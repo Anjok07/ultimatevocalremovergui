@@ -8,29 +8,29 @@ The application was made with Tkinter for cross platform compatibility, so this 
 
 ### Install Required Applications & Packages
 
-####1. Download & install Python 3.7 *Make sure to check the box that says "Add Python 3.7 to PATH"
-####2. Once Python has installed, open the Windows Command Prompt and run the following installs -
-#####- If you plan on doing conversions with your Nvidia GPU, please install the following -
+1. Download & install Python 3.7 *Make sure to check the box that says "Add Python 3.7 to PATH"
+2. Once Python has installed, open the Windows Command Prompt and run the following installs -
+- If you plan on doing conversions with your Nvidia GPU, please install the following -
 ```
 pip install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 ```
-#####- If you don't have a compatible Nvidia GPU and plan on only using the CPU version please do not check the "GPU Conversion" option in the GUI and install the following -
+- If you don't have a compatible Nvidia GPU and plan on only using the CPU version please do not check the "GPU Conversion" option in the GUI and install the following -
 
 ```
 pip install torch==1.5.0+cpu torchvision==0.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
-#####- The rest need to be installed regardless! -
+- The rest need to be installed regardless! -
 
 ```
-    pip install Pillow
-    pip install tqdm==4.30.0
-    pip install librosa==0.6.3
-    pip install opencv-python
-    pip install numba==0.48.0
-    pip install SoundFile
-    pip install soundstretch
+pip install Pillow
+pip install tqdm==4.30.0
+pip install librosa==0.6.3
+pip install opencv-python
+pip install numba==0.48.0
+pip install SoundFile
+pip install soundstretch
 ```
-####3. For the ability to convert mp3, mp4, m4a, and flac files, you'll need ffmpeg installed and configured!
+3. For the ability to convert mp3, mp4, m4a, and flac files, you'll need ffmpeg installed and configured!
 
 ### Getting vocal-remover
 Download the latest version from [here](https://xx).

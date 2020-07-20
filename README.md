@@ -33,7 +33,7 @@ pip install soundstretch
 3. For the ability to convert mp3, mp4, m4a, and flac files, you'll need ffmpeg installed and configured!
 
 ### Getting vocal-remover
-Download the latest version from [here](https://).
+Download the latest version from [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v2.2.0-GUI).
 
 ## Running the Vocal Remover Application GUI
 1. Place this folder where ever you wish (I put mine in my documents folder) and open the file labeled "VocalRemover.py" (I reccomend you create a shortcut for the file labeled "VocalRemover.py" to your desktop)

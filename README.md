@@ -1,6 +1,6 @@
 # Ultimate Vocal Remover GUI
 
-This is a deep-learning-based tool to extract instrumental track from mixture audio.
+This is a deep-learning-based tool that extracts the instrumental track from a track containing vocals. This project is a GUI version of the vocal remover created and posted by tsurumeso. You can find the command line version [here](https://github.com/tsurumeso/vocal-remover)
 
 ## Installation
 

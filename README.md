@@ -8,7 +8,7 @@ The application was made with Tkinter for cross platform compatibility, so this 
 
 ### Install Required Applications & Packages
 
-1. Download & install Python 3.7 *Make sure to check the box that says "Add Python 3.7 to PATH"
+1. Download & install Python 3.7 (Make sure to check the box that says "Add Python 3.7 to PATH" if you're on Windows)
 2. Once Python has installed, open the Windows Command Prompt and run the following installs -
 - If you plan on doing conversions with your Nvidia GPU, please install the following -
 ```

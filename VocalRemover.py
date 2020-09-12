@@ -23,7 +23,7 @@ import torch
 import inference
 
 # --Global Variables--
-base_path = os.path.dirname(__file__)
+base_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(base_path)  # Change the current working directory to the base path
 models_dir = os.path.join(base_path, 'models')
 logo_path = os.path.join(base_path, 'Images/UVR-logo.png')

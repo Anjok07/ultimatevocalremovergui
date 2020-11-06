@@ -1,6 +1,6 @@
 # Ultimate Vocal Remover GUI
 
-******A NEW UPDATE IS COMING THE WEEKENDING 11/14/2020!******
+******A NEW UPDATE IS COMING THE WEEK ENDING 11/14/2020!******
 
 ![alt text](https://github.com/Anjok07/ultimatevocalremovergui/blob/master/Images/UVR-App.jpg)
 

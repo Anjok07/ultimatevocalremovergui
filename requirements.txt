@@ -1,0 +1,7 @@
+Pillow
+tqdm==4.30.0
+librosa==0.6.3
+opencv-python
+numba==0.48.0
+SoundFile
+soundstretch

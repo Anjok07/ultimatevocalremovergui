@@ -299,6 +299,7 @@ class MainWindow(TkinterDnD.Tk):
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
         self.last_aiModel = self.aiModel_var.get()
         # Other
+        self.inputPathsEntry_var = tk.StringVar(value='')
         self.lastDir = data['lastDir']  # nopep8
         self.progress_var = tk.IntVar(value=0)
         # Font
@@ -312,6 +313,11 @@ class MainWindow(TkinterDnD.Tk):
         self.update_available_models()
         self.update_states()
         self.update_loop()
+
+
+        # Display the multiple selected music files more visually understandable
+        self.inputPaths_var.trace_add('write',
+                                      lambda *args: self.inputPathsEntry_var.set('; '.join(list(self.inputPaths_var.get()))))
 
     # -Widget Methods-
     def create_widgets(self):
@@ -396,7 +402,7 @@ class MainWindow(TkinterDnD.Tk):
                                                      text='Select Your Audio File(s)',
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
-                                                   textvariable=self.inputPaths_var,
+                                                   textvariable=self.inputPathsEntry_var,
                                                    state=tk.DISABLED
                                                    )
         # -Place Widgets-

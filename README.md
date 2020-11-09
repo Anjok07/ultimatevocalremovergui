@@ -55,13 +55,13 @@ All models released by me will have the values it was trained on appended to the
 - N_FFT - 2048
 
 ### Checkboxes:
- - GPU Conversion - This option ensures the GPU is used for conversions. It will not work if you don't have a Cuda    compatible GPU (Nividia GPU's are most compatible with Cuda) 
- - Post-process - This option may improve the separation on some songs. I recommend only using it if conversions don't come  out well
- - TTA - This option may improve the separation on some songs. Having this selected will run a track twice. Please note,    this option is NOT compatible with the v2 AI engine.
- - Output Image - This option will include a spectrogram of the resulting instrumental & vocal tracks.
- - Stack Passes - This option allows you to set the number of times you would like a track to run through a stacked model
- - Stack Conversion Only - Selecting this will allow you to run a pair through the stacked model only.
- - Model Test Mode - This option is meant to make it easier for users to test the results of different models without having to manually create new folders and/or change the filenames. When it's selected, the application will automatically generate a new folder with the name of the selected model in the "Save to" path you have chosen. The completed files will have the selected model name appended to it and be saved to the auto-generated folder.
+- GPU Conversion - This option ensures the GPU is used for conversions. It will not work if you don't have a Cuda    compatible GPU (Nividia GPU's are most compatible with Cuda) 
+- Post-process - This option may improve the separation on some songs. I recommend only using it if conversions don't come  out well
+- TTA - This option may improve the separation on some songs. Having this selected will run a track twice. Please note,    this option is NOT compatible with the v2 AI engine.
+- Output Image - This option will include a spectrogram of the resulting instrumental & vocal tracks.
+- Stack Passes - This option allows you to set the number of times you would like a track to run through a stacked model
+- Stack Conversion Only - Selecting this will allow you to run a pair through the stacked model only.
+- Model Test Mode - This option is meant to make it easier for users to test the results of different models without having to manually create new folders and/or change the filenames. When it's selected, the application will automatically generate a new folder with the name of the selected model in the "Save to" path you have chosen. The completed files will have the selected model name appended to it and be saved to the auto-generated folder.
 
 ### Other Buttons:
 

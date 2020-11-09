@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI
+# Ultimate Vocal Remover GUI v4.0.0
 
 ![alt text](https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/beta/img/UVRBETA.jpg)
 

@@ -55,7 +55,7 @@ All models released by me will have the values it was trained on appended to the
 - N_FFT - 2048
 
 ### Checkboxes:
-- GPU Conversion - This option ensures the GPU is used for conversions. It will not work if you don't have a Cuda    compatible GPU (Nividia GPU's are most compatible with Cuda) 
+- GPU Conversion - This option ensures the GPU is used for conversions. It will not work if you don't have a Cuda compatible GPU (Nividia GPU's are most compatible with Cuda) 
 - Post-process - This option may improve the separation on some songs. I recommend only using it if conversions don't come  out well
 - TTA - This option may improve the separation on some songs. Having this selected will run a track twice. Please note,    this option is NOT compatible with the v2 AI engine.
 - Output Image - This option will include a spectrogram of the resulting instrumental & vocal tracks.
@@ -81,7 +81,7 @@ Here's a list of the models (PLEASE DO NOT CHANGE THE NAME OF THE FIRST 2 MODELS
 1. Open the cmd prompt from the UVR-V4GUI directory
 2. Run the following command - 
 ```
-python VocalRemover_v4.py
+python VocalRemover.py
 ```
 3. Copy and paste the error in the cmd prompt to the issues center here on my GitHub.
 

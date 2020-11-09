@@ -13,16 +13,10 @@ The application was made with Tkinter for cross platform compatibility, so this 
 ### Install Required Applications & Packages
 
 1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.6.8/python-3.6.8-amd64.exe) (Make sure to check the box that says "Add Python 3.7 to PATH" if you're on Windows)
-2. Once Python has installed, open the Windows Command Prompt and run the following installs -
+2. Once Python has installed, open the Windows Command Prompt and run the following installs-
 
 ```
-pip install Pillow
-pip install tqdm==4.30.0
-pip install librosa==0.6.3
-pip install opencv-python
-pip install numba==0.48.0
-pip install SoundFile
-pip install soundstretch
+pip install --no-cache-dir -r requirements.txt
 pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 

@@ -89,8 +89,6 @@ python VocalRemover.py
 - The "Stack Passes" option should only be used with the Stacked Model. This option allows you to set the amount of times you want a track to run through a model. The amount of times you need to run it through will vary greatly by track. Most tracks won't require any more than 2-5 passes. If you do 5 or more passes on a track you risk quality degradation.
 - Conversion times will greatly depend on your hardware. This application will NOT be friendly to older or budget hardware. Please proceed with caution! Pay attention to your PC and make sure it doesn't overheat.
 
-```
-
 ## References
 - [1] Jansson et al., "Singing Voice Separation with Deep U-Net Convolutional Networks", https://ismir2017.smcnus.org/wp-content/uploads/2017/10/171_Paper.pdf
 - [2] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf

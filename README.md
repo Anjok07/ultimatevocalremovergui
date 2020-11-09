@@ -74,8 +74,6 @@ Here's a list of the models (PLEASE DO NOT CHANGE THE NAME OF THE FIRST 2 MODELS
 
 - (Pending)
 
----
-
 ## Troubleshooting:
 
 - If the VocalRemover.py file won't open under any circumstances and you have exhausted all other resources, please do the following - 

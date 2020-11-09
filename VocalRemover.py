@@ -4,6 +4,7 @@ import tkinter.ttk as ttk
 import tkinter.messagebox
 import tkinter.filedialog
 import tkinter.font
+from tkinterdnd2 import TkinterDnD, DND_FILES  # Enable Drag & Drop
 from datetime import datetime
 # Images
 from PIL import Image
@@ -35,6 +36,7 @@ else:
 os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
+vocalModels_dir = os.path.join(base_path, 'models')
 stackedModels_dir = os.path.join(base_path, 'models')
 logo_path = os.path.join(base_path, 'img', 'UVR-logo.png')
 refresh_path = os.path.join(base_path, 'img', 'refresh.png')
@@ -168,6 +170,30 @@ def get_model_values(model_name):
     return model_values
 
 
+def drop(var, event, accept_mode: str = 'files'):
+    """
+    Drag & Drop verification process
+    """
+    path = event.data
+
+    if accept_mode == 'folder':
+        path = path.replace('{', '').replace('}', '')
+        if not os.path.isdir(path):
+            tk.messagebox.showerror(title='Invalid Folder',
+                                    message='Your given export path is not a valid folder!')
+            return
+    elif accept_mode == 'files':
+        # Clean path text and set path to the list of paths
+        path = path[:-1]
+        path = path.replace('{', '')
+        path = path.split('} ')
+    else:
+        # Invalid accept mode
+        return
+
+    var.set(path)
+
+
 class ThreadSafeConsole(tk.Text):
     """
     Text Widget which is thread safe for tkinter
@@ -201,23 +227,23 @@ class ThreadSafeConsole(tk.Text):
         self.after(100, self.update_me)
 
 
-class MainWindow(tk.Tk):
+class MainWindow(TkinterDnD.Tk):
     # --Constants--
     # Layout
     IMAGE_HEIGHT = 140
     FILEPATHS_HEIGHT = 90
-    OPTIONS_HEIGHT = 240
+    OPTIONS_HEIGHT = 280
     CONVERSIONBUTTON_HEIGHT = 35
     COMMAND_HEIGHT = 200
     PROGRESS_HEIGHT = 26
     PADDING = 10
 
-    COL1_ROWS = 8
-    COL2_ROWS = 7
-    COL3_ROWS = 5
+    COL1_ROWS = 10
+    COL2_ROWS = 8
+    COL3_ROWS = 7
 
     def __init__(self):
-        # Run the __init__ method on the tk.Tk class
+        # Run the __init__ method on the TkinterDnD.Tk class
         super().__init__()
         # Calculate window height
         height = self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT
@@ -233,6 +259,7 @@ class MainWindow(tk.Tk):
             xpad=int(self.winfo_screenwidth()/2 - 550/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
         self.configure(bg='#000000')  # Set background color to black
+        self.protocol("WM_DELETE_WINDOW", self.save_values)
         self.resizable(False, False)
         self.update()
 
@@ -242,21 +269,25 @@ class MainWindow(tk.Tk):
         self.refresh_img = open_image(path=refresh_path,
                                       size=(20, 20))
         self.instrumentalLabel_to_path = defaultdict(lambda: '')
+        self.vocalLabel_to_path = defaultdict(lambda: '')
         self.stackedLabel_to_path = defaultdict(lambda: '')
         self.lastInstrumentalModels = []
+        self.lastVocalModels = []
         self.lastStackedModels = []
         # -Tkinter Value Holders-
         data = load_data()
         # Paths
         self.exportPath_var = tk.StringVar(value=data['export_path'])
-        self.inputPaths = []
+        self.inputPaths_var = tk.StringVar(value='')
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
         self.tta_var = tk.BooleanVar(value=data['tta'])
         self.outputImage_var = tk.BooleanVar(value=data['output_image'])
         # Models
+        self.useModel_var = tk.StringVar(value=data['useModel'])
         self.instrumentalModel_var = tk.StringVar(value='')
+        self.vocalModel_var = tk.StringVar(value='')
         self.stackedModel_var = tk.StringVar(value='')
         # Stacked Options
         self.stack_var = tk.BooleanVar(value=data['stack'])
@@ -280,6 +311,7 @@ class MainWindow(tk.Tk):
         # --Widgets--
         self.create_widgets()
         self.configure_widgets()
+        self.bind_widgets()
         self.place_widgets()
 
         self.update_available_models()
@@ -321,6 +353,21 @@ class MainWindow(tk.Tk):
                               font=self.font, foreground='white')
         ttk.Style().configure('T', font=self.font, foreground='white')
 
+    def bind_widgets(self):
+        """Bind widgets to the drag & drop mechanic"""
+        self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
+        self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)
+        self.filePaths_musicFile_Button.drop_target_register(DND_FILES)
+        self.filePaths_musicFile_Entry.drop_target_register(DND_FILES)
+        self.filePaths_saveTo_Button.dnd_bind('<<Drop>>',
+                                              lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
+        self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>',
+                                             lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
+        self.filePaths_musicFile_Button.dnd_bind('<<Drop>>',
+                                                 lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
+        self.filePaths_musicFile_Entry.dnd_bind('<<Drop>>',
+                                                lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
+
     def place_widgets(self):
         """Place main widgets"""
         self.title_Label.place(x=-2, y=-2)
@@ -354,7 +401,7 @@ class MainWindow(tk.Tk):
                                                      text='Select Your Audio File(s)',
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
-                                                   text=self.inputPaths,
+                                                   textvariable=self.inputPaths_var,
                                                    state=tk.DISABLED
                                                    )
         # -Place Widgets-
@@ -392,6 +439,18 @@ class MainWindow(tk.Tk):
         self.options_image_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
                                                          text='Output Image',
                                                          variable=self.outputImage_var,
+                                                         )
+        # Use Instrumental Model
+        self.options_instrumental_Radiobutton = ttk.Radiobutton(master=self.options_Frame,
+                                                                text='Use Instrumental Model',
+                                                                variable=self.useModel_var,
+                                                                value='instrumental',
+                                                                )
+        # Use Vocal Model
+        self.options_vocal_Radiobutton = ttk.Radiobutton(master=self.options_Frame,
+                                                         text='Use Vocal Model',
+                                                         variable=self.useModel_var,
+                                                         value='vocal',
                                                          )
         # Stack Loops
         self.options_stack_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
@@ -457,6 +516,12 @@ class MainWindow(tk.Tk):
                                                         background='#a7a7a7', font=self.font, relief="ridge")
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
+        # Choose Vocal Model
+        self.options_vocalModel_Label = tk.Label(master=self.options_Frame,
+                                                 text='Choose Vocal Model',
+                                                 background='#a7a7a7', font=self.font, relief="ridge")
+        self.options_vocalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
+                                                            self.vocalModel_var)
         # Choose Stacked Model
         self.options_stackedModel_Label = tk.Label(master=self.options_Frame,
                                                    text='Choose Stacked Model',
@@ -477,18 +542,23 @@ class MainWindow(tk.Tk):
                                            relx=0, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.options_image_Checkbutton.place(x=0, y=0, width=0, height=0,
                                              relx=0, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+        # Model
+        self.options_instrumental_Radiobutton.place(x=0, y=0, width=0, height=0,
+                                                    relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+        self.options_vocal_Radiobutton.place(x=0, y=0, width=0, height=0,
+                                             relx=0, rely=5/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         # Stacks
         self.options_stack_Checkbutton.place(x=0, y=0, width=0, height=0,
-                                             relx=0, rely=4/self.COL1_ROWS, relwidth=1/3/4*3, relheight=1/self.COL1_ROWS)
+                                             relx=0, rely=6/self.COL1_ROWS, relwidth=1/3/4*3, relheight=1/self.COL1_ROWS)
         self.options_stack_Entry.place(x=0, y=3, width=0, height=-6,
-                                       relx=1/3/4*2.4, rely=4/self.COL1_ROWS, relwidth=1/3/4*0.9, relheight=1/self.COL1_ROWS)
+                                       relx=1/3/4*2.4, rely=6/self.COL1_ROWS, relwidth=1/3/4*0.9, relheight=1/self.COL1_ROWS)
         self.options_stackOnly_Checkbutton.place(x=0, y=0, width=0, height=0,
-                                                 relx=0, rely=5/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+                                                 relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.options_saveStack_Checkbutton.place(x=0, y=0, width=0, height=0,
-                                                 relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+                                                 relx=0, rely=8/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         # Model Folder
         self.options_modelFolder_Checkbutton.place(x=0, y=0, width=0, height=0,
-                                                   relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+                                                   relx=0, rely=9/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         # -Column 2-
         # SR
         self.options_sr_Label.place(x=5, y=4, width=5, height=-8,
@@ -511,32 +581,40 @@ class MainWindow(tk.Tk):
         self.options_nfft_Entry.place(x=15, y=4, width=5, height=-8,
                                       relx=1/3 + 1/3/2, rely=3/self.COL2_ROWS, relwidth=1/3/4, relheight=1/self.COL2_ROWS)
         # AI model
-        self.options_aiModel_Label.place(x=5, y=-5, width=-30, height=-8,
+        self.options_aiModel_Label.place(x=5, y=4, width=-30, height=-8,
                                          relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_aiModel_Optionmenu.place(x=5, y=-5, width=-30, height=-8,
+        self.options_aiModel_Optionmenu.place(x=5, y=4, width=-30, height=-8,
                                               relx=1/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
         # -Column 3-
         # Choose Model
-        self.options_instrumentalModel_Label.place(x=0, y=0, width=0, height=-10,
+        self.options_instrumentalModel_Label.place(x=0, y=-5, width=0, height=-10,
                                                    relx=2/3, rely=0, relwidth=1/3, relheight=1/self.COL3_ROWS)
-        self.options_instrumentalModel_Optionmenu.place(x=15, y=-4, width=-30, height=-13,
+        self.options_instrumentalModel_Optionmenu.place(x=15, y=-10, width=-30, height=-2,
                                                         relx=2/3, rely=1/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
-        self.options_stackedModel_Label.place(x=0, y=0, width=0, height=-10,
-                                              relx=2/3, rely=2/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
-        self.options_stackedModel_Optionmenu.place(x=15, y=-4, width=-30, height=-13,
-                                                   relx=2/3, rely=3/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
-        self.options_model_Button.place(x=15, y=3, width=-30, height=-8,
-                                        relx=2/3, rely=4/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+        self.options_vocalModel_Label.place(x=0, y=-5, width=0, height=-10,
+                                            relx=2/3, rely=2/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+        self.options_vocalModel_Optionmenu.place(x=15, y=-10, width=-30, height=-2,
+                                                 relx=2/3, rely=3/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+        self.options_stackedModel_Label.place(x=0, y=-5, width=0, height=-10,
+                                              relx=2/3, rely=4/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+        self.options_stackedModel_Optionmenu.place(x=15, y=-10, width=-30, height=-2,
+                                                   relx=2/3, rely=5/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+        self.options_model_Button.place(x=15, y=0, width=-30, height=1,
+                                        relx=2/3, rely=6/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
 
         # -Update Binds-
         self.options_stackOnly_Checkbutton.configure(command=self.update_states)  # nopep8
         self.options_stack_Checkbutton.configure(command=self.update_states)  # nopep8
         self.options_stack_Entry.bind('<FocusOut>',
                                       lambda e: self.update_states())
+        self.options_instrumental_Radiobutton.configure(command=self.update_states)  # nopep8
+        self.options_vocal_Radiobutton.configure(command=self.update_states)
         # Model name decoding
         self.instrumentalModel_var.trace_add('write',
                                              lambda *args: self.decode_modelNames())
+        self.vocalModel_var.trace_add('write',
+                                      lambda *args: self.decode_modelNames())
         self.stackedModel_var.trace_add('write',
                                         lambda *args: self.decode_modelNames())
         # Model deselect
@@ -557,13 +635,8 @@ class MainWindow(tk.Tk):
             initialdir=self.lastDir,
         )
         if paths:  # Path selected
-            self.inputPaths = paths
-            # Change the entry text
-            self.filePaths_musicFile_Entry.configure(state=tk.NORMAL)
-            self.filePaths_musicFile_Entry.delete(0, tk.END)
-            self.filePaths_musicFile_Entry.insert(0, self.inputPaths)
-            self.filePaths_musicFile_Entry.configure(state=tk.DISABLED)
 
+            self.inputPaths_var.set(paths)
             self.lastDir = os.path.dirname(paths[0])
 
     def open_export_filedialog(self):
@@ -584,13 +657,16 @@ class MainWindow(tk.Tk):
         """
         # -Get all variables-
         export_path = self.exportPath_var.get()
+        input_paths = self.inputPaths_var.get()
         instrumentalModel_path = self.instrumentalLabel_to_path[self.instrumentalModel_var.get()]  # nopep8
+        vocalModel_path = self.vocalLabel_to_path[self.vocalModel_var.get()]
         stackedModel_path = self.stackedLabel_to_path[self.stackedModel_var.get()]  # nopep8
         # Get constants
         instrumental = get_model_values(self.instrumentalModel_var.get())
+        vocal = get_model_values(self.vocalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
         try:
-            if [bool(instrumental), bool(stacked)].count(True) == 2:
+            if [bool(instrumental), bool(vocal), bool(stacked)].count(True) == 2:
                 sr = DEFAULT_DATA['sr']
                 hop_length = DEFAULT_DATA['hop_length']
                 window_size = DEFAULT_DATA['window_size']
@@ -613,23 +689,34 @@ class MainWindow(tk.Tk):
             return
 
         # -Check for invalid inputs-
-        if not any([(os.path.isfile(path) and path.endswith(('.mp3', '.mp4', '.m4a', '.flac', '.wav')))
-                    for path in self.inputPaths]):
-            tk.messagebox.showwarning(master=self,
-                                      title='Invalid Music File',
-                                      message='You have selected an invalid music file!\nPlease make sure that your files still exist and ends with either ".mp3", ".mp4", ".m4a", ".flac", ".wav"')
-            return
+        for path in input_paths:
+            if not os.path.isfile(path):
+                tk.messagebox.showwarning(master=self,
+                                          title='Invalid Music File',
+                                          message='You have selected an invalid music file! Please make sure that the file still exists!',
+                                          detail=f'File path: {path}')
+                return
         if not os.path.isdir(export_path):
             tk.messagebox.showwarning(master=self,
                                       title='Invalid Export Directory',
                                       message='You have selected an invalid export directory!\nPlease make sure that your directory still exists!')
             return
         if not self.stackOnly_var.get():
-            if not os.path.isfile(instrumentalModel_path):
-                tk.messagebox.showwarning(master=self,
-                                          title='Invalid Instrumental Model File',
-                                          message='You have selected an invalid instrumental model file!\nPlease make sure that your model file still exists!')
-                return
+            if self.useModel_var.get() == 'instrumental':
+                if not os.path.isfile(instrumentalModel_path):
+                    tk.messagebox.showwarning(master=self,
+                                              title='Invalid Instrumental Model File',
+                                              message='You have selected an invalid instrumental model file!\nPlease make sure that your model file still exists!')
+                    return
+            elif self.useModel_var.get() == 'vocal':
+                if not os.path.isfile(vocalModel_path):
+                    tk.messagebox.showwarning(master=self,
+                                              title='Invalid Vocal Model File',
+                                              message='You have selected an invalid vocal model file!\nPlease make sure that your model file still exists!')
+                    return
+            else:
+                print('THIS SHOULD NOT HAPPEN')
+                exit()
         if (self.stackOnly_var.get() or
                 stackPasses > 0):
             if not os.path.isfile(stackedModel_path):
@@ -637,27 +724,6 @@ class MainWindow(tk.Tk):
                                           title='Invalid Stacked Model File',
                                           message='You have selected an invalid stacked model file!\nPlease make sure that your model file still exists!')
                 return
-
-        # -Save Data-
-        save_data(data={
-            'export_path': export_path,
-            'gpu': self.gpuConversion_var.get(),
-            'postprocess': self.postprocessing_var.get(),
-            'tta': self.tta_var.get(),
-            'output_image': self.outputImage_var.get(),
-            'stack': self.stack_var.get(),
-            'stackOnly': self.stackOnly_var.get(),
-            'stackPasses': stackPasses,
-            'saveAllStacked': self.saveAllStacked_var.get(),
-            'sr': sr,
-            'hop_length': hop_length,
-            'window_size': window_size,
-            'n_fft': n_fft,
-            'useModel': 'instrumental',  # Always instrumental
-            'lastDir': self.lastDir,
-            'modelFolder': self.modelFolder_var.get(),
-            'aiModel': self.aiModel_var.get(),
-        })
 
         if self.aiModel_var.get() == 'v2':
             inference = inference_v2
@@ -670,7 +736,7 @@ class MainWindow(tk.Tk):
         threading.Thread(target=inference.main,
                          kwargs={
                              # Paths
-                             'input_paths': self.inputPaths,
+                             'input_paths': input_paths,
                              'export_path': export_path,
                              # Processing Options
                              'gpu': 0 if self.gpuConversion_var.get() else -1,
@@ -679,9 +745,9 @@ class MainWindow(tk.Tk):
                              'output_image': self.outputImage_var.get(),
                              # Models
                              'instrumentalModel': instrumentalModel_path,
-                             'vocalModel': '',  # Always not needed
+                             'vocalModel': vocalModel_path,
                              'stackModel': stackedModel_path,
-                             'useModel': 'instrumental',  # Always instrumental
+                             'useModel': self.useModel_var.get(),
                              # Stack Options
                              'stackPasses': stackPasses,
                              'stackOnly': self.stackOnly_var.get(),
@@ -709,10 +775,12 @@ class MainWindow(tk.Tk):
         """
         # Check state of model selectors
         instrumental_selectable = bool(str(self.options_instrumentalModel_Optionmenu.cget('state')) == 'normal')
+        vocal_selectable = bool(str(self.options_vocalModel_Optionmenu.cget('state')) == 'normal')
         stacked_selectable = bool(str(self.options_stackedModel_Optionmenu.cget('state')) == 'normal')
 
         # Extract data from models name
         instrumental = get_model_values(self.instrumentalModel_var.get())
+        vocal = get_model_values(self.vocalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
 
         # Assign widgets to constants
@@ -722,32 +790,33 @@ class MainWindow(tk.Tk):
             'window_size': [self.options_winSize_Entry, self.winSize_var],
             'n_fft': [self.options_nfft_Entry, self.nfft_var],
         }
+        # Obtain data from instrumental or vocal (based on what is selected)
+        modelData = instrumental if bool(instrumental) else vocal
+        modelData_selectable = (instrumental_selectable or vocal_selectable)
 
         # Loop through each constant (key) and its widgets
         for key, (widget, var) in widgetsVars.items():
             if stacked_selectable:
-                # Stacked model can be selected
-                if key in stacked.keys():
-                    if (key in stacked.keys() and
-                        not instrumental_selectable):
+                if modelData_selectable:
+                    if (key in modelData.keys() and
+                            key in stacked.keys()):
+                        # Both models have set constants
+                        widget.configure(state=tk.DISABLED)
+                        var.set('%d/%d' % (modelData[key], stacked[key]))
+                        continue
+                else:
+                    if key in stacked.keys():
                         # Only stacked selectable
                         widget.configure(state=tk.DISABLED)
                         var.set(stacked[key])
                         continue
-                    elif (key in instrumental.keys() and
-                            instrumental_selectable):
-                        # Both models have set constants
-                        widget.configure(state=tk.DISABLED)
-                        var.set('%d/%d' % (instrumental[key], stacked[key]))
-                        continue
             else:
                 # Stacked model can not be selected
-                if (key in instrumental.keys() and
-                        instrumental_selectable):
+                if (key in modelData.keys() and
+                        modelData_selectable):
                     widget.configure(state=tk.DISABLED)
-                    var.set(instrumental[key])
+                    var.set(modelData[key])
                     continue
-
             # If widget is already enabled, no need to reset the value
             if str(widget.cget('state')) != 'normal':
                 widget.configure(state=tk.NORMAL)
@@ -765,6 +834,7 @@ class MainWindow(tk.Tk):
         and add to the select your model list
         """
         temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, self.aiModel_var.get(), 'Instrumental Models')  # nopep8
+        temp_vocalModels_dir = os.path.join(vocalModels_dir, self.aiModel_var.get(), 'Vocal Models')
         temp_stackedModels_dir = os.path.join(stackedModels_dir, self.aiModel_var.get(), 'Stacked Models')
         # Instrumental models
         new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
@@ -779,6 +849,19 @@ class MainWindow(tk.Tk):
                     # Link the files name to its absolute path
                     self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
             self.lastInstrumentalModels = new_InstrumentalModels
+        # Vocal models
+        new_VocalModels = os.listdir(temp_vocalModels_dir)
+        if new_VocalModels != self.lastVocalModels:
+            self.vocalLabel_to_path.clear()
+            self.options_vocalModel_Optionmenu['menu'].delete(0, 'end')
+            for file_name in new_VocalModels:
+                if file_name.endswith('.pth'):
+                    # Add Radiobutton to the Options Menu
+                    self.options_vocalModel_Optionmenu['menu'].add_radiobutton(label=file_name,
+                                                                               command=tk._setit(self.vocalModel_var, file_name))
+                    # Link the files name to its absolute path
+                    self.vocalLabel_to_path[file_name] = os.path.join(temp_vocalModels_dir, file_name)  # nopep8
+            self.lastVocalModels = new_VocalModels
         # Stacked models
         new_stackedModels = os.listdir(temp_stackedModels_dir)
         if new_stackedModels != self.lastStackedModels:
@@ -814,6 +897,14 @@ class MainWindow(tk.Tk):
             self.stackLoops_var.set(0)
             stackLoops = 0
 
+        # Radiobuttons
+        if self.stackOnly_var.get():
+            self.options_instrumental_Radiobutton.configure(text='Stack Instrumental')
+            self.options_vocal_Radiobutton.configure(text='Stack Vocal')
+        else:
+            self.options_instrumental_Radiobutton.configure(text='Use Instrumental Model')
+            self.options_vocal_Radiobutton.configure(text='Use Vocal Model')
+
         # Stack Only and Save All Outputs
         if stackLoops > 0:
             self.options_stackOnly_Checkbutton.configure(state=tk.NORMAL)
@@ -830,23 +921,45 @@ class MainWindow(tk.Tk):
             self.options_instrumentalModel_Label.configure(foreground='#777')
             self.options_instrumentalModel_Optionmenu.configure(state=tk.DISABLED)  # nopep8
             self.instrumentalModel_var.set('')
+            # Vocal Model
+            self.options_vocalModel_Label.configure(foreground='#777')
+            self.options_vocalModel_Optionmenu.configure(state=tk.DISABLED)
+            self.vocalModel_var.set('')
             # Stack Model
             self.options_stackedModel_Label.configure(foreground='#000')
             self.options_stackedModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
-        else:
+        elif self.useModel_var.get() == 'instrumental':
             # Instrumental Model
             self.options_instrumentalModel_Label.configure(foreground='#000')
             self.options_instrumentalModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
-            self.instrumentalModel_var.set('')
-
-        # Stack Model
-        if stackLoops > 0:
-            self.options_stackedModel_Label.configure(foreground='#000')
-            self.options_stackedModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
+            # Vocal Model
+            self.options_vocalModel_Label.configure(foreground='#777')
+            self.options_vocalModel_Optionmenu.configure(state=tk.DISABLED)
+            self.vocalModel_var.set('')
+            # Stack Model
+            if stackLoops > 0:
+                self.options_stackedModel_Label.configure(foreground='#000')
+                self.options_stackedModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
+            else:
+                self.options_stackedModel_Label.configure(foreground='#777')
+                self.options_stackedModel_Optionmenu.configure(state=tk.DISABLED)  # nopep8
+                self.stackedModel_var.set('')
         else:
-            self.options_stackedModel_Label.configure(foreground='#777')
-            self.options_stackedModel_Optionmenu.configure(state=tk.DISABLED)  # nopep8
-            self.stackedModel_var.set('')
+            # Instrumental Model
+            self.options_instrumentalModel_Label.configure(foreground='#777')
+            self.options_instrumentalModel_Optionmenu.configure(state=tk.DISABLED)  # nopep8
+            self.instrumentalModel_var.set('')
+            # Vocal Model
+            self.options_vocalModel_Label.configure(foreground='#000')
+            self.options_vocalModel_Optionmenu.configure(state=tk.NORMAL)
+            # Stack Model
+            if stackLoops > 0:
+                self.options_stackedModel_Label.configure(foreground='#000')
+                self.options_stackedModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
+            else:
+                self.options_stackedModel_Label.configure(foreground='#777')
+                self.options_stackedModel_Optionmenu.configure(state=tk.DISABLED)  # nopep8
+                self.stackedModel_var.set('')
 
         if self.aiModel_var.get() == 'v2':
             self.options_tta_Checkbutton.configure(state=tk.DISABLED)
@@ -871,6 +984,7 @@ class MainWindow(tk.Tk):
             self.last_aiModel = self.aiModel_var.get()
 
         self.instrumentalModel_var.set('')
+        self.vocalModel_var.set('')
         self.stackedModel_var.set('')
 
         self.srValue_var.set(DEFAULT_DATA['sr'])
@@ -885,11 +999,55 @@ class MainWindow(tk.Tk):
         """
         Restart the application after asking for confirmation
         """
-        proceed = tk.messagebox.askyesno(title='Confirmation',
-                                         message='The application will restart and lose unsaved data. Do you wish to proceed?')
-        if proceed:
-            subprocess.Popen(f'python "{__file__}"', shell=True)
-            exit()
+        save = tk.messagebox.askyesno(title='Confirmation',
+                                      message='The application will restart. Do you want to save the data?')
+        if save:
+            self.save_values()
+        subprocess.Popen(f'python "{__file__}"', shell=True)
+        exit()
+
+    def save_values(self):
+        """
+        Save the data of the application
+        """
+        export_path = self.exportPath_var.get()
+        # Get constants
+        instrumental = get_model_values(self.instrumentalModel_var.get())
+        vocal = get_model_values(self.vocalModel_var.get())
+        stacked = get_model_values(self.stackedModel_var.get())
+        if [bool(instrumental), bool(vocal), bool(stacked)].count(True) == 2:
+            sr = DEFAULT_DATA['sr']
+            hop_length = DEFAULT_DATA['hop_length']
+            window_size = DEFAULT_DATA['window_size']
+            n_fft = DEFAULT_DATA['n_fft']
+        else:
+            sr = self.srValue_var.get()
+            hop_length = self.hopValue_var.get()
+            window_size = self.winSize_var.get()
+            n_fft = self.nfft_var.get()
+
+        # -Save Data-
+        save_data(data={
+            'export_path': export_path,
+            'gpu': self.gpuConversion_var.get(),
+            'postprocess': self.postprocessing_var.get(),
+            'tta': self.tta_var.get(),
+            'output_image': self.outputImage_var.get(),
+            'stack': self.stack_var.get(),
+            'stackOnly': self.stackOnly_var.get(),
+            'stackPasses': self.stackLoops_var.get(),
+            'saveAllStacked': self.saveAllStacked_var.get(),
+            'sr': sr,
+            'hop_length': hop_length,
+            'window_size': window_size,
+            'n_fft': n_fft,
+            'useModel': self.useModel_var.get(),
+            'lastDir': self.lastDir,
+            'modelFolder': self.modelFolder_var.get(),
+            'aiModel': self.aiModel_var.get(),
+        })
+
+        self.destroy()
 
 
 if __name__ == "__main__":

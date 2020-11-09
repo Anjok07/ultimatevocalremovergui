@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI (Develop Version)
+# Ultimate Vocal Remover GUI
 
 ***NEW VERSION COMING 11/14/2020!***
 

@@ -620,7 +620,7 @@ class MainWindow(TkinterDnD.Tk):
         """
         # -Get all variables-
         export_path = self.exportPath_var.get()
-        input_paths = self.inputPaths_var.get()
+        input_paths = list(self.inputPaths_var.get())
         instrumentalModel_path = self.instrumentalLabel_to_path[self.instrumentalModel_var.get()]  # nopep8
         stackedModel_path = self.stackedLabel_to_path[self.stackedModel_var.get()]  # nopep8
         # Get constants

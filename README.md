@@ -4,7 +4,7 @@
 
 This application is a GUI version of the vocal remover AI created and posted by tsurumeso. This would not have been possible without tsurumeso's hard work and dedication! You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover)
 
-A very special thanks to the main code contributor [DilanBoskan](https://github.com/DilanBoskan)! DilanBoskan, thank you for all of your support in bringing this project to life!
+A very special thanks to the main code contributor [DilanBoskan](https://github.com/DilanBoskan)! DilanBoskan, thank you for all of your support in helping bring this project to life!
 
 ## Installation
 

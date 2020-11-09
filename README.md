@@ -23,7 +23,7 @@ pip install torch==1.5.0+cu101 torchvision==0.6.0+cu101 -f https://download.pyto
 ```
 pip install torch==1.5.0+cpu torchvision==0.6.0+cpu -f https://download.pytorch.org/whl/torch_stable.html
 ```
-- The rest need to be installed regardless! -
+- The rest need to be installed as well -
 
 ```
 pip install Pillow

@@ -72,6 +72,8 @@ All models released by me will have the values it was trained on appended to the
 
 Here's a list of the models (PLEASE DO NOT CHANGE THE NAME OF THE FIRST 2 MODELS LISTED AS THE PARAMETERS ARE SPECIFIED IN THE FILENAMES!):
 
+- (Pending)
+
 ---
 
 ## Troubleshooting:

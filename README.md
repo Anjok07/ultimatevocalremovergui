@@ -42,7 +42,7 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 ### Choose AI Engine:
 
 - This option allows you to toggle between tsurumeso's v2 & v4 AI engines. 
-  - **Please note**, The TTA option and the ability to set the N_FFT value is only available for the v4 engine.
+  - **Please note:** The TTA option and the ability to set the N_FFT value is only available for the v4 engine.
 
 ### Model Selections:
 
@@ -50,14 +50,14 @@ The v2 & v4 AI engines use different sets of models. The available models for ea
 
 - **Choose Main Model** - Here is where you choose the main model to convert your tracks with.
   - Each of the models provided were trained on different parameters, though they can convert tracks of all genres. 
-  - The variety of models allows the user the chance to determine which one works best for the type of music they're converting.
-     - The *'Model Test Option'* will allow the user to more easily determine which model is best for the track(s) being converted.
+  - The variety of models gives the user the chance to determine which one works best for whatever type of music they're converting.
+     - The [*'Model Test Option'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) makes it easier for the user to compare and determine which model is best for the track(s) being processed.
 - **Choose Stacked Model** - These models are meant to clean up vocal artifacts from instrumental outputs. 
   - The stacked models provided are only meant to process instrumental outputs created by a main model. 
-  - Selecting the *'Stack Passes'* option will enable you to select a stacked model to run with the main model. 
+  - Selecting the [*'Stack Passes'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option will enable you to select a stacked model to run with the main model. 
     - If you wish to only run a stacked model on a track, make sure the *'Stack Conversion Only'* option is checked.
   - The varying main model/stacked model combination options allows the user more flexibility in finding what blend works best for the track(s) they are proessing.
-    - To reiterate, the *'Model Test Option'* makes testing different model blends easier on the user, that's what it is there for.
+    - To reiterate, the [*'Model Test Option'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) makes testing and comparing different model blends easier on the user.
 
 ### Parameter Values
 

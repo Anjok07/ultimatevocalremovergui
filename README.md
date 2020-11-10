@@ -21,7 +21,7 @@ The application was made with Tkinter for cross-platform compatibility, so this 
 
 1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.7.0/python-3.7.0-amd64.exe) (Windows link)
     - Ensure the *"Add Python 3.7 to PATH"* box is checked
-2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.1.0** here (link pending)
+2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.0.0** here (link pending)
 3. Place the UVR-V4GUI folder contained within the *.zip* file where ever you wish. 
     - Your documents folder is recommended for ease of access.
 4. From the UVR-V4GUI directory, open the Windows Command Prompt and run the following installs -
@@ -35,7 +35,7 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 
 - Open the file labeled *'VocalRemover.py'*.
    - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
-     - If you are unable to open the *'VocalRemover.py'* file, please go to the **troubleshooting** section below.
+     - If you are unable to open the *'VocalRemover.py'* file, please go to the [**troubleshooting**](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#troubleshooting) section below.
 
 ## Option Guide
 
@@ -128,7 +128,7 @@ A special thank you to aufr33 for helping me expand the dataset used to train th
 
 ## Troubleshooting
 
-- If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
+If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 
 1. Open the cmd prompt from the UVR-V4GUI directory
 2. Run the following command - 

@@ -45,7 +45,7 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 
 ### Parameter Values:
 
-All models released by me will have the values they were trained with appended to the end of the filename like so "MGM-HIGHEND_sr44100_hl512_w512_nf2048.pth". The "sr44100_hl512_w512_nf2048" portion automatically sets those values within the application, so please do not change the model files names. If there are no values appended to the end of a model, the value fields will be editable and auto-populate with default values. The default values are - 
+All models released here will have the values they were trained with appended to the end of the filename like so "MGM-HIGHEND_sr44100_hl512_w512_nf2048.pth". The "sr44100_hl512_w512_nf2048" portion automatically sets those values within the application, so please do not change the model files names. If there are no values appended to the end of a model, the value fields will be editable and auto-populate with default values. The default values are - 
 
 - **SR** - 44100
 - **HOP LENGTH** - 1024

@@ -1,12 +1,16 @@
 # Ultimate Vocal Remover GUI v4.0.0
+
+![alt text](https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/beta/img/UVRBETA.jpg)
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
 
-![alt text](https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/beta/img/UVRBETA.jpg)
+## About
 
-This application is a GUI version of the vocal remover AI created and posted by tsurumeso. This would not have been possible without tsurumeso's hard work and dedication! You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover)
+This application is a GUI version of the vocal remover AI's created and posted by GitHub user tsurumeso. You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). Please note that we do not maintain or directly support any of tsurumesos AI application code. Direct support and development for the **Ultimate Vocal Remover GUI** is only maintained within this repository. 
 
-A very special thanks to the main code contributor [DilanBoskan](https://github.com/DilanBoskan)! DilanBoskan, thank you for helping bring this project to life, your hard work is greatly appreciated.
+- **Special Thanks**
+    - [tsurumeso](https://github.com/tsurumeso) - The engeneer who authored the AI code. Thank you for the hard work and dedication put into the AI application this GUI is built around!
+    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor, thank you for helping bring this GUI to life, your hard work and continued support is greatly appreciated!
 
 ## Installation
 
@@ -14,9 +18,9 @@ The application was made with Tkinter for cross platform compatibility, so this 
 
 ### Install Required Applications & Packages
 
-1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.6.8/python-3.6.8-amd64.exe)
-    - Make sure to check the box that says "Add Python 3.7 to PATH" if you're on Windows
-2. Once Python has installed, download Ultimate Vocal Remover GUI Version 4.1.0 here (link pending)
+1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.7.0/python-3.7.0-amd64.exe) (Windows link)
+    - Ensure the *"Add Python 3.7 to PATH"* box is checked
+2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.1.0** here (link pending)
 3. Place the UVR-V4GUI folder contained within the *.zip* file where ever you wish. 
     - Your documents folder is recommended for ease of access.
 4. From the UVR-V4GUI directory, open the Windows Command Prompt and run the following installs -
@@ -28,9 +32,9 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 
 ### Running the Vocal Remover GUI & Models
 
-1. Open the file labeled *'VocalRemover.py'*.
-    - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
-      - If you are having issues opening the *'VocalRemover.py'* file, please go to the **troubleshooting** section below.
+- Open the file labeled *'VocalRemover.py'*.
+   - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
+     - If you are unabled to open the *'VocalRemover.py'* file, please go to the **troubleshooting** section below.
 
 ## Option Guide
 
@@ -54,7 +58,7 @@ The v2 & v4 AI engines use different sets of models. The available models for ea
   - The varying main model/stacked model combination options allows the user more flexibility in finding what blend works best for the track(s) they are proessing.
     - To reiterate, the *'Model Test Option'* makes testing different model blends easier on the user, that's what it is there for.
 
-### Parameter Values:
+### Parameter Values
 
 All models released here will have the values they were trained with appended to the end of their filenames like so, **'MGM-HIGHEND_sr44100_hl512_w512_nf2048.pth'**. The *'_sr44100_hl512_w512_nf2048'* portion automatically sets the *SR*, *HOP LENGNTH*, *WINDOW SIZE*, & *N_FFT* values within the application, so please do not change the model files names. If there are no values appended to the end of the models' filename, the value fields will be editable and auto-populate with default values. 
 
@@ -64,7 +68,7 @@ All models released here will have the values they were trained with appended to
   - **WINDOW SIZE** - 512
   - **N_FFT** - 2048
 
-### Checkboxes:
+### Checkboxes
 - **GPU Conversion** - Seclecting this option ensures the GPU is used for conversions. 
   - NOTE: It will not work if you don't have a Cuda compatible GPU (Nividia GPU's are most compatible with Cuda).
 - **Post-process** - This option can potentially identify left over instrumental artifacts within the vocal outputs. This option may improve the separation on *some* songs. 
@@ -92,7 +96,7 @@ All models released here will have the values they were trained with appended to
   - The application will automatically detect any models added without having to restart the application.
 - **Restart Button** - If the application hangs for any reason, you can hit the circular arrow button immediately to the right of the *'Start Conversion'* button.
 
-## Models Included:
+## Models Included
 
 ***PLEASE NOTE: Please do not change the name of the models provided! The required perameters are specified in the filenames.***
 
@@ -102,7 +106,15 @@ Here's a list of the models included within the package -
 
 A special thank you to aufr33 for helping expand the dataset used to train these models and for the dilligent advice!
 
-## Troubleshooting:
+## Other GUI Notes
+
+- The application will automatically remember your *'save to'* path upon closing and reopening until you change it.
+  - It will also remember the last directory you accessed to select files to be processed.
+- Multiple conversions are supported.
+- The ability to drag & drop audio files to convert has also been added.
+- Conversion times will greatly depend on your hardware. This application will NOT be friendly to older or budget hardware. Please proceed with caution! Pay attention to your PC and make sure it doesn't overheat. We are not responsible for for any hardware damage.
+
+## Troubleshooting
 
 - If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 
@@ -113,15 +125,13 @@ python VocalRemover.py
 ```
 3. Copy and paste the error output in the cmd prompt to the issues center on the GitHub repository.
 
-## Other GUI Notes:
+## License
 
-- The application will automatically remember your *'save to'* path upon closing and reopening until you change it.
-  - It will also remember the last directory you accessed to select music.
-- Multiple conversions are supported.
-- The ability to drag & drop audio files to convert has also been added.
-- Conversion times will greatly depend on your hardware. This application will NOT be friendly to older or budget hardware. Please proceed with caution! Pay attention to your PC and make sure it doesn't overheat.
+The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE). 
+
+## Contributing
+
+For anyone interested in the ongoing develpment of **Ultimate Vocal Remover GUI** please send us a pull request and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
 
 ## References
-- [1] Jansson et al., "Singing Voice Separation with Deep U-Net Convolutional Networks", https://ismir2017.smcnus.org/wp-content/uploads/2017/10/171_Paper.pdf
-- [2] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf
-- [3] Liutkus et al., "The 2016 Signal Separation Evaluation Campaign", Latent Variable Analysis and Signal Separation - 12th International Conference
+- [1] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf

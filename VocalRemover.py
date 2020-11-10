@@ -499,7 +499,7 @@ class MainWindow(TkinterDnD.Tk):
         # -Column 3-
         #  Choose Instrumental Model
         self.options_instrumentalModel_Label = tk.Label(master=self.options_Frame,
-                                                        text='Choose Instrumental Model',
+                                                        text='Choose Main Model',
                                                         background='#a7a7a7', font=self.font, relief="ridge")
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
@@ -670,8 +670,8 @@ class MainWindow(TkinterDnD.Tk):
         if not self.stackOnly_var.get():
             if not os.path.isfile(instrumentalModel_path):
                 tk.messagebox.showwarning(master=self,
-                                          title='Invalid Instrumental Model File',
-                                          message='You have selected an invalid instrumental model file!\nPlease make sure that your model file still exists!')
+                                          title='Invalid Main Model File',
+                                          message='You have selected an invalid main model file!\nPlease make sure that your model file still exists!')
                 return
         if (self.stackOnly_var.get() or
                 stackPasses > 0):
@@ -785,7 +785,7 @@ class MainWindow(TkinterDnD.Tk):
         Loop through every model (.pth) in the models directory
         and add to the select your model list
         """
-        temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, self.aiModel_var.get(), 'Instrumental Models')  # nopep8
+        temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, self.aiModel_var.get(), 'Main Models')  # nopep8
         temp_stackedModels_dir = os.path.join(stackedModels_dir, self.aiModel_var.get(), 'Stacked Models')
         # Instrumental models
         new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)

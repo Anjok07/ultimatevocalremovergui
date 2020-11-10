@@ -269,7 +269,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         """Save output music files"""
         vocal_name = None
         instrumental_name = None
-        folder = ''
+        save_path = os.path.dirname(base_name)
 
         # Get the Suffix Name
         if (not loop_num or
@@ -302,13 +302,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 # Reverse names
                 vocal_name, instrumental_name = instrumental_name, vocal_name
         elif data['saveAllStacked']:
-            folder = os.path.splitext(os.path.basename(base_name))[0] + ' Stacked Outputs'  # nopep8
-            folder = os.path.basename(folder) + '/'
-            folder_path = os.path.dirname(base_name)
-            folder_path = os.path.join(folder_path, folder)
+            folder_name = os.path.basename(base_name) + ' Stacked Outputs'  # nopep8
+            save_path = os.path.join(save_path, folder_name)
 
-            if not os.path.isdir(folder_path):
-                os.mkdir(folder_path)
+            if not os.path.isdir(save_path):
+                os.mkdir(save_path)
 
             if data['stackOnly']:
                 vocal_name = f'(Vocal_{loop_num}_Stacked_Output)'
@@ -333,18 +331,16 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         # -Save files-
         # Instrumental
         if instrumental_name is not None:
-            instrumental_path = '{base_path}/{folder}{file_name}.wav'.format(
-                base_path=os.path.dirname(base_name),
-                folder=folder,
+            instrumental_path = '{save_path}/{file_name}.wav'.format(
+                save_path=save_path,
                 file_name=f'{os.path.basename(base_name)}_{instrumental_name}{appendModelFolderName}',
             )
             sf.write(instrumental_path,
                      wav_instrument.T, sr)
         # Vocal
         if vocal_name is not None:
-            vocal_path = '{base_path}/{folder}{file_name}.wav'.format(
-                base_path=os.path.dirname(base_name),
-                folder=folder,
+            vocal_path = '{save_path}/{file_name}.wav'.format(
+                save_path=save_path,
                 file_name=f'{os.path.basename(base_name)}_{vocal_name}{appendModelFolderName}',
             )
             sf.write(vocal_path,

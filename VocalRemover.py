@@ -169,7 +169,7 @@ def get_model_values(model_name):
     return model_values
 
 
-def drop(var, event, accept_mode: str = 'files'):
+def drop(event, accept_mode: str = 'files'):
     """
     Drag & Drop verification process
     """
@@ -181,16 +181,19 @@ def drop(var, event, accept_mode: str = 'files'):
             tk.messagebox.showerror(title='Invalid Folder',
                                     message='Your given export path is not a valid folder!')
             return
+        # Set Variables
+        root.exportPath_var.set(path)
     elif accept_mode == 'files':
         # Clean path text and set path to the list of paths
         path = path[:-1]
         path = path.replace('{', '')
         path = path.split('} ')
+        # Set Variables
+        root.inputPaths = path
+        root.inputPathsEntry_var.set('; '.join(path))
     else:
         # Invalid accept mode
         return
-
-    var.set(path)
 
 
 class ThreadSafeConsole(tk.Text):
@@ -275,7 +278,7 @@ class MainWindow(TkinterDnD.Tk):
         data = load_data()
         # Paths
         self.exportPath_var = tk.StringVar(value=data['export_path'])
-        self.inputPaths_var = tk.StringVar(value='')
+        self.inputPaths = []
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
@@ -313,11 +316,6 @@ class MainWindow(TkinterDnD.Tk):
         self.update_available_models()
         self.update_states()
         self.update_loop()
-
-
-        # Display the multiple selected music files more visually understandable
-        self.inputPaths_var.trace_add('write',
-                                      lambda *args: self.inputPathsEntry_var.set('; '.join(list(self.inputPaths_var.get()))))
 
     # -Widget Methods-
     def create_widgets(self):
@@ -361,13 +359,13 @@ class MainWindow(TkinterDnD.Tk):
         self.filePaths_musicFile_Button.drop_target_register(DND_FILES)
         self.filePaths_musicFile_Entry.drop_target_register(DND_FILES)
         self.filePaths_saveTo_Button.dnd_bind('<<Drop>>',
-                                              lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
+                                              lambda e: drop(e, accept_mode='folder'))
         self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>',
-                                             lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
+                                             lambda e: drop(e, accept_mode='folder'))
         self.filePaths_musicFile_Button.dnd_bind('<<Drop>>',
-                                                 lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
+                                                 lambda e: drop(e, accept_mode='files'))
         self.filePaths_musicFile_Entry.dnd_bind('<<Drop>>',
-                                                lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
+                                                lambda e: drop(e, accept_mode='files'))
 
     def place_widgets(self):
         """Place main widgets"""
@@ -605,7 +603,7 @@ class MainWindow(TkinterDnD.Tk):
             initialdir=self.lastDir,
         )
         if paths:  # Path selected
-            self.inputPaths_var.set(paths)
+            self.inputPaths = paths
             self.lastDir = os.path.dirname(paths[0])
 
     def open_export_filedialog(self):
@@ -626,7 +624,7 @@ class MainWindow(TkinterDnD.Tk):
         """
         # -Get all variables-
         export_path = self.exportPath_var.get()
-        input_paths = list(self.inputPaths_var.get())
+        input_paths = self.inputPaths
         instrumentalModel_path = self.instrumentalLabel_to_path[self.instrumentalModel_var.get()]  # nopep8
         stackedModel_path = self.stackedLabel_to_path[self.stackedModel_var.get()]  # nopep8
         # Get constants

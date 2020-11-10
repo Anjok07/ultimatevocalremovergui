@@ -4,7 +4,6 @@ import tkinter.ttk as ttk
 import tkinter.messagebox
 import tkinter.filedialog
 import tkinter.font
-from tkinterdnd2 import TkinterDnD, DND_FILES  # Enable Drag & Drop
 from datetime import datetime
 # Images
 from PIL import Image
@@ -94,7 +93,6 @@ def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: 
 def save_data(data):
     """
     Saves given data as a .pkl (pickle) file
-
     Paramters:
         data(dict):
             Dictionary containing all the necessary data to save
@@ -107,7 +105,6 @@ def save_data(data):
 def load_data() -> dict:
     """
     Loads saved pkl file and returns the stored data
-
     Returns(dict):
         Dictionary containing all the saved data
     """
@@ -169,30 +166,6 @@ def get_model_values(model_name):
     return model_values
 
 
-def drop(var, event, accept_mode: str = 'files'):
-    """
-    Drag & Drop verification process
-    """
-    path = event.data
-
-    if accept_mode == 'folder':
-        path = path.replace('{', '').replace('}', '')
-        if not os.path.isdir(path):
-            tk.messagebox.showerror(title='Invalid Folder',
-                                    message='Your given export path is not a valid folder!')
-            return
-    elif accept_mode == 'files':
-        # Clean path text and set path to the list of paths
-        path = path[:-1]
-        path = path.replace('{', '')
-        path = path.split('} ')
-    else:
-        # Invalid accept mode
-        return
-
-    var.set(path)
-
-
 class ThreadSafeConsole(tk.Text):
     """
     Text Widget which is thread safe for tkinter
@@ -226,7 +199,7 @@ class ThreadSafeConsole(tk.Text):
         self.after(100, self.update_me)
 
 
-class MainWindow(TkinterDnD.Tk):
+class MainWindow(tk.Tk):
     # --Constants--
     # Layout
     IMAGE_HEIGHT = 140
@@ -258,7 +231,6 @@ class MainWindow(TkinterDnD.Tk):
             xpad=int(self.winfo_screenwidth()/2 - 550/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
         self.configure(bg='#000000')  # Set background color to black
-        self.protocol("WM_DELETE_WINDOW", self.save_values)
         self.resizable(False, False)
         self.update()
 
@@ -275,7 +247,7 @@ class MainWindow(TkinterDnD.Tk):
         data = load_data()
         # Paths
         self.exportPath_var = tk.StringVar(value=data['export_path'])
-        self.inputPaths_var = tk.StringVar(value='')
+        self.inputPaths = []
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
@@ -299,7 +271,6 @@ class MainWindow(TkinterDnD.Tk):
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
         self.last_aiModel = self.aiModel_var.get()
         # Other
-        self.inputPathsEntry_var = tk.StringVar(value='')
         self.lastDir = data['lastDir']  # nopep8
         self.progress_var = tk.IntVar(value=0)
         # Font
@@ -307,17 +278,11 @@ class MainWindow(TkinterDnD.Tk):
         # --Widgets--
         self.create_widgets()
         self.configure_widgets()
-        self.bind_widgets()
         self.place_widgets()
 
         self.update_available_models()
         self.update_states()
         self.update_loop()
-
-
-        # Display the multiple selected music files more visually understandable
-        self.inputPaths_var.trace_add('write',
-                                      lambda *args: self.inputPathsEntry_var.set('; '.join(list(self.inputPaths_var.get()))))
 
     # -Widget Methods-
     def create_widgets(self):
@@ -354,21 +319,6 @@ class MainWindow(TkinterDnD.Tk):
                               font=self.font, foreground='white')
         ttk.Style().configure('T', font=self.font, foreground='white')
 
-    def bind_widgets(self):
-        """Bind widgets to the drag & drop mechanic"""
-        self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
-        self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)
-        self.filePaths_musicFile_Button.drop_target_register(DND_FILES)
-        self.filePaths_musicFile_Entry.drop_target_register(DND_FILES)
-        self.filePaths_saveTo_Button.dnd_bind('<<Drop>>',
-                                              lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
-        self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>',
-                                             lambda e, var=self.exportPath_var: drop(var, e, accept_mode='folder'))
-        self.filePaths_musicFile_Button.dnd_bind('<<Drop>>',
-                                                 lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
-        self.filePaths_musicFile_Entry.dnd_bind('<<Drop>>',
-                                                lambda e, var=self.inputPaths_var: drop(var, e, accept_mode='files'))
-
     def place_widgets(self):
         """Place main widgets"""
         self.title_Label.place(x=-2, y=-2)
@@ -402,7 +352,7 @@ class MainWindow(TkinterDnD.Tk):
                                                      text='Select Your Audio File(s)',
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
-                                                   textvariable=self.inputPathsEntry_var,
+                                                   text=self.inputPaths,
                                                    state=tk.DISABLED
                                                    )
         # -Place Widgets-
@@ -605,7 +555,13 @@ class MainWindow(TkinterDnD.Tk):
             initialdir=self.lastDir,
         )
         if paths:  # Path selected
-            self.inputPaths_var.set(paths)
+            self.inputPaths = paths
+            # Change the entry text
+            self.filePaths_musicFile_Entry.configure(state=tk.NORMAL)
+            self.filePaths_musicFile_Entry.delete(0, tk.END)
+            self.filePaths_musicFile_Entry.insert(0, self.inputPaths)
+            self.filePaths_musicFile_Entry.configure(state=tk.DISABLED)
+
             self.lastDir = os.path.dirname(paths[0])
 
     def open_export_filedialog(self):
@@ -626,7 +582,6 @@ class MainWindow(TkinterDnD.Tk):
         """
         # -Get all variables-
         export_path = self.exportPath_var.get()
-        input_paths = list(self.inputPaths_var.get())
         instrumentalModel_path = self.instrumentalLabel_to_path[self.instrumentalModel_var.get()]  # nopep8
         stackedModel_path = self.stackedLabel_to_path[self.stackedModel_var.get()]  # nopep8
         # Get constants
@@ -656,13 +611,12 @@ class MainWindow(TkinterDnD.Tk):
             return
 
         # -Check for invalid inputs-
-        for path in input_paths:
-            if not os.path.isfile(path):
-                tk.messagebox.showwarning(master=self,
-                                          title='Invalid Music File',
-                                          message='You have selected an invalid music file! Please make sure that the file still exists!',
-                                          detail=f'File path: {path}')
-                return
+        if not any([(os.path.isfile(path) and path.endswith(('.mp3', '.mp4', '.m4a', '.flac', '.wav')))
+                    for path in self.inputPaths]):
+            tk.messagebox.showwarning(master=self,
+                                      title='Invalid Music File',
+                                      message='You have selected an invalid music file!\nPlease make sure that your files still exist and ends with either ".mp3", ".mp4", ".m4a", ".flac", ".wav"')
+            return
         if not os.path.isdir(export_path):
             tk.messagebox.showwarning(master=self,
                                       title='Invalid Export Directory',
@@ -682,6 +636,27 @@ class MainWindow(TkinterDnD.Tk):
                                           message='You have selected an invalid stacked model file!\nPlease make sure that your model file still exists!')
                 return
 
+        # -Save Data-
+        save_data(data={
+            'export_path': export_path,
+            'gpu': self.gpuConversion_var.get(),
+            'postprocess': self.postprocessing_var.get(),
+            'tta': self.tta_var.get(),
+            'output_image': self.outputImage_var.get(),
+            'stack': self.stack_var.get(),
+            'stackOnly': self.stackOnly_var.get(),
+            'stackPasses': stackPasses,
+            'saveAllStacked': self.saveAllStacked_var.get(),
+            'sr': sr,
+            'hop_length': hop_length,
+            'window_size': window_size,
+            'n_fft': n_fft,
+            'useModel': 'instrumental',  # Always instrumental
+            'lastDir': self.lastDir,
+            'modelFolder': self.modelFolder_var.get(),
+            'aiModel': self.aiModel_var.get(),
+        })
+
         if self.aiModel_var.get() == 'v2':
             inference = inference_v2
         elif self.aiModel_var.get() == 'v4':
@@ -693,7 +668,7 @@ class MainWindow(TkinterDnD.Tk):
         threading.Thread(target=inference.main,
                          kwargs={
                              # Paths
-                             'input_paths': input_paths,
+                             'input_paths': self.inputPaths,
                              'export_path': export_path,
                              # Processing Options
                              'gpu': 0 if self.gpuConversion_var.get() else -1,
@@ -749,18 +724,19 @@ class MainWindow(TkinterDnD.Tk):
         # Loop through each constant (key) and its widgets
         for key, (widget, var) in widgetsVars.items():
             if stacked_selectable:
-                if instrumental_selectable:
-                    if (key in instrumental.keys() and
-                            key in stacked.keys()):
-                        # Both models have set constants
-                        widget.configure(state=tk.DISABLED)
-                        var.set('%d/%d' % (instrumental[key], stacked[key]))
-                        continue
-                else:
-                    if key in stacked.keys():
+                # Stacked model can be selected
+                if key in stacked.keys():
+                    if (key in stacked.keys() and
+                        not instrumental_selectable):
                         # Only stacked selectable
                         widget.configure(state=tk.DISABLED)
                         var.set(stacked[key])
+                        continue
+                    elif (key in instrumental.keys() and
+                            instrumental_selectable):
+                        # Both models have set constants
+                        widget.configure(state=tk.DISABLED)
+                        var.set('%d/%d' % (instrumental[key], stacked[key]))
                         continue
             else:
                 # Stacked model can not be selected
@@ -859,6 +835,7 @@ class MainWindow(TkinterDnD.Tk):
             # Instrumental Model
             self.options_instrumentalModel_Label.configure(foreground='#000')
             self.options_instrumentalModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
+            self.instrumentalModel_var.set('')
 
         # Stack Model
         if stackLoops > 0:
@@ -906,54 +883,11 @@ class MainWindow(TkinterDnD.Tk):
         """
         Restart the application after asking for confirmation
         """
-        save = tk.messagebox.askyesno(title='Confirmation',
-                                      message='The application will restart. Do you want to save the data?')
-        if save:
-            self.save_values()
-        subprocess.Popen(f'python "{__file__}"', shell=True)
-        exit()
-
-    def save_values(self):
-        """
-        Save the data of the application
-        """
-        export_path = self.exportPath_var.get()
-        # Get constants
-        instrumental = get_model_values(self.instrumentalModel_var.get())
-        stacked = get_model_values(self.stackedModel_var.get())
-        if [bool(instrumental), bool(stacked)].count(True) == 2:
-            sr = DEFAULT_DATA['sr']
-            hop_length = DEFAULT_DATA['hop_length']
-            window_size = DEFAULT_DATA['window_size']
-            n_fft = DEFAULT_DATA['n_fft']
-        else:
-            sr = self.srValue_var.get()
-            hop_length = self.hopValue_var.get()
-            window_size = self.winSize_var.get()
-            n_fft = self.nfft_var.get()
-
-        # -Save Data-
-        save_data(data={
-            'export_path': export_path,
-            'gpu': self.gpuConversion_var.get(),
-            'postprocess': self.postprocessing_var.get(),
-            'tta': self.tta_var.get(),
-            'output_image': self.outputImage_var.get(),
-            'stack': self.stack_var.get(),
-            'stackOnly': self.stackOnly_var.get(),
-            'stackPasses': self.stackLoops_var.get(),
-            'saveAllStacked': self.saveAllStacked_var.get(),
-            'sr': sr,
-            'hop_length': hop_length,
-            'window_size': window_size,
-            'n_fft': n_fft,
-            'useModel': 'instrumental',
-            'lastDir': self.lastDir,
-            'modelFolder': self.modelFolder_var.get(),
-            'aiModel': self.aiModel_var.get(),
-        })
-
-        self.destroy()
+        proceed = tk.messagebox.askyesno(title='Confirmation',
+                                         message='The application will restart and lose unsaved data. Do you wish to proceed?')
+        if proceed:
+            subprocess.Popen(f'python "{__file__}"', shell=True)
+            exit()
 
 
 if __name__ == "__main__":

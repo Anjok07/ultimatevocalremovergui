@@ -65,30 +65,32 @@ All models released by me will have the values they were trained with appended t
 ### Other Buttons:
 
 - **Add New Model** - This button will automatically take you to the models folder. If you are adding a new model, make sure to add it accordingly based on the AI engine it was trained on! All new models added will automatically be detected without having to restart the application.
-- Restart Button - If the application hangs for any reason you can hit the circular arrow button immediately to the right of the "Start Conversion" button.
+- **Restart Button** - If the application hangs for any reason, you can hit the circular arrow button immediately to the right of the *'Start Conversion'* button.
 
 ## Models Included:
 
-Here's a list of the models (PLEASE DO NOT CHANGE THE NAME OF THE FIRST 2 MODELS LISTED AS THE PARAMETERS ARE SPECIFIED IN THE FILENAMES!):
+***PLEASE NOTE: Please do not change the name of the models provided! The required perameters are specified in the filenames.***
 
-- (Pending)
+Here's a list of the models included within the package - 
 
-A special thank you to aufr33 for helping expand the dataset and dilligent advice!
+- *(list pending)*
+
+A special thank you to aufr33 for helping expand the dataset used to train these models and for the dilligent advice!
 
 ## Troubleshooting:
 
-- If the VocalRemover.py file won't open *under any circumstances* and you have exhausted all other resources, please do the following - 
+- If the VocalRemover.py file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 
 1. Open the cmd prompt from the UVR-V4GUI directory
 2. Run the following command - 
 ```
 python VocalRemover.py
 ```
-3. Copy and paste the error in the cmd prompt to the issues center on the GitHub repository.
+3. Copy and paste the error output in the cmd prompt to the issues center on the GitHub repository.
 
 ## Other GUI Notes:
 
-- The application will automatically remember your *'save to'* path upon closing and reopening until you change it
+- The application will automatically remember your *'save to'* path upon closing and reopening until you change it.
 - You can select as many files as you like. Multiple conversions are supported!
 - The ability to drag & drop files to convert has also been added.
 - The Stacked Model is meant to clean up vocal residue left over in the form of vocal pinches and static. The stacked models provided are only meant for instrumental outputs from track run through one of the main models.

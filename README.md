@@ -6,11 +6,11 @@
 
 This application is a GUI version of the vocal remover AI created and posted by tsurumeso. This would not have been possible without tsurumeso's hard work and dedication! You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover)
 
-A very special thanks to the main code contributor [DilanBoskan](https://github.com/DilanBoskan)! DilanBoskan, thank you for all of your support and hard work in helping bring this project to life!
+A very special thanks to the main code contributor [DilanBoskan](https://github.com/DilanBoskan)! DilanBoskan, thank you for helping bring this project to life, your hard work is greatly appreciated.
 
 ## Installation
 
-The application was made with Tkinter for cross platform compatibility, so this should work with Windows, Mac, and Linux systems. I've only personally tested this on Windows 10 & Linux Ubuntu.
+The application was made with Tkinter for cross platform compatibility, so this should work with Windows, Mac, and Linux systems. This application has only been tested on Windows 10 & Linux Ubuntu.
 
 ### Install Required Applications & Packages
 
@@ -27,15 +27,15 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 ### Running the Vocal Remover GUI & Models
 
 1. Open the file labeled *'VocalRemover.py'*.
-2. It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
-3. If you are having issues opening the *'VocalRemover.py'* file, please go to the **troubleshooting** section below.
+  - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
+    - If you are having issues opening the *'VocalRemover.py'* file, please go to the **troubleshooting** section below.
 
 ## Option Guide
 
 ### Choose AI Engine:
 
 - This option allows you to toggle between tsurumeso's v2 & v4 AI engines. 
-- **Please note** - The TTA option and the ability to set the N_FFT value are strictly **v4*** options.
+  - **Please note**, The TTA option and the ability to set the N_FFT value are strictly **v4*** options.
 
 ### Model Selections:
 

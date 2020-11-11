@@ -30,6 +30,12 @@ pip install --no-cache-dir -r requirements.txt
 pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
+### FFmpeg 
+
+FFmpeg must be installed and configured in order for the application to be able to process any track that isn't a *.wav* file. Instructions for installing FFmpeg can be found on YouTube, WikiHow, Reddit, GitHub, and many other sources around the web.
+
+- **Note:** If you are experiencing any errors when attempting to process any media audio files that are not the *.wav* format, please ensure FFmpeg is install & configured correctly.
+
 ### Running the Vocal Remover GUI & Models
 
 - Open the file labeled *'VocalRemover.py'*.
@@ -130,6 +136,8 @@ A special thank you to aufr33 for helping me expand the dataset used to train th
   - **Note:** This application will *not* be friendly to older or budget hardware. Please proceed with caution! Pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
 ## Troubleshooting
+
+Please be as detailed as possible when posting a new issue. Make sure to provide any error outputs and/or screenshots/gif's to give us a clearer understanding of the issue you are experiencing.
 
 If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 

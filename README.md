@@ -144,6 +144,13 @@ A special thank you to aufr33 for helping me expand the dataset used to train th
 
 ## Troubleshooting
 
+### Common Issues
+
+- This application is not compatible with 32-bit versions of Python. Please make sure your version of Python is 64-bit. 
+- If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
+
+### Issue Reporting
+
 Please be as detailed as possible when posting a new issue. Make sure to provide any error outputs and/or screenshots/gif's to give us a clearer understanding of the issue you are experiencing.
 
 If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 

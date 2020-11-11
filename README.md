@@ -10,7 +10,7 @@ This application is a GUI version of the vocal remover AI created and posted by 
 
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
-    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring this GUI to life! Your hard work and continued support is greatly appreciated!
+    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring this GUI to life! Your hard work and continued support is greatly appreciated.
 
 ## Installation
 
@@ -19,10 +19,10 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
 ### Install Required Applications & Packages
 
 1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.7.0/python-3.7.0-amd64.exe) (Windows link)
-    - Ensure the *"Add Python 3.7 to PATH"* box is checked
+    - **Note:** Ensure the *"Add Python 3.7 to PATH"* box is checked
 2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.0.0** here (link pending)
 3. Place the UVR-V4GUI folder contained within the *.zip* file where ever you wish. 
-    - *Your documents folder or home directory is recommended for ease of access.*
+    - Your documents folder or home directory is recommended for easy access.
 4. From the UVR-V4GUI directory, open the Windows Command Prompt and run the following installs -
 
 ```
@@ -41,22 +41,46 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 ### Choose AI Engine:
 
 - This option allows you to toggle between tsurumeso's v2 & v4 AI engines. 
-  - **Note:** The TTA option and the ability to set the N_FFT value is only available on the v4 engine.
-
+  - **Note:** Each engine comes with it's own set of models.
+  - **Note:** The TTA option and the ability to set the N_FFT value is limited to the v4 engine only.
+  
 ### Model Selections:
 
-The v2 & v4 AI engines use different sets of models. When selected, the available models for v2 or v4 will automatically populate within the model selection dropdowns. 
+The v2 & v4 AI engines use different sets of models. When selected, the models available for v2 or v4 will automatically populate within the model selection dropdowns. 
 
-- **Choose Main Model** - Here is where you choose the main model to convert your tracks with.
+- **Choose Main Model** - Here is where you choose the main model to perform a deep vocal removal.
   - Each of the models provided were trained on different parameters, though they can convert tracks of all genres. 
   - Each model differs in the way they processes given tracks.  
-     - The [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option makes it easier for the user to compare and determine which model is best for the track(s) being processed.
+     - The [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option makes it easier for the user to test different models on given tracks.
 - **Choose Stacked Model** - These models are meant to clean up vocal artifacts from instrumental outputs. 
   - The stacked models provided are only meant to process instrumental outputs created by a main model. 
   - Selecting the [*'Stack Passes'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option will enable you to select a stacked model to run with a main model. 
     - If you wish to only run a stacked model on a track, make sure the [*'Stack Conversion Only'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option is checked.
-  - The wide range of main model/stacked model allows the user more flexibility in finding what blend works best for the track(s) they are proessing.
-    - To reiterate, the [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option streamlines the process of testing different main model/stacked model combinations on a given track.
+  - The wide range of main model/stacked model combinations gives the user more flexibility in discovering what model blend works best for the track(s) they are proessing.
+    - To reiterate, the [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option streamlines the process of testing different main model/stacked model combinations on a given track. More information on this option can be found in the next section.
+
+### Checkboxes
+- **GPU Conversion** - Selecting this option ensures the GPU is used to process conversions. 
+  - **Note:** This option will not work if you don't have a Cuda compatible GPU.
+    - Nividia GPU's are most compatible with Cuda.
+  - **Note:** CPU conversions are much slower compared to those processed through the GPU. 
+- **Post-process** - This option can potentially identify leftover instrumental artifacts within the vocal outputs. This option may improve the separation on *some* songs. 
+  - **Note:** Having this option selected can potentially have an adverse effect on the conversion process, depending on the track. Because of this, it's only recommended as a last resort.
+- **TTA** - This option performs Test-Time-Augmentation to improve the separation quality. 
+  - **Note:** Having this selected will increase the time it takes to complete a conversion.
+  - **Note:** This option is ***not*** compatible with the *v2* AI engine.
+- **Output Image** - Selecting this option will include the spectrograms in *.jpg* format for the instrumental & vocal audio outputs.
+- **Stack Passes** - This option activates the stacked model conversion process and allows the user to set the number of times a track runs through a stacked model.
+  - **Note:** The best range is 3-7 passes. 8 or more passes can result in degraded sound quality for the track.
+- **Stack Conversion Only** - Selecting this option allows the user to bypass the main model and run a track through a stacked model only.
+- **Save All Stacked Outputs** - Having this option selected will auto-generate a new directory with the track name to your *'Save to'* path. The new directory will contain all of the outputs generated by each stack pass. The amount of audio outputs will depend on the number of stack passes chosen.  
+  - **Note:** Each output filename will be appended with the number of passes it has had.
+    - **Example:** If 5 stack passes are chosen, the application will provide you with all 5 pairs of audio outputs generated after each pass, if this option is enabled.
+  - This option can be very useful in determining the optimal number of passes needed to clean a track.
+- **Model Test Mode** - This option is meant to make it easier for users to test the results of different models, and model combinations, without having to manually create new folders and/or change the filenames. 
+  - When this option is selected, the application will auto-generate a new folder with the name of the selected model(s) in the *'Save to'* path you have chosen.
+    - The output files will be saved to the auto-generated directory.
+    - The filenames for the instrumental & vocal outputs will have the selected model(s) name(s) appended to them. 
 
 ### Parameter Values
 
@@ -68,31 +92,11 @@ All models released here will have the values they were trained with appended to
   - **WINDOW SIZE** - 512
   - **N_FFT** - 2048
 
-### Checkboxes
-- **GPU Conversion** - Selecting this option ensures the GPU is used for conversions. 
-  - **Note:** This option will not work if you don't have a Cuda compatible GPU (Nividia GPU's are most compatible with Cuda).
-- **Post-process** - This option can potentially identify leftover instrumental artifacts within the vocal outputs. This option may improve the separation on *some* songs. 
-  - **Note:** Having this option selected can potentially have an adverse effect on the conversion process, depending on the track. Because of this, it's only recommended as a last resort.
-- **TTA** - This option performs Test-Time-Augmentation to improve the separation quality. 
-  - **Note:** Having this selected will increase the time it takes to complete a conversion.
-  - **Note:** This option is ***not*** compatible with the *v2 AI engine*.
-- **Output Image** - Selecting this option will include the images of the spectrograms for the instrumental & vocal audio outputs.
-- **Stack Passes** - This option allows the user to set the number of times a track is to run through a stacked model.
-  - **Note:** The best range is 3-5 passes, any more than 5 can cause quality degradation of the track.
-- **Stack Conversion Only** - Selecting this option allows the user to bypass the main model and run a track through a stacked model only.
-- **Save All Stacked Outputs** - Having this option selected will auto-generate a new directory to the *'Save to'* path with the track name. The new directory will contain all of the outputs generated by the whole conversion process. The amount of audio outputs will depend on the input number of stack passes.  
-  - **Note:** Each output filename will be appended with the number of passes it has had.
-    - **Example:** if you choose 5 stack passes this option will provide you with 5 pairs of audio outputs generated after each pass.
-  - This option can be very useful in determining the optimal number of passes needed to clean a track.
-- **Model Test Mode** - This option is meant to make it easier for users to test the results of different models, and model combinations, without having to manually create new folders and/or change the filenames. 
-  - **Note:** When this option is selected the application will auto-generate a new folder with the name of the selected model(s) in the *'Save to'* path you have chosen.
-    - The instrumental & vocal outputs filenames will have the selected model(s) name(s) appended to them and save to the auto-generated directory.
-
 ### Other Buttons:
 
-- **Add New Model** - This button will automatically take you to the models folder. 
-  - **Note:** If you are adding a new model, make sure to add it accordingly based on the AI engine it was trained on!
-    - **Example:** If you wish to add a model trained on the v4 engine, add it to the correct folder located in the 'v4' directory.
+- **Add New Model** - This button will automatically open the models folder. 
+  - **Note:** If you are adding a new model, make sure to add it accordingly based on the AI engine it was trained on.
+    - **Example:** If you wish to add a model trained on the v4 engine, add it to the correct folder located in the 'models/v4/' directory.
   - **Note:** The application will automatically detect any models added the correct directories without needing a restart.
 - **Restart Button** - If the application hangs for any reason, you can hit the circular arrow button immediately to the right of the *'Start Conversion'* button.
 
@@ -118,8 +122,8 @@ A special thank you to aufr33 for helping me expand the dataset used to train th
 
 ## Other GUI Notes
 
-- The application will automatically remember your *'save to'* path upon closing and reopening until you change it.
-  - **Note:** It will also remember the last directory you accessed to select files to be processed.
+- The application will automatically remember your *'save to'* path upon closing and reopening until it's changed.
+  - **Note:** The last directory accessed within the application will also be remembered.
 - Multiple conversions are supported.
 - The ability to drag & drop audio files to convert has also been added.
 - Conversion times will greatly depend on your hardware. 

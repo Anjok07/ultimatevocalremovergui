@@ -34,7 +34,7 @@ pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pyto
 
 FFmpeg must be installed and configured in order for the application to be able to process any track that isn't a *.wav* file. Instructions for installing FFmpeg can be found on YouTube, WikiHow, Reddit, GitHub, and many other sources around the web.
 
-- **Note:** If you are experiencing any errors when attempting to process any media audio files that are not the *.wav* format, please ensure FFmpeg is install & configured correctly.
+- **Note:** If you are experiencing any errors when attempting to process any media audio files that are not the *.wav* format, please ensure FFmpeg is installed & configured correctly.
 
 ### Running the Vocal Remover GUI & Models
 
@@ -56,7 +56,7 @@ The v2 & v4 AI engines use different sets of models. When selected, the models a
 
 - **Choose Main Model** - Here is where you choose the main model to perform a deep vocal removal.
   - Each of the models provided were trained on different parameters, though they can convert tracks of all genres. 
-  - Each model differs in the way they processes given tracks.  
+  - Each model differs in the way they process given tracks.  
      - The [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option makes it easier for the user to test different models on given tracks.
 - **Choose Stacked Model** - These models are meant to clean up vocal artifacts from instrumental outputs. 
   - The stacked models provided are only meant to process instrumental outputs created by a main model. 
@@ -83,9 +83,10 @@ The v2 & v4 AI engines use different sets of models. When selected, the models a
   - **Note:** Each output filename will be appended with the number of passes it has had.
     - **Example:** If 5 stack passes are chosen, the application will provide you with all 5 pairs of audio outputs generated after each pass, if this option is enabled.
   - This option can be very useful in determining the optimal number of passes needed to clean a track.
-- **Model Test Mode** - This option is meant to make it easier for users to test the results of different models, and model combinations, without having to manually create new folders and/or change the filenames. 
-  - When this option is selected, the application will auto-generate a new folder with the name of the selected model(s) in the *'Save to'* path you have chosen.
-    - The output files will be saved to the auto-generated directory.
+- **Model Test Mode** - This option makes it easier for users to test the results of different models, and model combinations, by eliminating the hassel of having to manually create new folders and/or change the filenames when processing the same track through multiple models. This option structures the model testing process.
+  - When selected, the application will auto-generate a new folder in the *'Save to'* path you have chosen.
+    - The new auto-generated folder will be named after the model(s) selected.
+    - The output audio files will be saved to the auto-generated directory.
     - The filenames for the instrumental & vocal outputs will have the selected model(s) name(s) appended to them. 
 
 ### Parameter Values

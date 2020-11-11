@@ -41,7 +41,7 @@ FFmpeg must be installed and configured in order for the application to be able 
 - Open the file labeled *'VocalRemover.py'*.
    - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
      - **Note:** If you are unable to open the *'VocalRemover.py'* file, please go to the [**troubleshooting**](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#troubleshooting) section below.
-   - All output audio files will be the *'.wav'* format.
+- **Note:** All output audio files will be in the *'.wav'* format.
 
 ## Option Guide
 

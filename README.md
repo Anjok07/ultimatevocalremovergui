@@ -115,21 +115,31 @@ All models released here will have the values they were trained with appended to
 
 ## Models Included
 
+All of the models included in the release were trained on large datasets containing diverse sets of music genres.
+
 **PLEASE NOTE:** Do not change the name of the models provided! The required parameters are specified and appended to the end of the filenames.
 
 Here's a list of the models included within the package -
 
-- **v2 AI Engine**
-    - **Main Models**
-        - *(list pending)*
-    - **Stacked Models**
-        - *(list pending)*
-        
 - **v4 AI Engine**
     - **Main Models**
-        - *(list pending)*
+        - **MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth** - This is the main model that does an excellent job removing vocals from most tracks.
+        - **MGM_LOWEND_A_v4_sr32000_hl512_w512_nf2048.pth** - This model focuses a bit more on removing vocals from lower frequencies.
+        - **MGM_LOWEND_B_v4_sr33075_hl384_w512_nf2048.pth** - This is also a model that focuses on lower end frequencies, but trained with different parameters.
+        - **MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth** - This model slightly focuses a bit more on higher end frequencies.
+        - **MODEL_BVKARAOKE_by_aufr33_v4_sr33075_hl384_w512_nf1536.pth** - This is a beta model that removes main vocals while leaving background vocals intact.
     - **Stacked Models**
-        - *(list pending)*
+        - **StackedMGM_MM_v4_sr44100_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield the desired results.
+        - **StackedMGM_MLA_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield a desired results.
+        - **StackedMGM_LL_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_LOWEND_A_v4_sr32000_hl512_w512_nf2048.pth'*. However, any combination may yield a desired results.
+
+- **v2 AI Engine**
+    - **Main Models**
+        - **Multi_Genre_Model_v2_sr44100_hl1024_w512.pth** - This model yields excellent results for most tracks processed through it.
+    - **Stacked Models**
+        - **StackedRegA_v2_sr44100_hl1024_w512.pth** - This is a standard vocal artifact removal model.
+        - **StackedRegB_v2_sr44100_hl1024_w512.pth** - This is a standard vocal artifact removal model.
+        - **StackedArg_v2_sr44100_hl1024_w512.pth** - This model removes vocal artifacts a bit more aggressively, but may greatly degrade the audio quality of the output audio. 
 
 A special thank you to aufr33 for helping me expand the dataset used to train these models and for the helpful training tips.
 

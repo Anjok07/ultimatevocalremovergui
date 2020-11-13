@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from lib import layers
+from lib_v2 import layers
 
 
 class BaseASPPNet(nn.Module):

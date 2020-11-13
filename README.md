@@ -20,7 +20,7 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
 
 1. Download & install Python 3.7 [here](https://www.python.org/ftp/python/3.7.0/python-3.7.0-amd64.exe) (Windows link)
     - **Note:** Ensure the *"Add Python 3.7 to PATH"* box is checked
-2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.0.0** here (link pending)
+2. Once Python has installed, download **Ultimate Vocal Remover GUI Version 4.0.0** [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v4.0.0/UVR-V4GUI.zip)
 3. Place the UVR-V4GUI folder contained within the *.zip* file where ever you wish. 
     - Your documents folder or home directory is recommended for easy access.
 4. From the UVR-V4GUI directory, open the Windows Command Prompt and run the following installs -

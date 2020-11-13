@@ -37,7 +37,7 @@ os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
 stackedModels_dir = os.path.join(base_path, 'models')
-logo_path = os.path.join(base_path, 'img', 'UVR-logo.png')
+logo_path = os.path.join(base_path, 'img', 'UVR-banner.png')
 refresh_path = os.path.join(base_path, 'img', 'refresh.png')
 DEFAULT_DATA = {
     'export_path': '',

@@ -138,7 +138,6 @@ Here's a list of the models included within the package -
         - **Multi_Genre_Model_v2_sr44100_hl1024_w512.pth** - This model yields excellent results for most tracks processed through it.
     - **Stacked Models**
         - **StackedRegA_v2_sr44100_hl1024_w512.pth** - This is a standard vocal artifact removal model.
-        - **StackedRegB_v2_sr44100_hl1024_w512.pth** - This is a standard vocal artifact removal model.
         - **StackedArg_v2_sr44100_hl1024_w512.pth** - This model removes vocal artifacts a bit more aggressively, but may greatly degrade the audio quality of the output audio. 
 
 A special thank you to aufr33 for helping me expand the dataset used to train some of these models and for the helpful training tips.

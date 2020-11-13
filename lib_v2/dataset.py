@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-from lib import spec_utils
+from lib_v2 import spec_utils
 
 
 class VocalRemoverValidationSet(torch.utils.data.Dataset):

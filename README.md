@@ -169,7 +169,7 @@ If the *'VocalRemover.py'* file won't open *under any circumstances* and all oth
 ```
 python VocalRemover.py
 ```
-3. Copy and paste the error output in the cmd prompt to the issues center on the GitHub repository.
+3. Copy and paste the error output shown in the cmd prompt to the issues center on the GitHub repository.
 
 ## License
 

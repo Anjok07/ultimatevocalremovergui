@@ -129,9 +129,9 @@ Here's a list of the models included within the package -
         - **MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth** - This model slightly focuses a bit more on higher end frequencies.
         - **MODEL_BVKARAOKE_by_aufr33_v4_sr33075_hl384_w512_nf1536.pth** - This is a beta model that removes main vocals while leaving background vocals intact.
     - **Stacked Models**
-        - **StackedMGM_MM_v4_sr44100_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield the desired results.
-        - **StackedMGM_MLA_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield a desired results.
-        - **StackedMGM_LL_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_LOWEND_A_v4_sr32000_hl512_w512_nf2048.pth'*. However, any combination may yield a desired results.
+        - **StackedMGM_MM_v4_sr44100_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield a desired result.
+        - **StackedMGM_MLA_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_MAIN_v4_sr44100_hl512_w512_nf2048.pth'*. However, any combination may yield a desired result.
+        - **StackedMGM_LL_v4_sr32000_hl512_w512_nf2048.pth** - This is a strong vocal artifact removal model. This model was made to run with *'MGM_LOWEND_A_v4_sr32000_hl512_w512_nf2048.pth'*. However, any combination may yield a desired result.
 
 - **v2 AI Engine**
     - **Main Models**

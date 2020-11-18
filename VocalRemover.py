@@ -37,7 +37,7 @@ os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
 stackedModels_dir = os.path.join(base_path, 'models')
-logo_path = os.path.join(base_path, 'img', 'UVR-banner.png')
+logo_path = os.path.join(base_path, 'img', 'UVR-logo.png')
 refresh_path = os.path.join(base_path, 'img', 'refresh.png')
 DEFAULT_DATA = {
     'export_path': '',
@@ -185,9 +185,9 @@ def drop(event, accept_mode: str = 'files'):
         root.exportPath_var.set(path)
     elif accept_mode == 'files':
         # Clean path text and set path to the list of paths
-        path = path[:-1]
         path = path.replace('{', '')
         path = path.split('} ')
+        path[-1] = path[-1].replace('}', '')
         # Set Variables
         root.inputPaths = path
         root.inputPathsEntry_var.set('; '.join(path))

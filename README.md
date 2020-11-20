@@ -6,7 +6,7 @@
 
 ## About
 
-This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). 
+This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). This version also comes with a total of 11 high performance models trained by me. You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). 
 
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!

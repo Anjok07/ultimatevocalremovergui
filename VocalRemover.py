@@ -16,6 +16,7 @@ import subprocess  # Run python file
 import pathlib
 import sys
 import os
+import subprocess
 from collections import defaultdict
 # Used for live text displaying
 import queue
@@ -37,7 +38,7 @@ os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
 stackedModels_dir = os.path.join(base_path, 'models')
-logo_path = os.path.join(base_path, 'img', 'UVR-logo.png')
+banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
 refresh_path = os.path.join(base_path, 'img', 'refresh.png')
 DEFAULT_DATA = {
     'export_path': '',
@@ -266,7 +267,7 @@ class MainWindow(TkinterDnD.Tk):
         self.update()
 
         # --Variables--
-        self.logo_img = open_image(path=logo_path,
+        self.logo_img = open_image(path=banner_path,
                                    size=(self.winfo_width(), 9999))
         self.refresh_img = open_image(path=refresh_path,
                                       size=(20, 20))
@@ -617,7 +618,13 @@ class MainWindow(TkinterDnD.Tk):
 
     def open_newModel_filedialog(self):
         """Let user paste a ".pth" model to use for the vocal seperation"""
-        os.startfile('models')
+        filename = 'models'
+
+        if sys.platform == "win32":
+            os.startfile(filename)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, filename])
 
     def start_conversion(self):
         """

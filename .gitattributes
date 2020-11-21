@@ -1,1 +1,3 @@
-*.tcl linguist-language=Python
+ultimatevocalremovergui/tkinterdnd2/tkdnd/linux64/* linguist-vendored
+ultimatevocalremovergui/tkinterdnd2/tkdnd/osx64/* linguist-vendored
+ultimatevocalremovergui/tkinterdnd2/tkdnd/win64/* linguist-vendored

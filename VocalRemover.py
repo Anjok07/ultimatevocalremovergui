@@ -48,7 +48,7 @@ DEFAULT_DATA = {
     'output_image': False,
     'sr': 44100,
     'hop_length': 1024,
-    'window_size': 512,
+    'window_size': 320,
     'n_fft': 2048,
     'stack': False,
     'stackPasses': 1,

@@ -102,7 +102,7 @@ All models released here will have the values they were trained with appended to
 - **Note** - The WINDOW_SIZE value is universal. The smaller your window size, the better your conversions will be. However, a smaller window size means longer conversions times and heavier resource usage. 
     - Here are the recommended window size values - 
         - **1024** - Low conversion quality, shortest conversion time, low resource usage
-        - **512** - Average conversions, average conversion time, normal resource usage
+        - **512** - Average conversion quality, average conversion time, normal resource usage
         - **320** - Better conversion quality, long conversion time, high resource usage
         - **272** - Best conversion quality, longest conversion time, heavy resource usage
             - *272 is the lowest window size value possible.*

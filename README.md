@@ -99,6 +99,13 @@ The v2 & v4 AI engines use different sets of models. When selected, the models a
 
 All models released here will have the values they were trained with appended to the end of their filenames like so, **'MGM-HIGHEND_sr44100_hl512_w512_nf2048.pth'**. The *'_sr44100_hl512_w512_nf2048'* portion automatically sets the *SR*, *HOP LENGNTH*, *WINDOW SIZE*, & *N_FFT* values within the application. If there are no values appended to the end of a selected model filename, the *SR*, *HOP LENGNTH*, *WINDOW SIZE*, & *N_FFT* fields will be editable and auto-populate with default values. 
 
+- **Note** - The WINDOW_SIZE value is universal. The smaller your window size, the better your conversions will be. However, a smaller window size means longer conversions times and heavier resource usage. Here are the reccomended window size values - 
+    - **1024** - Low conversion quality, shortest conversion time, low resource usage
+    - **512** - Average conversions, average conversion time, normal resource usage
+    - **320** - Better conversion quality, long conversion time, high resource usage
+    - **272** - Best conversion quality, longest conversion time, heavy resource usage
+        - *272 is the lowest window size value possible.*
+
 - **Default Values:**
   - **SR** - 44100
   - **HOP LENGTH** - 1024

@@ -55,6 +55,8 @@ DEFAULT_DATA = {
     'stackOnly': False,
     'saveAllStacked': False,
     'modelFolder': False,
+    'modelInstrumentalLabel': 'model_iter26_sr33075_hl384_w512.pth',
+    'modelStackedLabel': 'baseline.pth',
     'aiModel': 'v4',
 
     'useModel': 'instrumental',
@@ -286,8 +288,8 @@ class MainWindow(TkinterDnD.Tk):
         self.tta_var = tk.BooleanVar(value=data['tta'])
         self.outputImage_var = tk.BooleanVar(value=data['output_image'])
         # Models
-        self.instrumentalModel_var = tk.StringVar(value='')
-        self.stackedModel_var = tk.StringVar(value='')
+        self.instrumentalModel_var = tk.StringVar(value=data['modelInstrumentalLabel'])
+        self.stackedModel_var = tk.StringVar(value=data['modelStackedLabel'])
         # Stacked Options
         self.stack_var = tk.BooleanVar(value=data['stack'])
         self.stackLoops_var = tk.StringVar(value=data['stackPasses'])
@@ -956,6 +958,8 @@ class MainWindow(TkinterDnD.Tk):
             'useModel': 'instrumental',
             'lastDir': self.lastDir,
             'modelFolder': self.modelFolder_var.get(),
+            'modelInstrumentalLabel': self.instrumentalModel_var.get(),
+            'modelStackedLabel': self.stackedModel_var.get(),
             'aiModel': self.aiModel_var.get(),
         })
 

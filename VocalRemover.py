@@ -41,7 +41,8 @@ stackedModels_dir = os.path.join(base_path, 'models')
 banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
 refresh_path = os.path.join(base_path, 'img', 'refresh.png')
 DEFAULT_DATA = {
-    'export_path': '',
+    'exportPath': '',
+    'inputPaths': [],
     'gpu': False,
     'postprocess': False,
     'tta': False,
@@ -55,6 +56,8 @@ DEFAULT_DATA = {
     'stackOnly': False,
     'saveAllStacked': False,
     'modelFolder': False,
+    'modelInstrumentalLabel': '',
+    'modelStackedLabel': '',
     'aiModel': 'v4',
 
     'useModel': 'instrumental',
@@ -191,7 +194,7 @@ def drop(event, accept_mode: str = 'files'):
         path[-1] = path[-1].replace('}', '')
         # Set Variables
         root.inputPaths = path
-        root.inputPathsEntry_var.set('; '.join(path))
+        root.update_inputPaths()
     else:
         # Invalid accept mode
         return
@@ -278,16 +281,16 @@ class MainWindow(TkinterDnD.Tk):
         # -Tkinter Value Holders-
         data = load_data()
         # Paths
-        self.exportPath_var = tk.StringVar(value=data['export_path'])
-        self.inputPaths = []
+        self.exportPath_var = tk.StringVar(value=data['exportPath'])
+        self.inputPaths = data['inputPaths']
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
         self.tta_var = tk.BooleanVar(value=data['tta'])
         self.outputImage_var = tk.BooleanVar(value=data['output_image'])
         # Models
-        self.instrumentalModel_var = tk.StringVar(value='')
-        self.stackedModel_var = tk.StringVar(value='')
+        self.instrumentalModel_var = tk.StringVar(value=data['modelInstrumentalLabel'])
+        self.stackedModel_var = tk.StringVar(value=data['modelStackedLabel'])
         # Stacked Options
         self.stack_var = tk.BooleanVar(value=data['stack'])
         self.stackLoops_var = tk.StringVar(value=data['stackPasses'])
@@ -605,7 +608,7 @@ class MainWindow(TkinterDnD.Tk):
         )
         if paths:  # Path selected
             self.inputPaths = paths
-            self.inputPathsEntry_var.set('; '.join(paths))
+            self.update_inputPaths()
             self.lastDir = os.path.dirname(paths[0])
 
     def open_export_filedialog(self):
@@ -781,6 +784,16 @@ class MainWindow(TkinterDnD.Tk):
                 widget.configure(state=tk.NORMAL)
                 var.set(DEFAULT_DATA[key])
 
+    def update_inputPaths(self):
+        """Update the music file entry"""
+        if self.inputPaths:
+            # Non-empty Selection
+            text = '; '.join(self.inputPaths)
+        else:
+            # Empty Selection
+            text = ''
+        self.inputPathsEntry_var.set(text)
+
     def update_loop(self):
         """Update the dropdown menu"""
         self.update_available_models()
@@ -887,6 +900,7 @@ class MainWindow(TkinterDnD.Tk):
                                           relx=1/3 + 1/3/2, rely=3/self.COL2_ROWS, relwidth=1/3/4, relheight=1/self.COL2_ROWS)
 
         self.decode_modelNames()
+        self.update_inputPaths()
 
     def deselect_models(self):
         """
@@ -923,7 +937,6 @@ class MainWindow(TkinterDnD.Tk):
         """
         Save the data of the application
         """
-        export_path = self.exportPath_var.get()
         # Get constants
         instrumental = get_model_values(self.instrumentalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
@@ -940,7 +953,8 @@ class MainWindow(TkinterDnD.Tk):
 
         # -Save Data-
         save_data(data={
-            'export_path': export_path,
+            'exportPath': self.exportPath_var.get(),
+            'inputPaths': self.inputPaths,
             'gpu': self.gpuConversion_var.get(),
             'postprocess': self.postprocessing_var.get(),
             'tta': self.tta_var.get(),
@@ -956,6 +970,8 @@ class MainWindow(TkinterDnD.Tk):
             'useModel': 'instrumental',
             'lastDir': self.lastDir,
             'modelFolder': self.modelFolder_var.get(),
+            'modelInstrumentalLabel': self.instrumentalModel_var.get(),
+            'modelStackedLabel': self.stackedModel_var.get(),
             'aiModel': self.aiModel_var.get(),
         })
 

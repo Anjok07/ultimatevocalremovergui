@@ -51,7 +51,7 @@ data = {
     # Constants
     'sr': 44_100,
     'hop_length': 1_024,
-    'window_size': 512,
+    'window_size': 320,
     'n_fft': 2_048,
 }
 default_sr = data['sr']
@@ -482,4 +482,5 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     progress_var.set(0)  # Update Progress
     text_widget.write(f'Conversion(s) Completed and Saving all Files!\n')  # nopep8 Write Command Text
     text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
+    torch.cuda.empty_cache()
     button_widget.configure(state=tk.NORMAL)  # Enable Button

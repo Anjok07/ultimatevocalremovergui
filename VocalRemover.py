@@ -36,10 +36,12 @@ else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(base_path)  # Change the current working directory to the base path
 
+image_foler = 'img'
 instrumentalModels_dir = os.path.join(base_path, 'models')
 stackedModels_dir = os.path.join(base_path, 'models')
-banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
-refresh_path = os.path.join(base_path, 'img', 'refresh.png')
+banner_path = os.path.join(base_path, image_foler, 'UVR-banner.png')
+refresh_path = os.path.join(base_path, image_foler, 'refresh.png')
+icon_path = os.path.join(base_path, image_foler, 'UVR-icon.ico')
 DEFAULT_DATA = {
     'exportPath': '',
     'inputPaths': [],
@@ -266,6 +268,7 @@ class MainWindow(TkinterDnD.Tk):
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
         self.configure(bg='#000000')  # Set background color to black
         self.protocol("WM_DELETE_WINDOW", self.save_values)
+        self.iconbitmap(icon_path)
         self.resizable(False, False)
         self.update()
 

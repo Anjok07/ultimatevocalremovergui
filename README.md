@@ -134,6 +134,7 @@ Here's a list of the models included within the package -
         - **MGM_MAIN_v4_sr44100_hl512_nf2048.pth** - This is the main model that does an excellent job removing vocals from most tracks.
         - **MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth** - This model focuses a bit more on removing vocals from lower frequencies.
         - **MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth** - This is also a model that focuses on lower end frequencies, but trained with different parameters.
+        - **MGM_LOWEND_C_v4_sr16000_hl512_nf2048.pth** - This is also a model that focuses on lower end frequencies, but trained on a very low sample rate.
         - **MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth** - This model slightly focuses a bit more on higher end frequencies.
         - **MODEL_BVKARAOKE_by_aufr33_v4_sr33075_hl384_nf1536.pth** - This is a beta model that removes main vocals while leaving background vocals intact.
     - **Stacked Models**

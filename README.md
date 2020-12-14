@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v4.0.0
+# Ultimate Vocal Remover GUI v4.0.1
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/UVRV4.png" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
@@ -187,7 +187,7 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 ## Contributing
 
 - For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI** please send us a pull request and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
-- Please note that we do not maintain or directly support any of tsurumesos AI application code. We only maintain the development and support for the **Ultimate Vocal Remover GUI**. 
+- Please note that we do not maintain or directly support any of tsurumesos AI application code. We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
 
 ## References
 - [1] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf

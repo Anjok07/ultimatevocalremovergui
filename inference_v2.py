@@ -143,18 +143,13 @@ def determineModelFolderName():
 
     # -Instrumental-
     if os.path.isfile(data['instrumentalModel']):
-        modelFolderName += os.path.splitext(os.path.basename(data['instrumentalModel']))[0] + '-'
+        modelFolderName += os.path.splitext(os.path.basename(data['instrumentalModel']))[0]
     # -Vocal-
     elif os.path.isfile(data['vocalModel']):
-        modelFolderName += os.path.splitext(os.path.basename(data['vocalModel']))[0] + '-'
+        modelFolderName += os.path.splitext(os.path.basename(data['vocalModel']))[0]
     # -Stack-
     if os.path.isfile(data['stackModel']):
-        modelFolderName += os.path.splitext(os.path.basename(data['stackModel']))[0]
-    else:
-        modelFolderName = modelFolderName[:-1]
-
-    if modelFolderName:
-        modelFolderName = '/' + modelFolderName
+        modelFolderName += '-' + os.path.splitext(os.path.basename(data['stackModel']))[0]
 
     return modelFolderName
 
@@ -327,22 +322,17 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         sf.write(f'temp.wav',
                  wav_instrument.T, sr)
 
-        appendModelFolderName = modelFolderName.replace('/', '_')
         # -Save files-
         # Instrumental
         if instrumental_name is not None:
-            instrumental_path = '{save_path}/{file_name}.wav'.format(
-                save_path=save_path,
-                file_name=f'{os.path.basename(base_name)}_{instrumental_name}{appendModelFolderName}',
-            )
+            instrumental_path = os.path.join(save_path,
+                                             f'{os.path.basename(base_name)}_{instrumental_name}_{modelFolderName}.wav')
             sf.write(instrumental_path,
                      wav_instrument.T, sr)
         # Vocal
         if vocal_name is not None:
-            vocal_path = '{save_path}/{file_name}.wav'.format(
-                save_path=save_path,
-                file_name=f'{os.path.basename(base_name)}_{vocal_name}{appendModelFolderName}',
-            )
+            vocal_path = os.path.join(save_path,
+                                      f'{os.path.basename(base_name)}_{vocal_name}_{modelFolderName}.wav')
             sf.write(vocal_path,
                      wav_vocals.T, sr)
 
@@ -376,7 +366,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     models, devices = load_models()
     modelFolderName = determineModelFolderName()
     if modelFolderName:
-        folder_path = f'{data["export_path"]}{modelFolderName}'
+        folder_path = os.path.join(data["export_path"], modelFolderName)
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
 
@@ -388,7 +378,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     for file_num, music_file in enumerate(data['input_paths'], start=1):
         try:
             # Determine File Name
-            base_name = f'{data["export_path"]}{modelFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+            base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
 
             for loop_num in range(total_loops):
                 # -Determine which model will be used-

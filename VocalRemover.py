@@ -795,6 +795,8 @@ class MainWindow(TkinterDnD.Tk):
                 if str(widget.cget('state')) != 'normal':
                     # Manual typing and widget not enabled
                     widget.configure(state=tk.NORMAL)
+                if '/' in str(var.get()):
+                    var.set(var.get().split('/')[0])
                 continue
             elif stacked_selectable:
                 if instrumental_selectable:

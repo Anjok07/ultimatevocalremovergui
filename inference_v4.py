@@ -175,6 +175,8 @@ data = {
     'hop_length': 1_024,
     'window_size': 320,
     'n_fft': 2_048,
+    # Resolution Type
+    'resType': 'kaiser_fast'
 }
 default_sr = data['sr']
 default_hop_length = data['hop_length']
@@ -428,7 +430,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 # Wave source
                 text_widget.write(base_text + 'Loading wave source...\n')
                 X, sr = librosa.load(music_file, data['sr'], False,
-                                     dtype=np.float32, res_type='kaiser_fast')
+                                     dtype=np.float32, res_type=data['resType'])
                 if X.ndim == 1:
                     X = np.asarray([X, X])
                 text_widget.write(base_text + 'Done!\n')

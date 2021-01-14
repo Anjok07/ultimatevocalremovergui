@@ -54,7 +54,9 @@ data = {
     'window_size': 320,
     'n_fft': 2_048,
     # Resolution Type
-    'resType': 'kaiser_fast'
+    'resType': 'kaiser_fast',
+    # Parsed constants should be fixed
+    'manType': False,
 }
 default_sr = data['sr']
 default_hop_length = data['hop_length']
@@ -93,6 +95,10 @@ def update_constants(model_name):
     data['hop_length'] = default_hop_length
     data['window_size'] = default_window_size
     data['n_fft'] = default_n_fft
+
+    if data['manType']:
+        # Default constants should be fixed
+        return
 
     for text_part in text_parts:
         if 'sr' in text_part:

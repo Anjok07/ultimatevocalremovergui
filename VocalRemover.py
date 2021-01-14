@@ -671,7 +671,8 @@ class MainWindow(TkinterDnD.Tk):
         instrumental = get_model_values(self.instrumentalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
         try:
-            if [bool(instrumental), bool(stacked)].count(True) == 2:
+            if ([bool(instrumental), bool(stacked)].count(True) == 2 and
+                    not self.manType_var.get()):
                 sr = DEFAULT_DATA['sr']
                 hop_length = DEFAULT_DATA['hop_length']
                 window_size = DEFAULT_DATA['window_size']
@@ -756,6 +757,8 @@ class MainWindow(TkinterDnD.Tk):
                              'n_fft': n_fft,  # not needed for v2
                              # Resolution Type
                              'resType': resType,
+                             # Parsed constants should be fixed
+                             'manType': self.manType_var.get(),
                              # Other Variables (Tkinter)
                              'window': self,
                              'text_widget': self.command_Text,
@@ -974,7 +977,8 @@ class MainWindow(TkinterDnD.Tk):
         # Get constants
         instrumental = get_model_values(self.instrumentalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
-        if [bool(instrumental), bool(stacked)].count(True) == 2:
+        if ([bool(instrumental), bool(stacked)].count(True) == 2 and
+                not self.manType_var.get()):
             sr = DEFAULT_DATA['sr']
             hop_length = DEFAULT_DATA['hop_length']
             window_size = DEFAULT_DATA['window_size']

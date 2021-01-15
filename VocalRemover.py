@@ -61,8 +61,6 @@ DEFAULT_DATA = {
     'modelInstrumentalLabel': '',
     'modelStackedLabel': '',
     'aiModel': 'v4',
-    'resType': 'Kaiser Fast',
-    'manType': False,
 
     'useModel': 'instrumental',
     'lastDir': None,
@@ -242,15 +240,15 @@ class MainWindow(TkinterDnD.Tk):
     # Layout
     IMAGE_HEIGHT = 140
     FILEPATHS_HEIGHT = 90
-    OPTIONS_HEIGHT = 285
+    OPTIONS_HEIGHT = 240
     CONVERSIONBUTTON_HEIGHT = 35
     COMMAND_HEIGHT = 200
     PROGRESS_HEIGHT = 26
     PADDING = 10
 
-    COL1_ROWS = 9.5
-    COL2_ROWS = 8.1
-    COL3_ROWS = 5.5
+    COL1_ROWS = 8
+    COL2_ROWS = 7
+    COL3_ROWS = 5
 
     def __init__(self):
         # Run the __init__ method on the tk.Tk class
@@ -307,10 +305,8 @@ class MainWindow(TkinterDnD.Tk):
         self.hopValue_var = tk.StringVar(value=data['hop_length'])
         self.winSize_var = tk.StringVar(value=data['window_size'])
         self.nfft_var = tk.StringVar(value=data['n_fft'])
-        self.manType_var = tk.BooleanVar(value=data['manType'])
         # AI model
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
-        self.resType_var = tk.StringVar(value=data['resType'])
         self.last_aiModel = self.aiModel_var.get()
         # Other
         self.inputPathsEntry_var = tk.StringVar(value='')
@@ -402,6 +398,7 @@ class MainWindow(TkinterDnD.Tk):
                                                   text='Save to',
                                                   command=self.open_export_filedialog)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame,
+
                                                 textvariable=self.exportPath_var,
                                                 state=tk.DISABLED
                                                 )
@@ -470,11 +467,6 @@ class MainWindow(TkinterDnD.Tk):
                                                                text='Model Test Mode',
                                                                variable=self.modelFolder_var,
                                                                )
-        # Manual Constants
-        self.options_manType_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                           text='Custom parameters',
-                                                           variable=self.manType_var,
-                                                           )
         # -Column 2-
         # SR
         self.options_sr_Entry = ttk.Entry(master=self.options_Frame,
@@ -500,13 +492,6 @@ class MainWindow(TkinterDnD.Tk):
         self.options_nfft_Label = tk.Label(master=self.options_Frame,
                                            text='N_FFT', anchor=tk.W,
                                            background='#63605f', font=self.font, foreground='white', relief="sunken")
-        # Resolution Type
-        self.options_resType_Label = tk.Label(master=self.options_Frame,
-                                              text='Resolution Type', anchor=tk.CENTER,
-                                              background='#63605f', font=self.font, foreground='white', relief="sunken")
-        self.options_resType_Optionmenu = ttk.OptionMenu(self.options_Frame,
-                                                         self.resType_var,
-                                                         None, 'Kaiser Fast', 'Kaiser Best', 'Scipy')
         # AI model
         self.options_aiModel_Label = tk.Label(master=self.options_Frame,
                                               text='Choose AI Engine', anchor=tk.CENTER,
@@ -557,9 +542,6 @@ class MainWindow(TkinterDnD.Tk):
         # Model Folder
         self.options_modelFolder_Checkbutton.place(x=0, y=0, width=0, height=0,
                                                    relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
-        # Manual Constants
-        self.options_manType_Checkbutton.place(x=0, y=0, width=0, height=0,
-                                               relx=0, rely=8/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         # -Column 2-
         # SR
         self.options_sr_Label.place(x=5, y=4, width=5, height=-8,
@@ -581,16 +563,11 @@ class MainWindow(TkinterDnD.Tk):
                                       relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3/2, relheight=1/self.COL2_ROWS)
         self.options_nfft_Entry.place(x=15, y=4, width=5, height=-8,
                                       relx=1/3 + 1/3/2, rely=3/self.COL2_ROWS, relwidth=1/3/4, relheight=1/self.COL2_ROWS)
-        # Resolution Type
-        self.options_resType_Label.place(x=5, y=8, width=-30, height=-8,
-                                         relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_resType_Optionmenu.place(x=5, y=8, width=-30, height=-8,
-                                              relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         # AI model
-        self.options_aiModel_Label.place(x=5, y=8, width=-30, height=-8,
-                                         relx=1/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_aiModel_Optionmenu.place(x=5, y=8, width=-30, height=-8,
-                                              relx=1/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_aiModel_Label.place(x=5, y=-5, width=-30, height=-8,
+                                         relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_aiModel_Optionmenu.place(x=5, y=-5, width=-30, height=-8,
+                                              relx=1/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
         # -Column 3-
         # Choose Model
@@ -615,8 +592,6 @@ class MainWindow(TkinterDnD.Tk):
                                              lambda *args: self.decode_modelNames())
         self.stackedModel_var.trace_add('write',
                                         lambda *args: self.decode_modelNames())
-        self.manType_var.trace_add('write',
-                                   lambda *args: self.decode_modelNames())
         # Model deselect
         self.aiModel_var.trace_add('write',
                                    lambda *args: self.deselect_models())
@@ -666,13 +641,11 @@ class MainWindow(TkinterDnD.Tk):
         input_paths = self.inputPaths
         instrumentalModel_path = self.instrumentalLabel_to_path[self.instrumentalModel_var.get()]  # nopep8
         stackedModel_path = self.stackedLabel_to_path[self.stackedModel_var.get()]  # nopep8
-        resType = self.resType_var.get().lower().replace(' ', '_')
         # Get constants
         instrumental = get_model_values(self.instrumentalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
         try:
-            if ([bool(instrumental), bool(stacked)].count(True) == 2 and
-                    not self.manType_var.get()):
+            if [bool(instrumental), bool(stacked)].count(True) == 2:
                 sr = DEFAULT_DATA['sr']
                 hop_length = DEFAULT_DATA['hop_length']
                 window_size = DEFAULT_DATA['window_size']
@@ -755,10 +728,6 @@ class MainWindow(TkinterDnD.Tk):
                              'hop_length': hop_length,
                              'window_size': window_size,
                              'n_fft': n_fft,  # not needed for v2
-                             # Resolution Type
-                             'resType': resType,
-                             # Parsed constants should be fixed
-                             'manType': self.manType_var.get(),
                              # Other Variables (Tkinter)
                              'window': self,
                              'text_widget': self.command_Text,
@@ -791,14 +760,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # Loop through each constant (key) and its widgets
         for key, (widget, var) in widgetsVars.items():
-            if self.manType_var.get():
-                if str(widget.cget('state')) != 'normal':
-                    # Manual typing and widget not enabled
-                    widget.configure(state=tk.NORMAL)
-                if '/' in str(var.get()):
-                    var.set(var.get().split('/')[0])
-                continue
-            elif stacked_selectable:
+            if stacked_selectable:
                 if instrumental_selectable:
                     if (key in instrumental.keys() and
                             key in stacked.keys()):
@@ -806,17 +768,19 @@ class MainWindow(TkinterDnD.Tk):
                         widget.configure(state=tk.DISABLED)
                         var.set('%d/%d' % (instrumental[key], stacked[key]))
                         continue
-                elif key in stacked.keys():
-                    # Only stacked selectable
-                    widget.configure(state=tk.DISABLED)
-                    var.set(stacked[key])
-                    continue
-            elif (key in instrumental.keys() and
-                    instrumental_selectable):
+                else:
+                    if key in stacked.keys():
+                        # Only stacked selectable
+                        widget.configure(state=tk.DISABLED)
+                        var.set(stacked[key])
+                        continue
+            else:
                 # Stacked model can not be selected
-                widget.configure(state=tk.DISABLED)
-                var.set(instrumental[key])
-                continue
+                if (key in instrumental.keys() and
+                        instrumental_selectable):
+                    widget.configure(state=tk.DISABLED)
+                    var.set(instrumental[key])
+                    continue
 
             # If widget is already enabled, no need to reset the value
             if str(widget.cget('state')) != 'normal':
@@ -979,8 +943,7 @@ class MainWindow(TkinterDnD.Tk):
         # Get constants
         instrumental = get_model_values(self.instrumentalModel_var.get())
         stacked = get_model_values(self.stackedModel_var.get())
-        if ([bool(instrumental), bool(stacked)].count(True) == 2 and
-                not self.manType_var.get()):
+        if [bool(instrumental), bool(stacked)].count(True) == 2:
             sr = DEFAULT_DATA['sr']
             hop_length = DEFAULT_DATA['hop_length']
             window_size = DEFAULT_DATA['window_size']
@@ -1013,8 +976,6 @@ class MainWindow(TkinterDnD.Tk):
             'modelInstrumentalLabel': self.instrumentalModel_var.get(),
             'modelStackedLabel': self.stackedModel_var.get(),
             'aiModel': self.aiModel_var.get(),
-            'resType': self.resType_var.get(),
-            'manType': self.manType_var.get(),
         })
 
         self.destroy()

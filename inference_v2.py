@@ -377,6 +377,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         folder_path = os.path.join(data["export_path"], modelFolderName)
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
+    else:
+        folder_path = ''
 
     # Determine Loops
     total_loops = data['stackPasses']
@@ -384,10 +386,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         total_loops += 1
 
     for file_num, music_file in enumerate(data['input_paths'], start=1):
+        # Determine File Name
+        base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
         try:
-            # Determine File Name
-            base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
-
             for loop_num in range(total_loops):
                 # -Determine which model will be used-
                 if not loop_num:

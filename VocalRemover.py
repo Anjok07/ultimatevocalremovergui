@@ -472,7 +472,7 @@ class MainWindow(TkinterDnD.Tk):
                                                                )
         # Manual Constants
         self.options_manType_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                           text='Custom parameters',
+                                                           text='Custom Parameters',
                                                            variable=self.manType_var,
                                                            )
         # -Column 2-

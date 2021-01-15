@@ -54,7 +54,9 @@ data = {
     'window_size': 320,
     'n_fft': 2_048,
     # Resolution Type
-    'resType': 'kaiser_fast'
+    'resType': 'kaiser_fast',
+    # Parsed constants should be fixed
+    'manType': False,
 }
 default_sr = data['sr']
 default_hop_length = data['hop_length']
@@ -93,6 +95,10 @@ def update_constants(model_name):
     data['hop_length'] = default_hop_length
     data['window_size'] = default_window_size
     data['n_fft'] = default_n_fft
+
+    if data['manType']:
+        # Default constants should be fixed
+        return
 
     for text_part in text_parts:
         if 'sr' in text_part:
@@ -371,6 +377,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         folder_path = os.path.join(data["export_path"], modelFolderName)
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
+    else:
+        folder_path = ''
 
     # Determine Loops
     total_loops = data['stackPasses']
@@ -378,10 +386,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         total_loops += 1
 
     for file_num, music_file in enumerate(data['input_paths'], start=1):
+        # Determine File Name
+        base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
         try:
-            # Determine File Name
-            base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
-
             for loop_num in range(total_loops):
                 # -Determine which model will be used-
                 if not loop_num:

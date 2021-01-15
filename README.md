@@ -45,6 +45,10 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 ## Option Guide
 
+### Resolution Type:
+
+- This option allows you to choose the resolution type for the spectrogram to be analyzed.
+
 ### Choose AI Engine:
 
 - This option allows you to toggle between tsurumeso's v2 & v4 AI engines. 
@@ -94,6 +98,7 @@ The v2 & v4 AI engines use different sets of models. When selected, the models a
     - The new auto-generated folder will be named after the model(s) selected.
     - The output audio files will be saved to the auto-generated directory.
     - The filenames for the instrumental & vocal outputs will have the selected model(s) name(s) appended to them. 
+- **Custom Parameters** - This option allows will de-gray the SR, HOP LENGTH, WINDOW SIZE, & N_FFT, allowing the user to set parameters that differ from those recommended for the model selected.
 
 ### Parameter Values
 

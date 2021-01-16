@@ -264,27 +264,54 @@ def determineExportPath():
     Determine the path, where the music file is stored
     """
     folder_path = data["export_path"]
+    file_add_on = ''
 
     if data['modelFolder']:
         # Model Test Mode selected
-        folder_name = ''
         # -Instrumental-
         if os.path.isfile(data['instrumentalModel']):
-            folder_name += os.path.splitext(os.path.basename(data['instrumentalModel']))[0]
+            file_add_on += os.path.splitext(os.path.basename(data['instrumentalModel']))[0]
         # -Vocal-
         elif os.path.isfile(data['vocalModel']):
-            folder_name += os.path.splitext(os.path.basename(data['vocalModel']))[0]
+            file_add_on += os.path.splitext(os.path.basename(data['vocalModel']))[0]
         # -Stack-
         if os.path.isfile(data['stackModel']):
-            folder_name += '-' + os.path.splitext(os.path.basename(data['stackModel']))[0]
+            file_add_on += '-' + os.path.splitext(os.path.basename(data['stackModel']))[0]
 
         # Add generated folder name to export Path
-        folder_path = os.path.join(folder_path, folder_name)
+        folder_path = os.path.join(folder_path, file_add_on)
         if not os.path.isdir(folder_path):
             # Folder does not exist
             os.mkdir(folder_path)
+        
+        file_add_on = f'_{file_add_on}' 
 
-    return folder_path
+    return folder_path, file_add_on
+
+
+def getModelDeviceFile(vocal_remover, music_file, loop_num):
+    if not loop_num:
+        # First Iteration
+        if data['stackOnly']:
+            if os.path.isfile(data['stackModel']):
+                model_name = os.path.basename(data['stackModel'])
+                model = vocal_remover.models['stack']
+                device = vocal_remover.devices['stack']
+            else:
+                raise ValueError(f'Selected stack only model, however, stack model path file cannot be found\nPath: "{data["stackModel"]}"')  # nopep8
+        else:
+            model_name = os.path.basename(data[f'{data["useModel"]}Model'])
+            model = vocal_remover.models[data['useModel']]
+            device = vocal_remover.devices[data['useModel']]
+    else:
+        model_name = os.path.basename(data['stackModel'])
+        # Every other iteration
+        model = vocal_remover.models['stack']
+        device = vocal_remover.devices['stack']
+        # Reference new music file
+        music_file = 'temp.wav'
+
+    return model, device, model_name, music_file
 
 
 def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
@@ -326,8 +353,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 # Reverse names
                 vocal_name, instrumental_name = instrumental_name, vocal_name
         elif data['saveAllStacked']:
-            folder_name = os.path.basename(base_name) + ' Stacked Outputs'  # nopep8
-            save_path = os.path.join(save_path, folder_name)
+            stacked_folder_name = os.path.basename(base_name) + ' Stacked Outputs'  # nopep8
+            save_path = os.path.join(save_path, stacked_folder_name)
 
             if not os.path.isdir(save_path):
                 os.mkdir(save_path)
@@ -355,14 +382,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         # Instrumental
         if instrumental_name is not None:
             instrumental_path = os.path.join(save_path,
-                                             f'{os.path.basename(base_name)}_{instrumental_name}_{modelFolderName}.wav')
+                                             f'{os.path.basename(base_name)}_{instrumental_name}{file_add_on}.wav')
 
             sf.write(instrumental_path,
                      wav_instrument.T, sr)
         # Vocal
         if vocal_name is not None:
             vocal_path = os.path.join(save_path,
-                                      f'{os.path.basename(base_name)}_{vocal_name}_{modelFolderName}.wav')
+                                      f'{os.path.basename(base_name)}_{vocal_name}{file_add_on}.wav')
             sf.write(vocal_path,
                      wav_vocals.T, sr)
 
@@ -385,7 +412,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
     vocal_remover = VocalRemover(data, text_widget)
-    folder_path = determineExportPath()
+    folder_path, file_add_on = determineExportPath()
 
     # Determine Loops
     total_loops = data['stackPasses']
@@ -399,26 +426,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             # --Seperate Music Files--
             for loop_num in range(total_loops):
                 # -Determine which model will be used-
-                if not loop_num:
-                    # First Iteration
-                    if data['stackOnly']:
-                        if os.path.isfile(data['stackModel']):
-                            model_name = os.path.basename(data['stackModel'])
-                            model = vocal_remover.models['stack']
-                            device = vocal_remover.devices['stack']
-                        else:
-                            raise ValueError(f'Selected stack only model, however, stack model path file cannot be found\nPath: "{data["stackModel"]}"')  # nopep8
-                    else:
-                        model_name = os.path.basename(data[f'{data["useModel"]}Model'])
-                        model = vocal_remover.models[data['useModel']]
-                        device = vocal_remover.devices[data['useModel']]
-                else:
-                    model_name = os.path.basename(data['stackModel'])
-                    # Every other iteration
-                    model = vocal_remover.models['stack']
-                    device = vocal_remover.devices['stack']
-                    # Reference new music file
-                    music_file = 'temp.wav'
+                model, device, model_name, music_file = getModelDeviceFile(vocal_remover,
+                                                                           music_file,
+                                                                           loop_num)
 
                 # -Get text and update progress-
                 base_text = get_baseText(total_files=len(data['input_paths']),

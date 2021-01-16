@@ -259,27 +259,32 @@ def update_constants(model_name):
                     pass
 
 
-def determineModelFolderName():
+def determineExportPath():
     """
-    Determine the name that is used for the folder and appended
-    to the back of the music files
+    Determine the path, where the music file is stored
     """
-    modelFolderName = ''
-    if not data['modelFolder']:
-        # Model Test Mode not selected
-        return modelFolderName
+    folder_path = data["export_path"]
 
-    # -Instrumental-
-    if os.path.isfile(data['instrumentalModel']):
-        modelFolderName += os.path.splitext(os.path.basename(data['instrumentalModel']))[0]
-    # -Vocal-
-    elif os.path.isfile(data['vocalModel']):
-        modelFolderName += os.path.splitext(os.path.basename(data['vocalModel']))[0]
-    # -Stack-
-    if os.path.isfile(data['stackModel']):
-        modelFolderName += '-' + os.path.splitext(os.path.basename(data['stackModel']))[0]
+    if data['modelFolder']:
+        # Model Test Mode selected
+        folder_name = ''
+        # -Instrumental-
+        if os.path.isfile(data['instrumentalModel']):
+            folder_name += os.path.splitext(os.path.basename(data['instrumentalModel']))[0]
+        # -Vocal-
+        elif os.path.isfile(data['vocalModel']):
+            folder_name += os.path.splitext(os.path.basename(data['vocalModel']))[0]
+        # -Stack-
+        if os.path.isfile(data['stackModel']):
+            folder_name += '-' + os.path.splitext(os.path.basename(data['stackModel']))[0]
 
-    return modelFolderName
+        # Add generated folder name to export Path
+        folder_path = os.path.join(folder_path, folder_name)
+        if not os.path.isdir(folder_path):
+            # Folder does not exist
+            os.mkdir(folder_path)
+
+    return folder_path
 
 
 def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
@@ -363,6 +368,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     data.update(kwargs)
 
+    # --Setup--
     # Update default settings
     global default_sr
     global default_hop_length
@@ -379,12 +385,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
     vocal_remover = VocalRemover(data, text_widget)
-    folder_path = data["export_path"]
-    modelFolderName = determineModelFolderName()
-    if modelFolderName:
-        folder_path = os.path.join(data["export_path"], modelFolderName)
-        if not os.path.isdir(folder_path):
-            os.mkdir(folder_path)
+    folder_path = determineExportPath()
 
     # Determine Loops
     total_loops = data['stackPasses']
@@ -392,7 +393,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         total_loops += 1
     for file_num, music_file in enumerate(data['input_paths'], start=1):
         # Determine File Name
-        base_name = os.path.join(folder_path, f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
+        base_name = os.path.join(folder_path,
+                                 f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}')
         try:
             # --Seperate Music Files--
             for loop_num in range(total_loops):

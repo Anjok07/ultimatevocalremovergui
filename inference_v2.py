@@ -372,13 +372,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
     models, devices = load_models()
+    folder_path = data["export_path"]
     modelFolderName = determineModelFolderName()
     if modelFolderName:
         folder_path = os.path.join(data["export_path"], modelFolderName)
         if not os.path.isdir(folder_path):
             os.mkdir(folder_path)
-    else:
-        folder_path = ''
 
     # Determine Loops
     total_loops = data['stackPasses']

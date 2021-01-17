@@ -22,7 +22,7 @@ from typing import Tuple
 
 
 class VocalRemover:
-    def __init__(self, data, total_files: int = 1, text_widget: tk.Text = None, progress_var: tk.IntVar = None):
+    def __init__(self, data, text_widget: tk.Text = None, progress_var: tk.IntVar = None):
         self.text_widget = text_widget
         self.progress_var = progress_var
         # GUI parsed data
@@ -70,11 +70,23 @@ class VocalRemover:
 
         self._fill_general_data()
 
-    def seperate(self, file_path, file_num):
-        """Seperate given music file"""
+    def seperate_files(self):
+        """
+        Seperate all files
+        """
+        for file_num, file_path in enumerate(self.seperation_data['input_paths'], start=1):
+            self._seperate(file_path,
+                           file_num)
+
+    def _seperate(self, file_path: str, file_num: int = -1):
+        """
+        Seperate given music file,
+        file_num is used to determine progress
+        """
+
+        self.loop_data['file_num'] = file_num
         file_data = self._get_path_data(file_path)
         # -Update file specific variables-
-        self.loop_data['file_num'] = file_num
         self.loop_data['file_path'] = file_data['file_path']
         self.loop_data['file_base_name'] = file_data['file_base_name']
 
@@ -100,6 +112,7 @@ class VocalRemover:
             # End of seperation
             if self.seperation_data['output_image']:
                 self._save_mask()
+            os.remove('temp.wav')
 
         self.write_to_gui(text='Completed Seperation!\n',
                           progress_step=0.9)
@@ -358,7 +371,10 @@ class VocalRemover:
         """
         Get the path infos for the given music file
         """
-        file_data = {}
+        file_data = {
+            'file_path': None,
+            'file_base_name': None,
+        }
         # -Get Data-
         file_data['file_path'] = file_path
         file_data['file_base_name'] = f"{self.loop_data['file_num']}_{os.path.splitext(os.path.basename(file_path))[0]}"
@@ -701,42 +717,21 @@ default_data = {
 }
 
 
-def update_constants(model_name):
-    """
-    Decode the conversion settings from the model's name
-    """
-    global data
-    text = model_name.replace('.pth', '')
-    text_parts = text.split('_')[1:]
-
-    data['sr'] = default_sr
-    data['hop_length'] = default_hop_length
-    data['window_size'] = default_window_size
-    data['n_fft'] = default_n_fft
-
-    if data['manType']:
-        # Default constants should be fixed
-        return
-
-
 def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.IntVar,
          **kwargs: dict):
+    # -Setup-
     data = default_data
     data.update(kwargs)
-
-    # --Setup--
     stime = time.perf_counter()
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
+    # -Seperation-
     vocal_remover = VocalRemover(data=data,
-                                 total_files=len(data['input_paths']),
                                  text_widget=text_widget,
                                  progress_var=progress_var)
+    vocal_remover.seperate_files()
 
-    for file_num, music_file in enumerate(data['input_paths'], start=1):
-        vocal_remover.seperate(music_file,
-                               file_num)
-        os.remove('temp.wav')
+    # -Finished-
     progress_var.set(100)
     text_widget.write(f'Conversion(s) Completed and Saving all Files!\n')
     text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8

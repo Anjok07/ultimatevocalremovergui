@@ -47,7 +47,7 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 ### Resolution Type:
 
-- This option allows you to choose the resolution type for the spectrogram to be analyzed.
+- You can now choose the type of spectrogram the AI uses to analyze your track. Results will vary slightly between each option.
 
 ### Choose AI Engine:
 
@@ -98,11 +98,13 @@ The v2 & v4 AI engines use different sets of models. When selected, the models a
     - The new auto-generated folder will be named after the model(s) selected.
     - The output audio files will be saved to the auto-generated directory.
     - The filenames for the instrumental & vocal outputs will have the selected model(s) name(s) appended to them. 
-- **Custom Parameters** - This option allows will de-gray the SR, HOP LENGTH, WINDOW SIZE, & N_FFT, allowing the user to set parameters that differ from those recommended for the model selected.
+- **Custom Parameters** - Checking this box allows you to set custom parameters (*SR*, *HOP LENGNTH*, & *N_FFT*) instead of the ones appended to the model filenames. 
+  - **Note:** Using the parameters the model was trained with is still recommended. This option is for testing.
+
 
 ### Parameter Values
 
-All models released here will have the values they were trained with appended to the end of their filenames like so, **'MGM-HIGHEND_sr44100_hl512_w512_nf2048.pth'**. The *'_sr44100_hl512_w512_nf2048'* portion automatically sets the *SR*, *HOP LENGNTH*, *WINDOW SIZE*, & *N_FFT* values within the application. If there are no values appended to the end of a selected model filename, the *SR*, *HOP LENGNTH*, *WINDOW SIZE*, & *N_FFT* fields will be editable and auto-populate with default values. 
+All models released here will have the values they were trained with appended to the end of their filenames like so, **'MGM-HIGHEND_sr44100_hl512_nf2048.pth'**. The *'_sr44100_hl512_nf2048'* portion automatically sets the *SR*, *HOP LENGNTH*, & *N_FFT* values within the application. If there are no values appended to the end of a selected model filename, the *SR*, *HOP LENGNTH*, & *N_FFT* fields will be editable and auto-populate with default values. 
 
 - **Note** - The WINDOW_SIZE value is universal. The smaller your window size, the better your conversions will be. However, a smaller window size means longer conversions times and heavier resource usage. 
     - Here are the recommended window size values - 

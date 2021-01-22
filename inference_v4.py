@@ -1,5 +1,3 @@
-import pprint
-import argparse
 import os
 
 import cv2
@@ -223,6 +221,17 @@ class VocalRemover:
 
                 models['stack'] = model
                 devices['stack'] = device
+
+            if not ('stack' in models.keys()):
+                # No or invalid stack model given
+                if (self.seperation_data['stackOnly'] or
+                        self.seperation_data['stackPasses'] > 0):
+                    # Stack model is needed
+                    raise TypeError(f"Not specified or invalid model path for stacked model!")
+            if not (self.seperation_data['useModel'] in models.keys()):
+                # No or invalid instrumental/vocal model given
+                # but that model is required
+                raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
 
             return models, devices
 
@@ -687,24 +696,24 @@ class VocalRemover:
 
 default_data = {
     # Paths
-    'input_paths': None, # List of paths
-    'export_path': None, # path
+    'input_paths': [],  # List of paths
+    'export_path': [],  # Export path
     # Processing Options
     'gpu': -1,
     'postprocess': True,
     'tta': True,
     'output_image': True,
     # Models
-    'instrumentalModel': None, # Path to instrumental (not needed if not used)
-    'vocalModel': None, # Path to vocal model (not needed if not used)
-    'stackModel': None, # Path to stacked model (not needed if not used)
-    'useModel': None, # Either 'instrumental' or 'vocal'
+    'instrumentalModel': '',  # Path to instrumental (not needed if not used)
+    'vocalModel': '',  # Path to vocal model (not needed if not used)
+    'stackModel': '',  # Path to stacked model (not needed if not used)
+    'useModel': '',  # Either 'instrumental' or 'vocal'
     # Stack Options
     'stackPasses': 0,
     'stackOnly': False,
     'saveAllStacked': False,
     # Model Folder
-    'modelFolder': False, # Model Test Mode
+    'modelFolder': False,  # Model Test Mode
     # Constants
     'sr': 44_100,
     'hop_length': 1_024,
@@ -713,7 +722,7 @@ default_data = {
     # Resolution Type
     'resType': 'kaiser_fast',
     # Parsed constants should be fixed
-    'manType': False, # Override model name cosntants
+    'manType': False,  # Override model name cosntants
 }
 
 

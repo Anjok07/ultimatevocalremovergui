@@ -707,7 +707,7 @@ default_data = {
     'instrumentalModel': '',  # Path to instrumental (not needed if not used)
     'vocalModel': '',  # Path to vocal model (not needed if not used)
     'stackModel': '',  # Path to stacked model (not needed if not used)
-    'useModel': '',  # Either 'instrumental' or 'vocal'
+    'useModel': 'instrumental',  # Either 'instrumental' or 'vocal'
     # Stack Options
     'stackPasses': 0,
     'stackOnly': False,
@@ -721,8 +721,8 @@ default_data = {
     'n_fft': 2_048,
     # Resolution Type
     'resType': 'kaiser_fast',
-    # Parsed constants should be fixed
-    'manType': False,  # Override model name cosntants
+    # Whether to override constants embedded in the model file name
+    'manType': False,
 }
 
 

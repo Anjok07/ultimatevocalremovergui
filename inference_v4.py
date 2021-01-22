@@ -10,13 +10,14 @@ from lib_v4 import dataset
 from lib_v4 import nets
 from lib_v4 import spec_utils
 import torch
+import sys
 
 # Command line text parsing and widget manipulation
 from collections import defaultdict
 import tkinter as tk
 import traceback  # Error Message Recent Calls
 import time  # Timer
-from typing import Tuple
+from typing import (Tuple, Optional)
 
 
 class VocalRemover:
@@ -43,6 +44,7 @@ class VocalRemover:
             # Loop specific
             'command_base_text': None,
             'loop_num': 0,
+            'progress_step': 0.0,
             'music_file': None,
             'model_device': {
                 'model': None,
@@ -72,9 +74,19 @@ class VocalRemover:
         """
         Seperate all files
         """
+        # Track time
+        stime = time.perf_counter()
+
         for file_num, file_path in enumerate(self.seperation_data['input_paths'], start=1):
             self._seperate(file_path,
                            file_num)
+        # Free RAM
+        torch.cuda.empty_cache()
+
+        self.write_to_gui('Conversion(s) Completed and Saving all Files!',
+                          include_base_text=False)
+        self.write_to_gui(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}',
+                          include_base_text=False)
 
     def _seperate(self, file_path: str, file_num: int = -1):
         """
@@ -113,35 +125,41 @@ class VocalRemover:
             os.remove('temp.wav')
 
         self.write_to_gui(text='Completed Seperation!\n',
-                          progress_step=0.9)
+                          progress_step=1)
 
-    def write_to_gui(self, text: str = None, include_base_text: bool = True, progress_step: int = None):
+    def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         """
-        Write text to the command line and/or update progress
+        Update progress and/or write text to the command line 
 
-        If text is "[CLEAR]" the command line will be cleaned
+        If text is "[CLEAR]" the command line will be cleared
+        An end line '\\n' will be automatically appended to the text
         """
-        if (text is not None and
-                self.text_widget is not None):
-            # Text was given
-            if text == '[CLEAR]':
-                # Clear command line
-                self.text_widget.clear()
+        # Progress is given
+        progress = self._get_progress(progress_step)
+
+        if text is not None:
+            # Text is given
+            if include_base_text:
+                # Include base text
+                text = f"{self.loop_data['command_base_text']} {text}"
+
+            if self.text_widget is not None:
+                # Text widget is given
+                if text == '[CLEAR]':
+                    # Clear command line
+                    self.text_widget.clear()
+                else:
+                    self.text_widget.write(text + '\n')
             else:
-                text = text + '\n'
-                if include_base_text:
-                    # Include base text:
-                    text = f"{self.loop_data['command_base_text']} {text}"
-                self.text_widget.write(text)
+                # No text widget so write to console
+                if progress_step is not None:
+                    text = f'{int(progress)} %\t{text}'
+                if not 'done' in text.lower():
+                    # Skip 'Done!' text as it clutters the terminal
+                    print(text)
 
-        if (progress_step is not None and
-                self.progress_var is not None):
-            # Progress was given
-            # Calculate progress
-            base = (100 / self.general_data['total_files'])
-            progress = base * (self.loop_data['file_num'] - 1)
-            progress += (base / self.general_data['total_loops']) * (self.loop_data['loop_num'] + progress_step)
-
+        if self.progress_var is not None:
+            # Progress widget is given
             self.progress_var.set(progress)
 
     def _fill_general_data(self):
@@ -408,7 +426,8 @@ class VocalRemover:
         self.loop_data['X'] = X
         self.loop_data['sampling_rate'] = sampling_rate
 
-        self.write_to_gui(text='Done!')
+        self.write_to_gui(text='Done!',
+                          progress_step=0.1)
 
     def _wave_to_spectogram(self):
         """
@@ -420,12 +439,28 @@ class VocalRemover:
 
             return X_mag, X_phase
 
-        def execute(X_mag_pad, roi_size, n_window, device, model):
+        def execute(X_mag_pad, roi_size, n_window, device, model, progrs_info: str = ''):
             model.eval()
             with torch.no_grad():
                 preds = []
-                for progrs, i in enumerate(tqdm(range(n_window))):
-                    self.write_to_gui(progress_step=0.1 + 0.5 * (progrs/n_window))
+                if self.progress_var is None:
+                    bar_format = '{desc}    |{bar}{r_bar}'
+                else:
+                    bar_format = '{l_bar}{bar}{r_bar}'
+                pbar = tqdm(range(n_window), bar_format=bar_format)
+
+                for progrs, i in enumerate(pbar):
+                    # Progress management
+                    if progrs_info == '1/2':
+                        progres_step = 0.1 + 0.3 * (progrs / n_window)
+                    elif progrs_info == '2/2':
+                        progres_step = 0.4 + 0.3 * (progrs / n_window)
+                    else:
+                        progres_step = 0.1 + 0.6 * (progrs / n_window)
+                    self.write_to_gui(progress_step=progres_step)
+                    if self.progress_var is None:
+                        progress = self._get_progress(progres_step)
+                        pbar.set_description_str(f'{int(progress)} %')
 
                     start = i * roi_size
                     X_mag_window = X_mag_pad[None, :, :,
@@ -476,7 +511,7 @@ class VocalRemover:
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred = execute(X_mag_pad, roi_size, n_window,
-                           device, model)
+                           device, model, progrs_info='1/2')
             pred = pred[:, :, :n_frame]
 
             pad_l += roi_size // 2
@@ -487,7 +522,7 @@ class VocalRemover:
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred_tta = execute(X_mag_pad, roi_size, n_window,
-                               device, model)
+                               device, model, progrs_info='2/2')
             pred_tta = pred_tta[:, :, roi_size // 2:]
             pred_tta = pred_tta[:, :, :n_frame]
 
@@ -514,14 +549,14 @@ class VocalRemover:
         self.loop_data['X_phase'] = X_phase
 
         self.write_to_gui(text='Done!',
-                          progress_step=0.6)
+                          progress_step=0.7)
 
     def _post_process(self):
         """
         Post process
         """
         self.write_to_gui(text='Post processing...',
-                          progress_step=0.6)
+                          progress_step=0.7)
 
         pred_inv = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'], 0, np.inf)
         prediction = spec_utils.mask_silence(self.loop_data['prediction'], pred_inv)
@@ -529,14 +564,14 @@ class VocalRemover:
         self.loop_data['prediction'] = prediction
 
         self.write_to_gui(text='Done!',
-                          progress_step=0.65)
+                          progress_step=0.75)
 
     def _inverse_stft_of_instrumentals_and_vocals(self):
         """
         Inverse stft of instrumentals and vocals
         """
         self.write_to_gui(text='Inverse stft of instruments and vocals...',
-                          progress_step=0.65)
+                          progress_step=0.75)
 
         y_spec = self.loop_data['prediction'] * self.loop_data['X_phase']
         wav_instrument = spec_utils.spectrogram_to_wave(y_spec,
@@ -552,7 +587,7 @@ class VocalRemover:
         self.loop_data['v_spec'] = v_spec
 
         self.write_to_gui(text='Done!',
-                          progress_step=0.7)
+                          progress_step=0.8)
 
     def _save_files(self):
         """
@@ -648,7 +683,7 @@ class VocalRemover:
             return vocal_name, instrumental_name, folder_path
 
         self.write_to_gui(text='Saving Files...',
-                          progress_step=0.7)
+                          progress_step=0.8)
 
         folder_path, file_add_on = get_export_path()
         vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name(folder_path)
@@ -678,7 +713,7 @@ class VocalRemover:
                      self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
 
         self.write_to_gui(text='Done!',
-                          progress_step=0.8)
+                          progress_step=0.9)
 
     def _save_mask(self):
         """
@@ -693,11 +728,29 @@ class VocalRemover:
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
 
+    # -Other Methods-
+    def _get_progress(self, progress_step: Optional[float] = None) -> float:
+        """
+        Get current conversion progress in percent
+        """
+        if progress_step is not None:
+            self.loop_data['progress_step'] = progress_step
+        try:
+            base = (100 / self.general_data['total_files'])
+            progress = base * (self.loop_data['file_num'] - 1)
+            progress += (base / self.general_data['total_loops']) * \
+                (self.loop_data['loop_num'] + self.loop_data['progress_step'])
+        except TypeError:
+            # One data point not specified yet
+            progress = 0
+
+        return progress
+
 
 default_data = {
     # Paths
     'input_paths': [],  # List of paths
-    'export_path': [],  # Export path
+    'export_path': '',  # Export path
     # Processing Options
     'gpu': -1,
     'postprocess': True,
@@ -731,7 +784,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     # -Setup-
     data = default_data
     data.update(kwargs)
-    stime = time.perf_counter()
+
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
     # -Seperation-
@@ -741,8 +794,4 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     vocal_remover.seperate_files()
 
     # -Finished-
-    progress_var.set(100)
-    text_widget.write(f'Conversion(s) Completed and Saving all Files!\n')
-    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
-    torch.cuda.empty_cache()
     button_widget.configure(state=tk.NORMAL)  # Enable Button

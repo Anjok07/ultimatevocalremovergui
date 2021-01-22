@@ -460,7 +460,10 @@ class VocalRemover:
                     self.write_to_gui(progress_step=progres_step)
                     if self.progress_var is None:
                         progress = self._get_progress(progres_step)
-                        pbar.set_description_str(f'{int(progress)} %')
+                        text = f'{int(progress)} %'
+                        if progress < 10:
+                            text += ' '
+                        pbar.set_description_str(text)
 
                     start = i * roi_size
                     X_mag_window = X_mag_pad[None, :, :,

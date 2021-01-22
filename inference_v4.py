@@ -68,6 +68,7 @@ class VocalRemover:
             'v_spec': None,
         }
 
+        self._check_for_valid_inputs()
         self._fill_general_data()
 
     def seperate_files(self):
@@ -239,17 +240,6 @@ class VocalRemover:
 
                 models['stack'] = model
                 devices['stack'] = device
-
-            if not ('stack' in models.keys()):
-                # No or invalid stack model given
-                if (self.seperation_data['stackOnly'] or
-                        self.seperation_data['stackPasses'] > 0):
-                    # Stack model is needed
-                    raise TypeError(f"Not specified or invalid model path for stacked model!")
-            if not (self.seperation_data['useModel'] in models.keys()):
-                # No or invalid instrumental/vocal model given
-                # but that model is required
-                raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
 
             return models, devices
 
@@ -748,6 +738,33 @@ class VocalRemover:
             progress = 0
 
         return progress
+
+    def _check_for_valid_inputs(self):
+        """
+        Check if all inputs have been entered correctly.
+
+        If errors are found, an exception is raised
+        """
+        # Check input paths
+        if not len(self.seperation_data['input_paths']):
+            raise TypeError('No music file to seperate defined!')
+        if not isinstance(self.seperation_data['input_paths'], list):
+            raise TypeError('Please specify your music file path/s in a list!')
+
+        # Check models
+        if not self.seperation_data['useModel'] in ['vocal', 'instrumental']:
+            # Invalid 'useModel'
+            raise TypeError("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
+        if not os.path.isfile(self.seperation_data[f"{self.seperation_data['useModel']}Model"]):
+            # No or invalid instrumental/vocal model given
+            # but model is needed
+            raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
+        if (not os.path.isfile(self.seperation_data['stackModel']) and
+            (self.seperation_data['stackOnly'] or
+             self.seperation_data['stackPasses'] > 0)):
+            # No or invalid stack model given
+            # but model is needed
+            raise TypeError(f"Not specified or invalid model path for stacked model!")
 
 
 default_data = {

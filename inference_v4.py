@@ -687,24 +687,24 @@ class VocalRemover:
 
 default_data = {
     # Paths
-    'input_paths': None,
-    'export_path': None,
+    'input_paths': None, # List of paths
+    'export_path': None, # path
     # Processing Options
     'gpu': -1,
     'postprocess': True,
     'tta': True,
     'output_image': True,
     # Models
-    'instrumentalModel': None,
-    'vocalModel': None,
-    'stackModel': None,
-    'useModel': None,
+    'instrumentalModel': None, # Path to instrumental (not needed if not used)
+    'vocalModel': None, # Path to vocal model (not needed if not used)
+    'stackModel': None, # Path to stacked model (not needed if not used)
+    'useModel': None, # Either 'instrumental' or 'vocal'
     # Stack Options
     'stackPasses': 0,
     'stackOnly': False,
     'saveAllStacked': False,
     # Model Folder
-    'modelFolder': False,
+    'modelFolder': False, # Model Test Mode
     # Constants
     'sr': 44_100,
     'hop_length': 1_024,
@@ -713,7 +713,7 @@ default_data = {
     # Resolution Type
     'resType': 'kaiser_fast',
     # Parsed constants should be fixed
-    'manType': False,
+    'manType': False, # Override model name cosntants
 }
 
 

@@ -30,7 +30,7 @@ class VocalRemover:
         self.general_data = {
             'total_files': len(self.seperation_data['input_paths']),
             'total_loops': None,
-            'export_path': None,
+            'folder_path': None,
             'file_add_on': None,
             'models': defaultdict(lambda: None),
             'devices': defaultdict(lambda: None),
@@ -167,7 +167,7 @@ class VocalRemover:
         """
         Fill the data implemented in general_data
         """
-        def get_exportPath_fileAddOn() -> list:
+        def get_folderPath_fileAddOn() -> Tuple[str, str]:
             """
             Get export path and text, whic hwill be appended on the music files name
             """
@@ -185,17 +185,17 @@ class VocalRemover:
                     file_add_on += '-' + os.path.splitext(os.path.basename(self.seperation_data['stackModel']))[0]
 
                 # Generate paths
-                export_path = os.path.join(self.seperation_data["export_path"], file_add_on)
+                folder_path = os.path.join(self.seperation_data['export_path'], file_add_on)
                 file_add_on = f'_{file_add_on}'
 
-                if not os.path.isdir(export_path):
+                if not os.path.isdir(folder_path):
                     # Folder does not exist
-                    os.mkdir(export_path)
+                    os.mkdir(folder_path)
             else:
                 # Not Model Test Mode selected
-                export_path = self.seperation_data["export_path"]
+                folder_path = self.seperation_data['export_path']
 
-            return export_path, file_add_on
+            return folder_path, file_add_on
 
         def get_models_devices() -> list:
             """
@@ -261,7 +261,7 @@ class VocalRemover:
 
         # -Get data-
         total_loops = get_total_loops()
-        export_path, file_add_on = get_exportPath_fileAddOn()
+        folder_path, file_add_on = get_folderPath_fileAddOn()
         self.write_to_gui(text='\n\nLoading models...',
                           include_base_text=False)
         models, devices = get_models_devices()
@@ -270,7 +270,7 @@ class VocalRemover:
 
         # -Set data-
         self.general_data['total_loops'] = total_loops
-        self.general_data['export_path'] = export_path
+        self.general_data['folder_path'] = folder_path
         self.general_data['file_add_on'] = file_add_on
         self.general_data['models'] = models
         self.general_data['devices'] = devices
@@ -586,44 +586,18 @@ class VocalRemover:
         """
         Save the files
         """
-        def get_export_path():
+
+        def get_vocal_instrumental_name() -> Tuple[str, str, str]:
             """
-            Determine the path, where the music file is stored
-            """
-            folder_path = self.seperation_data['export_path']
-            file_add_on = ''
-
-            if self.seperation_data['modelFolder']:
-                # Model Test Mode selected
-                # -Instrumental-
-                if os.path.isfile(self.seperation_data['instrumentalModel']):
-                    file_add_on += os.path.splitext(os.path.basename(self.seperation_data['instrumentalModel']))[0]
-                # -Vocal-
-                elif os.path.isfile(self.seperation_data['vocalModel']):
-                    file_add_on += os.path.splitext(os.path.basename(self.seperation_data['vocalModel']))[0]
-                # -Stack-
-                if os.path.isfile(self.seperation_data['stackModel']):
-                    file_add_on += '-' + os.path.splitext(os.path.basename(self.seperation_data['stackModel']))[0]
-
-                # Add generated folder name to export Path
-                folder_path = os.path.join(folder_path, file_add_on)
-                if not os.path.isdir(folder_path):
-                    # Folder does not exist
-                    os.mkdir(folder_path)
-
-                file_add_on = f'_{file_add_on}'
-
-            return folder_path, file_add_on
-
-        def get_vocal_instrumental_name(folder_path: str) -> Tuple[str, str, str]:
-            """
-            Update the folder_path if needed
+            Get vocal and instrumental file names and update the
+            folder_path temporarily if needed
             """
             loop_num = self.loop_data['loop_num']
             total_loops = self.general_data['total_loops']
             file_base_name = self.loop_data['file_base_name']
             vocal_name = None
             instrumental_name = None
+            folder_path = self.general_data['folder_path']
 
             # Get the Suffix Name
             if (not loop_num or
@@ -678,8 +652,7 @@ class VocalRemover:
         self.write_to_gui(text='Saving Files...',
                           progress_step=0.8)
 
-        folder_path, file_add_on = get_export_path()
-        vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name(folder_path)
+        vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name()
 
         # Save Temp File
         # For instrumental the instrumental is the temp file
@@ -691,7 +664,7 @@ class VocalRemover:
         # -Save files-
         # Instrumental
         if instrumental_name is not None:
-            instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{file_add_on}.wav"
+            instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
             instrumental_path = os.path.join(folder_path,
                                              instrumental_file_name)
 
@@ -699,7 +672,7 @@ class VocalRemover:
                      self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
         # Vocal
         if vocal_name is not None:
-            vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{file_add_on}.wav"
+            vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
             vocal_path = os.path.join(folder_path,
                                       vocal_file_name)
             sf.write(vocal_path,
@@ -712,11 +685,12 @@ class VocalRemover:
         """
         Save output image
         """
-        with open('{}_Instruments.jpg'.format(self.loop_data['file_base_name']), mode='wb') as f:
+        mask_path = os.path.join(self.general_data['folder_path'], self.loop_data['file_base_name'])
+        with open('{}_Instruments.jpg'.format(mask_path), mode='wb') as f:
             image = spec_utils.spectrogram_to_image(self.loop_data['y_spec'])
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
-        with open('{}_Vocals.jpg'.format(self.loop_data['file_base_name']), mode='wb') as f:
+        with open('{}_Vocals.jpg'.format(mask_path), mode='wb') as f:
             image = spec_utils.spectrogram_to_image(self.loop_data['v_spec'])
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
@@ -750,6 +724,13 @@ class VocalRemover:
             raise TypeError('No music file to seperate defined!')
         if not isinstance(self.seperation_data['input_paths'], list):
             raise TypeError('Please specify your music file path/s in a list!')
+        for input_path in self.seperation_data['input_paths']:
+            if not os.path.isfile(input_path):
+                raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
+        # Output path
+        if (not os.path.isdir(self.seperation_data['export_path']) and
+                not self.seperation_data['export_path'] == ''):
+            raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
 
         # Check models
         if not self.seperation_data['useModel'] in ['vocal', 'instrumental']:
@@ -775,7 +756,7 @@ default_data = {
     'gpu': -1,
     'postprocess': True,
     'tta': True,
-    'output_image': True,
+    'output_image': False,
     # Models
     'instrumentalModel': '',  # Path to instrumental (not needed if not used)
     'vocalModel': '',  # Path to vocal model (not needed if not used)

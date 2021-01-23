@@ -721,16 +721,21 @@ class VocalRemover:
         """
         # Check input paths
         if not len(self.seperation_data['input_paths']):
+            # No music file specified
             raise TypeError('No music file to seperate defined!')
         if (not isinstance(self.seperation_data['input_paths'], tuple) and
                 not isinstance(self.seperation_data['input_paths'], list)):
+            # Music file not specified in a list or tuple
             raise TypeError('Please specify your music file path/s in a list or tuple!')
         for input_path in self.seperation_data['input_paths']:
+            # Go through each music file
             if not os.path.isfile(input_path):
+                # Invalid path
                 raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
         # Output path
         if (not os.path.isdir(self.seperation_data['export_path']) and
                 not self.seperation_data['export_path'] == ''):
+            # Export path either invalid or not specified
             raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
 
         # Check models

@@ -8,7 +8,7 @@ import tkinter.ttk as ttk
 import tkinter.messagebox
 import tkinter.filedialog
 import tkinter.font
-from tkinterdnd2 import TkinterDnD, DND_FILES  # Enable Drag & Drop
+from .tkinterdnd2 import (TkinterDnD, DND_FILES)   # Enable Drag & Drop
 # -Root imports-
 from .resources.resources_manager import ResourcePaths
 from .data.data_manager import DataManager

@@ -37,7 +37,7 @@ if getattr(sys, 'frozen', False):
     # If the application is run as a bundle, the PyInstaller bootloader
     # extends the sys module by a flag frozen=True and sets the app
     # path into variable _MEIPASS'.
-    base_path = sys._MEIPASS
+    base_path = sys._MEIPASS # pylint: disable=no-member
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(base_path)  # Change the current working directory to the base path
@@ -148,7 +148,7 @@ def get_model_values(model_name):
     return model_values
 
 
-def drop(event, accept_mode: str = 'files'):
+def drop(win, event, accept_mode: str = 'files'):
     """
     Drag & Drop verification process
     """
@@ -161,15 +161,15 @@ def drop(event, accept_mode: str = 'files'):
                                     message='Your given export path is not a valid folder!')
             return
         # Set Variables
-        root.exportPath_var.set(path)
+        win.exportPath_var.set(path)
     elif accept_mode == 'files':
         # Clean path text and set path to the list of paths
         path = path.replace('{', '')
         path = path.split('} ')
         path[-1] = path[-1].replace('}', '')
         # Set Variables
-        root.inputPaths = path
-        root.update_inputPaths()
+        win.inputPaths = path
+        win.update_inputPaths()
     else:
         # Invalid accept mode
         return
@@ -341,13 +341,13 @@ class MainWindow(TkinterDnD.Tk):
         self.filePaths_musicFile_Button.drop_target_register(DND_FILES)
         self.filePaths_musicFile_Entry.drop_target_register(DND_FILES)
         self.filePaths_saveTo_Button.dnd_bind('<<Drop>>',
-                                              lambda e: drop(e, accept_mode='folder'))
+                                              lambda e: drop(self, e, accept_mode='folder'))
         self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>',
-                                             lambda e: drop(e, accept_mode='folder'))
+                                             lambda e: drop(self, e, accept_mode='folder'))
         self.filePaths_musicFile_Button.dnd_bind('<<Drop>>',
-                                                 lambda e: drop(e, accept_mode='files'))
+                                                 lambda e: drop(self, e, accept_mode='files'))
         self.filePaths_musicFile_Entry.dnd_bind('<<Drop>>',
-                                                lambda e: drop(e, accept_mode='files'))
+                                                lambda e: drop(self, e, accept_mode='files'))
 
     def place_widgets(self):
         """Place main widgets"""

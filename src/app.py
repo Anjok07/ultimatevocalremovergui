@@ -690,53 +690,62 @@ class MainWindow(TkinterDnD.Tk):
                                           title='Invalid Stacked Model File',
                                           message='You have selected an invalid stacked model file!\nPlease make sure that your model file still exists!')
                 return
+        
+        seperation_data = {
+            # Paths
+            'input_paths': input_paths,
+            'export_path': export_path,
+            # Processing Options
+            'gpu': 0 if self.gpuConversion_var.get() else -1,
+            'postprocess': self.postprocessing_var.get(),
+            'tta': self.tta_var.get(),  # not needed for v2
+            'output_image': self.outputImage_var.get(),
+            # Models
+            'instrumentalModel': instrumentalModel_path,
+            'vocalModel': '',  # Always not needed
+            'stackModel': stackedModel_path,
+            'useModel': 'instrumental',  # Always instrumental
+            # Stack Options
+            'stackPasses': stackPasses,
+            'stackOnly': self.stackOnly_var.get(),
+            'saveAllStacked': self.saveAllStacked_var.get(),
+            # Model Folder
+            'modelFolder': self.modelFolder_var.get(),
+            # Constants
+            'sr': sr,
+            'hop_length': hop_length,
+            'window_size': window_size,
+            'n_fft': n_fft,  # not needed for v2
+            # Resolution Type
+            'resType': resType,
+            # Parsed constants should be fixed
+            'manType': self.manType_var.get(),            
+        }
+        widgets = {
+            'window': self,
+            'text_widget': self.command_Text,
+            'button_widget': self.conversion_Button,
+            'progress_var': self.progress_var,
+        }
 
         if self.aiModel_var.get() == 'v2':
-            inference = converter_v2
+            threading.Thread(target=converter_v2.main,
+                             kwargs={
+                                 'seperation_data': seperation_data,
+                                 'widgets': widgets
+                             },
+                             daemon=True
+                             ).start()
         elif self.aiModel_var.get() == 'v4':
-            inference = converter_v4
+            threading.Thread(target=converter_v4.main,
+                             kwargs={
+                                 'seperation_data': seperation_data,
+                                 'widgets': widgets
+                             },
+                             daemon=True
+                             ).start()
         else:
             raise TypeError('This error should not occur.')
-
-        # -Run the algorithm-
-        threading.Thread(target=inference.main,
-                         kwargs={
-                             # Paths
-                             'input_paths': input_paths,
-                             'export_path': export_path,
-                             # Processing Options
-                             'gpu': 0 if self.gpuConversion_var.get() else -1,
-                             'postprocess': self.postprocessing_var.get(),
-                             'tta': self.tta_var.get(),  # not needed for v2
-                             'output_image': self.outputImage_var.get(),
-                             # Models
-                             'instrumentalModel': instrumentalModel_path,
-                             'vocalModel': '',  # Always not needed
-                             'stackModel': stackedModel_path,
-                             'useModel': 'instrumental',  # Always instrumental
-                             # Stack Options
-                             'stackPasses': stackPasses,
-                             'stackOnly': self.stackOnly_var.get(),
-                             'saveAllStacked': self.saveAllStacked_var.get(),
-                             # Model Folder
-                             'modelFolder': self.modelFolder_var.get(),
-                             # Constants
-                             'sr': sr,
-                             'hop_length': hop_length,
-                             'window_size': window_size,
-                             'n_fft': n_fft,  # not needed for v2
-                             # Resolution Type
-                             'resType': resType,
-                             # Parsed constants should be fixed
-                             'manType': self.manType_var.get(),
-                             # Other Variables (Tkinter)
-                             'window': self,
-                             'text_widget': self.command_Text,
-                             'button_widget': self.conversion_Button,
-                             'progress_var': self.progress_var,
-                         },
-                         daemon=True
-                         ).start()
 
     # Models
     def decode_modelNames(self):

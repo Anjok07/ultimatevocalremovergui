@@ -1,27 +1,29 @@
-import os
-
+"""
+Seperate music files with the v4 engine
+"""
+# -Required for conversion-
 import cv2
 import librosa
 import numpy as np
 import soundfile as sf
-from tqdm import tqdm
-
+import torch
+# -Root imports-
 from .lib.lib_v4 import dataset
 from .lib.lib_v4 import nets
 from .lib.lib_v4 import spec_utils
-import torch
-import sys
-
-# Command line text parsing and widget manipulation
-from collections import defaultdict
+# -Other-
+# Loading Bar
+from tqdm import tqdm
+# Timer
+import time
+import os
+# Annotating
 import tkinter as tk
-import traceback  # Error Message Recent Calls
-import time  # Timer
-from typing import (Tuple, Optional)
+from typing import (Dict, Tuple, Optional)
 
 
 class VocalRemover:
-    def __init__(self, data, text_widget: tk.Text = None, progress_var: tk.IntVar = None):
+    def __init__(self, data: dict, text_widget: Optional[tk.Text] = None, progress_var: Optional[tk.IntVar] = None):
         self.text_widget = text_widget
         self.progress_var = progress_var
         # GUI parsed data
@@ -32,8 +34,8 @@ class VocalRemover:
             'total_loops': None,
             'folder_path': None,
             'file_add_on': None,
-            'models': defaultdict(lambda: None),
-            'devices': defaultdict(lambda: None),
+            'models': {},
+            'devices': {},
         }
         # Updated on every conversion or loop
         self.loop_data = {
@@ -88,6 +90,41 @@ class VocalRemover:
                           include_base_text=False)
         self.write_to_gui(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}',
                           include_base_text=False)
+    
+    def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
+        """
+        Update progress and/or write text to the command line 
+
+        If text is "[CLEAR]" the command line will be cleared
+        An end line '\\n' will be automatically appended to the text
+        """
+        # Progress is given
+        progress = self._get_progress(progress_step)
+
+        if text is not None:
+            # Text is given
+            if include_base_text:
+                # Include base text
+                text = f"{self.loop_data['command_base_text']} {text}"
+
+            if self.text_widget is not None:
+                # Text widget is given
+                if text == '[CLEAR]':
+                    # Clear command line
+                    self.text_widget.clear()
+                else:
+                    self.text_widget.write(text + '\n')
+            else:
+                # No text widget so write to console
+                if progress_step is not None:
+                    text = f'{int(progress)} %\t{text}'
+                if not 'done' in text.lower():
+                    # Skip 'Done!' text as it clutters the terminal
+                    print(text)
+
+        if self.progress_var is not None:
+            # Progress widget is given
+            self.progress_var.set(progress)
 
     def _seperate(self, file_path: str, file_num: int = -1):
         """
@@ -127,41 +164,6 @@ class VocalRemover:
 
         self.write_to_gui(text='Completed Seperation!\n',
                           progress_step=1)
-
-    def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
-        """
-        Update progress and/or write text to the command line 
-
-        If text is "[CLEAR]" the command line will be cleared
-        An end line '\\n' will be automatically appended to the text
-        """
-        # Progress is given
-        progress = self._get_progress(progress_step)
-
-        if text is not None:
-            # Text is given
-            if include_base_text:
-                # Include base text
-                text = f"{self.loop_data['command_base_text']} {text}"
-
-            if self.text_widget is not None:
-                # Text widget is given
-                if text == '[CLEAR]':
-                    # Clear command line
-                    self.text_widget.clear()
-                else:
-                    self.text_widget.write(text + '\n')
-            else:
-                # No text widget so write to console
-                if progress_step is not None:
-                    text = f'{int(progress)} %\t{text}'
-                if not 'done' in text.lower():
-                    # Skip 'Done!' text as it clutters the terminal
-                    print(text)
-
-        if self.progress_var is not None:
-            # Progress widget is given
-            self.progress_var.set(progress)
 
     def _fill_general_data(self):
         """
@@ -384,7 +386,7 @@ class VocalRemover:
 
         return model_device, music_file
 
-    def _get_path_data(self, file_path: str) -> dict:
+    def _get_path_data(self, file_path: str) -> Dict[str, str]:
         """
         Get the path infos for the given music file
         """
@@ -786,19 +788,18 @@ default_data = {
 }
 
 
-def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.IntVar,
-         **kwargs: dict):
+def main(widgets: dict, seperation_data: dict):
     # -Setup-
     data = default_data
-    data.update(kwargs)
+    data.update(seperation_data)
 
-    button_widget.configure(state=tk.DISABLED)  # Disable Button
+    widgets['button_widget'].configure(state=tk.DISABLED)  # Disable Button
 
     # -Seperation-
     vocal_remover = VocalRemover(data=data,
-                                 text_widget=text_widget,
-                                 progress_var=progress_var)
+                                 text_widget=widgets['text_widget'],
+                                 progress_var=widgets['progress_var'])
     vocal_remover.seperate_files()
 
     # -Finished-
-    button_widget.configure(state=tk.NORMAL)  # Enable Button
+    widgets['button_widget'].configure(state=tk.NORMAL)  # Enable Button

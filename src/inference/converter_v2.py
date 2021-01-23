@@ -194,10 +194,9 @@ def getModelDeviceFile(models, devices, music_file, loop_num):
     return model, device, model_name, music_file
 
 
-def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
-         **kwargs: dict):
+def main(widgets: dict, seperation_data: dict):
     def load_models():
-        text_widget.write('Loading models...\n')  # nopep8 Write Command Text
+        widgets['text_widget'].write('Loading models...\n')  # nopep8 Write Command Text
         models = defaultdict(lambda: None)
         devices = defaultdict(lambda: None)
 
@@ -238,7 +237,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             models['stack'] = model
             devices['stack'] = device
 
-        text_widget.write('Done!\n')
+        widgets['text_widget'].write('Done!\n')
         return models, devices
 
     def load_wave_source():
@@ -382,11 +381,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             np.max(norm_mask, axis=2, keepdims=True),
             norm_mask], axis=2)[::-1]
         _, bin_mask = cv2.imencode('.png', norm_mask)
-        text_widget.write(base_text + 'Saving Mask...\n')  # nopep8 Write Command Text
+        widgets['text_widget'].write(base_text + 'Saving Mask...\n')  # nopep8 Write Command Text
         with open(f'{base_name}_(Mask).png', mode='wb') as f:
             bin_mask.tofile(f)
 
-    data.update(kwargs)
+    data.update(seperation_data)
 
     # Update default settings
     global default_sr
@@ -399,9 +398,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     default_n_fft = data['n_fft']
 
     stime = time.perf_counter()
-    progress_var.set(0)
-    text_widget.clear()
-    button_widget.configure(state=tk.DISABLED)  # Disable Button
+    widgets['progress_var'].set(0)
+    widgets['text_widget'].clear()
+    widgets['button_widget'].configure(state=tk.DISABLED)  # Disable Button
 
     models, devices = load_models()
     folder_path, file_add_on = determineExportPath()
@@ -428,7 +427,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                                                            music_file,
                                                                            loop_num)
 
-                progress_kwargs = {'progress_var': progress_var,
+                progress_kwargs = {'progress_var': widgets['progress_var'],
                                    'total_files': len(data['input_paths']),
                                    'total_loops': total_loops,
                                    'file_num': file_num,
@@ -439,30 +438,30 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                 # -Go through the different steps of seperation-
                 # Wave source
-                text_widget.write(base_text + 'Loading wave source...\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Loading wave source...\n')  # nopep8 Write Command Text
                 X, sr = load_wave_source()
-                text_widget.write(base_text + 'Done!\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Done!\n')  # nopep8 Write Command Text
 
                 update_progress(**progress_kwargs,
                                 step=0.1)
                 # Stft of wave source
-                text_widget.write(base_text + 'Stft of wave source...\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Stft of wave source...\n')  # nopep8 Write Command Text
                 inst, vocal, phase, mask = stft_wave_source(X, model, device)
-                text_widget.write(base_text + 'Done!\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Done!\n')  # nopep8 Write Command Text
 
                 update_progress(**progress_kwargs,
                                 step=0.6)
                 # Inverse stft
-                text_widget.write(base_text + 'Inverse stft of instruments and vocals...\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Inverse stft of instruments and vocals...\n')  # nopep8 Write Command Text
                 wav_instrument, wav_vocals = invert_instrum_vocal(inst, vocal, phase)  # nopep8
-                text_widget.write(base_text + 'Done!\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Done!\n')  # nopep8 Write Command Text
 
                 update_progress(**progress_kwargs,
                                 step=0.7)
                 # Save Files
-                text_widget.write(base_text + 'Saving Files...\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Saving Files...\n')  # nopep8 Write Command Text
                 save_files(wav_instrument, wav_vocals)
-                text_widget.write(base_text + 'Done!\n')  # nopep8 Write Command Text
+                widgets['text_widget'].write(base_text + 'Done!\n')  # nopep8 Write Command Text
 
                 update_progress(**progress_kwargs,
                                 step=0.8)
@@ -470,27 +469,27 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             else:
                 # Save Output Image (Mask)
                 if data['output_image']:
-                    text_widget.write(base_text + 'Creating Mask...\n')  # nopep8 Write Command Text
+                    widgets['text_widget'].write(base_text + 'Creating Mask...\n')  # nopep8 Write Command Text
                     output_image()
-                    text_widget.write(base_text + 'Done!\n')  # nopep8 Write Command Text
+                    widgets['text_widget'].write(base_text + 'Done!\n')  # nopep8 Write Command Text
 
-            text_widget.write(base_text + 'Completed Seperation!\n\n')  # nopep8 Write Command Text
+            widgets['text_widget'].write(base_text + 'Completed Seperation!\n\n')  # nopep8 Write Command Text
         except Exception as e:
             traceback_text = ''.join(traceback.format_tb(e.__traceback__))
             message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\nFile: {music_file}\nLoop: {loop_num}\nPlease contact the creator and attach a screenshot of this error with the file and settings that caused it!'
-            tk.messagebox.showerror(master=window,
+            tk.messagebox.showerror(master=widgets['window'],
                                     title='Untracked Error',
                                     message=message)
             print(traceback_text)
             print(type(e).__name__, e)
             print(message)
-            progress_var.set(0)
-            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            widgets['progress_var'].set(0)
+            widgets['button_widget'].configure(state=tk.NORMAL)  # Enable Button
             return
 
     os.remove('temp.wav')
-    progress_var.set(0)  # Update Progress
-    text_widget.write(f'Conversion(s) Completed and Saving all Files!\n')  # nopep8 Write Command Text
-    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
+    widgets['progress_var'].set(0)  # Update Progress
+    widgets['text_widget'].write(f'Conversion(s) Completed and Saving all Files!\n')  # nopep8 Write Command Text
+    widgets['text_widget'].write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
     torch.cuda.empty_cache()
-    button_widget.configure(state=tk.NORMAL)  # Enable Button
+    widgets['button_widget'].configure(state=tk.NORMAL)  # Enable Button

@@ -1,6 +1,7 @@
 """
 Seperate music files with the v4 engine
 """
+# pylint: disable=no-name-in-module, import-error
 # -Required for conversion-
 import cv2
 import librosa

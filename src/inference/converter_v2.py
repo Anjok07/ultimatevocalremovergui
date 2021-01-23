@@ -1,3 +1,7 @@
+"""
+Seperate music files with the v2 engine
+"""
+# pylint: disable=no-name-in-module, import-error
 import argparse
 import os
 

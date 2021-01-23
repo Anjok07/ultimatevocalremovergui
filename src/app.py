@@ -1,6 +1,7 @@
 """
 Main Application
 """
+# pylint: disable=no-name-in-module, import-error
 # -GUI modules-
 import tkinter as tk
 import tkinter.ttk as ttk

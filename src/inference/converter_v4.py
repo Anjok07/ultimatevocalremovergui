@@ -141,6 +141,7 @@ class VocalRemover:
 
         for loop_num in range(self.general_data['total_loops']):
             self.loop_data['loop_num'] = loop_num
+            # -Get loop specific variables-
             command_base_text = self._get_base_text()
             model_device, music_file = self._get_model_device_file()
             constants = self._get_constants(model_device['model_name'])
@@ -150,6 +151,7 @@ class VocalRemover:
             self.loop_data['model_device'] = model_device
             self.loop_data['music_file'] = music_file
 
+            # -Seperation-
             self._load_wave_source()
             self._wave_to_spectogram()
             if self.seperation_data['postprocess']:

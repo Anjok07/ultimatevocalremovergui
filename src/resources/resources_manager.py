@@ -23,6 +23,7 @@ class ResourcePaths:
         showcase = os.path.join(abs_path, _IMAGE_FOLDER, 'showcase.png')
         icon = os.path.join(abs_path, _IMAGE_FOLDER, 'icon.ico')
         banner = os.path.join(abs_path, _IMAGE_FOLDER, 'banner.png')
+        settings = os.path.join(abs_path, _IMAGE_FOLDER, 'settings.png')
 
     class ui_files:
         _UI_FOLDER = 'ui_files'

@@ -3,20 +3,19 @@ Main Application
 """
 # pylint: disable=no-name-in-module, import-error
 # -GUI-
-from PySide6.QtCore import (Qt, QThreadPool, QSize, QDir,)
-from PySide6.QtWidgets import (QApplication, QMainWindow, QMessageBox, QWidget, QPushButton, QFileDialog, QWidget)
 import PySide6.QtWidgets as QtWidgets
 import PySide6.QtCore as QtCore
 import PySide6.QtGui as QtGui
-from PySide6.QtUiTools import QUiLoader
+from PySide6.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import ResourcePaths
 from .data.data_manager import DataManager
+from .windows import (mainwindow, settingswindow)
 # -Other-
 import os
 import sys
 # Code annotation
-from typing import (Dict)
+from typing import (Dict, Optional)
 
 # Change the current working directory to the directory
 # this file sits in
@@ -30,96 +29,161 @@ else:
 
 os.chdir(base_path)  # Change the current working directory to the base path
 
-settingsManager = DataManager(default_data={
-    'seperation_data':
-        {'exportPath': '',
-         'inputPaths': [],
-         'gpu': False,
-         'postprocess': False,
-         'tta': False,
-         'output_image': False,
-         'sr': 44100,
-         'hop_length': 1024,
-         'window_size': 320,
-         'n_fft': 2048,
-         'stack': False,
-         'stackPasses': 1,
-         'stackOnly': False,
-         'saveAllStacked': False,
-         'modelFolder': False,
-         'modelInstrumentalLabel': '',
-         'modelStackedLabel': '',
-         'aiModel': 'v4',
-         'resType': 'Kaiser Fast',
-         'manType': False,
+settingsManager = DataManager(default_data={'seperation_data': {'exportPath': '',
+                                                                'inputPaths': [],
+                                                                'gpu': False,
+                                                                'postprocess': False,
+                                                                'tta': False,
+                                                                'output_image': False,
+                                                                'sr': 44100,
+                                                                'hop_length': 1024,
+                                                                'window_size': 320,
+                                                                'n_fft': 2048,
+                                                                'stack': False,
+                                                                'stackPasses': 1,
+                                                                'stackOnly': False,
+                                                                'saveAllStacked': False,
+                                                                'modelFolder': False,
+                                                                'modelInstrumentalLabel': '',
+                                                                'modelStackedLabel': '',
+                                                                'aiModel': 'v4',
+                                                                'resType': 'Kaiser Fast',
+                                                                'manType': False,
 
-         'useModel': 'instrumental',
-         'lastDir': None,
-         },
-    'window_geometries': {}})
-app: QApplication
+                                                                'useModel': 'instrumental',
+                                                                'lastDir': None,
+                                                                },
+                                            'window_geometries': {},
+                                            })
 
 
-def load_windows() -> dict:
-    """
-    Load all windows of this application and return
-    a dictionary with their instances
-    """
-    global loader
-    loader = QUiLoader()
-    window_paths = {'main': ResourcePaths.ui_files.mainwindow,
-                    }
-    windows: Dict[str, QWidget] = {}
+class CustomApplication(QtWidgets.QApplication):
+    def __init__(self):
+        # -Init Application-
+        # Suppress QT Warnings
+        os.environ["QT_DEVICE_PIXEL_RATIO"] = "0"
+        os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+        os.environ["QT_SCREEN_SCALE_FACTORS"] = "1"
+        os.environ["QT_SCALE_FACTOR"] = "1"
+        # ...Application settings here...
+        self.setAttribute(Qt.AA_UseHighDpiPixmaps)
+        super(CustomApplication, self).__init__(sys.argv)
 
-    for win_name, path in window_paths.items():
-        window = loader.load(path, None)
-        if win_name != 'main':
-            # Window is not main
-            window.setWindowFlag(Qt.WindowStaysOnTopHint)
-        windows[win_name] = window
+        # -Create Managers-
+        self.settings = QtCore.QSettings('UVR', 'Ultimate Vocal Remover')
+        self.settings.remove("")
+        self.resources = ResourcePaths()
+        self.languageManager = LanguageManager(self)
+        self.threadpool = QtCore.QThreadPool(self)
+        # -Load Windows-
+        self.windows = {
+            # Collection of windows
+            'main': MainWindow(self),
+        }
 
-    return windows
+        self.windows['main'].show()
+
+
+class LanguageManager:
+    def __init__(self, app: CustomApplication):
+        self.app = app
+        self.translator = QtCore.QTranslator(self.app)
+        # Load language -> if not specified, try loading system language
+        self.load_language(self.app.settings.value('language',
+                                                   'en'))
+        # defaultValue=QtCore.QLocale.system().name()))
+
+    def load_language(self, language: Optional[str] = None):
+        """
+        Load specified language by file name
+
+        Default is english
+        """
+        if (not language or
+                'en' in language.lower()):
+            # Language was not specified
+            self.app.removeTranslator(self.translator)
+        else:
+            # Language was specified
+            translation_path = os.path.join(self.app.resources.localizationDir, f'{language}.qm')
+            if not os.path.isfile(translation_path):
+                # Translation does not exist
+                # Load default language (english)
+                self.load_language()
+
+            self.translator.load(translation_path)
+            self.app.installTranslator(self.translator)
+
+        if hasattr(self.app, 'windows'):
+            # Application already initialized windows
+            for window in self.app.windows.values():
+                window.update_translation()
 
 
 class MainWindow(QtWidgets.QWidget):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, app: CustomApplication):
+        super(MainWindow, self).__init__()
+        self.ui = mainwindow.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.app = app
 
+        self.load_settings()
 
-class WindowManager:
-    def __init__(self, windows: Dict[str, QWidget]):
-        self.windows = windows
-        # -Variables-
-        self.threadpool = QThreadPool()
-        # -Setup-
-        icon = QtGui.QPixmap(ResourcePaths.images.settings)
-        self.windows['main'].pushButton_settings.setIcon(icon)
-        self.windows['main'].pushButton_settings.setIconSize(QSize(30, 30))
+    def load_settings(self):
+        """
+        Load the saved settings for this window
+        """
+        # -Default Settings-
+        # Window is centered on primary window
+        default_geometry = self.geometry()
+        point = QtCore.QPoint()
+        point.setX(self.app.primaryScreen().size().width() / 2)
+        point.setY(self.app.primaryScreen().size().height() / 2)
+        default_geometry.moveCenter(point)
 
-        # -Other-
-        # Show window
-        self.windows['main'].show()
-        self.windows['main'].resizeEvent = lambda: print('F')
-        # Focus window
-        self.windows['main'].activateWindow()
-        self.windows['main'].raise_()
+        # -Load Settings-
+        self.app.settings.beginGroup('mainwindow')
+        geometry = self.app.settings.value('geometry',
+                                           default_geometry)
+        self.app.settings.endGroup()
+
+        # -Apply Settings-
+        self.setGeometry(geometry)
+
+    def save_settings(self):
+        """
+        Save the settings for this window
+        """
+        # -Save Settings-
+        self.app.settings.beginGroup('mainwindow')
+        self.app.settings.setValue('geometry',
+                                   self.geometry())
+        self.app.settings.endGroup()
+        # Commit Save
+        self.app.settings.sync()
+
+    def closeEvent(self, event: QtCore.QEvent):
+        """
+        Catch close event of this window to save data
+        """
+        self.save_settings()
+
+        event.accept()
+
+    def update_translation(self):
+        """
+        Update translation of this window
+        """
+        self.ui.retranslateUi(self)
 
 
 def run():
     """Start the application\n
     Run 'sys.exit(app.exec_())' after this method has been called
     """
-    global app
-    global winManager
-    # Suppress QT Warnings
-    os.environ["QT_DEVICE_PIXEL_RATIO"] = "0"
-    os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
-    os.environ["QT_SCREEN_SCALE_FACTORS"] = "1"
-    os.environ["QT_SCALE_FACTOR"] = "1"
-    app = QApplication
-    # ...Application settings here...
-    app.setAttribute(Qt.AA_UseHighDpiPixmaps)
-    app = app(sys.argv)
-    windows = load_windows()
+    app = CustomApplication()
+
+    sys.exit(app.exec_())
     # Create Manager
-    winManager = WindowManager(windows)
+
+    # winManager = WindowManager(windows)

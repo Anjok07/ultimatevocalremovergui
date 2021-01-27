@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>SettingsWindow</class>
+ <widget class="QWidget" name="SettingsWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>754</width>
+    <width>777</width>
     <height>344</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Settings</string>
   </property>
   <property name="styleSheet">
    <string notr="true">* {
@@ -19,7 +19,7 @@
 	color: rgb(255, 255, 255);
 }
 
-QWidget#Form {
+QWidget#SettingsWindow {
 	background-color: rgb(2, 18, 40);
 }
 QFrame {

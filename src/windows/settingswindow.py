@@ -13,56 +13,56 @@ from PySide6.QtGui import *
 from PySide6.QtWidgets import *
 
 
-class Ui_Form(object):
-    def setupUi(self, Form):
-        if not Form.objectName():
-            Form.setObjectName(u"Form")
-        Form.resize(754, 344)
-        Form.setStyleSheet(u"* {\n"
-                           "	font: 16pt \"Yu Gothic UI\";	\n"
-                           "	color: rgb(255, 255, 255);\n"
-                           "}\n"
-                           "\n"
-                           "QWidget#Form {\n"
-                           "	background-color: rgb(2, 18, 40);\n"
-                           "}\n"
-                           "QFrame {\n"
-                           "	background-color: rgb(2, 18, 40);\n"
-                           "}\n"
-                           "QPushButton {\n"
-                           "	background-color: rgb(2, 5, 39);\n"
-                           "	border-width: 2px;\n"
-                           "	border-style: solid;\n"
-                           "	border-radius: 22px;\n"
-                           "	border-color: rgb(85, 78, 163)\n"
-                           "}\n"
-                           "QPushButton:hover {\n"
-                           "	background-color: rgba(85, 78, 163, 60);\n"
-                           "}\n"
-                           "QPushButton:pressed {\n"
-                           "	background-color: rgba(85, 78, 163, 140);\n"
-                           "	border-width: 0px;\n"
-                           "}\n"
-                           "* {\n"
-                           "	font: 10pt \"Yu Gothic UI\";	\n"
-                           "	color: rgb(255, 255, 255);\n"
-                           "}\n"
-                           "QFrame#frame_settingOptions, QFrame#frame_modelOptions, QFrame#frame_engine {\n"
-                           "	background-color: rgb(2, 5, 39);\n"
-                           "	border-width: 2px;\n"
-                           "	border-radius: 8px;\n"
-                           "	border-style: solid;\n"
-                           "	border-color: rgb(85, 78, 163);\n"
-                           "}\n"
-                           "QLineEdit, QComboBox {\n"
-                           "	color: rgb(0, 0, 0);\n"
-                           "}\n"
-                           "QLabel[title=\"true\"] {\n"
-                           "	font: 15pt \"Yu Gothic UI\";\n"
-                           "}")
-        self.gridLayout_2 = QGridLayout(Form)
+class Ui_SettingsWindow(object):
+    def setupUi(self, SettingsWindow):
+        if not SettingsWindow.objectName():
+            SettingsWindow.setObjectName(u"SettingsWindow")
+        SettingsWindow.resize(777, 344)
+        SettingsWindow.setStyleSheet(u"* {\n"
+                                     "	font: 16pt \"Yu Gothic UI\";	\n"
+                                     "	color: rgb(255, 255, 255);\n"
+                                     "}\n"
+                                     "\n"
+                                     "QWidget#SettingsWindow {\n"
+                                     "	background-color: rgb(2, 18, 40);\n"
+                                     "}\n"
+                                     "QFrame {\n"
+                                     "	background-color: rgb(2, 18, 40);\n"
+                                     "}\n"
+                                     "QPushButton {\n"
+                                     "	background-color: rgb(2, 5, 39);\n"
+                                     "	border-width: 2px;\n"
+                                     "	border-style: solid;\n"
+                                     "	border-radius: 22px;\n"
+                                     "	border-color: rgb(85, 78, 163)\n"
+                                     "}\n"
+                                     "QPushButton:hover {\n"
+                                     "	background-color: rgba(85, 78, 163, 60);\n"
+                                     "}\n"
+                                     "QPushButton:pressed {\n"
+                                     "	background-color: rgba(85, 78, 163, 140);\n"
+                                     "	border-width: 0px;\n"
+                                     "}\n"
+                                     "* {\n"
+                                     "	font: 10pt \"Yu Gothic UI\";	\n"
+                                     "	color: rgb(255, 255, 255);\n"
+                                     "}\n"
+                                     "QFrame#frame_settingOptions, QFrame#frame_modelOptions, QFrame#frame_engine {\n"
+                                     "	background-color: rgb(2, 5, 39);\n"
+                                     "	border-width: 2px;\n"
+                                     "	border-radius: 8px;\n"
+                                     "	border-style: solid;\n"
+                                     "	border-color: rgb(85, 78, 163);\n"
+                                     "}\n"
+                                     "QLineEdit, QComboBox {\n"
+                                     "	color: rgb(0, 0, 0);\n"
+                                     "}\n"
+                                     "QLabel[title=\"true\"] {\n"
+                                     "	font: 15pt \"Yu Gothic UI\";\n"
+                                     "}")
+        self.gridLayout_2 = QGridLayout(SettingsWindow)
         self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.frame_modelOptions = QFrame(Form)
+        self.frame_modelOptions = QFrame(SettingsWindow)
         self.frame_modelOptions.setObjectName(u"frame_modelOptions")
         self.frame_modelOptions.setStyleSheet(u"* {\n"
                                               "	background-color: none;\n"
@@ -253,7 +253,7 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.frame_modelOptions, 1, 0, 1, 2)
 
-        self.frame_engine = QFrame(Form)
+        self.frame_engine = QFrame(SettingsWindow)
         self.frame_engine.setObjectName(u"frame_engine")
         self.frame_engine.setMinimumSize(QSize(230, 0))
         self.frame_engine.setStyleSheet(u"* {\n"
@@ -335,7 +335,7 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.frame_engine, 0, 1, 1, 1)
 
-        self.frame_settingOptions = QFrame(Form)
+        self.frame_settingOptions = QFrame(SettingsWindow)
         self.frame_settingOptions.setObjectName(u"frame_settingOptions")
         self.frame_settingOptions.setMinimumSize(QSize(500, 0))
         self.frame_settingOptions.setStyleSheet(u"* {\n"
@@ -442,80 +442,82 @@ class Ui_Form(object):
 
         self.gridLayout_2.addWidget(self.frame_settingOptions, 0, 0, 1, 1)
 
-        self.retranslateUi(Form)
+        self.retranslateUi(SettingsWindow)
 
-        QMetaObject.connectSlotsByName(Form)
+        QMetaObject.connectSlotsByName(SettingsWindow)
     # setupUi
 
-    def retranslateUi(self, Form):
-        Form.setWindowTitle(QCoreApplication.translate("Form", u"Form", None))
+    def retranslateUi(self, SettingsWindow):
+        SettingsWindow.setWindowTitle(QCoreApplication.translate(
+            "SettingsWindow", u"Settings", None))
         self.label__title_models.setText(
-            QCoreApplication.translate("Form", u"Models", None))
+            QCoreApplication.translate("SettingsWindow", u"Models", None))
         self.label_2.setText(QCoreApplication.translate(
-            "Form", u"Instrumental Model", None))
+            "SettingsWindow", u"Instrumental Model", None))
         self.comboBox_resType_3.setCurrentText("")
-        self.label_sr.setText(QCoreApplication.translate("Form", u"SR", None))
-        self.label_nfft.setText(
-            QCoreApplication.translate("Form", u"N_FFT", None))
-        self.label_winSize.setText(
-            QCoreApplication.translate("Form", u"Window Size", None))
-        self.label_hopLength.setText(
-            QCoreApplication.translate("Form", u"Hop Length", None))
+        self.label_sr.setText(QCoreApplication.translate(
+            "SettingsWindow", u"SR", None))
+        self.label_nfft.setText(QCoreApplication.translate(
+            "SettingsWindow", u"N_FFT", None))
+        self.label_winSize.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Window Size", None))
+        self.label_hopLength.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Hop Length", None))
         self.lineEdit_instr_nfft.setText(
-            QCoreApplication.translate("Form", u"2048", None))
+            QCoreApplication.translate("SettingsWindow", u"2048", None))
         self.lineEdit_instr_winSize.setText(
-            QCoreApplication.translate("Form", u"320", None))
+            QCoreApplication.translate("SettingsWindow", u"320", None))
         self.lineEdit_stack_sr.setText(
-            QCoreApplication.translate("Form", u"44100", None))
+            QCoreApplication.translate("SettingsWindow", u"44100", None))
         self.lineEdit_stack_winSize.setText(
-            QCoreApplication.translate("Form", u"320", None))
+            QCoreApplication.translate("SettingsWindow", u"320", None))
         self.lineEdit_stack_hopLength.setText(
-            QCoreApplication.translate("Form", u"1024", None))
+            QCoreApplication.translate("SettingsWindow", u"1024", None))
         self.lineEdit_stack_nfft.setText(
-            QCoreApplication.translate("Form", u"2048", None))
+            QCoreApplication.translate("SettingsWindow", u"2048", None))
         self.lineEdit_instr_hopLength.setText(
-            QCoreApplication.translate("Form", u"1024", None))
+            QCoreApplication.translate("SettingsWindow", u"1024", None))
         self.lineEdit_instr_sr.setText(
-            QCoreApplication.translate("Form", u"44100", None))
+            QCoreApplication.translate("SettingsWindow", u"44100", None))
         self.label_4.setText(QCoreApplication.translate(
-            "Form", u"Stacked Model", None))
+            "SettingsWindow", u"Stacked Model", None))
         self.comboBox_resType_5.setCurrentText("")
         self.label_title_engine.setText(
-            QCoreApplication.translate("Form", u"Engine", None))
-        self.label_engine.setText(
-            QCoreApplication.translate("Form", u"AI Engine", None))
+            QCoreApplication.translate("SettingsWindow", u"Engine", None))
+        self.label_engine.setText(QCoreApplication.translate(
+            "SettingsWindow", u"AI Engine", None))
         self.label_resType.setText(QCoreApplication.translate(
-            "Form", u"Resolution Type", None))
+            "SettingsWindow", u"Resolution Type", None))
         self.comboBox_engine.setItemText(
-            0, QCoreApplication.translate("Form", u"v4", None))
+            0, QCoreApplication.translate("SettingsWindow", u"v4", None))
         self.comboBox_engine.setItemText(
-            1, QCoreApplication.translate("Form", u"v2", None))
+            1, QCoreApplication.translate("SettingsWindow", u"v2", None))
 
         self.comboBox_resType.setItemText(
-            0, QCoreApplication.translate("Form", u"Kaiser Best", None))
+            0, QCoreApplication.translate("SettingsWindow", u"Kaiser Best", None))
         self.comboBox_resType.setItemText(
-            1, QCoreApplication.translate("Form", u"Kaiser Fast", None))
+            1, QCoreApplication.translate("SettingsWindow", u"Kaiser Fast", None))
         self.comboBox_resType.setItemText(
-            2, QCoreApplication.translate("Form", u"Scipy", None))
+            2, QCoreApplication.translate("SettingsWindow", u"Scipy", None))
 
         self.label_title_conversion.setText(
-            QCoreApplication.translate("Form", u"Conversion", None))
-        self.checkBox_gpuConversion.setText(
-            QCoreApplication.translate("Form", u"GPU Conversion", None))
-        self.checkBox_saveAllStacked.setText(
-            QCoreApplication.translate("Form", u"Save All Stacked Outputs", None))
-        self.checkBox_postProcess.setText(
-            QCoreApplication.translate("Form", u"Post-Process", None))
+            QCoreApplication.translate("SettingsWindow", u"Conversion", None))
+        self.checkBox_gpuConversion.setText(QCoreApplication.translate(
+            "SettingsWindow", u"GPU Conversion", None))
+        self.checkBox_saveAllStacked.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Save All Stacked Outputs", None))
+        self.checkBox_postProcess.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Post-Process", None))
         self.checkBox_stackOnly.setText(QCoreApplication.translate(
-            "Form", u"Stack Conversion Only", None))
-        self.checkBox_outputImage.setText(
-            QCoreApplication.translate("Form", u"Output Image", None))
-        self.checkBox_modelTest.setText(
-            QCoreApplication.translate("Form", u"Model Test Mode", None))
+            "SettingsWindow", u"Stack Conversion Only", None))
+        self.checkBox_outputImage.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Output Image", None))
+        self.checkBox_modelTest.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Model Test Mode", None))
         self.checkBox_tta.setText(
-            QCoreApplication.translate("Form", u"TTA", None))
-        self.checkBox_customParameters.setText(
-            QCoreApplication.translate("Form", u"Custom Parameters", None))
-        self.checkBox_stackPasses.setText(
-            QCoreApplication.translate("Form", u"Stack Passes", None))
+            QCoreApplication.translate("SettingsWindow", u"TTA", None))
+        self.checkBox_customParameters.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Custom Parameters", None))
+        self.checkBox_stackPasses.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Stack Passes", None))
     # retranslateUi

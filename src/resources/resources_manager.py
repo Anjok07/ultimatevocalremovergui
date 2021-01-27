@@ -25,13 +25,11 @@ class ResourcePaths:
         banner = os.path.join(abs_path, _IMAGE_FOLDER, 'banner.png')
         settings = os.path.join(abs_path, _IMAGE_FOLDER, 'settings.png')
 
-    class ui_files:
-        _UI_FOLDER = 'ui_files'
-        mainwindow = os.path.join(abs_path, _UI_FOLDER, 'mainwindow.ui')
-
     class models:
         _MODELS_FOLDER = 'models'
         modelsFolder = os.path.join(abs_path, _MODELS_FOLDER)
+
+    localizationDir = os.path.join(abs_path, 'translations')
 
 
 if __name__ == "__main__":
@@ -41,7 +39,3 @@ if __name__ == "__main__":
     for img, img_path in vars(ResourcePaths.images).items():
         if os.path.isfile(str(img_path)):
             print(f'{img} -> {img_path}')
-    print('-- UI Files --')
-    for ui, ui_path in vars(ResourcePaths.ui_files).items():
-        if os.path.isfile(str(ui_path)):
-            print(f'{ui} -> {ui_path}')

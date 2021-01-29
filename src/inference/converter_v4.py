@@ -154,14 +154,14 @@ class VocalRemover:
             # -Seperation-
             self._load_wave_source()
             self._wave_to_spectogram()
-            if self.seperation_data['postprocess']:
+            if self.seperation_data['postProcess']:
                 # Postprocess
                 self._post_process()
             self._inverse_stft_of_instrumentals_and_vocals()
             self._save_files()
         else:
             # End of seperation
-            if self.seperation_data['output_image']:
+            if self.seperation_data['outputImage']:
                 self._save_mask()
             os.remove('temp.wav')
 
@@ -215,7 +215,7 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['instrumentalModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                if torch.cuda.is_available() and self.seperation_data['gpuConversion']:
                     device = torch.device('cuda:0')
                     model.to(device)
 
@@ -227,7 +227,7 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['vocalModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                if torch.cuda.is_available() and self.seperation_data['gpuConversion']:
                     device = torch.device('cuda:0')
                     model.to(device)
 
@@ -239,7 +239,7 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['stackModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                if torch.cuda.is_available() and self.seperation_data['gpuConversion']:
                     device = torch.device('cuda:0')
                     model.to(device)
 
@@ -304,7 +304,7 @@ class VocalRemover:
             'window_size': self.seperation_data['window_size'],
             'n_fft': self.seperation_data['n_fft'],
         }
-        if self.seperation_data['manType']:
+        if self.seperation_data['customParameters']:
             # Typed constants are fixed
             return seperation_params
 
@@ -764,10 +764,10 @@ default_data = {
     'input_paths': [],  # List of paths
     'export_path': '',  # Export path
     # Processing Options
-    'gpu': False,
-    'postprocess': True,
+    'gpuConversion': False,
+    'postProcess': True,
     'tta': True,
-    'output_image': False,
+    'outputImage': False,
     # Models
     'instrumentalModel': '',  # Path to instrumental (not needed if not used)
     'vocalModel': '',  # Path to vocal model (not needed if not used)
@@ -787,22 +787,5 @@ default_data = {
     # Resolution Type
     'resType': 'kaiser_fast',
     # Whether to override constants embedded in the model file name
-    'manType': False,
+    'customParameters': False,
 }
-
-
-def main(widgets: dict, seperation_data: dict):
-    # -Setup-
-    data = default_data
-    data.update(seperation_data)
-
-    widgets['button_widget'].configure(state=tk.DISABLED)  # Disable Button
-
-    # -Seperation-
-    vocal_remover = VocalRemover(data=data,
-                                 text_widget=widgets['text_widget'],
-                                 progress_var=widgets['progress_var'])
-    vocal_remover.seperate_files()
-
-    # -Finished-
-    widgets['button_widget'].configure(state=tk.NORMAL)  # Enable Button

@@ -17,7 +17,7 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(898, 546)
+        SettingsWindow.resize(898, 452)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -215,7 +215,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 485))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 418))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -245,61 +245,61 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_4.setSpacing(45)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
-        self.groupBox = QGroupBox(self.horizontalFrame_1)
-        self.groupBox.setObjectName(u"groupBox")
-        self.groupBox.setStyleSheet(u"")
-        self.groupBox.setAlignment(
+        self.groupBox_conversion = QGroupBox(self.horizontalFrame_1)
+        self.groupBox_conversion.setObjectName(u"groupBox_conversion")
+        self.groupBox_conversion.setStyleSheet(u"")
+        self.groupBox_conversion.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
-        self.groupBox.setFlat(True)
-        self.groupBox.setCheckable(False)
-        self.groupBox.setProperty("titleText", True)
-        self.gridLayout = QGridLayout(self.groupBox)
+        self.groupBox_conversion.setFlat(True)
+        self.groupBox_conversion.setCheckable(False)
+        self.groupBox_conversion.setProperty("titleText", True)
+        self.gridLayout = QGridLayout(self.groupBox_conversion)
         self.gridLayout.setObjectName(u"gridLayout")
         self.gridLayout.setHorizontalSpacing(15)
         self.gridLayout.setVerticalSpacing(10)
         self.gridLayout.setContentsMargins(35, 10, 30, 10)
-        self.checkBox_postProcess = QCheckBox(self.groupBox)
+        self.checkBox_postProcess = QCheckBox(self.groupBox_conversion)
         self.checkBox_postProcess.setObjectName(u"checkBox_postProcess")
 
         self.gridLayout.addWidget(self.checkBox_postProcess, 0, 1, 1, 1)
 
-        self.checkBox_outputImage = QCheckBox(self.groupBox)
+        self.checkBox_outputImage = QCheckBox(self.groupBox_conversion)
         self.checkBox_outputImage.setObjectName(u"checkBox_outputImage")
 
         self.gridLayout.addWidget(self.checkBox_outputImage, 3, 0, 1, 1)
 
-        self.checkBox_stackOnly = QCheckBox(self.groupBox)
+        self.checkBox_stackOnly = QCheckBox(self.groupBox_conversion)
         self.checkBox_stackOnly.setObjectName(u"checkBox_stackOnly")
 
         self.gridLayout.addWidget(self.checkBox_stackOnly, 4, 0, 1, 1)
 
-        self.checkBox_tta = QCheckBox(self.groupBox)
+        self.checkBox_tta = QCheckBox(self.groupBox_conversion)
         self.checkBox_tta.setObjectName(u"checkBox_tta")
 
         self.gridLayout.addWidget(self.checkBox_tta, 1, 1, 1, 1)
 
-        self.checkBox_gpuConversion = QCheckBox(self.groupBox)
+        self.checkBox_gpuConversion = QCheckBox(self.groupBox_conversion)
         self.checkBox_gpuConversion.setObjectName(u"checkBox_gpuConversion")
 
         self.gridLayout.addWidget(self.checkBox_gpuConversion, 0, 0, 1, 1)
 
-        self.checkBox_customParameters = QCheckBox(self.groupBox)
+        self.checkBox_customParameters = QCheckBox(self.groupBox_conversion)
         self.checkBox_customParameters.setObjectName(
             u"checkBox_customParameters")
 
         self.gridLayout.addWidget(self.checkBox_customParameters, 3, 1, 1, 1)
 
-        self.checkBox_saveAllStacked = QCheckBox(self.groupBox)
+        self.checkBox_saveAllStacked = QCheckBox(self.groupBox_conversion)
         self.checkBox_saveAllStacked.setObjectName(u"checkBox_saveAllStacked")
 
         self.gridLayout.addWidget(self.checkBox_saveAllStacked, 2, 0, 1, 1)
 
-        self.checkBox_modelTest = QCheckBox(self.groupBox)
-        self.checkBox_modelTest.setObjectName(u"checkBox_modelTest")
+        self.checkBox_modelFolder = QCheckBox(self.groupBox_conversion)
+        self.checkBox_modelFolder.setObjectName(u"checkBox_modelFolder")
 
-        self.gridLayout.addWidget(self.checkBox_modelTest, 1, 0, 1, 1)
+        self.gridLayout.addWidget(self.checkBox_modelFolder, 1, 0, 1, 1)
 
-        self.frame_10 = QFrame(self.groupBox)
+        self.frame_10 = QFrame(self.groupBox_conversion)
         self.frame_10.setObjectName(u"frame_10")
         self.frame_10.setFrameShape(QFrame.NoFrame)
         self.frame_10.setFrameShadow(QFrame.Plain)
@@ -330,7 +330,7 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout.addWidget(self.frame_10, 2, 1, 1, 1, Qt.AlignLeft)
 
-        self.horizontalLayout_4.addWidget(self.groupBox)
+        self.horizontalLayout_4.addWidget(self.groupBox_conversion)
 
         self.groupBox_2 = QGroupBox(self.horizontalFrame_1)
         self.groupBox_2.setObjectName(u"groupBox_2")
@@ -1014,8 +1014,8 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Customization", None))
         self.radioButton_preferences.setText(
             QCoreApplication.translate("SettingsWindow", u"Preferences", None))
-        self.groupBox.setTitle(QCoreApplication.translate(
-            "SettingsWindow", u"Conversion ", None))
+        self.groupBox_conversion.setTitle(
+            QCoreApplication.translate("SettingsWindow", u"Conversion ", None))
         self.checkBox_postProcess.setText(QCoreApplication.translate(
             "SettingsWindow", u"Post-Process", None))
         self.checkBox_outputImage.setText(QCoreApplication.translate(
@@ -1030,7 +1030,7 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Custom Parameters", None))
         self.checkBox_saveAllStacked.setText(QCoreApplication.translate(
             "SettingsWindow", u"Save All Stacked Outputs", None))
-        self.checkBox_modelTest.setText(QCoreApplication.translate(
+        self.checkBox_modelFolder.setText(QCoreApplication.translate(
             "SettingsWindow", u"Model Test Mode", None))
         self.checkBox_stackPasses.setText(QCoreApplication.translate(
             "SettingsWindow", u"Stack Passes", None))

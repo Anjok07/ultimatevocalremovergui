@@ -14,6 +14,7 @@ else:
 
 IMAGE_FOLDER = 'images'
 MODELS_FOLDER = 'models'
+TRANSLATIONS_FOLDER = 'models'
 
 
 class ResourcePaths:
@@ -36,11 +37,9 @@ class ResourcePaths:
             japanese = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'japan.png')
             filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
 
-    class models:
 
-        modelsFolder = os.path.join(abs_path, MODELS_FOLDER)
-
-    localizationDir = os.path.join(abs_path, 'translations')
+    modelsDir = os.path.join(abs_path, MODELS_FOLDER)
+    localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>898</width>
-    <height>546</height>
+    <height>452</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -365,7 +365,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                <x>0</x>
                <y>0</y>
                <width>735</width>
-               <height>485</height>
+               <height>418</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -448,7 +448,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QGroupBox" name="groupBox">
+                     <widget class="QGroupBox" name="groupBox_conversion">
                       <property name="styleSheet">
                        <string notr="true"/>
                       </property>
@@ -536,7 +536,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                         </widget>
                        </item>
                        <item row="1" column="0">
-                        <widget class="QCheckBox" name="checkBox_modelTest">
+                        <widget class="QCheckBox" name="checkBox_modelFolder">
                          <property name="text">
                           <string>Model Test Mode</string>
                          </property>

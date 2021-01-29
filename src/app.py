@@ -373,22 +373,62 @@ class SettingsWindow(QtWidgets.QWidget):
     # -Other Methods-
     def update_widgets(self):
         """
-        Update the text and states of widgets
+        Update the values and states of widgets
         in this window
         """
         seperation_data = self.app.extract_seperation_data()
+        # -Conversion Settings-
+        # Stack Passes
+        if self.ui.checkBox_stackPasses.isChecked():
+            self.ui.lineEdit_stackPasses.setEnabled(True)
+        else:
+            self.ui.lineEdit_stackPasses.setEnabled(False)
+            self.ui.lineEdit_stackPasses.setText('0')
+        # Checkbuttons
+        for checkbutton in self.ui.groupBox_conversion.findChildren(QtWidgets.QCheckBox):
+            key = checkbutton.objectName().split('_')[1]
+            checkbutton.setChecked(seperation_data[key])
 
-        # Checkbutton
-        self.ui.checkBox_gpuConversion.setChecked(seperation_data['gpu'])
-        self.ui.checkBox_postProcess.setChecked(seperation_data['postprocess'])
-        self.ui.checkBox_tta.setChecked(seperation_data['tta'])
-        self.ui.checkBox_outputImage.setChecked(seperation_data['output_image'])
-        self.ui.checkBox_stackOnly.setChecked(seperation_data['stackOnly'])
-        self.ui.checkBox_saveAllStacked.setChecked(seperation_data['saveAllStacked'])
-        self.ui.checkBox_modelTest.setChecked(seperation_data['modelFolder'])
-        self.ui.checkBox_customParameters.setChecked(seperation_data['manType'])
-        # Line edits
-        self.ui.lineEdit_stackPasses.setText(str(seperation_data['stackPasses']))
+    def decode_modelNames(self):
+        """
+        Decode the selected model file names and adjust states
+        and cosntants of widgets accordingly
+        """
+
+    # def update_available_models(self):
+    #     """
+    #     Loop through every model (.pth) in the models directory
+    #     and add to the select your model list
+    #     """
+    #     model_folder = os.path.join(ResourcePaths.modelsDir, self.settings.value('seper'))
+    #     temp_instrumentalModels_dir = os.path.join(, self.aiModel_var.get(), 'Main Models')  # nopep8
+    #     temp_stackedModels_dir = os.path.join(stackedModels_dir, self.aiModel_var.get(), 'Stacked Models')
+    #     # Instrumental models
+    #     new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
+    #     if new_InstrumentalModels != self.lastInstrumentalModels:
+    #         self.instrumentalLabel_to_path.clear()
+    #         self.options_instrumentalModel_Optionmenu['menu'].delete(0, 'end')
+    #         for file_name in new_InstrumentalModels:
+    #             if file_name.endswith('.pth'):
+    #                 # Add Radiobutton to the Options Menu
+    #                 self.options_instrumentalModel_Optionmenu['menu'].add_radiobutton(label=file_name,
+    #                                                                                   command=tk._setit(self.instrumentalModel_var, file_name))
+    #                 # Link the files name to its absolute path
+    #                 self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
+    #         self.lastInstrumentalModels = new_InstrumentalModels
+    #     # Stacked models
+    #     new_stackedModels = os.listdir(temp_stackedModels_dir)
+    #     if new_stackedModels != self.lastStackedModels:
+    #         self.stackedLabel_to_path.clear()
+    #         self.options_stackedModel_Optionmenu['menu'].delete(0, 'end')
+    #         for file_name in new_stackedModels:
+    #             if file_name.endswith('.pth'):
+    #                 # Add Radiobutton to the Options Menu
+    #                 self.options_stackedModel_Optionmenu['menu'].add_radiobutton(label=file_name,
+    #                                                                              command=tk._setit(self.stackedModel_var, file_name))
+    #                 # Link the files name to its absolute path
+    #                 self.stackedLabel_to_path[file_name] = os.path.join(temp_stackedModels_dir, file_name)  # nopep8
+    #         self.lastStackedModels = new_stackedModels
 
     def menu_loadPage(self, index: int):
         """

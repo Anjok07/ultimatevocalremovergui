@@ -17,7 +17,7 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(898, 497)
+        SettingsWindow.resize(898, 546)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -50,8 +50,8 @@ class Ui_SettingsWindow(object):
                                      "}\n"
                                      "/* Pushbutton */\n"
                                      "QPushButton {\n"
-                                     "	border: 2px solid rgb(109, 213, 237);\n"
                                      "	border-radius: 5px;\n"
+                                     "	background-color: rgb(49, 96, 107);\n"
                                      "}\n"
                                      "QPushButton:hover {\n"
                                      "	background-color: rgb(25, 45, 60);\n"
@@ -59,11 +59,23 @@ class Ui_SettingsWindow(object):
                                      "QPushButton:pressed {\n"
                                      "	background-color: rgb(49, 96, 107);\n"
                                      "}\n"
+                                     "QPushButton[clear=\"true\"] {\n"
+                                     "	border: 2px solid rgb(109, 213, 237);\n"
+                                     "	ba"
+                                     "ckground-color: none;\n"
+                                     "	border-radius: 5px;\n"
+                                     "}\n"
+                                     "QPushButton[clear=\"true\"]:hover {\n"
+                                     "	background-color: rgb(25, 45, 60);\n"
+                                     "}\n"
+                                     "QPushButton[clear=\"true\"]:pressed {\n"
+                                     "	background-color: rgb(49, 96, 107);\n"
+                                     "}\n"
                                      "QPushButton[export=\"true\"] {\n"
                                      "	border: none;\n"
+                                     "background-color: none;\n"
                                      "}\n"
                                      "/* LANGUAGE */\n"
-                                     ""
                                      "QPushButton[language=\"true\"] {\n"
                                      "	border-radius: 10px;\n"
                                      "	background-color: rgba(255, 255, 255, 5);\n"
@@ -86,7 +98,8 @@ class Ui_SettingsWindow(object):
                                      "QRadioButton[menu=\"true\"]::indicator::hover {\n"
                                      "    background-color: rgb(25, 50, 60);\n"
                                      "}\n"
-                                     "QRadioButton[menu=\"true\"]::checked,\n"
+                                     "QRadio"
+                                     "Button[menu=\"true\"]::checked,\n"
                                      "QRadioButton[menu=\"true\"]::indicator::checked {\n"
                                      "    background-color: rgb(2, 18, 40);\n"
                                      "}\n"
@@ -167,7 +180,16 @@ class Ui_SettingsWindow(object):
 
         self.horizontalLayout.addWidget(self.frame_15)
 
-        self.stackedWidget_11 = QStackedWidget(SettingsWindow)
+        self.frame_14 = QFrame(SettingsWindow)
+        self.frame_14.setObjectName(u"frame_14")
+        self.frame_14.setMinimumSize(QSize(100, 0))
+        self.frame_14.setFrameShape(QFrame.NoFrame)
+        self.frame_14.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_18 = QVBoxLayout(self.frame_14)
+        self.verticalLayout_18.setSpacing(0)
+        self.verticalLayout_18.setObjectName(u"verticalLayout_18")
+        self.verticalLayout_18.setContentsMargins(0, 0, 0, 0)
+        self.stackedWidget_11 = QStackedWidget(self.frame_14)
         self.stackedWidget_11.setObjectName(u"stackedWidget_11")
         self.stackedWidget_11.setFrameShape(QFrame.NoFrame)
         self.stackedWidget_11.setFrameShadow(QFrame.Raised)
@@ -193,7 +215,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 418))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 485))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -571,7 +593,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 766, 493))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 40))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -606,7 +628,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 592, 352))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 718, 501))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -642,7 +664,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 718, 497))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 718, 485))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -704,14 +726,14 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_5 = QHBoxLayout(self.frame_11)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
-        self.comboBox = QComboBox(self.frame_11)
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.addItem("")
-        self.comboBox.setObjectName(u"comboBox")
-        self.comboBox.setMinimumSize(QSize(0, 27))
+        self.comboBox_command = QComboBox(self.frame_11)
+        self.comboBox_command.addItem("")
+        self.comboBox_command.addItem("")
+        self.comboBox_command.addItem("")
+        self.comboBox_command.setObjectName(u"comboBox_command")
+        self.comboBox_command.setMinimumSize(QSize(0, 27))
 
-        self.horizontalLayout_5.addWidget(self.comboBox)
+        self.horizontalLayout_5.addWidget(self.comboBox_command)
 
         self.pushButton_clearCommand = QPushButton(self.frame_11)
         self.pushButton_clearCommand.setObjectName(u"pushButton_clearCommand")
@@ -723,6 +745,7 @@ class Ui_SettingsWindow(object):
         self.pushButton_clearCommand.setSizePolicy(sizePolicy6)
         self.pushButton_clearCommand.setMinimumSize(QSize(50, 0))
         self.pushButton_clearCommand.setFlat(True)
+        self.pushButton_clearCommand.setProperty("clear", True)
 
         self.horizontalLayout_5.addWidget(self.pushButton_clearCommand)
 
@@ -730,15 +753,22 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_13.addWidget(self.horizontalFrame)
 
-        self.checkBox = QCheckBox(self.groupBox_6)
-        self.checkBox.setObjectName(u"checkBox")
+        self.checkBox_notifyUpdates = QCheckBox(self.groupBox_6)
+        self.checkBox_notifyUpdates.setObjectName(u"checkBox_notifyUpdates")
 
-        self.verticalLayout_13.addWidget(self.checkBox)
+        self.verticalLayout_13.addWidget(self.checkBox_notifyUpdates)
 
-        self.checkBox_2 = QCheckBox(self.groupBox_6)
-        self.checkBox_2.setObjectName(u"checkBox_2")
+        self.checkBox_enableShortcuts = QCheckBox(self.groupBox_6)
+        self.checkBox_enableShortcuts.setObjectName(
+            u"checkBox_enableShortcuts")
 
-        self.verticalLayout_13.addWidget(self.checkBox_2)
+        self.verticalLayout_13.addWidget(self.checkBox_enableShortcuts)
+
+        self.checkBox_disableAnimations = QCheckBox(self.groupBox_6)
+        self.checkBox_disableAnimations.setObjectName(
+            u"checkBox_disableAnimations")
+
+        self.verticalLayout_13.addWidget(self.checkBox_disableAnimations)
 
         self.verticalLayout_20.addWidget(self.groupBox_6)
 
@@ -785,25 +815,27 @@ class Ui_SettingsWindow(object):
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.frame_13)
 
-        self.label_5 = QLabel(self.groupBox_5)
-        self.label_5.setObjectName(u"label_5")
+        self.label_exportDirectory = QLabel(self.groupBox_5)
+        self.label_exportDirectory.setObjectName(u"label_exportDirectory")
         sizePolicy2.setHeightForWidth(
-            self.label_5.sizePolicy().hasHeightForWidth())
-        self.label_5.setSizePolicy(sizePolicy2)
-        self.label_5.setTextFormat(Qt.AutoText)
-        self.label_5.setScaledContents(True)
-        self.label_5.setAlignment(
+            self.label_exportDirectory.sizePolicy().hasHeightForWidth())
+        self.label_exportDirectory.setSizePolicy(sizePolicy2)
+        self.label_exportDirectory.setTextFormat(Qt.AutoText)
+        self.label_exportDirectory.setScaledContents(True)
+        self.label_exportDirectory.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
-        self.label_5.setWordWrap(True)
-        self.label_5.setIndent(5)
-        self.label_5.setProperty("path", True)
+        self.label_exportDirectory.setWordWrap(True)
+        self.label_exportDirectory.setIndent(5)
+        self.label_exportDirectory.setProperty("path", True)
 
-        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.label_5)
+        self.formLayout.setWidget(
+            0, QFormLayout.FieldRole, self.label_exportDirectory)
 
-        self.label_6 = QLabel(self.groupBox_5)
-        self.label_6.setObjectName(u"label_6")
+        self.label_autoSave = QLabel(self.groupBox_5)
+        self.label_autoSave.setObjectName(u"label_autoSave")
 
-        self.formLayout.setWidget(1, QFormLayout.LabelRole, self.label_6)
+        self.formLayout.setWidget(
+            1, QFormLayout.LabelRole, self.label_autoSave)
 
         self.frame_7 = QFrame(self.groupBox_5)
         self.frame_7.setObjectName(u"frame_7")
@@ -813,15 +845,18 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_7 = QHBoxLayout(self.frame_7)
         self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
         self.horizontalLayout_7.setContentsMargins(5, 0, 0, 0)
-        self.checkBox_3 = QCheckBox(self.frame_7)
-        self.checkBox_3.setObjectName(u"checkBox_3")
+        self.checkBox_autoSaveInstrumentals = QCheckBox(self.frame_7)
+        self.checkBox_autoSaveInstrumentals.setObjectName(
+            u"checkBox_autoSaveInstrumentals")
 
-        self.horizontalLayout_7.addWidget(self.checkBox_3, 0, Qt.AlignHCenter)
+        self.horizontalLayout_7.addWidget(
+            self.checkBox_autoSaveInstrumentals, 0, Qt.AlignHCenter)
 
-        self.checkBox_4 = QCheckBox(self.frame_7)
-        self.checkBox_4.setObjectName(u"checkBox_4")
+        self.checkBox_autoSaveVocals = QCheckBox(self.frame_7)
+        self.checkBox_autoSaveVocals.setObjectName(u"checkBox_autoSaveVocals")
 
-        self.horizontalLayout_7.addWidget(self.checkBox_4, 0, Qt.AlignHCenter)
+        self.horizontalLayout_7.addWidget(
+            self.checkBox_autoSaveVocals, 0, Qt.AlignHCenter)
 
         self.horizontalLayout_7.setStretch(0, 1)
         self.horizontalLayout_7.setStretch(1, 1)
@@ -908,11 +943,60 @@ class Ui_SettingsWindow(object):
 
         self.stackedWidget_11.addWidget(self.page_preferences)
 
-        self.horizontalLayout.addWidget(self.stackedWidget_11)
+        self.verticalLayout_18.addWidget(self.stackedWidget_11)
+
+        self.frame_16 = QFrame(self.frame_14)
+        self.frame_16.setObjectName(u"frame_16")
+        sizePolicy.setHeightForWidth(
+            self.frame_16.sizePolicy().hasHeightForWidth())
+        self.frame_16.setSizePolicy(sizePolicy)
+        self.frame_16.setMinimumSize(QSize(0, 60))
+        self.frame_16.setFrameShape(QFrame.StyledPanel)
+        self.frame_16.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame_16)
+        self.horizontalLayout_9.setSpacing(10)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(0, 15, 15, 15)
+        self.pushButton_resetDefault = QPushButton(self.frame_16)
+        self.pushButton_resetDefault.setObjectName(u"pushButton_resetDefault")
+        sizePolicy7 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(
+            self.pushButton_resetDefault.sizePolicy().hasHeightForWidth())
+        self.pushButton_resetDefault.setSizePolicy(sizePolicy7)
+        self.pushButton_resetDefault.setMinimumSize(QSize(110, 29))
+        self.pushButton_resetDefault.setMaximumSize(QSize(16777215, 25))
+
+        self.horizontalLayout_9.addWidget(self.pushButton_resetDefault)
+
+        self.pushButton_apply = QPushButton(self.frame_16)
+        self.pushButton_apply.setObjectName(u"pushButton_apply")
+        sizePolicy7.setHeightForWidth(
+            self.pushButton_apply.sizePolicy().hasHeightForWidth())
+        self.pushButton_apply.setSizePolicy(sizePolicy7)
+        self.pushButton_apply.setMinimumSize(QSize(60, 29))
+        self.pushButton_apply.setMaximumSize(QSize(16777215, 25))
+
+        self.horizontalLayout_9.addWidget(self.pushButton_apply)
+
+        self.pushButton_cancel = QPushButton(self.frame_16)
+        self.pushButton_cancel.setObjectName(u"pushButton_cancel")
+        sizePolicy7.setHeightForWidth(
+            self.pushButton_cancel.sizePolicy().hasHeightForWidth())
+        self.pushButton_cancel.setSizePolicy(sizePolicy7)
+        self.pushButton_cancel.setMinimumSize(QSize(60, 29))
+        self.pushButton_cancel.setMaximumSize(QSize(16777215, 25))
+
+        self.horizontalLayout_9.addWidget(self.pushButton_cancel)
+
+        self.verticalLayout_18.addWidget(self.frame_16, 0, Qt.AlignRight)
+
+        self.horizontalLayout.addWidget(self.frame_14)
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget_11.setCurrentIndex(3)
+        self.stackedWidget_11.setCurrentIndex(0)
         self.pushButton_english.setDefault(False)
         self.pushButton_german.setDefault(False)
 
@@ -1004,32 +1088,34 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Settings ", None))
         self.label.setText(QCoreApplication.translate(
             "SettingsWindow", u"Command Line", None))
-        self.comboBox.setItemText(
+        self.comboBox_command.setItemText(
             0, QCoreApplication.translate("SettingsWindow", u"Off", None))
-        self.comboBox.setItemText(
+        self.comboBox_command.setItemText(
             1, QCoreApplication.translate("SettingsWindow", u"On", None))
-        self.comboBox.setItemText(2, QCoreApplication.translate(
-            "SettingsWindow", u"Debug Mode", None))
+        self.comboBox_command.setItemText(
+            2, QCoreApplication.translate("SettingsWindow", u"Debug Mode", None))
 
         self.pushButton_clearCommand.setText(
             QCoreApplication.translate("SettingsWindow", u"Clear", None))
-        self.checkBox.setText(QCoreApplication.translate(
+        self.checkBox_notifyUpdates.setText(QCoreApplication.translate(
             "SettingsWindow", u"Notify me of updates", None))
-        self.checkBox_2.setText(QCoreApplication.translate(
+        self.checkBox_enableShortcuts.setText(QCoreApplication.translate(
             "SettingsWindow", u"Enable Shortcuts", None))
+        self.checkBox_disableAnimations.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Disable Animations", None))
         self.groupBox_5.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Export Settings ", None))
         self.label_3.setText(QCoreApplication.translate(
             "SettingsWindow", u"Export Directory", None))
         self.pushButton_exportDirectory.setText("")
-        self.label_5.setText(QCoreApplication.translate(
-            "SettingsWindow", u"B:/Downloads", None))
-        self.label_6.setText(QCoreApplication.translate(
+        self.label_exportDirectory.setText(
+            QCoreApplication.translate("SettingsWindow", u"B:/Downloads", None))
+        self.label_autoSave.setText(QCoreApplication.translate(
             "SettingsWindow", u"Automatically Save:", None))
-        self.checkBox_3.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Instrumentals", None))
-        self.checkBox_4.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Vocals", None))
+        self.checkBox_autoSaveInstrumentals.setText(
+            QCoreApplication.translate("SettingsWindow", u"Instrumentals", None))
+        self.checkBox_autoSaveVocals.setText(
+            QCoreApplication.translate("SettingsWindow", u"Vocals", None))
         self.groupBox_4.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Language ", None))
 # if QT_CONFIG(tooltip)
@@ -1050,4 +1136,10 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Japanese", None))
 #endif // QT_CONFIG(tooltip)
         self.pushButton_japanese.setText("")
+        self.pushButton_resetDefault.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Reset to default", None))
+        self.pushButton_apply.setText(
+            QCoreApplication.translate("SettingsWindow", u"Apply", None))
+        self.pushButton_cancel.setText(
+            QCoreApplication.translate("SettingsWindow", u"Cancel", None))
     # retranslateUi

@@ -131,6 +131,7 @@ class Ui_MainWindow(object):
         self.label_musicFiles.setSizePolicy(sizePolicy)
         self.label_musicFiles.setMinimumSize(QSize(0, 100))
         self.label_musicFiles.setMaximumSize(QSize(16777215, 16777215))
+        self.label_musicFiles.setCursor(QCursor(Qt.PointingHandCursor))
         self.label_musicFiles.setAcceptDrops(True)
         self.label_musicFiles.setStyleSheet(u"")
         self.label_musicFiles.setAlignment(Qt.AlignCenter)

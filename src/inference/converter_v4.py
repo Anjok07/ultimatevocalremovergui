@@ -19,14 +19,14 @@ from tqdm import tqdm
 import time
 import os
 # Annotating
-import tkinter as tk
+from PySide6 import QtWidgets
 from typing import (Dict, Tuple, Optional)
 
 
 class VocalRemover:
-    def __init__(self, data: dict, text_widget: Optional[tk.Text] = None, progress_var: Optional[tk.IntVar] = None):
-        self.text_widget = text_widget
-        self.progress_var = progress_var
+    def __init__(self, data: dict, command_widget: Optional[QtWidgets.QTextBrowser] = None, progress_widget: Optional[QtWidgets.QProgressBar] = None):
+        self.command_widget = command_widget
+        self.progress_widget = progress_widget
         # GUI parsed data
         self.seperation_data = data
         # Data that is determined once
@@ -91,7 +91,7 @@ class VocalRemover:
                           include_base_text=False)
         self.write_to_gui(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}',
                           include_base_text=False)
-    
+
     def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         """
         Update progress and/or write text to the command line 
@@ -108,13 +108,13 @@ class VocalRemover:
                 # Include base text
                 text = f"{self.loop_data['command_base_text']} {text}"
 
-            if self.text_widget is not None:
+            if self.command_widget is not None:
                 # Text widget is given
                 if text == '[CLEAR]':
                     # Clear command line
-                    self.text_widget.clear()
+                    self.command_widget.clear()
                 else:
-                    self.text_widget.write(text + '\n')
+                    self.command_widget.append(text)
             else:
                 # No text widget so write to console
                 if progress_step is not None:
@@ -123,9 +123,9 @@ class VocalRemover:
                     # Skip 'Done!' text as it clutters the terminal
                     print(text)
 
-        if self.progress_var is not None:
+        if self.progress_widget is not None:
             # Progress widget is given
-            self.progress_var.set(progress)
+            self.progress_widget.setValue(progress)
 
     def _seperate(self, file_path: str, file_num: int = -1):
         """
@@ -215,8 +215,8 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['instrumentalModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu'] >= 0:
-                    device = torch.device('cuda:{}'.format(self.seperation_data['gpu']))
+                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                    device = torch.device('cuda:0')
                     model.to(device)
 
                 models['instrumental'] = model
@@ -227,8 +227,8 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['vocalModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu'] >= 0:
-                    device = torch.device('cuda:{}'.format(self.seperation_data['gpu']))
+                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                    device = torch.device('cuda:0')
                     model.to(device)
 
                 models['vocal'] = model
@@ -239,8 +239,8 @@ class VocalRemover:
                 model = nets.CascadedASPPNet(self.seperation_data['n_fft'])
                 model.load_state_dict(torch.load(self.seperation_data['stackModel'],
                                                  map_location=device))
-                if torch.cuda.is_available() and self.seperation_data['gpu'] >= 0:
-                    device = torch.device('cuda:{}'.format(self.seperation_data['gpu']))
+                if torch.cuda.is_available() and self.seperation_data['gpu']:
+                    device = torch.device('cuda:0')
                     model.to(device)
 
                 models['stack'] = model
@@ -438,7 +438,7 @@ class VocalRemover:
             model.eval()
             with torch.no_grad():
                 preds = []
-                if self.progress_var is None:
+                if self.progress_widget is None:
                     bar_format = '{desc}    |{bar}{r_bar}'
                 else:
                     bar_format = '{l_bar}{bar}{r_bar}'
@@ -453,7 +453,7 @@ class VocalRemover:
                     else:
                         progres_step = 0.1 + 0.6 * (progrs / n_window)
                     self.write_to_gui(progress_step=progres_step)
-                    if self.progress_var is None:
+                    if self.progress_widget is None:
                         progress = self._get_progress(progres_step)
                         text = f'{int(progress)} %'
                         if progress < 10:
@@ -764,7 +764,7 @@ default_data = {
     'input_paths': [],  # List of paths
     'export_path': '',  # Export path
     # Processing Options
-    'gpu': -1,
+    'gpu': False,
     'postprocess': True,
     'tta': True,
     'output_image': False,

@@ -228,6 +228,9 @@ QTextBrowser {
                 <height>16777215</height>
                </size>
               </property>
+              <property name="cursor">
+               <cursorShape>PointingHandCursor</cursorShape>
+              </property>
               <property name="acceptDrops">
                <bool>true</bool>
               </property>

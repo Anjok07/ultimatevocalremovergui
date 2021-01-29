@@ -10,6 +10,7 @@ from PySide6.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import ResourcePaths
 from .windows import (mainwindow, settingswindow)
+from .inference import converter_v4
 # -Other-
 import os
 import sys
@@ -25,9 +26,10 @@ if getattr(sys, 'frozen', False):
     base_path = os.path.dirname(sys.executable)
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
-print(base_path)
 
 os.chdir(base_path)  # Change the current working directory to the base path
+APPLICATION_SHORTNAME = 'UVR'
+APPLICATION_NAME = 'Ultimate Vocal Remover'
 
 
 class CustomApplication(QtWidgets.QApplication):
@@ -43,7 +45,7 @@ class CustomApplication(QtWidgets.QApplication):
         super(CustomApplication, self).__init__(sys.argv)
 
         # -Create Managers-
-        self.settings = QtCore.QSettings('UVR', 'Ultimate Vocal Remover')
+        self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.threadpool = QtCore.QThreadPool(self)
@@ -66,6 +68,19 @@ class CustomApplication(QtWidgets.QApplication):
         """
         export_button = self.windows['settings'].ui.pushButton_exportDirectory
         export_button.clicked.connect(lambda: self.windows['main'].write_to_command('AYAAYAYA'))
+
+    def extract_seperation_data(self) -> dict:
+        """
+        Extract the saved seperation data
+        """
+        self.settings.beginGroup('seperation')
+        speration_data = converter_v4.default_data.copy()
+        for key, default_value in speration_data.items():
+            speration_data[key] = self.settings.value(key,
+                                                      default_value)
+        self.settings.endGroup()
+
+        return speration_data
 
 
 class Translator:
@@ -121,10 +136,13 @@ class MainWindow(QtWidgets.QWidget):
         self.ui = mainwindow.Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
+        self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
 
+        self.load_geometry()
         self.setup_widgets()
-        self.load_settings()
+        self.update_widgets()
 
+    # -Initialization methods-
     def setup_widgets(self):
         """
         Set up binds and images for this window's widgets
@@ -137,6 +155,7 @@ class MainWindow(QtWidgets.QWidget):
 
         # -Bind Widgets-
         self.ui.pushButton_settings.clicked.connect(self.pushButton_settings_clicked)
+        self.ui.pushButton_seperate.clicked.connect(self.pushButton_seperate_clicked)
 
         # -Load Images-
         # Settings button
@@ -144,15 +163,29 @@ class MainWindow(QtWidgets.QWidget):
         self.ui.pushButton_settings.setIcon(icon)
         self.ui.pushButton_settings.setIconSize(QtCore.QSize(25, 25))
 
-    def write_to_command(self, text: str):
+    def load_geometry(self):
         """
-        Write to the command line
+        Load the geometry for this window
         """
-        self.ui.textBrowser_command.append(text)
-        if hasattr(self.app, 'windows'):
-            self.app.windows['settings'].ui.pushButton_clearCommand.setVisible(True)
+        # -Default Settings-
+        # Window is centered on primary window
+        default_geometry = self.geometry()
+        point = QtCore.QPoint()
+        point.setX(self.app.primaryScreen().size().width() / 2)
+        point.setY(self.app.primaryScreen().size().height() / 2)
+        default_geometry.moveCenter(point)
 
-    # -Widgets-
+        # -Load Settings-
+        # Window
+        self.settings.beginGroup('mainwindow')
+        geometry = self.settings.value('geometry',
+                                       default_geometry)
+        self.settings.endGroup()
+
+        # -Apply Settings-
+        self.setGeometry(geometry)
+
+    # -Widget Binds-
     def pushButton_settings_clicked(self):
         """
         Open the settings window
@@ -162,6 +195,16 @@ class MainWindow(QtWidgets.QWidget):
         # Focus window
         self.app.windows['settings'].activateWindow()
         self.app.windows['settings'].raise_()
+
+    def pushButton_seperate_clicked(self):
+        """
+        Seperate given files
+        """
+        seperation_data = self.app.extract_seperation_data()
+        vocalRemover = converter_v4.VocalRemover(data=seperation_data,
+                                                 command_widget=self.ui.textBrowser_command,
+                                                 progress_widget=self.ui.progressBar)
+        # vocalRemover.seperate_files()
 
     def label_musicFiles_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         """
@@ -181,48 +224,40 @@ class MainWindow(QtWidgets.QWidget):
         input_paths = []
         for url in event.mimeData().urls():
             input_paths.append(url.toLocalFile())
-        self.app.settings.setValue('seperation/input_paths', input_paths)
-        self.ui.label_musicFiles.setText(f'Total Music File/s: {len(input_paths)}')
+        self.ui.label_musicFiles.setText(repr(input_paths))
 
-    def load_settings(self):
+        self.settings.setValue('seperation/input_paths', input_paths)
+
+    # -Other Methods-
+    def update_widgets(self):
         """
-        Load the saved settings for this window
+        Update the text and states of widgets
+        in this window
         """
-        # -Default Settings-
-        # Window is centered on primary window
-        default_geometry = self.geometry()
-        point = QtCore.QPoint()
-        point.setX(self.app.primaryScreen().size().width() / 2)
-        point.setY(self.app.primaryScreen().size().height() / 2)
-        default_geometry.moveCenter(point)
+        seperation_data = self.app.extract_seperation_data()
+        self.ui.label_musicFiles.setText(repr(seperation_data['input_paths']))
 
-        # -Load Settings-
-        self.app.settings.beginGroup('mainwindow')
-        geometry = self.app.settings.value('geometry',
-                                           default_geometry)
-        self.app.settings.endGroup()
-
-        # -Apply Settings-
-        self.setGeometry(geometry)
-
-    def save_settings(self):
+    def write_to_command(self, text: str):
         """
-        Save the settings for this window
+        Write to the command line
         """
-        # -Save Settings-
-        self.app.settings.beginGroup('mainwindow')
-        self.app.settings.setValue('geometry',
-                                   self.geometry())
-        self.app.settings.endGroup()
-        # Commit Save
-        self.app.settings.sync()
+        self.ui.textBrowser_command.append(text)
+        if hasattr(self.app, 'windows'):
+            self.app.windows['settings'].ui.pushButton_clearCommand.setVisible(True)
 
+    # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
         """
         Catch close event of this window to save data
         """
-        self.save_settings()
-
+        # -Save the geometry for this window-
+        self.settings.beginGroup('mainwindow')
+        self.settings.setValue('geometry',
+                               self.geometry())
+        self.settings.endGroup()
+        # Commit Save
+        self.settings.sync()
+        # -Close Window-
         event.accept()
 
     def update_translation(self):
@@ -238,11 +273,15 @@ class SettingsWindow(QtWidgets.QWidget):
         self.ui = settingswindow.Ui_SettingsWindow()
         self.ui.setupUi(self)
         self.app = app
+        self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
 
+        self.load_geometry()
         self.setup_widgets()
-        self.load_settings()
+        self.update_widgets()
+
         self.menu_loadPage(index=0)
 
+    # -Initialization methods-
     def setup_widgets(self):
         """
         Set up binds and images for this window's widgets
@@ -302,6 +341,55 @@ class SettingsWindow(QtWidgets.QWidget):
         # Buttons
         self.ui.pushButton_clearCommand.clicked.connect(self.pushButton_clearCommand_clicked)
 
+    def load_geometry(self):
+        """
+        Load the geometry for this window
+        """
+        # -Default Settings-
+        # Window is centered on primary window
+        default_geometry = self.geometry()
+        point = QtCore.QPoint()
+        point.setX(self.app.primaryScreen().size().width() / 2)
+        point.setY(self.app.primaryScreen().size().height() / 2)
+        default_geometry.moveCenter(point)
+
+        # -Load Settings-
+        self.settings.beginGroup('settingswindow')
+        geometry = self.settings.value('geometry',
+                                       default_geometry)
+        self.settings.endGroup()
+
+        # -Apply Settings-
+        self.setGeometry(geometry)
+
+    # -Widget Binds-
+    def pushButton_clearCommand_clicked(self):
+        """
+        Clear the command line
+        """
+        self.app.windows['main'].ui.textBrowser_command.clear()
+        self.ui.pushButton_clearCommand.setVisible(False)
+
+    # -Other Methods-
+    def update_widgets(self):
+        """
+        Update the text and states of widgets
+        in this window
+        """
+        seperation_data = self.app.extract_seperation_data()
+
+        # Checkbutton
+        self.ui.checkBox_gpuConversion.setChecked(seperation_data['gpu'])
+        self.ui.checkBox_postProcess.setChecked(seperation_data['postprocess'])
+        self.ui.checkBox_tta.setChecked(seperation_data['tta'])
+        self.ui.checkBox_outputImage.setChecked(seperation_data['output_image'])
+        self.ui.checkBox_stackOnly.setChecked(seperation_data['stackOnly'])
+        self.ui.checkBox_saveAllStacked.setChecked(seperation_data['saveAllStacked'])
+        self.ui.checkBox_modelTest.setChecked(seperation_data['modelFolder'])
+        self.ui.checkBox_customParameters.setChecked(seperation_data['manType'])
+        # Line edits
+        self.ui.lineEdit_stackPasses.setText(str(seperation_data['stackPasses']))
+
     def menu_loadPage(self, index: int):
         """
         Load the given menu page by index
@@ -317,54 +405,24 @@ class SettingsWindow(QtWidgets.QWidget):
         # Find Frame which specifies the minimum width
         page = stackedWidget.currentWidget()
         min_width = page.property('minimumFrameWidth')
-        stackedWidget.setMinimumWidth(min_width)
+        self.ui.frame_14.setMinimumWidth(min_width)
 
-    def pushButton_clearCommand_clicked(self):
-        """
-        Clear the command line
-        """
-        self.app.windows['main'].ui.textBrowser_command.clear()
-        self.ui.pushButton_clearCommand.setVisible(False)
+        # Update states and values of widgets
+        self.update_widgets()
 
-    def load_settings(self):
-        """
-        Load the saved settings for this window
-        """
-        # -Default Settings-
-        # Window is centered on primary window
-        default_geometry = self.geometry()
-        point = QtCore.QPoint()
-        point.setX(self.app.primaryScreen().size().width() / 2)
-        point.setY(self.app.primaryScreen().size().height() / 2)
-        default_geometry.moveCenter(point)
-
-        # -Load Settings-
-        self.app.settings.beginGroup('settingswindow')
-        geometry = self.app.settings.value('geometry',
-                                           default_geometry)
-        self.app.settings.endGroup()
-
-        # -Apply Settings-
-        self.setGeometry(geometry)
-
-    def save_settings(self):
-        """
-        Save the settings for this window
-        """
-        # -Save Settings-
-        self.app.settings.beginGroup('settingswindow')
-        self.app.settings.setValue('geometry',
-                                   self.geometry())
-        self.app.settings.endGroup()
-        # Commit Save
-        self.app.settings.sync()
-
+    # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
         """
         Catch close event of this window to save data
         """
-        self.save_settings()
-
+        # -Save the geometry for this window-
+        self.settings.beginGroup('settingswindow')
+        self.settings.setValue('geometry',
+                               self.geometry())
+        self.settings.endGroup()
+        # Commit Save
+        self.settings.sync()
+        # -Close Window-
         event.accept()
 
     def update_translation(self):
@@ -375,46 +433,8 @@ class SettingsWindow(QtWidgets.QWidget):
 
 
 def run():
-    """Start the application\n
-    Run 'sys.exit(app.exec_())' after this method has been called
+    """
+    Start the application
     """
     app = CustomApplication()
-
     sys.exit(app.exec_())
-    # Create Manager
-
-    # winManager = WindowManager(windows)
-
-
-# def load_settings(self):
-#     """
-#     Load the saved settings for this window
-#     """
-#     # -Default Settings-
-#     # Window is centered on primary window
-#     default_geometry = self.geometry()
-#     point = QtCore.QPoint()
-#     point.setX(self.app.primaryScreen().size().width() / 2)
-#     point.setY(self.app.primaryScreen().size().height() / 2)
-#     default_geometry.moveCenter(point)
-
-#     # -Load Settings-
-#     self.app.settings.beginGroup('settingswindow')
-#     geometry = self.app.settings.value('geometry',
-#                                         default_geometry)
-#     self.app.settings.endGroup()
-
-#     # -Apply Settings-
-#     self.setGeometry(geometry)
-
-# def save_settings(self):
-#     """
-#     Save the settings for this window
-#     """
-#     # -Save Settings-
-#     self.app.settings.beginGroup('settingswindow')
-#     self.app.settings.setValue('geometry',
-#                                 self.geometry())
-#     self.app.settings.endGroup()
-#     # Commit Save
-#     self.app.settings.sync()

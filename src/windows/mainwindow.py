@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(960, 550)
+        MainWindow.resize(911, 472)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"/* Universal */\n"
                                  "* {\n"
@@ -26,33 +26,72 @@ class Ui_MainWindow(object):
                                  "	background-color: none;\n"
                                  "	background: rgb(12, 23, 40);\n"
                                  "}\n"
-                                 "/* Window */\n"
-                                 "QWidget#Form, QFrame, QPushButton {\n"
-                                 "	background-color: rgb(12, 23, 40);\n"
-                                 "}\n"
                                  "/* Frames */\n"
-                                 "QFrame {\n"
-                                 "\n"
+                                 "QFrame[dragFile=\"true\"] {\n"
+                                 "	border-width: 3px;\n"
+                                 "    border-style: dotted;\n"
+                                 "    border-color: rgb(160, 160, 160);\n"
+                                 "	border-radius: 5px;\n"
                                  "}\n"
+                                 "/* Labels */\n"
+                                 "QLabel[audioFile=\"true\"] {\n"
+                                 "	color:rgba(160, 160, 160, 80);\n"
+                                 "	border-width: 3px;\n"
+                                 "    border-style: dotted;\n"
+                                 "    border-color: rgb(60, 60, 80);\n"
+                                 "	border-radius: 5px;\n"
+                                 "}\n"
+                                 "QLabel[dragFile=\"true\"] {\n"
+                                 "	color:  rgb(160, 160, 160);\n"
+                                 "	border: none;\n"
+                                 "}\n"
+                                 "\n"
                                  "/* Button */\n"
-                                 "QPushButton {\n"
+                                 "QPushButton[seperate=\"true\"] {\n"
                                  "	border-width: 2px;\n"
                                  "	border-style: solid;\n"
-                                 "	border-radius: 25px;\n"
+                                 "	border-radius: 15px;\n"
                                  "	border-color: rgb(109, 213, 237);\n"
                                  "	background-color: rgba(109, 213, 237, 4);\n"
                                  "}\n"
-                                 "QPushButton:hover {\n"
+                                 "QPushButton[seperate=\"true\"]:hover {\n"
                                  "	background-color: rgba(109, 213, 237, 10);\n"
                                  "}\n"
-                                 "QPushButton:pressed {\n"
-                                 "	background-color: rgba(109, 213, 237, 30);\n"
+                                 "QPushButton[seperate=\"true\"]:pressed {\n"
+                                 "	background-colo"
+                                 "r: rgba(109, 213, 237, 30);\n"
+                                 "}\n"
+                                 "/* Progressbar */\n"
+                                 "QProgressBar:horizontal {\n"
+                                 "	border: 0px solid gray;\n"
+                                 "}\n"
+                                 "QProgressBar::chunk:horizontal {\n"
+                                 "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));\n"
+                                 "	border-top-right-radius: 2px;\n"
+                                 "	border-bottom-right-radius: 2px;\n"
+                                 "}\n"
+                                 "/* Command Line*/\n"
+                                 "QTextBrowser {\n"
+                                 "	border-left: 2px;\n"
+                                 "	border-style: solid;\n"
+                                 "	border-color: rgb(109, 213, 237);\n"
+                                 "	font: 8pt \"Courier\";\n"
                                  "}")
-        self.gridLayout = QGridLayout(MainWindow)
-        self.gridLayout.setSpacing(0)
-        self.gridLayout.setObjectName(u"gridLayout")
-        self.gridLayout.setContentsMargins(5, 5, 5, 0)
-        self.frame_2 = QFrame(MainWindow)
+        self.horizontalLayout_2 = QHBoxLayout(MainWindow)
+        self.horizontalLayout_2.setSpacing(0)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 5, 0)
+        self.frame_5 = QFrame(MainWindow)
+        self.frame_5.setObjectName(u"frame_5")
+        self.frame_5.setMinimumSize(QSize(650, 0))
+        self.frame_5.setFrameShape(QFrame.NoFrame)
+        self.frame_5.setFrameShadow(QFrame.Plain)
+        self.frame_5.setLineWidth(0)
+        self.verticalLayout_3 = QVBoxLayout(self.frame_5)
+        self.verticalLayout_3.setSpacing(0)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
+        self.frame_2 = QFrame(self.frame_5)
         self.frame_2.setObjectName(u"frame_2")
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         sizePolicy.setHorizontalStretch(0)
@@ -60,9 +99,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(
             self.frame_2.sizePolicy().hasHeightForWidth())
         self.frame_2.setSizePolicy(sizePolicy)
-        self.frame_2.setMinimumSize(QSize(650, 0))
-        self.frame_2.setMaximumSize(QSize(700, 16777215))
-        self.frame_2.setStyleSheet(u"")
+        self.frame_2.setMinimumSize(QSize(0, 0))
+        self.frame_2.setMaximumSize(QSize(16777215, 16777215))
         self.frame_2.setFrameShape(QFrame.StyledPanel)
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.frame_2)
@@ -77,15 +115,11 @@ class Ui_MainWindow(object):
         sizePolicy1.setHeightForWidth(
             self.frame_4.sizePolicy().hasHeightForWidth())
         self.frame_4.setSizePolicy(sizePolicy1)
-        self.frame_4.setStyleSheet(u"QFrame {\n"
-                                   "	border-width: 3px;\n"
-                                   "    border-style: dotted;\n"
-                                   "    border-color: rgb(160, 160, 160);\n"
-                                   "	border-radius: 5px;\n"
-                                   "}")
+        self.frame_4.setStyleSheet(u"")
         self.frame_4.setFrameShape(QFrame.StyledPanel)
         self.frame_4.setFrameShadow(QFrame.Raised)
         self.frame_4.setLineWidth(1)
+        self.frame_4.setProperty("dragFile", True)
         self.verticalLayout_2 = QVBoxLayout(self.frame_4)
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
@@ -98,11 +132,9 @@ class Ui_MainWindow(object):
         self.label_musicFiles.setMinimumSize(QSize(0, 100))
         self.label_musicFiles.setMaximumSize(QSize(16777215, 16777215))
         self.label_musicFiles.setAcceptDrops(True)
-        self.label_musicFiles.setStyleSheet(u"QLabel {\n"
-                                            "	color:  rgb(160, 160, 160);\n"
-                                            "	border: none;\n"
-                                            "}")
+        self.label_musicFiles.setStyleSheet(u"")
         self.label_musicFiles.setAlignment(Qt.AlignCenter)
+        self.label_musicFiles.setProperty("dragFile", True)
 
         self.verticalLayout_2.addWidget(self.label_musicFiles)
 
@@ -140,14 +172,8 @@ class Ui_MainWindow(object):
 
         self.label_instrumentalFiles = QLabel(self.frame_3)
         self.label_instrumentalFiles.setObjectName(u"label_instrumentalFiles")
-        self.label_instrumentalFiles.setStyleSheet(u"QLabel {\n"
-                                                   "	color: rgba(160, 160, 160, 80);\n"
-                                                   "	border-width: 3px;\n"
-                                                   "    border-style: dotted;\n"
-                                                   "    border-color: rgba(160, 160, 160, 80);\n"
-                                                   "	border-radius: 5px;\n"
-                                                   "}")
         self.label_instrumentalFiles.setAlignment(Qt.AlignCenter)
+        self.label_instrumentalFiles.setProperty("audioFile", True)
 
         self.gridLayout_2.addWidget(self.label_instrumentalFiles, 0, 1, 1, 1)
 
@@ -158,14 +184,8 @@ class Ui_MainWindow(object):
 
         self.label_vocalsFile = QLabel(self.frame_3)
         self.label_vocalsFile.setObjectName(u"label_vocalsFile")
-        self.label_vocalsFile.setStyleSheet(u"QLabel {\n"
-                                            "	color:rgba(160, 160, 160, 80);\n"
-                                            "	border-width: 3px;\n"
-                                            "    border-style: dotted;\n"
-                                            "    border-color: rgba(160, 160, 160, 80);\n"
-                                            "	border-radius: 5px;\n"
-                                            "}")
         self.label_vocalsFile.setAlignment(Qt.AlignCenter)
+        self.label_vocalsFile.setProperty("audioFile", True)
 
         self.gridLayout_2.addWidget(self.label_vocalsFile, 1, 1, 1, 1)
 
@@ -184,9 +204,9 @@ class Ui_MainWindow(object):
         self.pushButton_seperate.setObjectName(u"pushButton_seperate")
         self.pushButton_seperate.setMinimumSize(QSize(160, 0))
         self.pushButton_seperate.setMaximumSize(QSize(16777215, 50))
-        self.pushButton_seperate.setStyleSheet(u"color: rgb(238, 238, 238);\n"
-                                               "border-top-right-radius: 0px;\n"
+        self.pushButton_seperate.setStyleSheet(u"border-top-right-radius: 0px;\n"
                                                "border-bottom-right-radius: 0px;")
+        self.pushButton_seperate.setProperty("seperate", True)
 
         self.horizontalLayout.addWidget(self.pushButton_seperate)
 
@@ -197,47 +217,41 @@ class Ui_MainWindow(object):
         self.pushButton_settings.setStyleSheet(u"border-left: none;\n"
                                                "border-top-left-radius: 0px;\n"
                                                "border-bottom-left-radius: 0px;")
+        self.pushButton_settings.setProperty("seperate", True)
 
         self.horizontalLayout.addWidget(self.pushButton_settings)
 
         self.verticalLayout.addWidget(self.frame, 0, Qt.AlignHCenter)
 
-        self.gridLayout.addWidget(self.frame_2, 0, 0, 1, 1)
+        self.verticalLayout_3.addWidget(self.frame_2)
 
-        self.progressBar = QProgressBar(MainWindow)
+        self.progressBar = QProgressBar(self.frame_5)
         self.progressBar.setObjectName(u"progressBar")
+        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(
+            self.progressBar.sizePolicy().hasHeightForWidth())
+        self.progressBar.setSizePolicy(sizePolicy3)
         self.progressBar.setMinimumSize(QSize(0, 10))
         self.progressBar.setMaximumSize(QSize(16777215, 6))
-        self.progressBar.setStyleSheet(u"QProgressBar:horizontal {\n"
-                                       "	border: 0px solid gray;\n"
-                                       "}\n"
-                                       "QProgressBar::chunk:horizontal {\n"
-                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));\n"
-                                       "	border-top-right-radius: 2px;\n"
-                                       "	border-bottom-right-radius: 2px;\n"
-                                       "}\n"
-                                       "")
         self.progressBar.setValue(80)
         self.progressBar.setTextVisible(False)
         self.progressBar.setTextDirection(QProgressBar.TopToBottom)
 
-        self.gridLayout.addWidget(self.progressBar, 1, 0, 1, 1)
+        self.verticalLayout_3.addWidget(self.progressBar)
+
+        self.horizontalLayout_2.addWidget(self.frame_5)
 
         self.textBrowser_command = QTextBrowser(MainWindow)
         self.textBrowser_command.setObjectName(u"textBrowser_command")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(
+        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(
             self.textBrowser_command.sizePolicy().hasHeightForWidth())
-        self.textBrowser_command.setSizePolicy(sizePolicy3)
-        self.textBrowser_command.setMinimumSize(QSize(300, 0))
-        self.textBrowser_command.setStyleSheet(u"QTextBrowser {\n"
-                                               "	border-left: 2px;\n"
-                                               "	border-style: solid;\n"
-                                               "	border-color: rgb(109, 213, 237);\n"
-                                               "	font: 8pt \"Courier\";\n"
-                                               "}")
+        self.textBrowser_command.setSizePolicy(sizePolicy4)
+        self.textBrowser_command.setMinimumSize(QSize(0, 0))
         self.textBrowser_command.setFrameShape(QFrame.StyledPanel)
         self.textBrowser_command.setFrameShadow(QFrame.Plain)
         self.textBrowser_command.setLineWidth(0)
@@ -246,9 +260,9 @@ class Ui_MainWindow(object):
         self.textBrowser_command.setHorizontalScrollBarPolicy(
             Qt.ScrollBarAlwaysOff)
 
-        self.gridLayout.addWidget(self.textBrowser_command, 0, 1, 2, 1)
+        self.horizontalLayout_2.addWidget(self.textBrowser_command)
 
-        self.gridLayout.setColumnStretch(1, 1)
+        self.horizontalLayout_2.setStretch(1, 1)
 
         self.retranslateUi(MainWindow)
 

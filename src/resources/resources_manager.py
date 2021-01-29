@@ -6,10 +6,14 @@ if getattr(sys, 'frozen', False):
     # If the application is run as a bundle, the PyInstaller bootloader
     # extends the sys module by a flag frozen=True and sets the app
     # path into variable _MEIPASS'.
-    main_path = sys._MEIPASS  # pylint: disable=no-member
+    main_path = os.path.dirname(sys.executable)
     abs_path = os.path.join(main_path, 'resources')
 else:
     abs_path = os.path.dirname(os.path.abspath(__file__))
+
+
+IMAGE_FOLDER = 'images'
+MODELS_FOLDER = 'models'
 
 
 class ResourcePaths:
@@ -18,16 +22,23 @@ class ResourcePaths:
     through this class
     """
     class images:
-        _IMAGE_FOLDER = 'images'
-        refresh = os.path.join(abs_path, _IMAGE_FOLDER, 'refresh.png')
-        showcase = os.path.join(abs_path, _IMAGE_FOLDER, 'showcase.png')
-        icon = os.path.join(abs_path, _IMAGE_FOLDER, 'icon.ico')
-        banner = os.path.join(abs_path, _IMAGE_FOLDER, 'banner.png')
-        settings = os.path.join(abs_path, _IMAGE_FOLDER, 'settings.png')
+        refresh = os.path.join(abs_path, IMAGE_FOLDER, 'refresh.png')
+        showcase = os.path.join(abs_path, IMAGE_FOLDER, 'showcase.png')
+        icon = os.path.join(abs_path, IMAGE_FOLDER, 'icon.ico')
+        banner = os.path.join(abs_path, IMAGE_FOLDER, 'banner.png')
+        settings = os.path.join(abs_path, IMAGE_FOLDER, 'settings.png')
+        folder = os.path.join(abs_path, IMAGE_FOLDER, 'folder.png')
+
+        class flags:
+            _FLAG_FOLDER = 'flags'
+            english = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'english.png')
+            german = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'german.png')
+            japanese = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'japan.png')
+            filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
 
     class models:
-        _MODELS_FOLDER = 'models'
-        modelsFolder = os.path.join(abs_path, _MODELS_FOLDER)
+
+        modelsFolder = os.path.join(abs_path, MODELS_FOLDER)
 
     localizationDir = os.path.join(abs_path, 'translations')
 

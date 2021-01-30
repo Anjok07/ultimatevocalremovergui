@@ -87,6 +87,7 @@ class Translator:
     def __init__(self, app: CustomApplication):
         self.app = app
         self._translator = QtCore.QTranslator(self.app)
+
         # Load language -> if not specified, try loading system language
         self.load_language(self.app.settings.value('language',
                                                    QtCore.QLocale.English))
@@ -107,6 +108,7 @@ class Translator:
             if not os.path.isfile(translation_path):
                 # Translation does not exist
                 # Load default language (english)
+                print(f'Translation file does not exist!\nLanguage: {language_str}\nPath: {translation_path}')
                 self.load_language()
                 return
             # Load language
@@ -118,7 +120,7 @@ class Translator:
             # Update translation on all windows
             for window in self.app.windows.values():
                 window.update_translation()
-            # Update checked language buttons
+            # Update settings window
             for button in self.app.windows['settings'].ui.frame_languages.findChildren(QtWidgets.QPushButton):
                 language_str = QtCore.QLocale.languageToString(language).lower()
                 button_name = f'pushButton_{language_str}'
@@ -229,7 +231,7 @@ class MainWindow(QtWidgets.QWidget):
         self.settings.setValue('seperation/input_paths', input_paths)
 
     # -Other Methods-
-    def update_widgets(self):
+    def update_window(self):
         """
         Update the text and states of widgets
         in this window
@@ -257,7 +259,8 @@ class MainWindow(QtWidgets.QWidget):
         self.settings.endGroup()
         # Commit Save
         self.settings.sync()
-        # -Close Window-
+        # -Close all windows-
+        self.app.closeAllWindows()
         event.accept()
 
     def update_translation(self):
@@ -277,7 +280,7 @@ class SettingsWindow(QtWidgets.QWidget):
 
         self.load_geometry()
         self.setup_widgets()
-        self.update_widgets()
+        self.update_window()
 
         self.menu_loadPage(index=0)
 
@@ -334,12 +337,16 @@ class SettingsWindow(QtWidgets.QWidget):
         self.menu_group.buttonClicked.connect(lambda btn:
                                               self.menu_loadPage(index=self.menu_group.id(btn)))
         # Flags
-        self.ui.pushButton_english.clicked.connect(lambda: self.app.translator.load_language(QtCore.QLocale.English))
-        self.ui.pushButton_german.clicked.connect(lambda: self.app.translator.load_language(QtCore.QLocale.German))
-        self.ui.pushButton_japanese.clicked.connect(lambda: self.app.translator.load_language(QtCore.QLocale.Japanese))
-        self.ui.pushButton_filipino.clicked.connect(lambda: self.app.translator.load_language(QtCore.QLocale.Filipino))
+        for button in self.ui.frame_languages.findChildren(QtWidgets.QPushButton):
+            # Get capitalized language from button name
+            language_str = button.objectName().split('_')[1].capitalize()
+            # Get language as QtCore.QLocale.Language
+            language: QtCore.QLocale.Language = getattr(QtCore.QLocale, language_str)
+            # Call load language on button click
+            button.clicked.connect(lambda *args, lan=language: self.app.translator.load_language(lan))
         # Buttons
         self.ui.pushButton_clearCommand.clicked.connect(self.pushButton_clearCommand_clicked)
+        self.ui.checkBox_stackPasses.clicked.connect(self.update_window)
 
     def load_geometry(self):
         """
@@ -370,65 +377,103 @@ class SettingsWindow(QtWidgets.QWidget):
         self.app.windows['main'].ui.textBrowser_command.clear()
         self.ui.pushButton_clearCommand.setVisible(False)
 
-    # -Other Methods-
-    def update_widgets(self):
+    # -Update and Save Methods-
+    # Whole window (All widgets)
+    def update_window(self):
         """
-        Update the values and states of widgets
+        Update the values and states of all widgets
         in this window
         """
+        self.update_page_seperationSettings()
+        self.update_page_shortcuts()
+        self.update_page_customization()
+        self.update_page_preferences()        
+
+    def save_window(self):
+        """
+        Save all values of the widgets in the
+        settings window
+        """
+
+    # Seperation Settings Page
+    def update_page_seperationSettings(self):
+        """
+        Update values and states of all widgets in the
+        seperation settings page
+        """
         seperation_data = self.app.extract_seperation_data()
-        # -Conversion Settings-
         # Stack Passes
         if self.ui.checkBox_stackPasses.isChecked():
-            self.ui.lineEdit_stackPasses.setEnabled(True)
+            self.ui.comboBox_stackPasses.setVisible(True)
+            self.ui.checkBox_saveAllStacked.setEnabled(True)
+            self.ui.checkBox_stackOnly.setEnabled(True)
+
         else:
-            self.ui.lineEdit_stackPasses.setEnabled(False)
-            self.ui.lineEdit_stackPasses.setText('0')
+            self.ui.comboBox_stackPasses.setVisible(False)
+            self.ui.checkBox_saveAllStacked.setEnabled(False)
+            self.ui.checkBox_stackOnly.setEnabled(False)
         # Checkbuttons
         for checkbutton in self.ui.groupBox_conversion.findChildren(QtWidgets.QCheckBox):
             key = checkbutton.objectName().split('_')[1]
+            if key in ['stackPasses', 'saveAllStacked', 'stackOnly']:
+                # Exclude these widgets (Manual processing)
+                continue
             checkbutton.setChecked(seperation_data[key])
 
+    def save_page_seperationSettings(self):
+        """
+        Save the values of the widgets in the
+        seperation settings page
+        """
+
+    # Shortcuts Page
+    def update_page_shortcuts(self):
+        """
+        Update values and states of all widgets in the
+        shortcuts page
+        """
+        pass
+
+    def save_page_shortcuts(self):
+        """
+        Save the values of the widgets in the
+        shortcuts page
+        """
+
+    # Customization Page
+    def update_page_customization(self):
+        """
+        Update values and states of all widgets in the
+        customization page
+        """
+        pass
+
+    def save_page_customization(self):
+        """
+        Save the values of the widgets in the
+        customization page
+        """
+    
+    # Preferences Page
+    def update_page_preferences(self):
+        """
+        Update values and states of all widgets in the
+        preferences page
+        """
+        pass
+
+    def save_page_preferences(self):
+        """
+        Save the values of the widgets in the
+        seperation settings page
+        """
+
+    # -Other-
     def decode_modelNames(self):
         """
         Decode the selected model file names and adjust states
         and cosntants of widgets accordingly
         """
-
-    # def update_available_models(self):
-    #     """
-    #     Loop through every model (.pth) in the models directory
-    #     and add to the select your model list
-    #     """
-    #     model_folder = os.path.join(ResourcePaths.modelsDir, self.settings.value('seper'))
-    #     temp_instrumentalModels_dir = os.path.join(, self.aiModel_var.get(), 'Main Models')  # nopep8
-    #     temp_stackedModels_dir = os.path.join(stackedModels_dir, self.aiModel_var.get(), 'Stacked Models')
-    #     # Instrumental models
-    #     new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
-    #     if new_InstrumentalModels != self.lastInstrumentalModels:
-    #         self.instrumentalLabel_to_path.clear()
-    #         self.options_instrumentalModel_Optionmenu['menu'].delete(0, 'end')
-    #         for file_name in new_InstrumentalModels:
-    #             if file_name.endswith('.pth'):
-    #                 # Add Radiobutton to the Options Menu
-    #                 self.options_instrumentalModel_Optionmenu['menu'].add_radiobutton(label=file_name,
-    #                                                                                   command=tk._setit(self.instrumentalModel_var, file_name))
-    #                 # Link the files name to its absolute path
-    #                 self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
-    #         self.lastInstrumentalModels = new_InstrumentalModels
-    #     # Stacked models
-    #     new_stackedModels = os.listdir(temp_stackedModels_dir)
-    #     if new_stackedModels != self.lastStackedModels:
-    #         self.stackedLabel_to_path.clear()
-    #         self.options_stackedModel_Optionmenu['menu'].delete(0, 'end')
-    #         for file_name in new_stackedModels:
-    #             if file_name.endswith('.pth'):
-    #                 # Add Radiobutton to the Options Menu
-    #                 self.options_stackedModel_Optionmenu['menu'].add_radiobutton(label=file_name,
-    #                                                                              command=tk._setit(self.stackedModel_var, file_name))
-    #                 # Link the files name to its absolute path
-    #                 self.stackedLabel_to_path[file_name] = os.path.join(temp_stackedModels_dir, file_name)  # nopep8
-    #         self.lastStackedModels = new_stackedModels
 
     def menu_loadPage(self, index: int):
         """
@@ -448,7 +493,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.ui.frame_14.setMinimumWidth(min_width)
 
         # Update states and values of widgets
-        self.update_widgets()
+        self.update_window()
 
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):

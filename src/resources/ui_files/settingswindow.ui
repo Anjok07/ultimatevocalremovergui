@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>898</width>
-    <height>452</height>
+    <width>948</width>
+    <height>501</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,6 +29,9 @@ QScrollBar {
 QLineEdit, QComboBox {
 	color: rgb(0, 0, 0);
 	background-color: none;
+}
+QLineEdit:disabled, QComboBox:disabled, QCheckBox:disabled {
+	color: rgb(60, 60, 60);
 }
 QComboBox QAbstractItemView {
     border: 2px solid rgb(49, 96, 107);
@@ -311,7 +314,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -364,8 +367,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>735</width>
-               <height>418</height>
+               <width>768</width>
+               <height>440</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -493,27 +496,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                         </widget>
                        </item>
-                       <item row="3" column="0">
-                        <widget class="QCheckBox" name="checkBox_outputImage">
-                         <property name="text">
-                          <string>Output Image</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
-                        <widget class="QCheckBox" name="checkBox_stackOnly">
-                         <property name="text">
-                          <string>Stack Conversion Only</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QCheckBox" name="checkBox_tta">
-                         <property name="text">
-                          <string>TTA</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="0" column="0">
                         <widget class="QCheckBox" name="checkBox_gpuConversion">
                          <property name="text">
@@ -521,28 +503,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                         </widget>
                        </item>
-                       <item row="3" column="1">
-                        <widget class="QCheckBox" name="checkBox_customParameters">
-                         <property name="text">
-                          <string>Custom Parameters</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="0">
-                        <widget class="QCheckBox" name="checkBox_saveAllStacked">
-                         <property name="text">
-                          <string>Save All Stacked Outputs</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="0">
-                        <widget class="QCheckBox" name="checkBox_modelFolder">
-                         <property name="text">
-                          <string>Model Test Mode</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="1" alignment="Qt::AlignLeft">
+                       <item row="1" column="1">
                         <widget class="QFrame" name="frame_10">
                          <property name="frameShape">
                           <enum>QFrame::NoFrame</enum>
@@ -569,15 +530,15 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                           <property name="bottomMargin">
                            <number>0</number>
                           </property>
-                          <item alignment="Qt::AlignLeft">
+                          <item>
                            <widget class="QCheckBox" name="checkBox_stackPasses">
                             <property name="text">
                              <string>Stack Passes</string>
                             </property>
                            </widget>
                           </item>
-                          <item alignment="Qt::AlignLeft">
-                           <widget class="QLineEdit" name="lineEdit_stackPasses">
+                          <item>
+                           <widget class="QComboBox" name="comboBox_stackPasses">
                             <property name="sizePolicy">
                              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                               <horstretch>0</horstretch>
@@ -586,16 +547,83 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             </property>
                             <property name="maximumSize">
                              <size>
-                              <width>22</width>
-                              <height>25</height>
+                              <width>30</width>
+                              <height>21</height>
                              </size>
                             </property>
-                            <property name="alignment">
-                             <set>Qt::AlignCenter</set>
+                            <property name="sizeAdjustPolicy">
+                             <enum>QComboBox::AdjustToContents</enum>
                             </property>
+                            <item>
+                             <property name="text">
+                              <string>1</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>2</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>3</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>4</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>5</string>
+                             </property>
+                            </item>
                            </widget>
                           </item>
                          </layout>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QCheckBox" name="checkBox_saveAllStacked">
+                         <property name="text">
+                          <string>Save All Stacked Outputs</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QCheckBox" name="checkBox_stackOnly">
+                         <property name="text">
+                          <string>Stack Conversion Only</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="0">
+                        <widget class="QCheckBox" name="checkBox_outputImage">
+                         <property name="text">
+                          <string>Output Image</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QCheckBox" name="checkBox_tta">
+                         <property name="text">
+                          <string>TTA</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QCheckBox" name="checkBox_modelFolder">
+                         <property name="text">
+                          <string>Model Test Mode</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QCheckBox" name="checkBox_customParameters">
+                         <property name="text">
+                          <string>Custom Parameters</string>
+                         </property>
                         </widget>
                        </item>
                       </layout>
@@ -682,6 +710,9 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                           </item>
                           <item row="1" column="0">
                            <widget class="QComboBox" name="comboBox_engine">
+                            <property name="enabled">
+                             <bool>true</bool>
+                            </property>
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
@@ -1162,7 +1193,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
+               <width>98</width>
                <height>40</height>
               </rect>
              </property>
@@ -1239,8 +1270,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>718</width>
-               <height>501</height>
+               <width>768</width>
+               <height>440</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1319,8 +1350,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>718</width>
-               <height>485</height>
+               <width>768</width>
+               <height>440</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1847,54 +1878,17 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="minimumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="toolTip">
                              <string>English</string>
-                            </property>
-                            <property name="text">
-                             <string notr="true"/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="checked">
-                             <bool>true</bool>
-                            </property>
-                            <property name="default">
-                             <bool>false</bool>
-                            </property>
-                            <property name="flat">
-                             <bool>false</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="1">
-                           <widget class="QPushButton" name="pushButton_german">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>48</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>48</height>
-                             </size>
-                            </property>
-                            <property name="toolTip">
-                             <string>German</string>
                             </property>
                             <property name="text">
                              <string notr="true"/>
@@ -1921,13 +1915,13 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="minimumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="toolTip">
@@ -1944,18 +1938,55 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             </property>
                            </widget>
                           </item>
-                          <item row="1" column="1">
-                           <widget class="QPushButton" name="pushButton_japanese">
+                          <item row="0" column="1">
+                           <widget class="QPushButton" name="pushButton_german">
                             <property name="minimumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
                               <width>80</width>
-                              <height>48</height>
+                              <height>49</height>
+                             </size>
+                            </property>
+                            <property name="toolTip">
+                             <string>German</string>
+                            </property>
+                            <property name="text">
+                             <string notr="true"/>
+                            </property>
+                            <property name="checkable">
+                             <bool>true</bool>
+                            </property>
+                            <property name="checked">
+                             <bool>false</bool>
+                            </property>
+                            <property name="default">
+                             <bool>false</bool>
+                            </property>
+                            <property name="flat">
+                             <bool>false</bool>
+                            </property>
+                            <property name="language" stdset="0">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="1" column="1">
+                           <widget class="QPushButton" name="pushButton_japanese">
+                            <property name="minimumSize">
+                             <size>
+                              <width>80</width>
+                              <height>49</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>80</width>
+                              <height>49</height>
                              </size>
                             </property>
                             <property name="toolTip">
@@ -1968,6 +1999,34 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                              <string/>
                             </property>
                             <property name="checkable">
+                             <bool>true</bool>
+                            </property>
+                            <property name="language" stdset="0">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="2" column="0">
+                           <widget class="QPushButton" name="pushButton_turkish">
+                            <property name="minimumSize">
+                             <size>
+                              <width>80</width>
+                              <height>49</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>80</width>
+                              <height>49</height>
+                             </size>
+                            </property>
+                            <property name="text">
+                             <string/>
+                            </property>
+                            <property name="checkable">
+                             <bool>true</bool>
+                            </property>
+                            <property name="flat">
                              <bool>true</bool>
                             </property>
                             <property name="language" stdset="0">

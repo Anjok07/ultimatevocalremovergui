@@ -17,7 +17,7 @@ class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(898, 452)
+        SettingsWindow.resize(948, 501)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -33,6 +33,9 @@ class Ui_SettingsWindow(object):
                                      "QLineEdit, QComboBox {\n"
                                      "	color: rgb(0, 0, 0);\n"
                                      "	background-color: none;\n"
+                                     "}\n"
+                                     "QLineEdit:disabled, QComboBox:disabled, QCheckBox:disabled {\n"
+                                     "	color: rgb(60, 60, 60);\n"
                                      "}\n"
                                      "QComboBox QAbstractItemView {\n"
                                      "    border: 2px solid rgb(49, 96, 107);\n"
@@ -57,12 +60,12 @@ class Ui_SettingsWindow(object):
                                      "	background-color: rgb(25, 45, 60);\n"
                                      "}\n"
                                      "QPushButton:pressed {\n"
-                                     "	background-color: rgb(49, 96, 107);\n"
+                                     "	background-color: rgb(49, "
+                                     "96, 107);\n"
                                      "}\n"
                                      "QPushButton[clear=\"true\"] {\n"
                                      "	border: 2px solid rgb(109, 213, 237);\n"
-                                     "	ba"
-                                     "ckground-color: none;\n"
+                                     "	background-color: none;\n"
                                      "	border-radius: 5px;\n"
                                      "}\n"
                                      "QPushButton[clear=\"true\"]:hover {\n"
@@ -95,11 +98,11 @@ class Ui_SettingsWindow(object):
                                      "    background-color: rgb(49, 96, 107);\n"
                                      "}\n"
                                      "QRadioButton[menu=\"true\"]::unchecked::hover, \n"
-                                     "QRadioButton[menu=\"true\"]::indicator::hover {\n"
+                                     "QRadioB"
+                                     "utton[menu=\"true\"]::indicator::hover {\n"
                                      "    background-color: rgb(25, 50, 60);\n"
                                      "}\n"
-                                     "QRadio"
-                                     "Button[menu=\"true\"]::checked,\n"
+                                     "QRadioButton[menu=\"true\"]::checked,\n"
                                      "QRadioButton[menu=\"true\"]::indicator::checked {\n"
                                      "    background-color: rgb(2, 18, 40);\n"
                                      "}\n"
@@ -215,7 +218,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 418))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 768, 440))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -263,41 +266,10 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout.addWidget(self.checkBox_postProcess, 0, 1, 1, 1)
 
-        self.checkBox_outputImage = QCheckBox(self.groupBox_conversion)
-        self.checkBox_outputImage.setObjectName(u"checkBox_outputImage")
-
-        self.gridLayout.addWidget(self.checkBox_outputImage, 3, 0, 1, 1)
-
-        self.checkBox_stackOnly = QCheckBox(self.groupBox_conversion)
-        self.checkBox_stackOnly.setObjectName(u"checkBox_stackOnly")
-
-        self.gridLayout.addWidget(self.checkBox_stackOnly, 4, 0, 1, 1)
-
-        self.checkBox_tta = QCheckBox(self.groupBox_conversion)
-        self.checkBox_tta.setObjectName(u"checkBox_tta")
-
-        self.gridLayout.addWidget(self.checkBox_tta, 1, 1, 1, 1)
-
         self.checkBox_gpuConversion = QCheckBox(self.groupBox_conversion)
         self.checkBox_gpuConversion.setObjectName(u"checkBox_gpuConversion")
 
         self.gridLayout.addWidget(self.checkBox_gpuConversion, 0, 0, 1, 1)
-
-        self.checkBox_customParameters = QCheckBox(self.groupBox_conversion)
-        self.checkBox_customParameters.setObjectName(
-            u"checkBox_customParameters")
-
-        self.gridLayout.addWidget(self.checkBox_customParameters, 3, 1, 1, 1)
-
-        self.checkBox_saveAllStacked = QCheckBox(self.groupBox_conversion)
-        self.checkBox_saveAllStacked.setObjectName(u"checkBox_saveAllStacked")
-
-        self.gridLayout.addWidget(self.checkBox_saveAllStacked, 2, 0, 1, 1)
-
-        self.checkBox_modelFolder = QCheckBox(self.groupBox_conversion)
-        self.checkBox_modelFolder.setObjectName(u"checkBox_modelFolder")
-
-        self.gridLayout.addWidget(self.checkBox_modelFolder, 1, 0, 1, 1)
 
         self.frame_10 = QFrame(self.groupBox_conversion)
         self.frame_10.setObjectName(u"frame_10")
@@ -311,24 +283,59 @@ class Ui_SettingsWindow(object):
         self.checkBox_stackPasses = QCheckBox(self.frame_10)
         self.checkBox_stackPasses.setObjectName(u"checkBox_stackPasses")
 
-        self.horizontalLayout_3.addWidget(
-            self.checkBox_stackPasses, 0, Qt.AlignLeft)
+        self.horizontalLayout_3.addWidget(self.checkBox_stackPasses)
 
-        self.lineEdit_stackPasses = QLineEdit(self.frame_10)
-        self.lineEdit_stackPasses.setObjectName(u"lineEdit_stackPasses")
+        self.comboBox_stackPasses = QComboBox(self.frame_10)
+        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.setObjectName(u"comboBox_stackPasses")
         sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(
-            self.lineEdit_stackPasses.sizePolicy().hasHeightForWidth())
-        self.lineEdit_stackPasses.setSizePolicy(sizePolicy3)
-        self.lineEdit_stackPasses.setMaximumSize(QSize(22, 25))
-        self.lineEdit_stackPasses.setAlignment(Qt.AlignCenter)
+            self.comboBox_stackPasses.sizePolicy().hasHeightForWidth())
+        self.comboBox_stackPasses.setSizePolicy(sizePolicy3)
+        self.comboBox_stackPasses.setMaximumSize(QSize(30, 21))
+        self.comboBox_stackPasses.setSizeAdjustPolicy(
+            QComboBox.AdjustToContents)
 
-        self.horizontalLayout_3.addWidget(
-            self.lineEdit_stackPasses, 0, Qt.AlignLeft)
+        self.horizontalLayout_3.addWidget(self.comboBox_stackPasses)
 
-        self.gridLayout.addWidget(self.frame_10, 2, 1, 1, 1, Qt.AlignLeft)
+        self.gridLayout.addWidget(self.frame_10, 1, 1, 1, 1)
+
+        self.checkBox_saveAllStacked = QCheckBox(self.groupBox_conversion)
+        self.checkBox_saveAllStacked.setObjectName(u"checkBox_saveAllStacked")
+
+        self.gridLayout.addWidget(self.checkBox_saveAllStacked, 2, 1, 1, 1)
+
+        self.checkBox_stackOnly = QCheckBox(self.groupBox_conversion)
+        self.checkBox_stackOnly.setObjectName(u"checkBox_stackOnly")
+
+        self.gridLayout.addWidget(self.checkBox_stackOnly, 3, 1, 1, 1)
+
+        self.checkBox_outputImage = QCheckBox(self.groupBox_conversion)
+        self.checkBox_outputImage.setObjectName(u"checkBox_outputImage")
+
+        self.gridLayout.addWidget(self.checkBox_outputImage, 4, 0, 1, 1)
+
+        self.checkBox_tta = QCheckBox(self.groupBox_conversion)
+        self.checkBox_tta.setObjectName(u"checkBox_tta")
+
+        self.gridLayout.addWidget(self.checkBox_tta, 1, 0, 1, 1)
+
+        self.checkBox_modelFolder = QCheckBox(self.groupBox_conversion)
+        self.checkBox_modelFolder.setObjectName(u"checkBox_modelFolder")
+
+        self.gridLayout.addWidget(self.checkBox_modelFolder, 2, 0, 1, 1)
+
+        self.checkBox_customParameters = QCheckBox(self.groupBox_conversion)
+        self.checkBox_customParameters.setObjectName(
+            u"checkBox_customParameters")
+
+        self.gridLayout.addWidget(self.checkBox_customParameters, 3, 0, 1, 1)
 
         self.horizontalLayout_4.addWidget(self.groupBox_conversion)
 
@@ -367,6 +374,7 @@ class Ui_SettingsWindow(object):
         self.comboBox_engine.addItem("")
         self.comboBox_engine.addItem("")
         self.comboBox_engine.setObjectName(u"comboBox_engine")
+        self.comboBox_engine.setEnabled(True)
         self.comboBox_engine.setMinimumSize(QSize(0, 27))
 
         self.gridLayout_6.addWidget(self.comboBox_engine, 1, 0, 1, 1)
@@ -593,7 +601,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 40))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 40))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -628,7 +636,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 718, 501))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 768, 440))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -664,7 +672,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 718, 485))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 768, 440))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -885,20 +893,29 @@ class Ui_SettingsWindow(object):
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.pushButton_english = QPushButton(self.frame_languages)
         self.pushButton_english.setObjectName(u"pushButton_english")
-        self.pushButton_english.setMinimumSize(QSize(80, 48))
-        self.pushButton_english.setMaximumSize(QSize(80, 48))
+        self.pushButton_english.setMinimumSize(QSize(80, 49))
+        self.pushButton_english.setMaximumSize(QSize(80, 49))
         self.pushButton_english.setText(u"")
         self.pushButton_english.setCheckable(True)
-        self.pushButton_english.setChecked(True)
+        self.pushButton_english.setChecked(False)
         self.pushButton_english.setFlat(False)
         self.pushButton_english.setProperty("language", True)
 
         self.gridLayout_3.addWidget(self.pushButton_english, 0, 0, 1, 1)
 
+        self.pushButton_filipino = QPushButton(self.frame_languages)
+        self.pushButton_filipino.setObjectName(u"pushButton_filipino")
+        self.pushButton_filipino.setMinimumSize(QSize(80, 49))
+        self.pushButton_filipino.setMaximumSize(QSize(80, 49))
+        self.pushButton_filipino.setCheckable(True)
+        self.pushButton_filipino.setProperty("language", True)
+
+        self.gridLayout_3.addWidget(self.pushButton_filipino, 1, 0, 1, 1)
+
         self.pushButton_german = QPushButton(self.frame_languages)
         self.pushButton_german.setObjectName(u"pushButton_german")
-        self.pushButton_german.setMinimumSize(QSize(80, 48))
-        self.pushButton_german.setMaximumSize(QSize(80, 48))
+        self.pushButton_german.setMinimumSize(QSize(80, 49))
+        self.pushButton_german.setMaximumSize(QSize(80, 49))
         self.pushButton_german.setText(u"")
         self.pushButton_german.setCheckable(True)
         self.pushButton_german.setChecked(False)
@@ -907,24 +924,25 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_3.addWidget(self.pushButton_german, 0, 1, 1, 1)
 
-        self.pushButton_filipino = QPushButton(self.frame_languages)
-        self.pushButton_filipino.setObjectName(u"pushButton_filipino")
-        self.pushButton_filipino.setMinimumSize(QSize(80, 48))
-        self.pushButton_filipino.setMaximumSize(QSize(80, 48))
-        self.pushButton_filipino.setCheckable(True)
-        self.pushButton_filipino.setProperty("language", True)
-
-        self.gridLayout_3.addWidget(self.pushButton_filipino, 1, 0, 1, 1)
-
         self.pushButton_japanese = QPushButton(self.frame_languages)
         self.pushButton_japanese.setObjectName(u"pushButton_japanese")
-        self.pushButton_japanese.setMinimumSize(QSize(80, 48))
-        self.pushButton_japanese.setMaximumSize(QSize(80, 48))
+        self.pushButton_japanese.setMinimumSize(QSize(80, 49))
+        self.pushButton_japanese.setMaximumSize(QSize(80, 49))
         self.pushButton_japanese.setToolTipDuration(-1)
         self.pushButton_japanese.setCheckable(True)
         self.pushButton_japanese.setProperty("language", True)
 
         self.gridLayout_3.addWidget(self.pushButton_japanese, 1, 1, 1, 1)
+
+        self.pushButton_turkish = QPushButton(self.frame_languages)
+        self.pushButton_turkish.setObjectName(u"pushButton_turkish")
+        self.pushButton_turkish.setMinimumSize(QSize(80, 49))
+        self.pushButton_turkish.setMaximumSize(QSize(80, 49))
+        self.pushButton_turkish.setCheckable(True)
+        self.pushButton_turkish.setFlat(True)
+        self.pushButton_turkish.setProperty("language", True)
+
+        self.gridLayout_3.addWidget(self.pushButton_turkish, 2, 0, 1, 1)
 
         self.gridLayout_2.addWidget(
             self.frame_languages, 0, 1, 1, 1, Qt.AlignTop)
@@ -996,7 +1014,7 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget_11.setCurrentIndex(0)
+        self.stackedWidget_11.setCurrentIndex(3)
         self.pushButton_english.setDefault(False)
         self.pushButton_german.setDefault(False)
 
@@ -1018,22 +1036,33 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Conversion ", None))
         self.checkBox_postProcess.setText(QCoreApplication.translate(
             "SettingsWindow", u"Post-Process", None))
-        self.checkBox_outputImage.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Output Image", None))
-        self.checkBox_stackOnly.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Stack Conversion Only", None))
-        self.checkBox_tta.setText(
-            QCoreApplication.translate("SettingsWindow", u"TTA", None))
         self.checkBox_gpuConversion.setText(QCoreApplication.translate(
             "SettingsWindow", u"GPU Conversion", None))
-        self.checkBox_customParameters.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Custom Parameters", None))
-        self.checkBox_saveAllStacked.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Save All Stacked Outputs", None))
-        self.checkBox_modelFolder.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Model Test Mode", None))
         self.checkBox_stackPasses.setText(QCoreApplication.translate(
             "SettingsWindow", u"Stack Passes", None))
+        self.comboBox_stackPasses.setItemText(
+            0, QCoreApplication.translate("SettingsWindow", u"1", None))
+        self.comboBox_stackPasses.setItemText(
+            1, QCoreApplication.translate("SettingsWindow", u"2", None))
+        self.comboBox_stackPasses.setItemText(
+            2, QCoreApplication.translate("SettingsWindow", u"3", None))
+        self.comboBox_stackPasses.setItemText(
+            3, QCoreApplication.translate("SettingsWindow", u"4", None))
+        self.comboBox_stackPasses.setItemText(
+            4, QCoreApplication.translate("SettingsWindow", u"5", None))
+
+        self.checkBox_saveAllStacked.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Save All Stacked Outputs", None))
+        self.checkBox_stackOnly.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Stack Conversion Only", None))
+        self.checkBox_outputImage.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Output Image", None))
+        self.checkBox_tta.setText(
+            QCoreApplication.translate("SettingsWindow", u"TTA", None))
+        self.checkBox_modelFolder.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Model Test Mode", None))
+        self.checkBox_customParameters.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Custom Parameters", None))
         self.groupBox_2.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Engine ", None))
         self.label_engine.setText(QCoreApplication.translate(
@@ -1123,19 +1152,20 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"English", None))
 #endif // QT_CONFIG(tooltip)
 # if QT_CONFIG(tooltip)
-        self.pushButton_german.setToolTip(
-            QCoreApplication.translate("SettingsWindow", u"German", None))
-#endif // QT_CONFIG(tooltip)
-# if QT_CONFIG(tooltip)
         self.pushButton_filipino.setToolTip(
             QCoreApplication.translate("SettingsWindow", u"Filipino", None))
 #endif // QT_CONFIG(tooltip)
         self.pushButton_filipino.setText("")
 # if QT_CONFIG(tooltip)
+        self.pushButton_german.setToolTip(
+            QCoreApplication.translate("SettingsWindow", u"German", None))
+#endif // QT_CONFIG(tooltip)
+# if QT_CONFIG(tooltip)
         self.pushButton_japanese.setToolTip(
             QCoreApplication.translate("SettingsWindow", u"Japanese", None))
 #endif // QT_CONFIG(tooltip)
         self.pushButton_japanese.setText("")
+        self.pushButton_turkish.setText("")
         self.pushButton_resetDefault.setText(QCoreApplication.translate(
             "SettingsWindow", u"Reset to default", None))
         self.pushButton_apply.setText(

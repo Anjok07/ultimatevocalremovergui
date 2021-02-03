@@ -2,12 +2,15 @@
 <ui version="4.0">
  <class>SettingsWindow</class>
  <widget class="QWidget" name="SettingsWindow">
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>948</width>
-    <height>501</height>
+    <width>972</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,8 +33,13 @@ QLineEdit, QComboBox {
 	color: rgb(0, 0, 0);
 	background-color: none;
 }
-QLineEdit:disabled, QComboBox:disabled, QCheckBox:disabled {
-	color: rgb(60, 60, 60);
+QCheckBox {
+	color: #CCC;
+}
+QLineEdit:disabled {
+	color: #222;
+	border: 1px solid gray;
+	background-color: #999;
 }
 QComboBox QAbstractItemView {
     border: 2px solid rgb(49, 96, 107);
@@ -99,8 +107,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::hover {
 QRadioButton[menu=&quot;true&quot;]::checked,
 QRadioButton[menu=&quot;true&quot;]::indicator::checked {
     background-color: rgb(2, 18, 40);
-}
-</string>
+}</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
    <property name="spacing">
@@ -303,7 +310,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
        <number>0</number>
       </property>
       <item>
-       <widget class="QStackedWidget" name="stackedWidget_11">
+       <widget class="QStackedWidget" name="stackedWidget">
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
@@ -314,7 +321,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -367,8 +374,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>768</width>
-               <height>440</height>
+               <width>792</width>
+               <height>519</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -470,7 +477,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                       <property name="titleText" stdset="0">
                        <bool>true</bool>
                       </property>
-                      <layout class="QGridLayout" name="gridLayout">
+                      <layout class="QGridLayout" name="gridLayout" columnminimumwidth="0,167">
                        <property name="leftMargin">
                         <number>35</number>
                        </property>
@@ -503,8 +510,14 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                         </widget>
                        </item>
-                       <item row="1" column="1">
+                       <item row="1" column="1" alignment="Qt::AlignLeft">
                         <widget class="QFrame" name="frame_10">
+                         <property name="minimumSize">
+                          <size>
+                           <width>135</width>
+                           <height>21</height>
+                          </size>
+                         </property>
                          <property name="frameShape">
                           <enum>QFrame::NoFrame</enum>
                          </property>
@@ -514,7 +527,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          <property name="lineWidth">
                           <number>0</number>
                          </property>
-                         <layout class="QHBoxLayout" name="horizontalLayout_3">
+                         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
                           <property name="spacing">
                            <number>3</number>
                           </property>
@@ -530,8 +543,14 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                           <property name="bottomMargin">
                            <number>0</number>
                           </property>
-                          <item>
+                          <item alignment="Qt::AlignLeft">
                            <widget class="QCheckBox" name="checkBox_stackPasses">
+                            <property name="maximumSize">
+                             <size>
+                              <width>16777215</width>
+                              <height>16777215</height>
+                             </size>
+                            </property>
                             <property name="text">
                              <string>Stack Passes</string>
                             </property>
@@ -545,38 +564,67 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                               <verstretch>0</verstretch>
                              </sizepolicy>
                             </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
                             <property name="maximumSize">
                              <size>
-                              <width>30</width>
+                              <width>45</width>
                               <height>21</height>
                              </size>
                             </property>
-                            <property name="sizeAdjustPolicy">
-                             <enum>QComboBox::AdjustToContents</enum>
+                            <property name="currentText">
+                             <string notr="true">1</string>
+                            </property>
+                            <property name="maxVisibleItems">
+                             <number>4</number>
                             </property>
                             <item>
                              <property name="text">
-                              <string>1</string>
+                              <string notr="true">1</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>2</string>
+                              <string notr="true">2</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>3</string>
+                              <string notr="true">3</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>4</string>
+                              <string notr="true">4</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>5</string>
+                              <string notr="true">5</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string notr="true">6</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string notr="true">7</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string notr="true">8</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string notr="true">9</string>
                              </property>
                             </item>
                            </widget>
@@ -593,6 +641,9 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                        </item>
                        <item row="3" column="1">
                         <widget class="QCheckBox" name="checkBox_stackOnly">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
                          <property name="text">
                           <string>Stack Conversion Only</string>
                          </property>
@@ -600,6 +651,9 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                        </item>
                        <item row="4" column="0">
                         <widget class="QCheckBox" name="checkBox_outputImage">
+                         <property name="toolTip">
+                          <string>Save spectogram of seperated music files</string>
+                         </property>
                          <property name="text">
                           <string>Output Image</string>
                          </property>
@@ -716,17 +770,17 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
-                              <height>27</height>
+                              <height>25</height>
                              </size>
                             </property>
                             <item>
                              <property name="text">
-                              <string comment="test" extracomment="a">v4</string>
+                              <string notr="true">v2</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>v2</string>
+                              <string notr="true">v4</string>
                              </property>
                             </item>
                            </widget>
@@ -736,22 +790,22 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
-                              <height>27</height>
+                              <height>25</height>
                              </size>
                             </property>
                             <item>
                              <property name="text">
-                              <string>Kaiser Best</string>
+                              <string notr="true">Kaiser Best</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>Kaiser Fast</string>
+                              <string notr="true">Kaiser Fast</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string>Scipy</string>
+                              <string notr="true">Scipy</string>
                              </property>
                             </item>
                            </widget>
@@ -795,7 +849,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                    <property name="titleText" stdset="0">
                     <bool>true</bool>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_2">
+                   <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,1">
                     <property name="spacing">
                      <number>10</number>
                     </property>
@@ -811,8 +865,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                     <property name="bottomMargin">
                      <number>10</number>
                     </property>
-                    <item alignment="Qt::AlignVCenter">
-                     <widget class="QFrame" name="frame_8">
+                    <item>
+                     <widget class="QFrame" name="frame_instrumentalComboBox">
                       <property name="frameShape">
                        <enum>QFrame::StyledPanel</enum>
                       </property>
@@ -858,11 +912,11 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                         </widget>
                        </item>
                        <item>
-                        <widget class="QComboBox" name="comboBox_resType_3">
+                        <widget class="QComboBox" name="comboBox_instrumental">
                          <property name="minimumSize">
                           <size>
                            <width>0</width>
-                           <height>27</height>
+                           <height>25</height>
                           </size>
                          </property>
                          <property name="maximumSize">
@@ -875,17 +929,20 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                           <bool>false</bool>
                          </property>
                          <property name="currentText">
-                          <string/>
+                          <string notr="true"/>
                          </property>
                          <property name="maxVisibleItems">
-                          <number>10</number>
+                          <number>5</number>
+                         </property>
+                         <property name="sizeAdjustPolicy">
+                          <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
                          </property>
                         </widget>
                        </item>
                       </layout>
                      </widget>
                     </item>
-                    <item>
+                    <item alignment="Qt::AlignLeft">
                      <widget class="QFrame" name="frame_constants">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -895,7 +952,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>230</width>
+                        <width>0</width>
                         <height>0</height>
                        </size>
                       </property>
@@ -911,45 +968,75 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                       <property name="frameShadow">
                        <enum>QFrame::Raised</enum>
                       </property>
-                      <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,2,1">
+                      <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,0,0">
                        <property name="topMargin">
                         <number>5</number>
                        </property>
                        <property name="bottomMargin">
                         <number>3</number>
                        </property>
-                       <item row="0" column="1">
-                        <widget class="QLabel" name="label_sr">
-                         <property name="text">
-                          <string>SR</string>
+                       <item row="2" column="2">
+                        <widget class="QComboBox" name="comboBox_winSize_stacked">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>25</height>
+                          </size>
                          </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
                          </property>
+                         <property name="editable">
+                          <bool>true</bool>
+                         </property>
+                         <property name="currentText">
+                          <string notr="true">512</string>
+                         </property>
+                         <property name="currentIndex">
+                          <number>2</number>
+                         </property>
+                         <property name="canEdit" stdset="0">
+                          <bool>true</bool>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>272</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>320</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>512</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>1024</string>
+                          </property>
+                         </item>
                         </widget>
                        </item>
-                       <item row="5" column="1">
-                        <widget class="QLabel" name="label_nfft">
-                         <property name="text">
-                          <string>N_FFT</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="1">
-                        <widget class="QLabel" name="label_winSize">
-                         <property name="text">
-                          <string>Window Size</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="1">
+                       <item row="1" column="1">
                         <widget class="QLabel" name="label_hopLength">
+                         <property name="minimumSize">
+                          <size>
+                           <width>80</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>80</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
                          <property name="text">
                           <string>Hop Length</string>
                          </property>
@@ -958,30 +1045,22 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                         </widget>
                        </item>
-                       <item row="5" column="0">
-                        <widget class="QLineEdit" name="lineEdit_instr_nfft">
+                       <item row="1" column="2">
+                        <widget class="QLineEdit" name="lineEdit_hopLength_stacked">
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
                          <property name="text">
-                          <string>2048</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
-                        <widget class="QLineEdit" name="lineEdit_instr_winSize">
-                         <property name="text">
-                          <string>320</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="2">
-                        <widget class="QLineEdit" name="lineEdit_stack_sr">
-                         <property name="text">
-                          <string>44100</string>
+                          <string notr="true">1024</string>
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignCenter</set>
@@ -995,9 +1074,21 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                         </widget>
                        </item>
                        <item row="4" column="2">
-                        <widget class="QLineEdit" name="lineEdit_stack_winSize">
+                        <widget class="QLineEdit" name="lineEdit_nfft_stacked">
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
                          <property name="text">
-                          <string>320</string>
+                          <string notr="true">2048</string>
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignCenter</set>
@@ -1010,10 +1101,91 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                         </widget>
                        </item>
-                       <item row="2" column="2">
-                        <widget class="QLineEdit" name="lineEdit_stack_hopLength">
+                       <item row="0" column="1">
+                        <widget class="QLabel" name="label_sr">
+                         <property name="minimumSize">
+                          <size>
+                           <width>80</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>80</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="toolTip">
+                          <string>Sampling Rate</string>
+                         </property>
                          <property name="text">
-                          <string>1024</string>
+                          <string>SR</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QLabel" name="label_winSize">
+                         <property name="minimumSize">
+                          <size>
+                           <width>80</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>80</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>Window Size</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="1">
+                        <widget class="QLabel" name="label_nfft">
+                         <property name="minimumSize">
+                          <size>
+                           <width>80</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>80</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>N_FFT</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <widget class="QLineEdit" name="lineEdit_sr_stacked">
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string notr="true">44100</string>
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignCenter</set>
@@ -1023,39 +1195,28 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                          <property name="readOnly">
                           <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="5" column="2">
-                        <widget class="QLineEdit" name="lineEdit_stack_nfft">
-                         <property name="text">
-                          <string>2048</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                         <property name="dragEnabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="readOnly">
-                          <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="0">
-                        <widget class="QLineEdit" name="lineEdit_instr_hopLength">
-                         <property name="text">
-                          <string>1024</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
                          </property>
                         </widget>
                        </item>
                        <item row="0" column="0">
-                        <widget class="QLineEdit" name="lineEdit_instr_sr">
+                        <widget class="QLineEdit" name="lineEdit_sr">
+                         <property name="enabled">
+                          <bool>false</bool>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
                          <property name="text">
-                          <string>44100</string>
+                          <string notr="true">44100</string>
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignCenter</set>
@@ -1065,14 +1226,106 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                          <property name="readOnly">
                           <bool>false</bool>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLineEdit" name="lineEdit_hopLength">
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string notr="true">1024</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QComboBox" name="comboBox_winSize">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="editable">
+                          <bool>true</bool>
+                         </property>
+                         <property name="currentText">
+                          <string notr="true">512</string>
+                         </property>
+                         <property name="currentIndex">
+                          <number>2</number>
+                         </property>
+                         <property name="canEdit" stdset="0">
+                          <bool>true</bool>
+                         </property>
+                         <item>
+                          <property name="text">
+                           <string>272</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>320</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>512</string>
+                          </property>
+                         </item>
+                         <item>
+                          <property name="text">
+                           <string>1024</string>
+                          </property>
+                         </item>
+                        </widget>
+                       </item>
+                       <item row="4" column="0">
+                        <widget class="QLineEdit" name="lineEdit_nfft">
+                         <property name="minimumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>60</width>
+                           <height>25</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string notr="true">2048</string>
+                         </property>
+                         <property name="alignment">
+                          <set>Qt::AlignCenter</set>
                          </property>
                         </widget>
                        </item>
                       </layout>
                      </widget>
                     </item>
-                    <item alignment="Qt::AlignVCenter">
-                     <widget class="QFrame" name="frame_9">
+                    <item>
+                     <widget class="QFrame" name="frame_stackComboBox">
                       <property name="frameShape">
                        <enum>QFrame::StyledPanel</enum>
                       </property>
@@ -1118,11 +1371,14 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                         </widget>
                        </item>
                        <item>
-                        <widget class="QComboBox" name="comboBox_resType_5">
+                        <widget class="QComboBox" name="comboBox_stacked">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
                          <property name="minimumSize">
                           <size>
                            <width>0</width>
-                           <height>27</height>
+                           <height>25</height>
                           </size>
                          </property>
                          <property name="maximumSize">
@@ -1135,10 +1391,13 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                           <bool>false</bool>
                          </property>
                          <property name="currentText">
-                          <string/>
+                          <string notr="true"/>
                          </property>
                          <property name="maxVisibleItems">
-                          <number>10</number>
+                          <number>5</number>
+                         </property>
+                         <property name="sizeAdjustPolicy">
+                          <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
                          </property>
                         </widget>
                        </item>
@@ -1270,8 +1529,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>768</width>
-               <height>440</height>
+               <width>98</width>
+               <height>40</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1350,8 +1609,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>768</width>
-               <height>440</height>
+               <width>600</width>
+               <height>371</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1549,7 +1808,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                                   <property name="minimumSize">
                                    <size>
                                     <width>0</width>
-                                    <height>27</height>
+                                    <height>25</height>
                                    </size>
                                   </property>
                                   <item>
@@ -1601,24 +1860,71 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                            </widget>
                           </item>
                           <item>
-                           <widget class="QCheckBox" name="checkBox_notifyUpdates">
-                            <property name="text">
-                             <string>Notify me of updates</string>
+                           <widget class="QFrame" name="frame_8">
+                            <property name="frameShape">
+                             <enum>QFrame::NoFrame</enum>
                             </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QCheckBox" name="checkBox_enableShortcuts">
-                            <property name="text">
-                             <string>Enable Shortcuts</string>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
                             </property>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QCheckBox" name="checkBox_disableAnimations">
-                            <property name="text">
-                             <string>Disable Animations</string>
+                            <property name="lineWidth">
+                             <number>0</number>
                             </property>
+                            <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0">
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>5</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="horizontalSpacing">
+                              <number>0</number>
+                             </property>
+                             <property name="verticalSpacing">
+                              <number>10</number>
+                             </property>
+                             <item row="2" column="0">
+                              <widget class="QCheckBox" name="checkBox_settingsStartup">
+                               <property name="text">
+                                <string>Open Settings on Startup</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="4" column="0">
+                              <widget class="QCheckBox" name="checkBox_disableAnimations">
+                               <property name="text">
+                                <string>Disable Animations</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="4" column="1">
+                              <widget class="QCheckBox" name="checkBox_disableShortcuts">
+                               <property name="text">
+                                <string>Disable Shortcuts</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="0" colspan="2">
+                              <widget class="QCheckBox" name="checkBox_notifiyOnFinish">
+                               <property name="text">
+                                <string>Notify me on finish of seperation</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0" colspan="2">
+                              <widget class="QCheckBox" name="checkBox_notifyUpdates">
+                               <property name="text">
+                                <string>Notify me of application updates</string>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
                            </widget>
                           </item>
                          </layout>
@@ -1640,7 +1946,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          </property>
                          <layout class="QFormLayout" name="formLayout">
                           <property name="fieldGrowthPolicy">
-                           <enum>QFormLayout::ExpandingFieldsGrow</enum>
+                           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
                           </property>
                           <property name="rowWrapPolicy">
                            <enum>QFormLayout::DontWrapRows</enum>
@@ -1752,7 +2058,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                              </sizepolicy>
                             </property>
                             <property name="text">
-                             <string>B:/Downloads</string>
+                             <string notr="true">B:/Downloads</string>
                             </property>
                             <property name="textFormat">
                              <enum>Qt::AutoText</enum>

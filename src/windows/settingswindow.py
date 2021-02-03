@@ -3,21 +3,22 @@
 ################################################################################
 # Form generated from reading UI file 'settingswindow.ui'
 ##
-# Created by: Qt User Interface Compiler version 6.0.0
+# Created by: Qt User Interface Compiler version 5.15.2
 ##
 # WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 
 class Ui_SettingsWindow(object):
     def setupUi(self, SettingsWindow):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
-        SettingsWindow.resize(948, 501)
+        SettingsWindow.setEnabled(True)
+        SettingsWindow.resize(972, 580)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -34,8 +35,13 @@ class Ui_SettingsWindow(object):
                                      "	color: rgb(0, 0, 0);\n"
                                      "	background-color: none;\n"
                                      "}\n"
-                                     "QLineEdit:disabled, QComboBox:disabled, QCheckBox:disabled {\n"
-                                     "	color: rgb(60, 60, 60);\n"
+                                     "QCheckBox {\n"
+                                     "	color: #CCC;\n"
+                                     "}\n"
+                                     "QLineEdit:disabled {\n"
+                                     "	color: #222;\n"
+                                     "	border: 1px solid gray;\n"
+                                     "	background-color: #999;\n"
                                      "}\n"
                                      "QComboBox QAbstractItemView {\n"
                                      "    border: 2px solid rgb(49, 96, 107);\n"
@@ -59,9 +65,9 @@ class Ui_SettingsWindow(object):
                                      "QPushButton:hover {\n"
                                      "	background-color: rgb(25, 45, 60);\n"
                                      "}\n"
-                                     "QPushButton:pressed {\n"
-                                     "	background-color: rgb(49, "
-                                     "96, 107);\n"
+                                     "QPushB"
+                                     "utton:pressed {\n"
+                                     "	background-color: rgb(49, 96, 107);\n"
                                      "}\n"
                                      "QPushButton[clear=\"true\"] {\n"
                                      "	border: 2px solid rgb(109, 213, 237);\n"
@@ -97,16 +103,15 @@ class Ui_SettingsWindow(object):
                                      "QRadioButton[menu=\"true\"]::indicator::unchecked {\n"
                                      "    background-color: rgb(49, 96, 107);\n"
                                      "}\n"
-                                     "QRadioButton[menu=\"true\"]::unchecked::hover, \n"
-                                     "QRadioB"
-                                     "utton[menu=\"true\"]::indicator::hover {\n"
+                                     "QRadioButton"
+                                     "[menu=\"true\"]::unchecked::hover, \n"
+                                     "QRadioButton[menu=\"true\"]::indicator::hover {\n"
                                      "    background-color: rgb(25, 50, 60);\n"
                                      "}\n"
                                      "QRadioButton[menu=\"true\"]::checked,\n"
                                      "QRadioButton[menu=\"true\"]::indicator::checked {\n"
                                      "    background-color: rgb(2, 18, 40);\n"
-                                     "}\n"
-                                     "")
+                                     "}")
         self.horizontalLayout = QHBoxLayout(SettingsWindow)
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -192,11 +197,11 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_18.setSpacing(0)
         self.verticalLayout_18.setObjectName(u"verticalLayout_18")
         self.verticalLayout_18.setContentsMargins(0, 0, 0, 0)
-        self.stackedWidget_11 = QStackedWidget(self.frame_14)
-        self.stackedWidget_11.setObjectName(u"stackedWidget_11")
-        self.stackedWidget_11.setFrameShape(QFrame.NoFrame)
-        self.stackedWidget_11.setFrameShadow(QFrame.Raised)
-        self.stackedWidget_11.setLineWidth(0)
+        self.stackedWidget = QStackedWidget(self.frame_14)
+        self.stackedWidget.setObjectName(u"stackedWidget")
+        self.stackedWidget.setFrameShape(QFrame.NoFrame)
+        self.stackedWidget.setFrameShadow(QFrame.Raised)
+        self.stackedWidget.setLineWidth(0)
         self.page_seperationSettings = QWidget()
         self.page_seperationSettings.setObjectName(u"page_seperationSettings")
         self.page_seperationSettings.setStyleSheet(u"")
@@ -218,7 +223,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 768, 440))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 792, 519))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -273,6 +278,7 @@ class Ui_SettingsWindow(object):
 
         self.frame_10 = QFrame(self.groupBox_conversion)
         self.frame_10.setObjectName(u"frame_10")
+        self.frame_10.setMinimumSize(QSize(135, 21))
         self.frame_10.setFrameShape(QFrame.NoFrame)
         self.frame_10.setFrameShadow(QFrame.Plain)
         self.frame_10.setLineWidth(0)
@@ -282,15 +288,21 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.checkBox_stackPasses = QCheckBox(self.frame_10)
         self.checkBox_stackPasses.setObjectName(u"checkBox_stackPasses")
+        self.checkBox_stackPasses.setMaximumSize(QSize(16777215, 16777215))
 
-        self.horizontalLayout_3.addWidget(self.checkBox_stackPasses)
+        self.horizontalLayout_3.addWidget(
+            self.checkBox_stackPasses, 0, Qt.AlignLeft)
 
         self.comboBox_stackPasses = QComboBox(self.frame_10)
-        self.comboBox_stackPasses.addItem("")
-        self.comboBox_stackPasses.addItem("")
-        self.comboBox_stackPasses.addItem("")
-        self.comboBox_stackPasses.addItem("")
-        self.comboBox_stackPasses.addItem("")
+        self.comboBox_stackPasses.addItem(u"1")
+        self.comboBox_stackPasses.addItem(u"2")
+        self.comboBox_stackPasses.addItem(u"3")
+        self.comboBox_stackPasses.addItem(u"4")
+        self.comboBox_stackPasses.addItem(u"5")
+        self.comboBox_stackPasses.addItem(u"6")
+        self.comboBox_stackPasses.addItem(u"7")
+        self.comboBox_stackPasses.addItem(u"8")
+        self.comboBox_stackPasses.addItem(u"9")
         self.comboBox_stackPasses.setObjectName(u"comboBox_stackPasses")
         sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
         sizePolicy3.setHorizontalStretch(0)
@@ -298,13 +310,14 @@ class Ui_SettingsWindow(object):
         sizePolicy3.setHeightForWidth(
             self.comboBox_stackPasses.sizePolicy().hasHeightForWidth())
         self.comboBox_stackPasses.setSizePolicy(sizePolicy3)
-        self.comboBox_stackPasses.setMaximumSize(QSize(30, 21))
-        self.comboBox_stackPasses.setSizeAdjustPolicy(
-            QComboBox.AdjustToContents)
+        self.comboBox_stackPasses.setMinimumSize(QSize(0, 0))
+        self.comboBox_stackPasses.setMaximumSize(QSize(45, 21))
+        self.comboBox_stackPasses.setCurrentText(u"1")
+        self.comboBox_stackPasses.setMaxVisibleItems(4)
 
         self.horizontalLayout_3.addWidget(self.comboBox_stackPasses)
 
-        self.gridLayout.addWidget(self.frame_10, 1, 1, 1, 1)
+        self.gridLayout.addWidget(self.frame_10, 1, 1, 1, 1, Qt.AlignLeft)
 
         self.checkBox_saveAllStacked = QCheckBox(self.groupBox_conversion)
         self.checkBox_saveAllStacked.setObjectName(u"checkBox_saveAllStacked")
@@ -313,6 +326,7 @@ class Ui_SettingsWindow(object):
 
         self.checkBox_stackOnly = QCheckBox(self.groupBox_conversion)
         self.checkBox_stackOnly.setObjectName(u"checkBox_stackOnly")
+        self.checkBox_stackOnly.setEnabled(True)
 
         self.gridLayout.addWidget(self.checkBox_stackOnly, 3, 1, 1, 1)
 
@@ -336,6 +350,8 @@ class Ui_SettingsWindow(object):
             u"checkBox_customParameters")
 
         self.gridLayout.addWidget(self.checkBox_customParameters, 3, 0, 1, 1)
+
+        self.gridLayout.setColumnMinimumWidth(1, 167)
 
         self.horizontalLayout_4.addWidget(self.groupBox_conversion)
 
@@ -371,20 +387,20 @@ class Ui_SettingsWindow(object):
         self.gridLayout_6.addWidget(self.label_engine, 0, 0, 1, 1)
 
         self.comboBox_engine = QComboBox(self.frame_12)
-        self.comboBox_engine.addItem("")
-        self.comboBox_engine.addItem("")
+        self.comboBox_engine.addItem(u"v2")
+        self.comboBox_engine.addItem(u"v4")
         self.comboBox_engine.setObjectName(u"comboBox_engine")
         self.comboBox_engine.setEnabled(True)
-        self.comboBox_engine.setMinimumSize(QSize(0, 27))
+        self.comboBox_engine.setMinimumSize(QSize(0, 25))
 
         self.gridLayout_6.addWidget(self.comboBox_engine, 1, 0, 1, 1)
 
         self.comboBox_resType = QComboBox(self.frame_12)
-        self.comboBox_resType.addItem("")
-        self.comboBox_resType.addItem("")
-        self.comboBox_resType.addItem("")
+        self.comboBox_resType.addItem(u"Kaiser Best")
+        self.comboBox_resType.addItem(u"Kaiser Fast")
+        self.comboBox_resType.addItem(u"Scipy")
         self.comboBox_resType.setObjectName(u"comboBox_resType")
-        self.comboBox_resType.setMinimumSize(QSize(0, 27))
+        self.comboBox_resType.setMinimumSize(QSize(0, 25))
 
         self.gridLayout_6.addWidget(self.comboBox_resType, 1, 1, 1, 1)
 
@@ -418,15 +434,16 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_2.setSpacing(10)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
         self.horizontalLayout_2.setContentsMargins(35, 10, 30, 10)
-        self.frame_8 = QFrame(self.groupBox_3)
-        self.frame_8.setObjectName(u"frame_8")
-        self.frame_8.setFrameShape(QFrame.StyledPanel)
-        self.frame_8.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_3 = QVBoxLayout(self.frame_8)
+        self.frame_instrumentalComboBox = QFrame(self.groupBox_3)
+        self.frame_instrumentalComboBox.setObjectName(
+            u"frame_instrumentalComboBox")
+        self.frame_instrumentalComboBox.setFrameShape(QFrame.StyledPanel)
+        self.frame_instrumentalComboBox.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_3 = QVBoxLayout(self.frame_instrumentalComboBox)
         self.verticalLayout_3.setSpacing(15)
         self.verticalLayout_3.setObjectName(u"verticalLayout_3")
         self.verticalLayout_3.setContentsMargins(0, 0, 0, 40)
-        self.label_2 = QLabel(self.frame_8)
+        self.label_2 = QLabel(self.frame_instrumentalComboBox)
         self.label_2.setObjectName(u"label_2")
         self.label_2.setMinimumSize(QSize(0, 30))
         self.label_2.setMaximumSize(QSize(16777215, 20))
@@ -434,16 +451,19 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_3.addWidget(self.label_2)
 
-        self.comboBox_resType_3 = QComboBox(self.frame_8)
-        self.comboBox_resType_3.setObjectName(u"comboBox_resType_3")
-        self.comboBox_resType_3.setMinimumSize(QSize(0, 27))
-        self.comboBox_resType_3.setMaximumSize(QSize(16777215, 30))
-        self.comboBox_resType_3.setEditable(False)
-        self.comboBox_resType_3.setMaxVisibleItems(10)
+        self.comboBox_instrumental = QComboBox(self.frame_instrumentalComboBox)
+        self.comboBox_instrumental.setObjectName(u"comboBox_instrumental")
+        self.comboBox_instrumental.setMinimumSize(QSize(0, 25))
+        self.comboBox_instrumental.setMaximumSize(QSize(16777215, 30))
+        self.comboBox_instrumental.setEditable(False)
+        self.comboBox_instrumental.setCurrentText(u"")
+        self.comboBox_instrumental.setMaxVisibleItems(5)
+        self.comboBox_instrumental.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLengthWithIcon)
 
-        self.verticalLayout_3.addWidget(self.comboBox_resType_3)
+        self.verticalLayout_3.addWidget(self.comboBox_instrumental)
 
-        self.horizontalLayout_2.addWidget(self.frame_8, 0, Qt.AlignVCenter)
+        self.horizontalLayout_2.addWidget(self.frame_instrumentalComboBox)
 
         self.frame_constants = QFrame(self.groupBox_3)
         self.frame_constants.setObjectName(u"frame_constants")
@@ -453,112 +473,153 @@ class Ui_SettingsWindow(object):
         sizePolicy5.setHeightForWidth(
             self.frame_constants.sizePolicy().hasHeightForWidth())
         self.frame_constants.setSizePolicy(sizePolicy5)
-        self.frame_constants.setMinimumSize(QSize(230, 0))
+        self.frame_constants.setMinimumSize(QSize(0, 0))
         self.frame_constants.setMaximumSize(QSize(230, 140))
         self.frame_constants.setFrameShape(QFrame.StyledPanel)
         self.frame_constants.setFrameShadow(QFrame.Raised)
         self.gridLayout_5 = QGridLayout(self.frame_constants)
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.gridLayout_5.setContentsMargins(-1, 5, -1, 3)
+        self.comboBox_winSize_stacked = QComboBox(self.frame_constants)
+        self.comboBox_winSize_stacked.addItem("")
+        self.comboBox_winSize_stacked.addItem("")
+        self.comboBox_winSize_stacked.addItem("")
+        self.comboBox_winSize_stacked.addItem("")
+        self.comboBox_winSize_stacked.setObjectName(
+            u"comboBox_winSize_stacked")
+        self.comboBox_winSize_stacked.setMinimumSize(QSize(0, 25))
+        self.comboBox_winSize_stacked.setMaximumSize(QSize(60, 25))
+        self.comboBox_winSize_stacked.setEditable(True)
+        self.comboBox_winSize_stacked.setCurrentText(u"512")
+        self.comboBox_winSize_stacked.setProperty("canEdit", True)
+
+        self.gridLayout_5.addWidget(self.comboBox_winSize_stacked, 2, 2, 1, 1)
+
+        self.label_hopLength = QLabel(self.frame_constants)
+        self.label_hopLength.setObjectName(u"label_hopLength")
+        self.label_hopLength.setMinimumSize(QSize(80, 0))
+        self.label_hopLength.setMaximumSize(QSize(80, 16777215))
+        self.label_hopLength.setAlignment(Qt.AlignCenter)
+
+        self.gridLayout_5.addWidget(self.label_hopLength, 1, 1, 1, 1)
+
+        self.lineEdit_hopLength_stacked = QLineEdit(self.frame_constants)
+        self.lineEdit_hopLength_stacked.setObjectName(
+            u"lineEdit_hopLength_stacked")
+        self.lineEdit_hopLength_stacked.setMinimumSize(QSize(60, 25))
+        self.lineEdit_hopLength_stacked.setMaximumSize(QSize(60, 25))
+        self.lineEdit_hopLength_stacked.setText(u"1024")
+        self.lineEdit_hopLength_stacked.setAlignment(Qt.AlignCenter)
+        self.lineEdit_hopLength_stacked.setDragEnabled(False)
+        self.lineEdit_hopLength_stacked.setReadOnly(False)
+
+        self.gridLayout_5.addWidget(
+            self.lineEdit_hopLength_stacked, 1, 2, 1, 1)
+
+        self.lineEdit_nfft_stacked = QLineEdit(self.frame_constants)
+        self.lineEdit_nfft_stacked.setObjectName(u"lineEdit_nfft_stacked")
+        self.lineEdit_nfft_stacked.setMinimumSize(QSize(60, 25))
+        self.lineEdit_nfft_stacked.setMaximumSize(QSize(60, 25))
+        self.lineEdit_nfft_stacked.setText(u"2048")
+        self.lineEdit_nfft_stacked.setAlignment(Qt.AlignCenter)
+        self.lineEdit_nfft_stacked.setDragEnabled(False)
+        self.lineEdit_nfft_stacked.setReadOnly(False)
+
+        self.gridLayout_5.addWidget(self.lineEdit_nfft_stacked, 4, 2, 1, 1)
+
         self.label_sr = QLabel(self.frame_constants)
         self.label_sr.setObjectName(u"label_sr")
+        self.label_sr.setMinimumSize(QSize(80, 0))
+        self.label_sr.setMaximumSize(QSize(80, 16777215))
         self.label_sr.setAlignment(Qt.AlignCenter)
 
         self.gridLayout_5.addWidget(self.label_sr, 0, 1, 1, 1)
 
-        self.label_nfft = QLabel(self.frame_constants)
-        self.label_nfft.setObjectName(u"label_nfft")
-        self.label_nfft.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_5.addWidget(self.label_nfft, 5, 1, 1, 1)
-
         self.label_winSize = QLabel(self.frame_constants)
         self.label_winSize.setObjectName(u"label_winSize")
+        self.label_winSize.setMinimumSize(QSize(80, 0))
+        self.label_winSize.setMaximumSize(QSize(80, 16777215))
         self.label_winSize.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout_5.addWidget(self.label_winSize, 4, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label_winSize, 2, 1, 1, 1)
 
-        self.label_hopLength = QLabel(self.frame_constants)
-        self.label_hopLength.setObjectName(u"label_hopLength")
-        self.label_hopLength.setAlignment(Qt.AlignCenter)
+        self.label_nfft = QLabel(self.frame_constants)
+        self.label_nfft.setObjectName(u"label_nfft")
+        self.label_nfft.setMinimumSize(QSize(80, 0))
+        self.label_nfft.setMaximumSize(QSize(80, 16777215))
+        self.label_nfft.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout_5.addWidget(self.label_hopLength, 2, 1, 1, 1)
+        self.gridLayout_5.addWidget(self.label_nfft, 4, 1, 1, 1)
 
-        self.lineEdit_instr_nfft = QLineEdit(self.frame_constants)
-        self.lineEdit_instr_nfft.setObjectName(u"lineEdit_instr_nfft")
-        self.lineEdit_instr_nfft.setAlignment(Qt.AlignCenter)
+        self.lineEdit_sr_stacked = QLineEdit(self.frame_constants)
+        self.lineEdit_sr_stacked.setObjectName(u"lineEdit_sr_stacked")
+        self.lineEdit_sr_stacked.setMinimumSize(QSize(60, 25))
+        self.lineEdit_sr_stacked.setMaximumSize(QSize(60, 25))
+        self.lineEdit_sr_stacked.setText(u"44100")
+        self.lineEdit_sr_stacked.setAlignment(Qt.AlignCenter)
+        self.lineEdit_sr_stacked.setDragEnabled(False)
+        self.lineEdit_sr_stacked.setReadOnly(False)
 
-        self.gridLayout_5.addWidget(self.lineEdit_instr_nfft, 5, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_sr_stacked, 0, 2, 1, 1)
 
-        self.lineEdit_instr_winSize = QLineEdit(self.frame_constants)
-        self.lineEdit_instr_winSize.setObjectName(u"lineEdit_instr_winSize")
-        self.lineEdit_instr_winSize.setAlignment(Qt.AlignCenter)
+        self.lineEdit_sr = QLineEdit(self.frame_constants)
+        self.lineEdit_sr.setObjectName(u"lineEdit_sr")
+        self.lineEdit_sr.setEnabled(False)
+        self.lineEdit_sr.setMinimumSize(QSize(60, 25))
+        self.lineEdit_sr.setMaximumSize(QSize(60, 25))
+        self.lineEdit_sr.setText(u"44100")
+        self.lineEdit_sr.setAlignment(Qt.AlignCenter)
+        self.lineEdit_sr.setDragEnabled(False)
+        self.lineEdit_sr.setReadOnly(False)
 
-        self.gridLayout_5.addWidget(self.lineEdit_instr_winSize, 4, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_sr, 0, 0, 1, 1)
 
-        self.lineEdit_stack_sr = QLineEdit(self.frame_constants)
-        self.lineEdit_stack_sr.setObjectName(u"lineEdit_stack_sr")
-        self.lineEdit_stack_sr.setAlignment(Qt.AlignCenter)
-        self.lineEdit_stack_sr.setDragEnabled(False)
-        self.lineEdit_stack_sr.setReadOnly(False)
+        self.lineEdit_hopLength = QLineEdit(self.frame_constants)
+        self.lineEdit_hopLength.setObjectName(u"lineEdit_hopLength")
+        self.lineEdit_hopLength.setMinimumSize(QSize(60, 25))
+        self.lineEdit_hopLength.setMaximumSize(QSize(60, 25))
+        self.lineEdit_hopLength.setText(u"1024")
+        self.lineEdit_hopLength.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout_5.addWidget(self.lineEdit_stack_sr, 0, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_hopLength, 1, 0, 1, 1)
 
-        self.lineEdit_stack_winSize = QLineEdit(self.frame_constants)
-        self.lineEdit_stack_winSize.setObjectName(u"lineEdit_stack_winSize")
-        self.lineEdit_stack_winSize.setAlignment(Qt.AlignCenter)
-        self.lineEdit_stack_winSize.setDragEnabled(False)
-        self.lineEdit_stack_winSize.setReadOnly(False)
+        self.comboBox_winSize = QComboBox(self.frame_constants)
+        self.comboBox_winSize.addItem("")
+        self.comboBox_winSize.addItem("")
+        self.comboBox_winSize.addItem("")
+        self.comboBox_winSize.addItem("")
+        self.comboBox_winSize.setObjectName(u"comboBox_winSize")
+        self.comboBox_winSize.setMinimumSize(QSize(0, 25))
+        self.comboBox_winSize.setMaximumSize(QSize(60, 25))
+        self.comboBox_winSize.setEditable(True)
+        self.comboBox_winSize.setCurrentText(u"512")
+        self.comboBox_winSize.setProperty("canEdit", True)
 
-        self.gridLayout_5.addWidget(self.lineEdit_stack_winSize, 4, 2, 1, 1)
+        self.gridLayout_5.addWidget(self.comboBox_winSize, 2, 0, 1, 1)
 
-        self.lineEdit_stack_hopLength = QLineEdit(self.frame_constants)
-        self.lineEdit_stack_hopLength.setObjectName(
-            u"lineEdit_stack_hopLength")
-        self.lineEdit_stack_hopLength.setAlignment(Qt.AlignCenter)
-        self.lineEdit_stack_hopLength.setDragEnabled(False)
-        self.lineEdit_stack_hopLength.setReadOnly(False)
+        self.lineEdit_nfft = QLineEdit(self.frame_constants)
+        self.lineEdit_nfft.setObjectName(u"lineEdit_nfft")
+        self.lineEdit_nfft.setMinimumSize(QSize(60, 25))
+        self.lineEdit_nfft.setMaximumSize(QSize(60, 25))
+        self.lineEdit_nfft.setText(u"2048")
+        self.lineEdit_nfft.setAlignment(Qt.AlignCenter)
 
-        self.gridLayout_5.addWidget(self.lineEdit_stack_hopLength, 2, 2, 1, 1)
-
-        self.lineEdit_stack_nfft = QLineEdit(self.frame_constants)
-        self.lineEdit_stack_nfft.setObjectName(u"lineEdit_stack_nfft")
-        self.lineEdit_stack_nfft.setAlignment(Qt.AlignCenter)
-        self.lineEdit_stack_nfft.setDragEnabled(False)
-        self.lineEdit_stack_nfft.setReadOnly(False)
-
-        self.gridLayout_5.addWidget(self.lineEdit_stack_nfft, 5, 2, 1, 1)
-
-        self.lineEdit_instr_hopLength = QLineEdit(self.frame_constants)
-        self.lineEdit_instr_hopLength.setObjectName(
-            u"lineEdit_instr_hopLength")
-        self.lineEdit_instr_hopLength.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_5.addWidget(self.lineEdit_instr_hopLength, 2, 0, 1, 1)
-
-        self.lineEdit_instr_sr = QLineEdit(self.frame_constants)
-        self.lineEdit_instr_sr.setObjectName(u"lineEdit_instr_sr")
-        self.lineEdit_instr_sr.setAlignment(Qt.AlignCenter)
-        self.lineEdit_instr_sr.setDragEnabled(False)
-        self.lineEdit_instr_sr.setReadOnly(False)
-
-        self.gridLayout_5.addWidget(self.lineEdit_instr_sr, 0, 0, 1, 1)
+        self.gridLayout_5.addWidget(self.lineEdit_nfft, 4, 0, 1, 1)
 
         self.gridLayout_5.setColumnStretch(0, 1)
-        self.gridLayout_5.setColumnStretch(1, 2)
-        self.gridLayout_5.setColumnStretch(2, 1)
 
-        self.horizontalLayout_2.addWidget(self.frame_constants)
+        self.horizontalLayout_2.addWidget(
+            self.frame_constants, 0, Qt.AlignLeft)
 
-        self.frame_9 = QFrame(self.groupBox_3)
-        self.frame_9.setObjectName(u"frame_9")
-        self.frame_9.setFrameShape(QFrame.StyledPanel)
-        self.frame_9.setFrameShadow(QFrame.Raised)
-        self.verticalLayout_4 = QVBoxLayout(self.frame_9)
+        self.frame_stackComboBox = QFrame(self.groupBox_3)
+        self.frame_stackComboBox.setObjectName(u"frame_stackComboBox")
+        self.frame_stackComboBox.setFrameShape(QFrame.StyledPanel)
+        self.frame_stackComboBox.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_4 = QVBoxLayout(self.frame_stackComboBox)
         self.verticalLayout_4.setSpacing(15)
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 40)
-        self.label_4 = QLabel(self.frame_9)
+        self.label_4 = QLabel(self.frame_stackComboBox)
         self.label_4.setObjectName(u"label_4")
         self.label_4.setMinimumSize(QSize(0, 30))
         self.label_4.setMaximumSize(QSize(16777215, 20))
@@ -566,16 +627,23 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_4.addWidget(self.label_4)
 
-        self.comboBox_resType_5 = QComboBox(self.frame_9)
-        self.comboBox_resType_5.setObjectName(u"comboBox_resType_5")
-        self.comboBox_resType_5.setMinimumSize(QSize(0, 27))
-        self.comboBox_resType_5.setMaximumSize(QSize(16777215, 30))
-        self.comboBox_resType_5.setEditable(False)
-        self.comboBox_resType_5.setMaxVisibleItems(10)
+        self.comboBox_stacked = QComboBox(self.frame_stackComboBox)
+        self.comboBox_stacked.setObjectName(u"comboBox_stacked")
+        self.comboBox_stacked.setEnabled(True)
+        self.comboBox_stacked.setMinimumSize(QSize(0, 25))
+        self.comboBox_stacked.setMaximumSize(QSize(16777215, 30))
+        self.comboBox_stacked.setEditable(False)
+        self.comboBox_stacked.setCurrentText(u"")
+        self.comboBox_stacked.setMaxVisibleItems(5)
+        self.comboBox_stacked.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLengthWithIcon)
 
-        self.verticalLayout_4.addWidget(self.comboBox_resType_5)
+        self.verticalLayout_4.addWidget(self.comboBox_stacked)
 
-        self.horizontalLayout_2.addWidget(self.frame_9, 0, Qt.AlignVCenter)
+        self.horizontalLayout_2.addWidget(self.frame_stackComboBox)
+
+        self.horizontalLayout_2.setStretch(0, 1)
+        self.horizontalLayout_2.setStretch(2, 1)
 
         self.verticalLayout_6.addWidget(self.groupBox_3)
 
@@ -585,7 +653,7 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_10.addWidget(self.scrollArea_2)
 
-        self.stackedWidget_11.addWidget(self.page_seperationSettings)
+        self.stackedWidget.addWidget(self.page_seperationSettings)
         self.page_shortcuts = QWidget()
         self.page_shortcuts.setObjectName(u"page_shortcuts")
         self.page_shortcuts.setProperty("minimumFrameWidth", 0)
@@ -620,7 +688,7 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_2.addWidget(self.scrollArea)
 
-        self.stackedWidget_11.addWidget(self.page_shortcuts)
+        self.stackedWidget.addWidget(self.page_shortcuts)
         self.page_customization = QWidget()
         self.page_customization.setObjectName(u"page_customization")
         self.page_customization.setProperty("minimumFrameWidth", 0)
@@ -636,7 +704,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 768, 440))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 98, 40))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -655,7 +723,7 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_12.addWidget(self.scrollArea_3)
 
-        self.stackedWidget_11.addWidget(self.page_customization)
+        self.stackedWidget.addWidget(self.page_customization)
         self.page_preferences = QWidget()
         self.page_preferences.setObjectName(u"page_preferences")
         self.page_preferences.setStyleSheet(u"")
@@ -672,7 +740,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 768, 440))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 371))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -739,7 +807,7 @@ class Ui_SettingsWindow(object):
         self.comboBox_command.addItem("")
         self.comboBox_command.addItem("")
         self.comboBox_command.setObjectName(u"comboBox_command")
-        self.comboBox_command.setMinimumSize(QSize(0, 27))
+        self.comboBox_command.setMinimumSize(QSize(0, 25))
 
         self.horizontalLayout_5.addWidget(self.comboBox_command)
 
@@ -761,22 +829,47 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_13.addWidget(self.horizontalFrame)
 
-        self.checkBox_notifyUpdates = QCheckBox(self.groupBox_6)
-        self.checkBox_notifyUpdates.setObjectName(u"checkBox_notifyUpdates")
+        self.frame_8 = QFrame(self.groupBox_6)
+        self.frame_8.setObjectName(u"frame_8")
+        self.frame_8.setFrameShape(QFrame.NoFrame)
+        self.frame_8.setFrameShadow(QFrame.Raised)
+        self.frame_8.setLineWidth(0)
+        self.gridLayout_4 = QGridLayout(self.frame_8)
+        self.gridLayout_4.setObjectName(u"gridLayout_4")
+        self.gridLayout_4.setHorizontalSpacing(0)
+        self.gridLayout_4.setVerticalSpacing(10)
+        self.gridLayout_4.setContentsMargins(0, 5, 0, 0)
+        self.checkBox_settingsStartup = QCheckBox(self.frame_8)
+        self.checkBox_settingsStartup.setObjectName(
+            u"checkBox_settingsStartup")
 
-        self.verticalLayout_13.addWidget(self.checkBox_notifyUpdates)
+        self.gridLayout_4.addWidget(self.checkBox_settingsStartup, 2, 0, 1, 1)
 
-        self.checkBox_enableShortcuts = QCheckBox(self.groupBox_6)
-        self.checkBox_enableShortcuts.setObjectName(
-            u"checkBox_enableShortcuts")
-
-        self.verticalLayout_13.addWidget(self.checkBox_enableShortcuts)
-
-        self.checkBox_disableAnimations = QCheckBox(self.groupBox_6)
+        self.checkBox_disableAnimations = QCheckBox(self.frame_8)
         self.checkBox_disableAnimations.setObjectName(
             u"checkBox_disableAnimations")
 
-        self.verticalLayout_13.addWidget(self.checkBox_disableAnimations)
+        self.gridLayout_4.addWidget(
+            self.checkBox_disableAnimations, 4, 0, 1, 1)
+
+        self.checkBox_disableShortcuts = QCheckBox(self.frame_8)
+        self.checkBox_disableShortcuts.setObjectName(
+            u"checkBox_disableShortcuts")
+
+        self.gridLayout_4.addWidget(self.checkBox_disableShortcuts, 4, 1, 1, 1)
+
+        self.checkBox_notifiyOnFinish = QCheckBox(self.frame_8)
+        self.checkBox_notifiyOnFinish.setObjectName(
+            u"checkBox_notifiyOnFinish")
+
+        self.gridLayout_4.addWidget(self.checkBox_notifiyOnFinish, 0, 0, 1, 2)
+
+        self.checkBox_notifyUpdates = QCheckBox(self.frame_8)
+        self.checkBox_notifyUpdates.setObjectName(u"checkBox_notifyUpdates")
+
+        self.gridLayout_4.addWidget(self.checkBox_notifyUpdates, 1, 0, 1, 2)
+
+        self.verticalLayout_13.addWidget(self.frame_8)
 
         self.verticalLayout_20.addWidget(self.groupBox_6)
 
@@ -786,7 +879,7 @@ class Ui_SettingsWindow(object):
         self.groupBox_5.setFlat(True)
         self.formLayout = QFormLayout(self.groupBox_5)
         self.formLayout.setObjectName(u"formLayout")
-        self.formLayout.setFieldGrowthPolicy(QFormLayout.ExpandingFieldsGrow)
+        self.formLayout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout.setRowWrapPolicy(QFormLayout.DontWrapRows)
         self.formLayout.setHorizontalSpacing(20)
         self.formLayout.setVerticalSpacing(10)
@@ -828,6 +921,7 @@ class Ui_SettingsWindow(object):
         sizePolicy2.setHeightForWidth(
             self.label_exportDirectory.sizePolicy().hasHeightForWidth())
         self.label_exportDirectory.setSizePolicy(sizePolicy2)
+        self.label_exportDirectory.setText(u"B:/Downloads")
         self.label_exportDirectory.setTextFormat(Qt.AutoText)
         self.label_exportDirectory.setScaledContents(True)
         self.label_exportDirectory.setAlignment(
@@ -959,9 +1053,9 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_7.addWidget(self.scrollArea_4)
 
-        self.stackedWidget_11.addWidget(self.page_preferences)
+        self.stackedWidget.addWidget(self.page_preferences)
 
-        self.verticalLayout_18.addWidget(self.stackedWidget_11)
+        self.verticalLayout_18.addWidget(self.stackedWidget)
 
         self.frame_16 = QFrame(self.frame_14)
         self.frame_16.setObjectName(u"frame_16")
@@ -1014,7 +1108,9 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget_11.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
+        self.comboBox_winSize_stacked.setCurrentIndex(2)
+        self.comboBox_winSize.setCurrentIndex(2)
         self.pushButton_english.setDefault(False)
         self.pushButton_german.setDefault(False)
 
@@ -1040,21 +1136,15 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"GPU Conversion", None))
         self.checkBox_stackPasses.setText(QCoreApplication.translate(
             "SettingsWindow", u"Stack Passes", None))
-        self.comboBox_stackPasses.setItemText(
-            0, QCoreApplication.translate("SettingsWindow", u"1", None))
-        self.comboBox_stackPasses.setItemText(
-            1, QCoreApplication.translate("SettingsWindow", u"2", None))
-        self.comboBox_stackPasses.setItemText(
-            2, QCoreApplication.translate("SettingsWindow", u"3", None))
-        self.comboBox_stackPasses.setItemText(
-            3, QCoreApplication.translate("SettingsWindow", u"4", None))
-        self.comboBox_stackPasses.setItemText(
-            4, QCoreApplication.translate("SettingsWindow", u"5", None))
 
         self.checkBox_saveAllStacked.setText(QCoreApplication.translate(
             "SettingsWindow", u"Save All Stacked Outputs", None))
         self.checkBox_stackOnly.setText(QCoreApplication.translate(
             "SettingsWindow", u"Stack Conversion Only", None))
+# if QT_CONFIG(tooltip)
+        self.checkBox_outputImage.setToolTip(QCoreApplication.translate(
+            "SettingsWindow", u"Save spectogram of seperated music files", None))
+#endif // QT_CONFIG(tooltip)
         self.checkBox_outputImage.setText(QCoreApplication.translate(
             "SettingsWindow", u"Output Image", None))
         self.checkBox_tta.setText(
@@ -1067,17 +1157,6 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Engine ", None))
         self.label_engine.setText(QCoreApplication.translate(
             "SettingsWindow", u"AI Engine", None))
-        self.comboBox_engine.setItemText(
-            0, QCoreApplication.translate("SettingsWindow", u"v4", u"test"))
-        self.comboBox_engine.setItemText(
-            1, QCoreApplication.translate("SettingsWindow", u"v2", None))
-
-        self.comboBox_resType.setItemText(
-            0, QCoreApplication.translate("SettingsWindow", u"Kaiser Best", None))
-        self.comboBox_resType.setItemText(
-            1, QCoreApplication.translate("SettingsWindow", u"Kaiser Fast", None))
-        self.comboBox_resType.setItemText(
-            2, QCoreApplication.translate("SettingsWindow", u"Scipy", None))
 
         self.label_resType.setText(QCoreApplication.translate(
             "SettingsWindow", u"Resolution Type", None))
@@ -1085,34 +1164,38 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Models ", None))
         self.label_2.setText(QCoreApplication.translate(
             "SettingsWindow", u"Instrumental Model", None))
-        self.comboBox_resType_3.setCurrentText("")
-        self.label_sr.setText(QCoreApplication.translate(
-            "SettingsWindow", u"SR", None))
-        self.label_nfft.setText(QCoreApplication.translate(
-            "SettingsWindow", u"N_FFT", None))
-        self.label_winSize.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Window Size", None))
+        self.comboBox_winSize_stacked.setItemText(
+            0, QCoreApplication.translate("SettingsWindow", u"272", None))
+        self.comboBox_winSize_stacked.setItemText(
+            1, QCoreApplication.translate("SettingsWindow", u"320", None))
+        self.comboBox_winSize_stacked.setItemText(
+            2, QCoreApplication.translate("SettingsWindow", u"512", None))
+        self.comboBox_winSize_stacked.setItemText(
+            3, QCoreApplication.translate("SettingsWindow", u"1024", None))
+
         self.label_hopLength.setText(QCoreApplication.translate(
             "SettingsWindow", u"Hop Length", None))
-        self.lineEdit_instr_nfft.setText(
-            QCoreApplication.translate("SettingsWindow", u"2048", None))
-        self.lineEdit_instr_winSize.setText(
-            QCoreApplication.translate("SettingsWindow", u"320", None))
-        self.lineEdit_stack_sr.setText(
-            QCoreApplication.translate("SettingsWindow", u"44100", None))
-        self.lineEdit_stack_winSize.setText(
-            QCoreApplication.translate("SettingsWindow", u"320", None))
-        self.lineEdit_stack_hopLength.setText(
-            QCoreApplication.translate("SettingsWindow", u"1024", None))
-        self.lineEdit_stack_nfft.setText(
-            QCoreApplication.translate("SettingsWindow", u"2048", None))
-        self.lineEdit_instr_hopLength.setText(
-            QCoreApplication.translate("SettingsWindow", u"1024", None))
-        self.lineEdit_instr_sr.setText(
-            QCoreApplication.translate("SettingsWindow", u"44100", None))
+# if QT_CONFIG(tooltip)
+        self.label_sr.setToolTip(QCoreApplication.translate(
+            "SettingsWindow", u"Sampling Rate", None))
+#endif // QT_CONFIG(tooltip)
+        self.label_sr.setText(QCoreApplication.translate(
+            "SettingsWindow", u"SR", None))
+        self.label_winSize.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Window Size", None))
+        self.label_nfft.setText(QCoreApplication.translate(
+            "SettingsWindow", u"N_FFT", None))
+        self.comboBox_winSize.setItemText(
+            0, QCoreApplication.translate("SettingsWindow", u"272", None))
+        self.comboBox_winSize.setItemText(
+            1, QCoreApplication.translate("SettingsWindow", u"320", None))
+        self.comboBox_winSize.setItemText(
+            2, QCoreApplication.translate("SettingsWindow", u"512", None))
+        self.comboBox_winSize.setItemText(
+            3, QCoreApplication.translate("SettingsWindow", u"1024", None))
+
         self.label_4.setText(QCoreApplication.translate(
             "SettingsWindow", u"Stacked Model", None))
-        self.comboBox_resType_5.setCurrentText("")
         self.groupBox_6.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Settings ", None))
         self.label.setText(QCoreApplication.translate(
@@ -1126,19 +1209,21 @@ class Ui_SettingsWindow(object):
 
         self.pushButton_clearCommand.setText(
             QCoreApplication.translate("SettingsWindow", u"Clear", None))
-        self.checkBox_notifyUpdates.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Notify me of updates", None))
-        self.checkBox_enableShortcuts.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Enable Shortcuts", None))
+        self.checkBox_settingsStartup.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Open Settings on Startup", None))
         self.checkBox_disableAnimations.setText(QCoreApplication.translate(
             "SettingsWindow", u"Disable Animations", None))
+        self.checkBox_disableShortcuts.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Disable Shortcuts", None))
+        self.checkBox_notifiyOnFinish.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Notify me on finish of seperation", None))
+        self.checkBox_notifyUpdates.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Notify me of application updates", None))
         self.groupBox_5.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Export Settings ", None))
         self.label_3.setText(QCoreApplication.translate(
             "SettingsWindow", u"Export Directory", None))
         self.pushButton_exportDirectory.setText("")
-        self.label_exportDirectory.setText(
-            QCoreApplication.translate("SettingsWindow", u"B:/Downloads", None))
         self.label_autoSave.setText(QCoreApplication.translate(
             "SettingsWindow", u"Automatically Save:", None))
         self.checkBox_autoSaveInstrumentals.setText(

@@ -6,4 +6,5 @@ baseline.pth
 temp.wav
 src/resources/models/**/*.pth
 UIFileConverter.ps1
+developer_notes.txt
 languages

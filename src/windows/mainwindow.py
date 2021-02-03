@@ -3,21 +3,21 @@
 ################################################################################
 # Form generated from reading UI file 'mainwindow.ui'
 ##
-# Created by: Qt User Interface Compiler version 6.0.0
+# Created by: Qt User Interface Compiler version 5.15.2
 ##
 # WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtWidgets import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtWidgets import *
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(911, 472)
+        MainWindow.resize(929, 479)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"/* Universal */\n"
                                  "* {\n"
@@ -218,6 +218,7 @@ class Ui_MainWindow(object):
         self.pushButton_settings.setStyleSheet(u"border-left: none;\n"
                                                "border-top-left-radius: 0px;\n"
                                                "border-bottom-left-radius: 0px;")
+        self.pushButton_settings.setText(u"")
         self.pushButton_settings.setProperty("seperate", True)
 
         self.horizontalLayout.addWidget(self.pushButton_settings)
@@ -260,6 +261,11 @@ class Ui_MainWindow(object):
             Qt.ScrollBarAlwaysOff)
         self.textBrowser_command.setHorizontalScrollBarPolicy(
             Qt.ScrollBarAlwaysOff)
+        self.textBrowser_command.setHtml(u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+                                         "p, li { white-space: pre-wrap; }\n"
+                                         "</style></head><body style=\" font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">COMMAND LINE [LOG LEVEL=1]</span></p></body></html>")
 
         self.horizontalLayout_2.addWidget(self.textBrowser_command)
 
@@ -287,11 +293,5 @@ class Ui_MainWindow(object):
             QCoreApplication.translate("MainWindow", u"Audio File", None))
         self.pushButton_seperate.setText(
             QCoreApplication.translate("MainWindow", u"  Seperate", None))
-        self.pushButton_settings.setText("")
         self.progressBar.setFormat("")
-        self.textBrowser_command.setHtml(QCoreApplication.translate("MainWindow", u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                                                    "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                                                    "p, li { white-space: pre-wrap; }\n"
-                                                                    "</style></head><body style=\" font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
-                                                                    "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">COMMAND LINE [LOG LEVEL=1]</span></p></body></html>", None))
     # retranslateUi

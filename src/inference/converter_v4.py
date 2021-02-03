@@ -16,19 +16,58 @@ from .lib.lib_v4 import spec_utils
 # Loading Bar
 from tqdm import tqdm
 # Timer
+import datetime as dt
 import time
 import os
 # Annotating
-from PySide6 import QtWidgets
-from typing import (Dict, Tuple, Optional)
+from PySide2 import QtCore  # (QRunnable, QThread, QObject, Signal, Slot)
+from PySide2 import QtWidgets
+from typing import (Dict, Tuple, Optional, Callable)
+
+
+default_data = {
+    # Paths
+    'input_paths': [],  # List of paths
+    'export_path': '',  # Export path
+    # Processing Options
+    'gpuConversion': False,
+    'postProcess': True,
+    'tta': True,
+    'outputImage': False,
+    # Models
+    'instrumentalModel': '',  # Path to instrumental (not needed if not used)
+    'vocalModel': '',  # Path to vocal model (not needed if not used)
+    'stackModel': '',  # Path to stacked model (not needed if not used)
+    'useModel': 'instrumental',  # Either 'instrumental' or 'vocal'
+    # Stack Options
+    'stackPasses': 0,
+    'stackOnly': False,
+    'saveAllStacked': False,
+    # Model Folder
+    'modelFolder': False,  # Model Test Mode
+    # Constants
+    'sr': 44_100,
+    'hop_length': 1_024,
+    'window_size': 320,
+    'n_fft': 2_048,
+    # Stacked
+    'sr_stacked': 44_100,
+    'hop_length_stacked': 1_024,
+    'window_size_stacked': 320,
+    'n_fft_stacked': 2_048,
+    # Resolution Type
+    'resType': 'kaiser_fast',
+    # Whether to override constants embedded in the model file name
+    'customParameters': False,
+}
 
 
 class VocalRemover:
-    def __init__(self, data: dict, command_widget: Optional[QtWidgets.QTextBrowser] = None, progress_widget: Optional[QtWidgets.QProgressBar] = None):
-        self.command_widget = command_widget
-        self.progress_widget = progress_widget
+    def __init__(self, seperation_data: dict, write_to_command: Optional[Callable[[str], None]] = None, update_progress: Optional[Callable[[int], None]] = None):
+        self.write_to_command = write_to_command
+        self.update_progress = update_progress
         # GUI parsed data
-        self.seperation_data = data
+        self.seperation_data = seperation_data
         # Data that is determined once
         self.general_data = {
             'total_files': len(self.seperation_data['input_paths']),
@@ -71,15 +110,14 @@ class VocalRemover:
             'v_spec': None,
         }
 
-        self._check_for_valid_inputs()
-        self._fill_general_data()
-
     def seperate_files(self):
         """
         Seperate all files
         """
         # Track time
         stime = time.perf_counter()
+        self._check_for_valid_inputs(self.seperation_data)
+        self._fill_general_data()
 
         for file_num, file_path in enumerate(self.seperation_data['input_paths'], start=1):
             self._seperate(file_path,
@@ -96,8 +134,7 @@ class VocalRemover:
         """
         Update progress and/or write text to the command line 
 
-        If text is "[CLEAR]" the command line will be cleared
-        An end line '\\n' will be automatically appended to the text
+        A new line '\\n' will be automatically appended to the text
         """
         # Progress is given
         progress = self._get_progress(progress_step)
@@ -108,13 +145,9 @@ class VocalRemover:
                 # Include base text
                 text = f"{self.loop_data['command_base_text']} {text}"
 
-            if self.command_widget is not None:
+            if self.write_to_command is not None:
                 # Text widget is given
-                if text == '[CLEAR]':
-                    # Clear command line
-                    self.command_widget.clear()
-                else:
-                    self.command_widget.append(text)
+                self.write_to_command(text)
             else:
                 # No text widget so write to console
                 if progress_step is not None:
@@ -123,11 +156,11 @@ class VocalRemover:
                     # Skip 'Done!' text as it clutters the terminal
                     print(text)
 
-        if self.progress_widget is not None:
+        if self.update_progress is not None:
             # Progress widget is given
-            self.progress_widget.setValue(progress)
+            self.update_progress(progress)
 
-    def _seperate(self, file_path: str, file_num: int = -1):
+    def _seperate(self, file_path: str, file_num: int):
         """
         Seperate given music file,
         file_num is used to determine progress
@@ -145,6 +178,7 @@ class VocalRemover:
             command_base_text = self._get_base_text()
             model_device, music_file = self._get_model_device_file()
             constants = self._get_constants(model_device['model_name'])
+            print(loop_num, constants)
             # -Update loop specific variables
             self.loop_data['constants'] = constants
             self.loop_data['command_base_text'] = command_base_text
@@ -298,12 +332,22 @@ class VocalRemover:
         """
         Get the sr, hop_length, window_size, n_fft
         """
-        seperation_params = {
-            'sr': self.seperation_data['sr'],
-            'hop_length': self.seperation_data['hop_length'],
-            'window_size': self.seperation_data['window_size'],
-            'n_fft': self.seperation_data['n_fft'],
-        }
+        if self.loop_data['loop_num'] == 0:
+            # Instrumental/Vocal Model
+            seperation_params = {
+                'sr': self.seperation_data['sr_stacked'],
+                'hop_length': self.seperation_data['hop_length_stacked'],
+                'window_size': self.seperation_data['window_size_stacked'],
+                'n_fft': self.seperation_data['n_fft_stacked'],
+            }
+        else:
+            # Stacked model
+            seperation_params = {
+                'sr': self.seperation_data['sr'],
+                'hop_length': self.seperation_data['hop_length'],
+                'window_size': self.seperation_data['window_size'],
+                'n_fft': self.seperation_data['n_fft'],
+            }
         if self.seperation_data['customParameters']:
             # Typed constants are fixed
             return seperation_params
@@ -438,7 +482,7 @@ class VocalRemover:
             model.eval()
             with torch.no_grad():
                 preds = []
-                if self.progress_widget is None:
+                if self.update_progress is None:
                     bar_format = '{desc}    |{bar}{r_bar}'
                 else:
                     bar_format = '{l_bar}{bar}{r_bar}'
@@ -453,7 +497,7 @@ class VocalRemover:
                     else:
                         progres_step = 0.1 + 0.6 * (progrs / n_window)
                     self.write_to_gui(progress_step=progres_step)
-                    if self.progress_widget is None:
+                    if self.update_progress is None:
                         progress = self._get_progress(progres_step)
                         text = f'{int(progress)} %'
                         if progress < 10:
@@ -718,74 +762,111 @@ class VocalRemover:
 
         return progress
 
-    def _check_for_valid_inputs(self):
+    def _check_for_valid_inputs(self, seperation_data: dict):
         """
         Check if all inputs have been entered correctly.
 
         If errors are found, an exception is raised
         """
         # Check input paths
-        if not len(self.seperation_data['input_paths']):
+        if len(seperation_data['input_paths']):
             # No music file specified
             raise TypeError('No music file to seperate defined!')
-        if (not isinstance(self.seperation_data['input_paths'], tuple) and
-                not isinstance(self.seperation_data['input_paths'], list)):
+        if (not isinstance(seperation_data['input_paths'], tuple) and
+                not isinstance(seperation_data['input_paths'], list)):
             # Music file not specified in a list or tuple
             raise TypeError('Please specify your music file path/s in a list or tuple!')
-        for input_path in self.seperation_data['input_paths']:
+        for input_path in seperation_data['input_paths']:
             # Go through each music file
             if not os.path.isfile(input_path):
                 # Invalid path
                 raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
         # Output path
-        if (not os.path.isdir(self.seperation_data['export_path']) and
-                not self.seperation_data['export_path'] == ''):
+        if (not os.path.isdir(seperation_data['export_path']) and
+                not seperation_data['export_path'] == ''):
             # Export path either invalid or not specified
             raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
 
         # Check models
-        if not self.seperation_data['useModel'] in ['vocal', 'instrumental']:
+        if not seperation_data['useModel'] in ['vocal', 'instrumental']:
             # Invalid 'useModel'
             raise TypeError("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
-        if not os.path.isfile(self.seperation_data[f"{self.seperation_data['useModel']}Model"]):
+        if not os.path.isfile(seperation_data[f"{seperation_data['useModel']}Model"]):
             # No or invalid instrumental/vocal model given
             # but model is needed
-            raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
-        if (not os.path.isfile(self.seperation_data['stackModel']) and
-            (self.seperation_data['stackOnly'] or
-             self.seperation_data['stackPasses'] > 0)):
+            raise TypeError(f"Not specified or invalid model path for {seperation_data['useModel']} model!")
+        if (not os.path.isfile(seperation_data['stackModel']) and
+            (seperation_data['stackOnly'] or
+             seperation_data['stackPasses'] > 0)):
             # No or invalid stack model given
             # but model is needed
             raise TypeError(f"Not specified or invalid model path for stacked model!")
 
+# --GUI ONLY--
 
-default_data = {
-    # Paths
-    'input_paths': [],  # List of paths
-    'export_path': '',  # Export path
-    # Processing Options
-    'gpuConversion': False,
-    'postProcess': True,
-    'tta': True,
-    'outputImage': False,
-    # Models
-    'instrumentalModel': '',  # Path to instrumental (not needed if not used)
-    'vocalModel': '',  # Path to vocal model (not needed if not used)
-    'stackModel': '',  # Path to stacked model (not needed if not used)
-    'useModel': 'instrumental',  # Either 'instrumental' or 'vocal'
-    # Stack Options
-    'stackPasses': 0,
-    'stackOnly': False,
-    'saveAllStacked': False,
-    # Model Folder
-    'modelFolder': False,  # Model Test Mode
-    # Constants
-    'sr': 44_100,
-    'hop_length': 1_024,
-    'window_size': 320,
-    'n_fft': 2_048,
-    # Resolution Type
-    'resType': 'kaiser_fast',
-    # Whether to override constants embedded in the model file name
-    'customParameters': False,
-}
+
+class WorkerSignals(QtCore.QObject):
+    '''
+    Defines the signals available from a running worker thread.
+
+    Supported signals are:
+
+    finished
+        str: Time elapsed
+    message
+        str: Message to write to GUI
+    progress
+        int (0-100): Progress update
+    error
+        Tuple[str, str]:
+            Index 0: Error Message
+            Index 1: Detailed Message
+
+    '''
+    finished = QtCore.Signal(str)
+    message = QtCore.Signal(str)
+    progress = QtCore.Signal(int)
+    error = QtCore.Signal(tuple)
+
+
+class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
+    '''
+    Threaded Vocal Remover
+
+    Only use in conjunction with GUI
+    '''
+
+    def __init__(self, seperation_data: dict):
+        super(VocalRemoverWorker, self).__init__(seperation_data)
+        super(VocalRemover, self).__init__(seperation_data)
+        super(QtCore.QRunnable, self).__init__()
+        self.signals = WorkerSignals()
+        self.seperation_data = seperation_data
+
+    @QtCore.Slot()
+    def run(self):
+        """
+        Seperate files
+        """
+        import time
+        stime = time.perf_counter()
+
+        try:
+            self.seperate_files()
+        except Exception as e:
+            self.signals.error.emit(e)
+            return
+
+        elapsed_seconds = int(time.perf_counter() - stime)
+        time = dt.timedelta(seconds=elapsed_seconds)
+        self.signals.finished.emit(str(time))
+
+    def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
+        if text is not None:
+            if include_base_text:
+                # Include base text
+                text = f"{self.loop_data['command_base_text']} {text}"
+            self.signals.message.emit(text)
+
+        if progress_step is not None:
+            self.signals.progress.emit(self._get_progress(progress_step))

@@ -14,6 +14,8 @@ else:
 
 IMAGE_FOLDER = 'images'
 MODELS_FOLDER = 'models'
+INSTRUMENTAL_FOLDER_NAME = 'Main Models'
+STACKED_FOLDER_NAME = 'Stacked Models'
 TRANSLATIONS_FOLDER = 'translations'
 
 
@@ -38,8 +40,9 @@ class ResourcePaths:
             filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
             turkish = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'turkish.png')
 
-
     modelsDir = os.path.join(abs_path, MODELS_FOLDER)
+    instrumentalDirName = INSTRUMENTAL_FOLDER_NAME
+    stackedDirName = STACKED_FOLDER_NAME
     localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
 
 

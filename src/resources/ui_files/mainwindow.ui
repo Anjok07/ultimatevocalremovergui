@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>911</width>
-    <height>472</height>
+    <width>929</width>
+    <height>479</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -425,7 +425,7 @@ border-top-left-radius: 0px;
 border-bottom-left-radius: 0px;</string>
               </property>
               <property name="text">
-               <string/>
+               <string notr="true"/>
               </property>
               <property name="seperate" stdset="0">
                <bool>true</bool>
@@ -505,7 +505,7 @@ border-bottom-left-radius: 0px;</string>
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
      <property name="html">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+      <string notr="true">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;

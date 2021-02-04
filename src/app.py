@@ -11,10 +11,11 @@ from PySide2.QtWinExtras import (QWinTaskbarButton)
 # -Root imports-
 from .resources.resources_manager import ResourcePaths
 from .windows import (mainwindow, settingswindow)
-from .inference import converter_v4
+from .inference import converter_v4_copy as converter_v4
 # -Other-
 import datetime as dt
 from collections import defaultdict
+from collections import OrderedDict
 import os
 import sys
 # Code annotation
@@ -95,6 +96,30 @@ DEFAULT_SETTINGS = {
     'checkBox_autoSaveVocals': False,
 }
 
+
+def dict_to_HTMLtable(x: dict, header: str) -> str:
+    """
+    Convert a 1D-dictionary into an HTML table
+    """
+    # Generate table contents
+    values = ''
+    for i, (key, value) in enumerate(x.items()):
+        if i % 2:
+            color = "#000"
+        else:
+            color = "#333"
+
+        values += f'<tr style="background-color:{color};border:none;"><td>{key}</td><td>{value}</td></tr>\n'
+    # HTML string
+    htmlTable = """
+    <table border="1" cellspacing="0" cellpadding="0" width="100%">
+        <tr><th colspan="2" style="background-color:#555500">{header}</th></tr>
+        {values}
+    </table>
+    """.format(header=header,
+               values=values)
+    # Return HTML string
+    return htmlTable
 
 class CustomApplication(QtWidgets.QApplication):
     def __init__(self):
@@ -196,9 +221,8 @@ class CustomApplication(QtWidgets.QApplication):
         """
         Extract the saved seperation data
         """
-        seperation_data = converter_v4.default_data.copy()
+        seperation_data = OrderedDict()
 
-        seperation_data['useModel'] = 'instrumental'
         # Input/Export
         # self.windows['settings'].inputPaths
         seperation_data['input_paths'] = ['B:/boska/Desktop/Test inference/test.mp3']
@@ -214,16 +238,18 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['modelFolder'] = self.windows['settings'].ui.checkBox_modelFolder.isChecked()
         seperation_data['customParameters'] = self.windows['settings'].ui.checkBox_customParameters.isChecked()
         # Combobox
+        seperation_data['useModel'] = 'instrumental'
         seperation_data['instrumentalModel'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
+        seperation_data['vocalModel'] = ""
         seperation_data['stackModel'] = self.windows['settings'].ui.comboBox_stacked.currentData()
         # Lineedit (Constants)
         seperation_data['sr'] = int(self.windows['settings'].ui.lineEdit_sr.text())
-        seperation_data['sr_stacked'] = int(self.windows['settings'].ui.lineEdit_sr_stacked.text())
         seperation_data['hop_length'] = int(self.windows['settings'].ui.lineEdit_hopLength.text())
-        seperation_data['hop_length_stacked'] = int(self.windows['settings'].ui.lineEdit_hopLength_stacked.text())
         seperation_data['window_size'] = int(self.windows['settings'].ui.comboBox_winSize.currentText())
-        seperation_data['window_size_stacked'] = int(self.windows['settings'].ui.comboBox_winSize_stacked.currentText())
         seperation_data['n_fft'] = int(self.windows['settings'].ui.lineEdit_nfft.text())
+        seperation_data['sr_stacked'] = int(self.windows['settings'].ui.lineEdit_sr_stacked.text())
+        seperation_data['hop_length_stacked'] = int(self.windows['settings'].ui.lineEdit_hopLength_stacked.text())
+        seperation_data['window_size_stacked'] = int(self.windows['settings'].ui.comboBox_winSize_stacked.currentText())
         seperation_data['n_fft_stacked'] = int(self.windows['settings'].ui.lineEdit_nfft_stacked.text())
         # -Complex variables (Difficult to extract)-
         # Stack passes
@@ -237,9 +263,13 @@ class CustomApplication(QtWidgets.QApplication):
         resType = resType.lower().replace(' ', '_')
         seperation_data['resType'] = resType
 
+        if set(converter_v4.default_data.keys()) != set(seperation_data.keys()):
+            self.debug_to_command(f'Extracted Keys do not equal keys set by default converter!\nExtracted Keys: {sorted(list(seperation_data.keys()))}\nShould be Keys: {sorted(list(converter_v4.default_data.keys()))}',
+                                  priority=1)
+
         return seperation_data
 
-    def debug_to_command(self, text: str, priority: Optional[int] = 'default'):
+    def debug_to_command(self, text: str, priority: Optional[int] = 'default', debug_prefix: bool = True):
         """
         Shortcut function for mainwindow write to gui
 
@@ -254,6 +284,8 @@ class CustomApplication(QtWidgets.QApplication):
                              'default': QtGui.QColor("#CCC")}
             if self.in_debug_mode():
                 self.windows['main'].ui.textBrowser_command.setTextColor(debug_colours[priority])
+                if debug_prefix:
+                    text = f'DEBUG: {text}'
                 self.windows['main'].write_to_command(text)
                 self.windows['main'].ui.textBrowser_command.setTextColor(debug_colours['default'])
         else:
@@ -462,6 +494,7 @@ class MainWindow(QtWidgets.QWidget):
         """
         self.app.debug_to_command('Opening settings window...')
         # Reshow window
+        self.app.windows['settings'].setWindowState(Qt.WindowNoState)
         self.app.windows['settings'].show()
         # Focus window
         self.app.windows['settings'].activateWindow()
@@ -473,21 +506,15 @@ class MainWindow(QtWidgets.QWidget):
         """
         Seperate given files
         """
-        self.app.debug_to_command('Seperating Files...')
-        # -Disable Seperation Button
-        self.ui.pushButton_seperate.setEnabled(False)
-        # -Setup WinTaskbar-
-        self.winTaskbar.setOverlayAccessibleDescription('Seperating...')
-        self.winTaskbar.setOverlayIcon(QtGui.QIcon(ResourcePaths.images.folder))
-        self.winTaskbar_progress.setVisible(True)
         # -Extract seperation info from GUI-
         seperation_data = self.app.extract_seperation_data()
-        pprint.pprint(seperation_data)
-
+        self.app.debug_to_command(dict_to_HTMLtable(seperation_data, 'Seperation Data'),
+                                  debug_prefix=False)
         # -Seperation-
         # Create instance
         vocalRemover = converter_v4.VocalRemoverWorker(seperation_data=seperation_data,)
         # Bind events
+        vocalRemover.signals.start.connect(self.seperation_start)
         vocalRemover.signals.message.connect(self.seperation_write)
         vocalRemover.signals.progress.connect(self.seperation_update_progress)
         vocalRemover.signals.error.connect(self.seperation_error)
@@ -518,6 +545,19 @@ class MainWindow(QtWidgets.QWidget):
         self.inputPaths = inputPaths
 
     # -Seperation Methods-
+    def seperation_start(self):
+        """
+        Seperation has started
+        """
+        self.app.debug_to_command(f'The seperation has started.',
+                                  priority=2)
+        # Disable Seperation Button
+        self.ui.pushButton_seperate.setEnabled(False)
+        # Setup WinTaskbar
+        self.winTaskbar.setOverlayAccessibleDescription('Seperating...')
+        self.winTaskbar.setOverlayIcon(QtGui.QIcon(ResourcePaths.images.folder))
+        self.winTaskbar_progress.setVisible(True)
+
     def seperation_write(self, text: str, priority: Optional[int] = 'default'):
         """
         Write to GUI
@@ -529,6 +569,7 @@ class MainWindow(QtWidgets.QWidget):
         Update both progressbars in Taskbar and GUI
         with the given progress
         """
+        self.app.debug_to_command(f'Updating progress: {progress}%')
         self.winTaskbar_progress.setValue(progress)
         self.ui.progressBar.setValue(progress)
 
@@ -541,9 +582,21 @@ class MainWindow(QtWidgets.QWidget):
                 Index 0: Error Message
                 Index 1: Detailed Message
         """
-        print(message)
+        self.app.debug_to_command(f'An error occured!\nMessage: {message[0]}\nDetailed Message: {message[1]}',
+                                  priority=1)
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle('An Error Occurred')
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+        msg.setText(
+            message[0] + '\n\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!')
+        msg.setDetailedText(message[1])
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+        msg.exec_()
 
-    def seperation_finish(self, elapsed_time: str = '1:02:03'):
+        self.seperation_finish(failed=True)
+
+    def seperation_finish(self, elapsed_time: str = '1:02:03', failed: bool = False):
         """
         Finished seperation
         """
@@ -555,8 +608,9 @@ class MainWindow(QtWidgets.QWidget):
             self.winTaskbar.clearOverlayIcon()
             self.winTaskbar_progress.setVisible(False)
             self.seperation_update_progress(0)
-            self.seperation_update_progress(100)
-        
+        self.app.debug_to_command(f'The seperation has finished.',
+                                  priority=2)
+
         # -Create MessageBox-
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('Seperation Complete')

@@ -795,12 +795,12 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             </property>
                             <item>
                              <property name="text">
-                              <string notr="true">Kaiser Best</string>
+                              <string notr="true">Kaiser Fast</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string notr="true">Kaiser Fast</string>
+                              <string notr="true">Kaiser Best</string>
                              </property>
                             </item>
                             <item>
@@ -1452,8 +1452,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>98</width>
-               <height>40</height>
+               <width>792</width>
+               <height>519</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1529,8 +1529,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>98</width>
-               <height>40</height>
+               <width>792</width>
+               <height>519</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1609,8 +1609,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>600</width>
-               <height>371</height>
+               <width>792</width>
+               <height>519</height>
               </rect>
              </property>
              <property name="minimumSize">

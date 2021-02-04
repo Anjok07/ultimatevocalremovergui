@@ -8,17 +8,17 @@ from src.inference.converter_v4 import (VocalRemover, default_data)
 
 parser = argparse.ArgumentParser(description='This is the terminal version of UVR.')
 # -IO-
-parser.add_argument('-i', '--inputs', metavar='Path/s', type=str, nargs='+',
+parser.add_argument('-i', '--inputs', metavar='InputPath/s', type=str, nargs='+',
                     required=True, dest='input_paths',
                     help='Path to music file/s')
-parser.add_argument('-o', '--output', metavar='Path', type=str, nargs=1,
+parser.add_argument('-o', '--output', metavar='ExportPath', type=str, nargs=1,
                     required=True, dest='export_path',
                     help='Path to output directory')
 # -Models-
-parser.add_argument('-inst', '--instrumentalModel', metavar='Path', type=str, nargs=1,
+parser.add_argument('-inst', '--instrumentalModel', metavar='InstrumentalPath', type=str, nargs=1,
                     required=True, dest='instrumentalModel',
                     help='Path to instrumental model')
-parser.add_argument('-stacked', '--stackedModel', metavar='Path', type=str, nargs=1,
+parser.add_argument('-stacked', '--stackedModel', metavar='StackedPath', type=str, nargs=1,
                     required=False, dest='stackModel',
                     help='Path to stacked model')
 # -Settings-

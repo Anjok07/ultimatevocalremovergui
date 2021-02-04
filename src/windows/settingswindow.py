@@ -396,8 +396,8 @@ class Ui_SettingsWindow(object):
         self.gridLayout_6.addWidget(self.comboBox_engine, 1, 0, 1, 1)
 
         self.comboBox_resType = QComboBox(self.frame_12)
-        self.comboBox_resType.addItem(u"Kaiser Best")
         self.comboBox_resType.addItem(u"Kaiser Fast")
+        self.comboBox_resType.addItem(u"Kaiser Best")
         self.comboBox_resType.addItem(u"Scipy")
         self.comboBox_resType.setObjectName(u"comboBox_resType")
         self.comboBox_resType.setMinimumSize(QSize(0, 25))
@@ -669,7 +669,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 40))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 792, 519))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -704,7 +704,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 98, 40))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 792, 519))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -740,7 +740,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 371))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 792, 519))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"

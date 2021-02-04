@@ -11,7 +11,7 @@ from PySide2.QtWinExtras import (QWinTaskbarButton)
 # -Root imports-
 from .resources.resources_manager import ResourcePaths
 from .windows import (mainwindow, settingswindow)
-from .inference import converter_v4_copy as converter_v4
+from .inference import converter_v4
 # -Other-
 import datetime as dt
 from collections import defaultdict
@@ -263,7 +263,7 @@ class CustomApplication(QtWidgets.QApplication):
         resType = resType.lower().replace(' ', '_')
         seperation_data['resType'] = resType
 
-        if set(converter_v4.default_data.keys()) != set(seperation_data.keys()):
+        if set(seperation_data.keys()) != set(converter_v4.default_data.keys()):
             self.debug_to_command(f'Extracted Keys do not equal keys set by default converter!\nExtracted Keys: {sorted(list(seperation_data.keys()))}\nShould be Keys: {sorted(list(converter_v4.default_data.keys()))}',
                                   priority=1)
 

@@ -80,6 +80,7 @@ class VocalRemover:
         # Updated on every conversion or loop
         self.loop_data = {
             # File specific
+            'file_path': None,
             'file_base_name': None,
             'file_num': 0,
             # Loop specific
@@ -107,8 +108,6 @@ class VocalRemover:
             'wav_instrument': None,
             'y_spec': None,
             'v_spec': None,
-            # Spectogram from last seperation
-            'temp_spectogramm': None,
         }
 
     def seperate_files(self):
@@ -167,27 +166,26 @@ class VocalRemover:
         file_num is used to determine progress
         """
 
-        # -Update file specific variables-
         self.loop_data['file_num'] = file_num
-        self.loop_data['music_file'] = file_path
-        self.loop_data['file_base_name'] = self._get_file_base_name(file_path)
+        file_data = self._get_path_data(file_path)
+        # -Update file specific variables-
+        self.loop_data['file_path'] = file_data['file_path']
+        self.loop_data['file_base_name'] = file_data['file_base_name']
 
         for loop_num in range(self.general_data['total_loops']):
             self.loop_data['loop_num'] = loop_num
             # -Get loop specific variables-
             command_base_text = self._get_base_text()
-            model_device = self._get_model_device_file()
+            model_device, music_file = self._get_model_device_file()
             constants = self._get_constants(model_device['model_name'])
             # -Update loop specific variables
             self.loop_data['constants'] = constants
             self.loop_data['command_base_text'] = command_base_text
             self.loop_data['model_device'] = model_device
+            self.loop_data['music_file'] = music_file
 
             # -Seperation-
-            if not self.loop_data['loop_num']:
-                print('A')
-                # First loop
-                self._load_wave_source()
+            self._load_wave_source()
             self._wave_to_spectogram()
             if self.seperation_data['postProcess']:
                 # Postprocess
@@ -198,6 +196,7 @@ class VocalRemover:
             # End of seperation
             if self.seperation_data['outputImage']:
                 self._save_mask()
+            os.remove('temp.wav')
 
         self.write_to_gui(text='Completed Seperation!\n',
                           progress_step=1)
@@ -395,7 +394,7 @@ class VocalRemover:
 
         return seperation_params
 
-    def _get_model_device_file(self) -> dict:
+    def _get_model_device_file(self) -> Tuple[dict, str]:
         """
         Get the used models and devices for this loop
         Also extract the model name and the music file
@@ -406,6 +405,8 @@ class VocalRemover:
             'device': None,
             'model_name': None,
         }
+
+        music_file = self.loop_data['file_path']
 
         if not self.loop_data['loop_num']:
             # First Iteration
@@ -426,14 +427,24 @@ class VocalRemover:
             model_device['model'] = self.general_data['models']['stack']
             model_device['device'] = self.general_data['devices']['stack']
             model_device['model_name'] = os.path.basename(self.seperation_data['stackModel'])
+            # Reference new music file
+            music_file = 'temp.wav'
 
-        return model_device
+        return model_device, music_file
 
-    def _get_file_base_name(self, file_path: str) -> str:
+    def _get_path_data(self, file_path: str) -> Dict[str, str]:
         """
         Get the path infos for the given music file
         """
-        return f"{self.loop_data['file_num']}_{os.path.splitext(os.path.basename(file_path))[0]}"
+        file_data = {
+            'file_path': None,
+            'file_base_name': None,
+        }
+        # -Get Data-
+        file_data['file_path'] = file_path
+        file_data['file_base_name'] = f"{self.loop_data['file_num']}_{os.path.splitext(os.path.basename(file_path))[0]}"
+
+        return file_data
 
     # -Seperation Methods-
     def _load_wave_source(self):
@@ -561,13 +572,9 @@ class VocalRemover:
         self.write_to_gui(text='Stft of wave source...',
                           progress_step=0.1)
 
-        if not self.loop_data['loop_num']:
-            X = spec_utils.wave_to_spectrogram(wave=self.loop_data['X'],
-                                            hop_length=self.seperation_data['hop_length'],
-                                            n_fft=self.seperation_data['n_fft'])
-        else:
-            X = self.loop_data['temp_spectogramm']
-
+        X = spec_utils.wave_to_spectrogram(wave=self.loop_data['X'],
+                                           hop_length=self.seperation_data['hop_length'],
+                                           n_fft=self.seperation_data['n_fft'])
         if self.seperation_data['tta']:
             prediction, X_mag, X_phase = inference_tta(X_spec=X,
                                                        device=self.loop_data['model_device']['device'],
@@ -620,7 +627,6 @@ class VocalRemover:
         self.loop_data['y_spec'] = y_spec
         self.loop_data['v_spec'] = v_spec
 
-        self.loop_data['temp_spectogramm'] = y_spec
         self.write_to_gui(text='Done!',
                           progress_step=0.9)
 
@@ -695,6 +701,13 @@ class VocalRemover:
                           progress_step=0.9)
 
         vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name()
+
+        # Save Temp File
+        # For instrumental the instrumental is the temp file
+        # and for vocal the instrumental is the temp file due
+        # to reversement
+        sf.write(f'temp.wav',
+                 self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
 
         # -Save files-
         # Instrumental

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>929</width>
-    <height>479</height>
+    <width>911</width>
+    <height>492</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -27,13 +27,6 @@
 	background-color: none;
 	background: rgb(12, 23, 40);
 }
-/* Frames */
-QFrame[dragFile=&quot;true&quot;] {
-	border-width: 3px;
-    border-style: dotted;
-    border-color: rgb(160, 160, 160);
-	border-radius: 5px;
-}
 /* Labels */
 QLabel[audioFile=&quot;true&quot;] {
 	color:rgba(160, 160, 160, 80);
@@ -42,11 +35,6 @@ QLabel[audioFile=&quot;true&quot;] {
     border-color: rgb(60, 60, 80);
 	border-radius: 5px;
 }
-QLabel[dragFile=&quot;true&quot;] {
-	color:  rgb(160, 160, 160);
-	border: none;
-}
-
 /* Button */
 QPushButton[seperate=&quot;true&quot;] {
 	border-width: 2px;
@@ -61,15 +49,22 @@ QPushButton[seperate=&quot;true&quot;]:hover {
 QPushButton[seperate=&quot;true&quot;]:pressed {
 	background-color: rgba(109, 213, 237, 30);
 }
+QPushButton[dragFile=&quot;true&quot;] {
+	color:  rgb(160, 160, 160);
+	border-width: 3px;
+    border-style: dotted;
+    border-color: rgb(160, 160, 160);
+	border-radius: 5px;
+}
+QPushButton[dragFile=&quot;true&quot;]:hover {
+	background-color: rgb(2, 24, 53);
+}
+QPushButton[dragFile=&quot;true&quot;]:pressed {
+	background-color: rgb(1, 24, 61);
+}
+
 /* Progressbar */
-QProgressBar:horizontal {
-	border: 0px solid gray;
-}
-QProgressBar::chunk:horizontal {
-	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));
-	border-top-right-radius: 2px;
-	border-bottom-right-radius: 2px;
-}
+
 /* Command Line*/
 QTextBrowser {
 	border-left: 2px;
@@ -148,7 +143,7 @@ QTextBrowser {
          </size>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::NoFrame</enum>
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
@@ -170,27 +165,27 @@ QTextBrowser {
           <number>30</number>
          </property>
          <item>
-          <widget class="QFrame" name="frame_4">
+          <widget class="QFrame" name="frame_musicFiles">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="acceptDrops">
+            <bool>true</bool>
+           </property>
            <property name="styleSheet">
             <string notr="true"/>
            </property>
            <property name="frameShape">
-            <enum>QFrame::StyledPanel</enum>
+            <enum>QFrame::NoFrame</enum>
            </property>
            <property name="frameShadow">
-            <enum>QFrame::Raised</enum>
+            <enum>QFrame::Plain</enum>
            </property>
            <property name="lineWidth">
             <number>1</number>
-           </property>
-           <property name="dragFile" stdset="0">
-            <bool>true</bool>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <property name="spacing">
@@ -209,39 +204,28 @@ QTextBrowser {
              <number>0</number>
             </property>
             <item>
-             <widget class="QLabel" name="label_musicFiles">
+             <widget class="QListWidget" name="listWidget_musicFiles">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="lineWidth">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton_musicFiles">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+               <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>100</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>16777215</height>
-               </size>
-              </property>
               <property name="cursor">
                <cursorShape>PointingHandCursor</cursorShape>
               </property>
-              <property name="acceptDrops">
-               <bool>true</bool>
-              </property>
-              <property name="styleSheet">
-               <string notr="true"/>
-              </property>
               <property name="text">
                <string>Drag your music files</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignCenter</set>
               </property>
               <property name="dragFile" stdset="0">
                <bool>true</bool>
@@ -458,8 +442,18 @@ border-bottom-left-radius: 0px;</string>
           <height>6</height>
          </size>
         </property>
+        <property name="styleSheet">
+         <string notr="true">QProgressBar:horizontal {
+	border: 0px solid gray;
+}
+QProgressBar::chunk {
+}</string>
+        </property>
+        <property name="maximum">
+         <number>200</number>
+        </property>
         <property name="value">
-         <number>80</number>
+         <number>200</number>
         </property>
         <property name="textVisible">
          <bool>false</bool>
@@ -468,7 +462,7 @@ border-bottom-left-radius: 0px;</string>
          <enum>QProgressBar::TopToBottom</enum>
         </property>
         <property name="format">
-         <string/>
+         <string notr="true"/>
         </property>
        </widget>
       </item>
@@ -509,7 +503,20 @@ border-bottom-left-radius: 0px;</string>
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;NAN&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;table border=&quot;1&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;&quot; width=&quot;100%&quot; cellspacing=&quot;2&quot; cellpadding=&quot;0&quot;&gt;
+&lt;tr&gt;
+&lt;td colspan=&quot;2&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;HEADER&lt;/span&gt;        &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;name&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;value        &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;name&lt;/p&gt;&lt;/td&gt;
+&lt;td&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;value    &lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>

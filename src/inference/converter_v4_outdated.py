@@ -785,7 +785,6 @@ class VocalRemover:
                 not seperation_data['export_path'] == ''):
             # Export path either invalid or not specified
             raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
-
         # Check models
         if not seperation_data['useModel'] in ['vocal', 'instrumental']:
             # Invalid 'useModel'

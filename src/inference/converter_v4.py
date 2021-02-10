@@ -2,6 +2,12 @@
 Seperate music files with the v4 engine
 """
 # pylint: disable=no-name-in-module, import-error
+# -GUI (Threads)-
+from PySide2 import QtCore  # (QRunnable, QThread, QObject, Signal, Slot)
+from PySide2 import QtWidgets
+# Multithreading
+import threading
+from multiprocessing import Pool
 # -Required for conversion-
 import cv2
 import librosa
@@ -12,6 +18,7 @@ import torch
 from .lib.lib_v4 import dataset
 from .lib.lib_v4 import nets
 from .lib.lib_v4 import spec_utils
+from ..resources.resources_manager import Logger
 # -Other-
 # Loading Bar
 from tqdm import tqdm
@@ -20,8 +27,6 @@ import datetime as dt
 import time
 import os
 # Annotating
-from PySide2 import QtCore  # (QRunnable, QThread, QObject, Signal, Slot)
-from PySide2 import QtWidgets
 from typing import (Dict, Tuple, Optional, Callable)
 
 
@@ -59,24 +64,40 @@ default_data = {
     'resType': 'kaiser_fast',
     # Whether to override constants embedded in the model file name
     'customParameters': False,
+    # Allows to process multiple music files at once
+    'multithreading': False,
 }
 
 
+def splitlist(input_paths: list, chunk_size: int) -> list:
+    """
+    Evenly split the values in the list into a space of chunk_size
+    """
+    split_values = []
+    for i, path in enumerate(input_paths):
+        idx = i - chunk_size * (i // chunk_size)
+        if idx < chunk_size:
+            split_values.append([])
+        split_values[idx].append(path)
+
+    return split_values
+
+
 class VocalRemover:
-    def __init__(self, seperation_data: dict, write_to_command: Optional[Callable[[str], None]] = None, update_progress: Optional[Callable[[int], None]] = None):
-        self.write_to_command = write_to_command
-        self.update_progress = update_progress
-        # GUI parsed data
+    def __init__(self, seperation_data: dict, logger: Logger):
+        # -Universal Data (Same for each file)-
         self.seperation_data = seperation_data
-        # Data that is determined once
         self.general_data = {
-            'total_files': len(self.seperation_data['input_paths']),
             'total_loops': None,
             'folder_path': None,
             'file_add_on': None,
-            'models': {},
-            'devices': {},
         }
+        self.logger = logger
+        self.models = {}
+        self.devices = {}
+        # Threads
+        self.all_threads = []
+        # -File Specific Data (Different for each file)-
         # Updated on every conversion or loop
         self.loop_data = {
             # File specific
@@ -117,19 +138,27 @@ class VocalRemover:
         """
         # Track time
         stime = time.perf_counter()
-        self._check_for_valid_inputs(self.seperation_data)
+        self._check_for_valid_inputs()
         self._fill_general_data()
-
+        self.all_threads = []
+        
         for file_num, file_path in enumerate(self.seperation_data['input_paths'], start=1):
-            self._seperate(file_path,
-                           file_num)
+            if self.seperation_data['multithreading']:
+                thread = threading.Thread(target=self._seperate, args=(file_path, file_num),
+                                          daemon=True)
+                thread.start()
+                self.all_threads.append(thread)
+            else:
+                self._seperate(file_path,
+                                    file_num)
+
+        for thread in self.all_threads:
+            thread.join()
         # Free RAM
         torch.cuda.empty_cache()
 
-        self.write_to_gui('Conversion(s) Completed and Saving all Files!',
-                          include_base_text=False)
-        self.write_to_gui(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}',
-                          include_base_text=False)
+        self.logger.info('Conversion(s) Completed and Saving all Files!')
+        self.logger.info(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
 
     def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         """
@@ -137,70 +166,8 @@ class VocalRemover:
 
         A new line '\\n' will be automatically appended to the text
         """
-        # Progress is given
-        progress = self._get_progress(progress_step)
-
-        if text is not None:
-            # Text is given
-            if include_base_text:
-                # Include base text
-                text = f"{self.loop_data['command_base_text']} {text}"
-
-            if self.write_to_command is not None:
-                # Text widget is given
-                self.write_to_command(text)
-            else:
-                # No text widget so write to console
-                if progress_step is not None:
-                    text = f'{int(progress)} %\t{text}'
-                if not 'done' in text.lower():
-                    # Skip 'Done!' text as it clutters the terminal
-                    print(text)
-
-        if self.update_progress is not None:
-            # Progress widget is given
-            self.update_progress(progress)
-
-    def _seperate(self, file_path: str, file_num: int):
-        """
-        Seperate given music file,
-        file_num is used to determine progress
-        """
-
-        # -Update file specific variables-
-        self.loop_data['file_num'] = file_num
-        self.loop_data['music_file'] = file_path
-        self.loop_data['file_base_name'] = self._get_file_base_name(file_path)
-
-        for loop_num in range(self.general_data['total_loops']):
-            self.loop_data['loop_num'] = loop_num
-            # -Get loop specific variables-
-            command_base_text = self._get_base_text()
-            model_device = self._get_model_device_file()
-            constants = self._get_constants(model_device['model_name'])
-            # -Update loop specific variables
-            self.loop_data['constants'] = constants
-            self.loop_data['command_base_text'] = command_base_text
-            self.loop_data['model_device'] = model_device
-
-            # -Seperation-
-            if not self.loop_data['loop_num']:
-                print('A')
-                # First loop
-                self._load_wave_source()
-            self._wave_to_spectogram()
-            if self.seperation_data['postProcess']:
-                # Postprocess
-                self._post_process()
-            self._inverse_stft_of_instrumentals_and_vocals()
-            self._save_files()
-        else:
-            # End of seperation
-            if self.seperation_data['outputImage']:
-                self._save_mask()
-
-        self.write_to_gui(text='Completed Seperation!\n',
-                          progress_step=1)
+        self.logger.info(text)
+        print(text)
 
     def _fill_general_data(self):
         """
@@ -301,18 +268,96 @@ class VocalRemover:
         # -Get data-
         total_loops = get_total_loops()
         folder_path, file_add_on = get_folderPath_fileAddOn()
-        self.write_to_gui(text='Loading models...',
-                          include_base_text=False)
+        self.logger.info('Loading models...')
         models, devices = get_models_devices()
-        self.write_to_gui(text='Done!',
-                          include_base_text=False)
 
         # -Set data-
+        self.general_data['total_files'] = len(self.seperation_data['input_paths'])
         self.general_data['total_loops'] = total_loops
         self.general_data['folder_path'] = folder_path
         self.general_data['file_add_on'] = file_add_on
-        self.general_data['models'] = models
-        self.general_data['devices'] = devices
+        self.models = models
+        self.devices = devices
+
+    def _check_for_valid_inputs(self):
+        """
+        Check if all inputs have been entered correctly.
+
+        If errors are found, an exception is raised
+        """
+        # Check input paths
+        if not len(self.seperation_data['input_paths']):
+            # No music file specified
+            raise TypeError('No music file to seperate defined!')
+        if (not isinstance(self.seperation_data['input_paths'], tuple) and
+                not isinstance(self.seperation_data['input_paths'], list)):
+            # Music file not specified in a list or tuple
+            raise TypeError('Please specify your music file path/s in a list or tuple!')
+        for input_path in self.seperation_data['input_paths']:
+            # Go through each music file
+            if not os.path.isfile(input_path):
+                # Invalid path
+                raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
+        # Output path
+        if (not os.path.isdir(self.seperation_data['export_path']) and
+                not self.seperation_data['export_path'] == ''):
+            # Export path either invalid or not specified
+            raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
+
+        # Check models
+        if not self.seperation_data['useModel'] in ['vocal', 'instrumental']:
+            # Invalid 'useModel'
+            raise TypeError("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
+        if not os.path.isfile(self.seperation_data[f"{self.seperation_data['useModel']}Model"]):
+            # No or invalid instrumental/vocal model given
+            # but model is needed
+            raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
+        if (not os.path.isfile(self.seperation_data['stackModel']) and
+            (self.seperation_data['stackOnly'] or
+                self.seperation_data['stackPasses'] > 0)):
+            # No or invalid stack model given
+            # but model is needed
+            raise TypeError(f"Not specified or invalid model path for stacked model!")
+
+    def _seperate(self, file_path: str, file_num: int):
+        """
+        Seperate given music file,
+        file_num is used to determine progress
+        """
+
+        # -Update file specific variables-
+        self.loop_data['file_num'] = file_num
+        self.loop_data['music_file'] = file_path
+        self.loop_data['file_base_name'] = self._get_file_base_name(file_path)
+
+        for loop_num in range(self.general_data['total_loops']):
+            self.loop_data['loop_num'] = loop_num
+            # -Get loop specific variables-
+            command_base_text = self._get_base_text()
+            model_device = self._get_model_device_file()
+            constants = self._get_constants(model_device['model_name'])
+            # -Update loop specific variables
+            self.loop_data['constants'] = constants
+            self.loop_data['command_base_text'] = command_base_text
+            self.loop_data['model_device'] = model_device
+
+            # -Seperation-
+            if not self.loop_data['loop_num']:
+                # First loop
+                self._load_wave_source()
+            self._wave_to_spectogram()
+            if self.seperation_data['postProcess']:
+                # Postprocess
+                self._post_process()
+            self._inverse_stft_of_instrumentals_and_vocals()
+            self._save_files()
+        else:
+            # End of seperation
+            if self.seperation_data['outputImage']:
+                self._save_mask()
+
+        self.write_to_gui(text='Completed Seperation!\n',
+                            progress_step=1)
 
     # -Data Getter Methods-
     def _get_base_text(self) -> str:
@@ -325,8 +370,8 @@ class VocalRemover:
             loop_add_on = f" ({self.loop_data['loop_num']+1}/{self.general_data['total_loops']})"
 
         return 'File {file_num}/{total_files}:{loop} '.format(file_num=self.loop_data['file_num'],
-                                                              total_files=self.general_data['total_files'],
-                                                              loop=loop_add_on)
+                                                                total_files=self.general_data['total_files'],
+                                                                loop=loop_add_on)
 
     def _get_constants(self, model_name: str) -> dict:
         """
@@ -406,25 +451,24 @@ class VocalRemover:
             'device': None,
             'model_name': None,
         }
-
-        if not self.loop_data['loop_num']:
-            # First Iteration
-            if self.seperation_data['stackOnly']:
-                if os.path.isfile(self.seperation_data['stackModel']):
-                    model_device['model'] = self.general_data['models']['stack']
-                    model_device['device'] = self.general_data['devices']['stack']
-                    model_device['model_name'] = os.path.basename(self.seperation_data['stackModel'])
-                else:
-                    raise ValueError(f'Selected stack only model, however, stack model path file cannot be found\nPath: "{self.seperation_data["stackModel"]}"')  # nopep8
+        if self.seperation_data['stackOnly']:
+            # Stack Only Conversion
+            if os.path.isfile(self.seperation_data['stackModel']):
+                model_device['model'] = self.models['stack']
+                model_device['device'] = self.devices['stack']
+                model_device['model_name'] = os.path.basename(self.seperation_data['stackModel'])
             else:
-                model_device['model'] = self.general_data['models'][self.seperation_data['useModel']]
-                model_device['device'] = self.general_data['devices'][self.seperation_data['useModel']]
-                model_device['model_name'] = os.path.basename(
-                    self.seperation_data[f'{self.seperation_data["useModel"]}Model'])
+                raise ValueError(f'Selected stack only model, however, stack model path file cannot be found\nPath: "{self.seperation_data["stackModel"]}"')  # nopep8
+        elif not self.loop_data['loop_num']:
+            # First Loop
+            model_device['model'] = self.models[self.seperation_data['useModel']]
+            model_device['device'] = self.devices[self.seperation_data['useModel']]
+            model_device['model_name'] = os.path.basename(
+                self.seperation_data[f'{self.seperation_data["useModel"]}Model'])
         else:
             # Every other iteration
-            model_device['model'] = self.general_data['models']['stack']
-            model_device['device'] = self.general_data['devices']['stack']
+            model_device['model'] = self.models['stack']
+            model_device['device'] = self.devices['stack']
             model_device['model_name'] = os.path.basename(self.seperation_data['stackModel'])
 
         return model_device
@@ -441,7 +485,7 @@ class VocalRemover:
         Load the wave source
         """
         self.write_to_gui(text='Loading wave source...',
-                          progress_step=0)
+                            progress_step=0)
 
         X, sampling_rate = librosa.load(path=self.loop_data['music_file'],
                                         sr=self.loop_data['constants']['sr'],
@@ -452,9 +496,6 @@ class VocalRemover:
 
         self.loop_data['X'] = X
         self.loop_data['sampling_rate'] = sampling_rate
-
-        self.write_to_gui(text='Done!',
-                          progress_step=0.1)
 
     def _wave_to_spectogram(self):
         """
@@ -470,10 +511,7 @@ class VocalRemover:
             model.eval()
             with torch.no_grad():
                 preds = []
-                if self.update_progress is None:
-                    bar_format = '{desc}    |{bar}{r_bar}'
-                else:
-                    bar_format = '{l_bar}{bar}{r_bar}'
+                bar_format = '{desc}    |{bar}{r_bar}'
                 pbar = tqdm(range(n_window), bar_format=bar_format)
 
                 for progrs, i in enumerate(pbar):
@@ -485,16 +523,16 @@ class VocalRemover:
                     else:
                         progres_step = 0.1 + 0.7 * (progrs / n_window)
                     self.write_to_gui(progress_step=progres_step)
-                    if self.update_progress is None:
-                        progress = self._get_progress(progres_step)
-                        text = f'{int(progress)} %'
-                        if progress < 10:
-                            text += ' '
-                        pbar.set_description_str(text)
+
+                    progress = self._get_progress(progres_step)
+                    text = f'{int(progress)} %'
+                    if progress < 10:
+                        text += ' '
+                    pbar.set_description_str(text)
 
                     start = i * roi_size
                     X_mag_window = X_mag_pad[None, :, :,
-                                             start:start + self.seperation_data['window_size']]
+                                                start:start + self.seperation_data['window_size']]
                     X_mag_window = torch.from_numpy(X_mag_window).to(device)
 
                     pred = model.predict(X_mag_window)
@@ -514,14 +552,14 @@ class VocalRemover:
 
             n_frame = X_mag_pre.shape[2]
             pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
-                                                          self.seperation_data['window_size'], model.offset)
+                                                            self.seperation_data['window_size'], model.offset)
             n_window = int(np.ceil(n_frame / roi_size))
 
             X_mag_pad = np.pad(
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred = execute(X_mag_pad, roi_size, n_window,
-                           device, model)
+                            device, model)
             pred = pred[:, :, :n_frame]
 
             return pred * coef, X_mag, np.exp(1.j * X_phase)
@@ -534,14 +572,14 @@ class VocalRemover:
 
             n_frame = X_mag_pre.shape[2]
             pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
-                                                          self.seperation_data['window_size'], model.offset)
+                                                            self.seperation_data['window_size'], model.offset)
             n_window = int(np.ceil(n_frame / roi_size))
 
             X_mag_pad = np.pad(
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred = execute(X_mag_pad, roi_size, n_window,
-                           device, model, progrs_info='1/2')
+                            device, model, progrs_info='1/2')
             pred = pred[:, :, :n_frame]
 
             pad_l += roi_size // 2
@@ -552,77 +590,73 @@ class VocalRemover:
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred_tta = execute(X_mag_pad, roi_size, n_window,
-                               device, model, progrs_info='2/2')
+                                device, model, progrs_info='2/2')
             pred_tta = pred_tta[:, :, roi_size // 2:]
             pred_tta = pred_tta[:, :, :n_frame]
 
             return (pred + pred_tta) * 0.5 * coef, X_mag, np.exp(1.j * X_phase)
 
         self.write_to_gui(text='Stft of wave source...',
-                          progress_step=0.1)
+                            progress_step=0.1)
 
         if not self.loop_data['loop_num']:
             X = spec_utils.wave_to_spectrogram(wave=self.loop_data['X'],
-                                            hop_length=self.seperation_data['hop_length'],
-                                            n_fft=self.seperation_data['n_fft'])
+                                                hop_length=self.seperation_data['hop_length'],
+                                                n_fft=self.seperation_data['n_fft'])
         else:
             X = self.loop_data['temp_spectogramm']
 
         if self.seperation_data['tta']:
             prediction, X_mag, X_phase = inference_tta(X_spec=X,
-                                                       device=self.loop_data['model_device']['device'],
-                                                       model=self.loop_data['model_device']['model'])
+                                                        device=self.loop_data['model_device']['device'],
+                                                        model=self.loop_data['model_device']['model'])
         else:
             prediction, X_mag, X_phase = inference(X_spec=X,
-                                                   device=self.loop_data['model_device']['device'],
-                                                   model=self.loop_data['model_device']['model'])
+                                                    device=self.loop_data['model_device']['device'],
+                                                    model=self.loop_data['model_device']['model'])
 
         self.loop_data['prediction'] = prediction
         self.loop_data['X'] = X
         self.loop_data['X_mag'] = X_mag
         self.loop_data['X_phase'] = X_phase
 
-        self.write_to_gui(text='Done!',
-                          progress_step=0.8)
-
     def _post_process(self):
         """
         Post process
         """
         self.write_to_gui(text='Post processing...',
-                          progress_step=0.8)
+                            progress_step=0.8)
 
         pred_inv = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'], 0, np.inf)
         prediction = spec_utils.mask_silence(self.loop_data['prediction'], pred_inv)
 
         self.loop_data['prediction'] = prediction
 
-        self.write_to_gui(text='Done!',
-                          progress_step=0.85)
-
     def _inverse_stft_of_instrumentals_and_vocals(self):
         """
         Inverse stft of instrumentals and vocals
         """
         self.write_to_gui(text='Inverse stft of instruments and vocals...',
-                          progress_step=0.85)
+                            progress_step=0.85)
 
         y_spec = self.loop_data['prediction'] * self.loop_data['X_phase']
-        wav_instrument = spec_utils.spectrogram_to_wave(y_spec,
-                                                        hop_length=self.seperation_data['hop_length'])
-        v_spec = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'], 0, np.inf) * self.loop_data['X_phase']
+        v_spec = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'],
+                            0, np.inf) * self.loop_data['X_phase']
+
+        if self.loop_data['loop_num'] == (self.general_data['total_loops'] - 1):
+            # Only compute wave on last loop
+            wav_instrument = spec_utils.spectrogram_to_wave(y_spec,
+                                                            hop_length=self.seperation_data['hop_length'])
+            self.loop_data['wav_instrument'] = wav_instrument
         wav_vocals = spec_utils.spectrogram_to_wave(v_spec,
                                                     hop_length=self.seperation_data['hop_length'])
-
         self.loop_data['wav_vocals'] = wav_vocals
-        self.loop_data['wav_instrument'] = wav_instrument
+
         # Needed for mask creation
         self.loop_data['y_spec'] = y_spec
         self.loop_data['v_spec'] = v_spec
 
         self.loop_data['temp_spectogramm'] = y_spec
-        self.write_to_gui(text='Done!',
-                          progress_step=0.9)
 
     def _save_files(self):
         """
@@ -682,7 +716,7 @@ class VocalRemover:
                     vocal_name = f'(Vocal_{loop_num}_Stacked_Output)'
                     instrumental_name = f'(Instrumental_{loop_num}_Stacked_Output)'
                 elif (self.seperation_data['useModel'] == 'vocal' or
-                      self.seperation_data['useModel'] == 'instrumental'):
+                        self.seperation_data['useModel'] == 'instrumental'):
                     vocal_name = f'(Vocals_{loop_num}_Stacked_Output)'
                     instrumental_name = f'(Instrumental_{loop_num}_Stacked_Output)'
 
@@ -692,7 +726,7 @@ class VocalRemover:
             return vocal_name, instrumental_name, folder_path
 
         self.write_to_gui(text='Saving Files...',
-                          progress_step=0.9)
+                            progress_step=0.9)
 
         vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name()
 
@@ -701,20 +735,17 @@ class VocalRemover:
         if instrumental_name is not None:
             instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
             instrumental_path = os.path.join(folder_path,
-                                             instrumental_file_name)
+                                                instrumental_file_name)
 
             sf.write(instrumental_path,
-                     self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
+                        self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
         # Vocal
         if vocal_name is not None:
             vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
             vocal_path = os.path.join(folder_path,
-                                      vocal_file_name)
+                                        vocal_file_name)
             sf.write(vocal_path,
-                     self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
-
-        self.write_to_gui(text='Done!',
-                          progress_step=0.95)
+                        self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
 
     def _save_mask(self):
         """
@@ -747,46 +778,6 @@ class VocalRemover:
             progress = 0
 
         return progress
-
-    def _check_for_valid_inputs(self, seperation_data: dict):
-        """
-        Check if all inputs have been entered correctly.
-
-        If errors are found, an exception is raised
-        """
-        # Check input paths
-        if not len(seperation_data['input_paths']):
-            # No music file specified
-            raise TypeError('No music file to seperate defined!')
-        if (not isinstance(seperation_data['input_paths'], tuple) and
-                not isinstance(seperation_data['input_paths'], list)):
-            # Music file not specified in a list or tuple
-            raise TypeError('Please specify your music file path/s in a list or tuple!')
-        for input_path in seperation_data['input_paths']:
-            # Go through each music file
-            if not os.path.isfile(input_path):
-                # Invalid path
-                raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
-        # Output path
-        if (not os.path.isdir(seperation_data['export_path']) and
-                not seperation_data['export_path'] == ''):
-            # Export path either invalid or not specified
-            raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
-
-        # Check models
-        if not seperation_data['useModel'] in ['vocal', 'instrumental']:
-            # Invalid 'useModel'
-            raise TypeError("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
-        if not os.path.isfile(seperation_data[f"{seperation_data['useModel']}Model"]):
-            # No or invalid instrumental/vocal model given
-            # but model is needed
-            raise TypeError(f"Not specified or invalid model path for {seperation_data['useModel']} model!")
-        if (not os.path.isfile(seperation_data['stackModel']) and
-            (seperation_data['stackOnly'] or
-             seperation_data['stackPasses'] > 0)):
-            # No or invalid stack model given
-            # but model is needed
-            raise TypeError(f"Not specified or invalid model path for stacked model!")
 
 # --GUI ONLY--
 
@@ -823,25 +814,28 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
     Only use in conjunction with GUI
     '''
 
-    def __init__(self, seperation_data: dict):
-        super(VocalRemoverWorker, self).__init__(seperation_data)
-        super(VocalRemover, self).__init__(seperation_data)
+    def __init__(self, logger, seperation_data: dict = {}):
+        super(VocalRemoverWorker, self).__init__(seperation_data, logger=logger)
+        super(VocalRemover, self).__init__(seperation_data, logger=logger)
         super(QtCore.QRunnable, self).__init__()
         self.signals = WorkerSignals()
+        self.logger = logger
         self.seperation_data = seperation_data
+        self.setAutoDelete(False)
 
     @QtCore.Slot()
     def run(self):
         """
         Seperate files
         """
-        import time
         stime = time.perf_counter()
 
         try:
             self.signals.start.emit()
+            self.logger.info(msg='----- The seperation has started! -----')
             self.seperate_files()
         except Exception as e:
+            self.logger.exception(msg='An Exception has occurred!')
             import traceback
             traceback_text = ''.join(traceback.format_tb(e.__traceback__))
             message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!'
@@ -849,10 +843,9 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
             print(type(e).__name__, e)
             self.signals.error.emit([str(e), message])
             return
-
         elapsed_seconds = int(time.perf_counter() - stime)
-        time = dt.timedelta(seconds=elapsed_seconds)
-        self.signals.finished.emit(str(time))
+        elapsed_time = str(dt.timedelta(seconds=elapsed_seconds))
+        self.signals.finished.emit(elapsed_time)
 
     def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         if text is not None:

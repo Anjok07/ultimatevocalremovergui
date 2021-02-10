@@ -1,10 +1,8 @@
 __pycache__
-data.pkl
-# Testing models
-model_iter26_sr33075_hl384_w512.pth
-baseline.pth
-temp.wav
-src/resources/models/**/*.pth
+# Developer stuff
 UIFileConverter.ps1
 developer_notes.txt
 languages
+# Do not include model files and logs
+src/resources/models/**/*.pth
+src/resources/logs/*.log

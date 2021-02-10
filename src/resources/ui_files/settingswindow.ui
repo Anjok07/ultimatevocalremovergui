@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>972</width>
-    <height>580</height>
+    <width>1097</width>
+    <height>508</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -321,7 +321,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -374,8 +374,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>792</width>
-               <height>519</height>
+               <width>735</width>
+               <height>424</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -1452,8 +1452,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>792</width>
-               <height>519</height>
+               <width>83</width>
+               <height>40</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1529,8 +1529,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>792</width>
-               <height>519</height>
+               <width>83</width>
+               <height>40</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1609,8 +1609,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>792</width>
-               <height>519</height>
+               <width>917</width>
+               <height>447</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1821,11 +1821,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                                     <string>On</string>
                                    </property>
                                   </item>
-                                  <item>
-                                   <property name="text">
-                                    <string>Debug Mode</string>
-                                   </property>
-                                  </item>
                                  </widget>
                                 </item>
                                 <item>
@@ -1889,13 +1884,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                              <property name="verticalSpacing">
                               <number>10</number>
                              </property>
-                             <item row="2" column="0">
-                              <widget class="QCheckBox" name="checkBox_settingsStartup">
-                               <property name="text">
-                                <string>Open Settings on Startup</string>
-                               </property>
-                              </widget>
-                             </item>
                              <item row="4" column="0">
                               <widget class="QCheckBox" name="checkBox_disableAnimations">
                                <property name="text">
@@ -1910,6 +1898,20 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                                </property>
                               </widget>
                              </item>
+                             <item row="1" column="0" colspan="2">
+                              <widget class="QCheckBox" name="checkBox_notifyUpdates">
+                               <property name="text">
+                                <string>Notify me of application updates</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="2" column="0">
+                              <widget class="QCheckBox" name="checkBox_settingsStartup">
+                               <property name="text">
+                                <string>Open Settings on Startup</string>
+                               </property>
+                              </widget>
+                             </item>
                              <item row="0" column="0" colspan="2">
                               <widget class="QCheckBox" name="checkBox_notifiyOnFinish">
                                <property name="text">
@@ -1917,10 +1919,16 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                                </property>
                               </widget>
                              </item>
-                             <item row="1" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_notifyUpdates">
+                             <item row="5" column="0">
+                              <widget class="QCheckBox" name="checkBox_multiThreading">
+                               <property name="enabled">
+                                <bool>false</bool>
+                               </property>
+                               <property name="toolTip">
+                                <string>Process multiple files simultaneously</string>
+                               </property>
                                <property name="text">
-                                <string>Notify me of application updates</string>
+                                <string>Multithreading (Experimental)</string>
                                </property>
                               </widget>
                              </item>
@@ -2397,6 +2405,25 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
           <number>15</number>
          </property>
          <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>29</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Get Log File</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="pushButton_resetDefault">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -2418,56 +2445,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
            </property>
            <property name="text">
             <string>Reset to default</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_apply">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>60</width>
-             <height>29</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Apply</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButton_cancel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>60</width>
-             <height>29</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Cancel</string>
            </property>
           </widget>
          </item>

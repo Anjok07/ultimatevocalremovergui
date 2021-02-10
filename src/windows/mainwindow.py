@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(929, 479)
+        MainWindow.resize(911, 492)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"/* Universal */\n"
                                  "* {\n"
@@ -25,13 +25,6 @@ class Ui_MainWindow(object):
                                  "	color: rgb(255, 255, 255);\n"
                                  "	background-color: none;\n"
                                  "	background: rgb(12, 23, 40);\n"
-                                 "}\n"
-                                 "/* Frames */\n"
-                                 "QFrame[dragFile=\"true\"] {\n"
-                                 "	border-width: 3px;\n"
-                                 "    border-style: dotted;\n"
-                                 "    border-color: rgb(160, 160, 160);\n"
-                                 "	border-radius: 5px;\n"
                                  "}\n"
                                  "/* Labels */\n"
                                  "QLabel[audioFile=\"true\"] {\n"
@@ -41,11 +34,6 @@ class Ui_MainWindow(object):
                                  "    border-color: rgb(60, 60, 80);\n"
                                  "	border-radius: 5px;\n"
                                  "}\n"
-                                 "QLabel[dragFile=\"true\"] {\n"
-                                 "	color:  rgb(160, 160, 160);\n"
-                                 "	border: none;\n"
-                                 "}\n"
-                                 "\n"
                                  "/* Button */\n"
                                  "QPushButton[seperate=\"true\"] {\n"
                                  "	border-width: 2px;\n"
@@ -58,18 +46,25 @@ class Ui_MainWindow(object):
                                  "	background-color: rgba(109, 213, 237, 10);\n"
                                  "}\n"
                                  "QPushButton[seperate=\"true\"]:pressed {\n"
-                                 "	background-colo"
-                                 "r: rgba(109, 213, 237, 30);\n"
+                                 "	background-color: rgba(109, 213, 237, 30);\n"
                                  "}\n"
+                                 "QPushButton[dragFile=\"true\"] {\n"
+                                 "	color:  rgb(160, 160, 160);\n"
+                                 "	border-width: 3px;\n"
+                                 "    border-style: dotted;\n"
+                                 "    border-color: rgb(160, 160, 160);\n"
+                                 "	border-radius: 5px;\n"
+                                 "}\n"
+                                 "QPushButton[dragFile=\"true\"]:hover"
+                                 " {\n"
+                                 "	background-color: rgb(2, 24, 53);\n"
+                                 "}\n"
+                                 "QPushButton[dragFile=\"true\"]:pressed {\n"
+                                 "	background-color: rgb(1, 24, 61);\n"
+                                 "}\n"
+                                 "\n"
                                  "/* Progressbar */\n"
-                                 "QProgressBar:horizontal {\n"
-                                 "	border: 0px solid gray;\n"
-                                 "}\n"
-                                 "QProgressBar::chunk:horizontal {\n"
-                                 "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));\n"
-                                 "	border-top-right-radius: 2px;\n"
-                                 "	border-bottom-right-radius: 2px;\n"
-                                 "}\n"
+                                 "\n"
                                  "/* Command Line*/\n"
                                  "QTextBrowser {\n"
                                  "	border-left: 2px;\n"
@@ -101,45 +96,50 @@ class Ui_MainWindow(object):
         self.frame_2.setSizePolicy(sizePolicy)
         self.frame_2.setMinimumSize(QSize(0, 0))
         self.frame_2.setMaximumSize(QSize(16777215, 16777215))
-        self.frame_2.setFrameShape(QFrame.StyledPanel)
+        self.frame_2.setFrameShape(QFrame.NoFrame)
         self.frame_2.setFrameShadow(QFrame.Raised)
         self.verticalLayout = QVBoxLayout(self.frame_2)
         self.verticalLayout.setSpacing(5)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(30, 30, 30, 30)
-        self.frame_4 = QFrame(self.frame_2)
-        self.frame_4.setObjectName(u"frame_4")
+        self.frame_musicFiles = QFrame(self.frame_2)
+        self.frame_musicFiles.setObjectName(u"frame_musicFiles")
         sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy1.setHorizontalStretch(0)
         sizePolicy1.setVerticalStretch(0)
         sizePolicy1.setHeightForWidth(
-            self.frame_4.sizePolicy().hasHeightForWidth())
-        self.frame_4.setSizePolicy(sizePolicy1)
-        self.frame_4.setStyleSheet(u"")
-        self.frame_4.setFrameShape(QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QFrame.Raised)
-        self.frame_4.setLineWidth(1)
-        self.frame_4.setProperty("dragFile", True)
-        self.verticalLayout_2 = QVBoxLayout(self.frame_4)
+            self.frame_musicFiles.sizePolicy().hasHeightForWidth())
+        self.frame_musicFiles.setSizePolicy(sizePolicy1)
+        self.frame_musicFiles.setAcceptDrops(True)
+        self.frame_musicFiles.setStyleSheet(u"")
+        self.frame_musicFiles.setFrameShape(QFrame.NoFrame)
+        self.frame_musicFiles.setFrameShadow(QFrame.Plain)
+        self.frame_musicFiles.setLineWidth(1)
+        self.verticalLayout_2 = QVBoxLayout(self.frame_musicFiles)
         self.verticalLayout_2.setSpacing(0)
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.label_musicFiles = QLabel(self.frame_4)
-        self.label_musicFiles.setObjectName(u"label_musicFiles")
-        sizePolicy.setHeightForWidth(
-            self.label_musicFiles.sizePolicy().hasHeightForWidth())
-        self.label_musicFiles.setSizePolicy(sizePolicy)
-        self.label_musicFiles.setMinimumSize(QSize(0, 100))
-        self.label_musicFiles.setMaximumSize(QSize(16777215, 16777215))
-        self.label_musicFiles.setCursor(QCursor(Qt.PointingHandCursor))
-        self.label_musicFiles.setAcceptDrops(True)
-        self.label_musicFiles.setStyleSheet(u"")
-        self.label_musicFiles.setAlignment(Qt.AlignCenter)
-        self.label_musicFiles.setProperty("dragFile", True)
+        self.listWidget_musicFiles = QListWidget(self.frame_musicFiles)
+        self.listWidget_musicFiles.setObjectName(u"listWidget_musicFiles")
+        self.listWidget_musicFiles.setFrameShape(QFrame.NoFrame)
+        self.listWidget_musicFiles.setLineWidth(0)
 
-        self.verticalLayout_2.addWidget(self.label_musicFiles)
+        self.verticalLayout_2.addWidget(self.listWidget_musicFiles)
 
-        self.verticalLayout.addWidget(self.frame_4)
+        self.pushButton_musicFiles = QPushButton(self.frame_musicFiles)
+        self.pushButton_musicFiles.setObjectName(u"pushButton_musicFiles")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
+        sizePolicy2.setHeightForWidth(
+            self.pushButton_musicFiles.sizePolicy().hasHeightForWidth())
+        self.pushButton_musicFiles.setSizePolicy(sizePolicy2)
+        self.pushButton_musicFiles.setCursor(QCursor(Qt.PointingHandCursor))
+        self.pushButton_musicFiles.setProperty("dragFile", True)
+
+        self.verticalLayout_2.addWidget(self.pushButton_musicFiles)
+
+        self.verticalLayout.addWidget(self.frame_musicFiles)
 
         self.label_arrow = QLabel(self.frame_2)
         self.label_arrow.setObjectName(u"label_arrow")
@@ -162,12 +162,12 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setContentsMargins(-1, -1, -1, 30)
         self.label_instrumental = QLabel(self.frame_3)
         self.label_instrumental.setObjectName(u"label_instrumental")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(
+        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(
             self.label_instrumental.sizePolicy().hasHeightForWidth())
-        self.label_instrumental.setSizePolicy(sizePolicy2)
+        self.label_instrumental.setSizePolicy(sizePolicy3)
 
         self.gridLayout_2.addWidget(self.label_instrumental, 0, 0, 1, 1)
 
@@ -229,17 +229,24 @@ class Ui_MainWindow(object):
 
         self.progressBar = QProgressBar(self.frame_5)
         self.progressBar.setObjectName(u"progressBar")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(
+        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(
             self.progressBar.sizePolicy().hasHeightForWidth())
-        self.progressBar.setSizePolicy(sizePolicy3)
+        self.progressBar.setSizePolicy(sizePolicy4)
         self.progressBar.setMinimumSize(QSize(0, 10))
         self.progressBar.setMaximumSize(QSize(16777215, 6))
-        self.progressBar.setValue(80)
+        self.progressBar.setStyleSheet(u"QProgressBar:horizontal {\n"
+                                       "	border: 0px solid gray;\n"
+                                       "}\n"
+                                       "QProgressBar::chunk {\n"
+                                       "}")
+        self.progressBar.setMaximum(200)
+        self.progressBar.setValue(200)
         self.progressBar.setTextVisible(False)
         self.progressBar.setTextDirection(QProgressBar.TopToBottom)
+        self.progressBar.setFormat(u"")
 
         self.verticalLayout_3.addWidget(self.progressBar)
 
@@ -247,12 +254,12 @@ class Ui_MainWindow(object):
 
         self.textBrowser_command = QTextBrowser(MainWindow)
         self.textBrowser_command.setObjectName(u"textBrowser_command")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(
+        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(
             self.textBrowser_command.sizePolicy().hasHeightForWidth())
-        self.textBrowser_command.setSizePolicy(sizePolicy4)
+        self.textBrowser_command.setSizePolicy(sizePolicy5)
         self.textBrowser_command.setMinimumSize(QSize(0, 0))
         self.textBrowser_command.setFrameShape(QFrame.StyledPanel)
         self.textBrowser_command.setFrameShadow(QFrame.Plain)
@@ -265,11 +272,23 @@ class Ui_MainWindow(object):
                                          "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
                                          "p, li { white-space: pre-wrap; }\n"
                                          "</style></head><body style=\" font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">COMMAND LINE [LOG LEVEL=1]</span></p></body></html>")
+                                         "<table border=\"1\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"2\" cellpadding=\"0\">\n"
+                                         "<tr>\n"
+                                         "<td colspan=\"2\">\n"
+                                         "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">HEADER</span>        </p></td></tr>\n"
+                                         "<tr>\n"
+                                         "<td>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">name</p></td>\n"
+                                         "<td>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">val"
+                                         "ue        </p></td></tr>\n"
+                                         "<tr>\n"
+                                         "<td>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">name</p></td>\n"
+                                         "<td>\n"
+                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">value    </p></td></tr></table></body></html>")
 
         self.horizontalLayout_2.addWidget(self.textBrowser_command)
-
-        self.horizontalLayout_2.setStretch(1, 1)
 
         self.retranslateUi(MainWindow)
 
@@ -279,7 +298,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate(
             "MainWindow", u"Vocal Remover", None))
-        self.label_musicFiles.setText(QCoreApplication.translate(
+        self.pushButton_musicFiles.setText(QCoreApplication.translate(
             "MainWindow", u"Drag your music files", None))
         self.label_arrow.setText(
             QCoreApplication.translate("MainWindow", u"\u2193", None))
@@ -293,5 +312,4 @@ class Ui_MainWindow(object):
             QCoreApplication.translate("MainWindow", u"Audio File", None))
         self.pushButton_seperate.setText(
             QCoreApplication.translate("MainWindow", u"  Seperate", None))
-        self.progressBar.setFormat("")
     # retranslateUi

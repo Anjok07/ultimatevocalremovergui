@@ -9,10 +9,12 @@ from PySide2 import QtGui
 from PySide2.QtGui import Qt
 from PySide2.QtWinExtras import (QWinTaskbarButton)
 # -Root imports-
-from .resources.resources_manager import ResourcePaths
+from .resources.resources_manager import (ResourcePaths, Logger)
 from .windows import (mainwindow, settingswindow)
 from .inference import converter_v4
 # -Other-
+# Logging
+import logging
 import datetime as dt
 from collections import defaultdict
 from collections import OrderedDict
@@ -39,9 +41,11 @@ APPLICATION_NAME = 'Ultimate Vocal Remover'
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
     'inputPaths': [],
-    # Default export path (Desktop)
+    # Directory to open when selecting a music file (Default: desktop)
+    'inputsDirectory': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
+    # Export path (Default: desktop)
     'exportDirectory': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
-    # Default language in format {language}_{country}
+    # Language in format {language}_{country} (Default: system language)
     'language': QtCore.QLocale.system().name(),
     # --Settings window -> Seperation Settings--
     # -Conversion-
@@ -90,6 +94,8 @@ DEFAULT_SETTINGS = {
     'checkBox_disableAnimations': False,
     # Disable Shortcuts
     'checkBox_disableShortcuts': False,
+    # Process multiple files at once
+    'checkBox_multiThreading': False,
     # -Export Settings-
     # Autosave Instrumentals/Vocals
     'checkBox_autoSaveInstrumentals': False,
@@ -121,6 +127,7 @@ def dict_to_HTMLtable(x: dict, header: str) -> str:
     # Return HTML string
     return htmlTable
 
+
 class CustomApplication(QtWidgets.QApplication):
     def __init__(self):
         # -Init Application-
@@ -134,13 +141,12 @@ class CustomApplication(QtWidgets.QApplication):
         super(CustomApplication, self).__init__(sys.argv)
 
         # -Create Managers-
+        self.logger = Logger()
         self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
         # self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.threadpool = QtCore.QThreadPool(self)
-        # -Variables/Functions-
-        self.in_debug_mode = lambda: self.windows['settings'].ui.comboBox_command.currentIndex() == 2
         # -Load Windows-
         # Collection of windows
         self.windows: Dict[str, QtWidgets.QWidget] = {
@@ -149,43 +155,41 @@ class CustomApplication(QtWidgets.QApplication):
         }
         self.windows['main'].show()
 
-        self.load_settings()
-        self.late_setup()
+        self.logger.info('--- Setting up application ---',
+                         indent_forwards=True)
+        self.setup_application()
+        # Raise main window
+        self.windows['main'].activateWindow()
+        self.windows['main'].raise_()
+        # self.windows['main'].pushButton_seperate_clicked()
+        self.logger.indent_backwards()
+        self.logger.info('--- Finished setup ---')
 
-    def load_settings(self):
+    def setup_application(self):
         """
-        Load the settings saved
+        Update windows
         """
-        language = QtCore.QLocale(self.settings.value('settingswindow/language',
-                                                      DEFAULT_SETTINGS['language'])).language()
-        # Load language -> if not specified, try loading system language
-        self.translator.load_language(language)
 
-        open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
-                                            DEFAULT_SETTINGS['checkBox_settingsStartup'],
-                                            bool)
-        if open_settings:
-            self.windows['settings'].show()
+        def setup_windows():
+            """
+            Setup all windows in this application
+            """
+            for window in self.windows.values():
+                window.setup_window()
 
-    def late_setup(self):
-        """
-        Update windows, set up binds and images for widgets that interact
-        with widgets/methods from other windows
-
-        (Binds cannot be set to widgets/methods that have not been initialized yet)
-        """
-        def improve_comboboxes(window: QtWidgets.QWidget):
+        def improve_comboboxes():
             """
             Improvements:
                 - Always show full contents of popup
                 - Center align editable comboboxes
             """
-            for combobox in window.findChildren(QtWidgets.QComboBox):
-                combobox.showPopup = lambda wig=combobox, func=combobox.showPopup: self.improved_combobox_showPopUp(wig, func)  # nopep8
+            for window in self.windows.values():
+                for combobox in window.findChildren(QtWidgets.QComboBox):
+                    combobox.showPopup = lambda wig=combobox, func=combobox.showPopup: self.improved_combobox_showPopUp(wig, func)  # nopep8
 
-                if combobox.isEditable():
-                    # Align editable comboboxes to center
-                    combobox.lineEdit().setAlignment(Qt.AlignCenter)
+                    if combobox.isEditable():
+                        # Align editable comboboxes to center
+                        combobox.lineEdit().setAlignment(Qt.AlignCenter)
 
         def assign_lineEdit_validators():
             """
@@ -195,11 +199,25 @@ class CustomApplication(QtWidgets.QApplication):
             for widget in self.windows['settings'].ui.frame_constants.findChildren(QtWidgets.QLineEdit):
                 widget.setValidator(validator)
 
-        for window in self.windows.values():
-            window.setup_window()
-            improve_comboboxes(window)
+        # -Before-
+        # None
 
+        # -Setup-
+        setup_windows()
+        improve_comboboxes()
         assign_lineEdit_validators()
+
+        # -After-
+        # Open settings window on startup
+        open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
+                                            DEFAULT_SETTINGS['checkBox_settingsStartup'],
+                                            bool)
+        if open_settings:
+            self.windows['main'].pushButton_settings_clicked()
+        # Load language
+        language = QtCore.QLocale(self.settings.value('settingswindow/language',
+                                                      DEFAULT_SETTINGS['language'])).language()
+        self.translator.load_language(language)
 
     @staticmethod
     def improved_combobox_showPopUp(widget: QtWidgets.QComboBox, popup_func: QtWidgets.QComboBox.showPopup):
@@ -225,7 +243,7 @@ class CustomApplication(QtWidgets.QApplication):
 
         # Input/Export
         # self.windows['settings'].inputPaths
-        seperation_data['input_paths'] = ['B:/boska/Desktop/Test inference/test.mp3']
+        seperation_data['input_paths'] = self.windows['main'].inputPaths
         seperation_data['export_path'] = self.windows['settings'].exportDirectory
         # -Simple Variables (Easy to extract)-
         # Checkbox
@@ -237,6 +255,7 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['saveAllStacked'] = self.windows['settings'].ui.checkBox_saveAllStacked.isChecked()
         seperation_data['modelFolder'] = self.windows['settings'].ui.checkBox_modelFolder.isChecked()
         seperation_data['customParameters'] = self.windows['settings'].ui.checkBox_customParameters.isChecked()
+        seperation_data['multithreading'] = self.windows['settings'].ui.checkBox_multiThreading.isChecked()
         # Combobox
         seperation_data['useModel'] = 'instrumental'
         seperation_data['instrumentalModel'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
@@ -264,50 +283,43 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['resType'] = resType
 
         if set(seperation_data.keys()) != set(converter_v4.default_data.keys()):
-            self.debug_to_command(f'Extracted Keys do not equal keys set by default converter!\nExtracted Keys: {sorted(list(seperation_data.keys()))}\nShould be Keys: {sorted(list(converter_v4.default_data.keys()))}',
-                                  priority=1)
+            msg = (
+                'Extracted Keys do not equal keys set by default converter!\n'
+                f'\tExtracted Keys: {sorted(list(seperation_data.keys()))}\n'
+                f'\tShould be Keys: {sorted(list(converter_v4.default_data.keys()))}\n'
+                f'\tExtracted Values:\n\t{pprint.pformat(seperation_data)}'
+            )
+            self.logger.debug(msg)
+        else:
+            msg = (
+                'Successful extraction of seperation data!\n'
+                f'\tExtracted Values:\n\t{pprint.pformat(seperation_data, compact=True)}'
+            )
+            self.logger.info(msg)
 
         return seperation_data
-
-    def debug_to_command(self, text: str, priority: Optional[int] = 'default', debug_prefix: bool = True):
-        """
-        Shortcut function for mainwindow write to gui
-
-        Priority:
-            1: Red Color
-            2: Orange Color
-            'default': Default color
-        """
-        if hasattr(self, 'windows'):
-            debug_colours = {1: QtGui.QColor("#EE3737"),
-                             2: QtGui.QColor("#FFAE42"),
-                             'default': QtGui.QColor("#CCC")}
-            if self.in_debug_mode():
-                self.windows['main'].ui.textBrowser_command.setTextColor(debug_colours[priority])
-                if debug_prefix:
-                    text = f'DEBUG: {text}'
-                self.windows['main'].write_to_command(text)
-                self.windows['main'].ui.textBrowser_command.setTextColor(debug_colours['default'])
-        else:
-            # Windows not initialized yet
-            print(f'Debug Text: {text}\nPriority: {priority}')
 
     def closeAllWindows(self):
         """
         Capture application close to save data
         """
+        self.logger.info('--- Closing application ---',
+                         indent_forwards=True)
         # --Settings Window--
         self.settings.beginGroup('settingswindow')
         # Widgets
+        self.logger.info('Saving application data...')
         setting_widgets = [*self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QCheckBox),
                            *self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QComboBox),
                            *self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QLineEdit), ]
         for widget in setting_widgets:
             widgetObjectName = widget.objectName()
             if not widgetObjectName in DEFAULT_SETTINGS:
+                if not widgetObjectName:
+                    # Empty object name no need to notify
+                    continue
                 # Default settings do not exist
-                self.debug_to_command(text=f'"{widgetObjectName}" does not have a default setting!',
-                                      priority=2)
+                self.logger.warn(f'"{widgetObjectName}"; {widget.__class__} does not have a default setting!')
                 continue
             if isinstance(widget, QtWidgets.QCheckBox):
                 value = widget.isChecked()
@@ -329,12 +341,16 @@ class CustomApplication(QtWidgets.QApplication):
         self.settings.endGroup()
         self.settings.sync()
 
+        self.logger.info('Closing windows...')
         super().closeAllWindows()
+        self.logger.indent_backwards()
+        self.logger.info('--- Done! ---')
 
 
 class Translator:
     def __init__(self, app: CustomApplication):
         self.app = app
+        self.logger = app.logger
         self.loaded_language: str
         self._translator = QtCore.QTranslator(self.app)
 
@@ -344,15 +360,17 @@ class Translator:
 
         Default is english
         """
-        # Get path where translation file should be
         language_str = QtCore.QLocale.languageToString(language).lower()
+        self.logger.info(f'Translating to {language_str}...',
+                         indent_forwards=True)
+        # Get path where translation file should be
         translation_path = os.path.join(self.app.resources.localizationDir, f'{language_str}.qm')
         if (not os.path.isfile(translation_path) and
                 language != QtCore.QLocale.English):
             # Translation file does not exist
             # Load default language (english)
-            self.app.debug_to_command(f'Translation file does not exist! Switching to English.\nLanguage: {language_str}\nPath: {translation_path}',
-                                      priority=1)
+            self.logger.warning(f'Translation file does not exist! Switching to English. Language: {language_str}')
+            self.logger.indent_backwards()
             self.load_language()
             return
         # get language name to later store in settings
@@ -360,10 +378,8 @@ class Translator:
         # Load language
         if language == QtCore.QLocale.English:
             # English is base language so remove translator
-            self.app.debug_to_command(f'Translating to english...')
             self.app.removeTranslator(self._translator)
         else:
-            self.app.debug_to_command(f'Translating to {language_str}...')
             self._translator.load(translation_path)
             self.app.installTranslator(self._translator)
 
@@ -383,6 +399,8 @@ class Translator:
                     # Not selected language
                     button.setChecked(False)
 
+        self.logger.indent_backwards()
+
 
 class MainWindow(QtWidgets.QWidget):
     def __init__(self, app: CustomApplication):
@@ -391,6 +409,7 @@ class MainWindow(QtWidgets.QWidget):
         self.ui = mainwindow.Ui_MainWindow()
         self.ui.setupUi(self)
         self.app = app
+        self.logger = app.logger
         self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.icon))
 
@@ -412,15 +431,17 @@ class MainWindow(QtWidgets.QWidget):
             Load the geometry of this window
             """
             # Window is centered on primary window
-            default_geometry = self.geometry()
-            point = QtCore.QPoint()
-            point.setX(self.app.primaryScreen().size().width() / 2)
-            point.setY(self.app.primaryScreen().size().height() / 2)
-            default_geometry.moveCenter(point)
+            default_size = self.size()
+            default_pos = QtCore.QPoint()
+            default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
+            default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
             # Get geometry
-            geometry = self.settings.value('mainwindow/geometry',
-                                           default_geometry)
-            self.setGeometry(geometry)
+            size = self.settings.value('mainwindow/size',
+                                       default_size)
+            pos = self.settings.value('mainwindow/pos',
+                                      default_pos)
+            self.resize(size)
+            self.move(pos)
 
         def load_images():
             """
@@ -437,13 +458,47 @@ class MainWindow(QtWidgets.QWidget):
             """
             # -Override binds-
             # Music file drag & drop
-            self.ui.label_musicFiles.dragEnterEvent = self.label_musicFiles_dragEnterEvent
-            self.ui.label_musicFiles.dropEvent = self.label_musicFiles_dropEvent
+            self.ui.frame_musicFiles.dragEnterEvent = self.frame_musicFiles_dragEnterEvent
+            self.ui.frame_musicFiles.dropEvent = self.frame_musicFiles_dropEvent
             # -Pushbuttons-
             self.ui.pushButton_settings.clicked.connect(self.pushButton_settings_clicked)
             self.ui.pushButton_seperate.clicked.connect(self.pushButton_seperate_clicked)
 
+        def create_animation_objects():
+            """
+            Create the animation objects that are used
+            multiple times here
+            """
+            def style_progressbar():
+                """
+                Style pogressbar manually as when styled in Qt Designer
+                a bug occurs that prevents smooth animation of progressbar
+                """
+                self.ui.progressBar.setStyleSheet("""QProgressBar:horizontal {
+                    border: 0px solid gray;
+                }
+                QProgressBar::chunk {
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));
+                    border-top-right-radius: 2px;
+                    border-bottom-right-radius: 2px;
+                } """)
+                self.seperation_update_progress(0)
+            self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
+                                                            parent=self)
+            # This is all to prevent the progressbar animation not working propertly
+            self.pbar_animation.setDuration(8)
+            self.pbar_animation.setStartValue(0)
+            self.pbar_animation.setEndValue(8)
+            self.pbar_animation.start()
+            self.pbar_animation.setDuration(500)
+            QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
+
         # -Before setup-
+        self.logger.info('Main -> Setting up',
+                         indent_forwards=True)
+        # Load saved settings for widgets
+        self._load_data()
+        # Create WinTaskbar
         self.winTaskbar = QWinTaskbarButton(self)
         self.winTaskbar.setWindow(self.windowHandle())
         self.winTaskbar_progress = self.winTaskbar.progress()
@@ -452,10 +507,20 @@ class MainWindow(QtWidgets.QWidget):
         load_geometry()
         load_images()
         bind_widgets()
+        create_animation_objects()
 
         # -After setup-
-        # Load saved settings for widgets
-        self._load_data()
+        # Create instance
+        self.vocalRemoverRunnable = converter_v4.VocalRemoverWorker(logger=self.logger)
+        # Bind events
+        self.vocalRemoverRunnable.signals.start.connect(self.seperation_start)
+        self.vocalRemoverRunnable.signals.message.connect(self.seperation_write)
+        self.vocalRemoverRunnable.signals.progress.connect(self.seperation_update_progress)
+        self.vocalRemoverRunnable.signals.error.connect(self.seperation_error)
+        self.vocalRemoverRunnable.signals.finished.connect(self.seperation_finish)
+        # Late update
+        self.update_window()
+        self.logger.indent_backwards()
 
     def _load_data(self, default: bool = False):
         """
@@ -477,22 +542,13 @@ class MainWindow(QtWidgets.QWidget):
 
         # -Done-
         self.settings.endGroup()
-        self._late_update()
-
-    def _late_update(self):
-        """
-        Late update cross-windows
-
-        (Only run right after window initialization)
-        """
-        self.update_window()
 
     # -Widget Binds-
     def pushButton_settings_clicked(self):
         """
         Open the settings window
         """
-        self.app.debug_to_command('Opening settings window...')
+        self.logger.info('Opening settings window...')
         # Reshow window
         self.app.windows['settings'].setWindowState(Qt.WindowNoState)
         self.app.windows['settings'].show()
@@ -500,29 +556,18 @@ class MainWindow(QtWidgets.QWidget):
         self.app.windows['settings'].activateWindow()
         self.app.windows['settings'].raise_()
 
-        self.app.windows['settings'].update_window()
-
     def pushButton_seperate_clicked(self):
         """
         Seperate given files
         """
         # -Extract seperation info from GUI-
+        self.app.logger.info('Seperation button pressed')
         seperation_data = self.app.extract_seperation_data()
-        self.app.debug_to_command(dict_to_HTMLtable(seperation_data, 'Seperation Data'),
-                                  debug_prefix=False)
-        # -Seperation-
-        # Create instance
-        vocalRemover = converter_v4.VocalRemoverWorker(seperation_data=seperation_data,)
-        # Bind events
-        vocalRemover.signals.start.connect(self.seperation_start)
-        vocalRemover.signals.message.connect(self.seperation_write)
-        vocalRemover.signals.progress.connect(self.seperation_update_progress)
-        vocalRemover.signals.error.connect(self.seperation_error)
-        vocalRemover.signals.finished.connect(self.seperation_finish)
+        self.vocalRemoverRunnable.seperation_data = seperation_data.copy()
         # Start seperation
-        self.app.threadpool.start(vocalRemover)
+        self.app.threadpool.start(self.vocalRemoverRunnable)
 
-    def label_musicFiles_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
+    def frame_musicFiles_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         """
         Check whether the files the user is dragging over the widget
         is valid or not
@@ -533,24 +578,29 @@ class MainWindow(QtWidgets.QWidget):
         else:
             event.ignore()
 
-    def label_musicFiles_dropEvent(self, event: QtGui.QDropEvent):
+    def frame_musicFiles_dropEvent(self, event: QtGui.QDropEvent):
         """
         Assign dropped paths to list
         """
+        urls = event.mimeData().urls()
+        self.logger.info(f'Selected {len(urls)} files',
+                         indent_forwards=True)
         inputPaths = []
-        for url in event.mimeData().urls():
-            inputPaths.append(url.toLocalFile())
+        for url in urls:
+            path = url.toLocalFile()
+            if os.path.isfile(path):
+                inputPaths.append(path)
 
-        self.ui.label_musicFiles.setText(repr(inputPaths))
+            self.logger.info(repr(path))
         self.inputPaths = inputPaths
+        self.update_window()
+        self.logger.indent_backwards()
 
     # -Seperation Methods-
     def seperation_start(self):
         """
         Seperation has started
         """
-        self.app.debug_to_command(f'The seperation has started.',
-                                  priority=2)
         # Disable Seperation Button
         self.ui.pushButton_seperate.setEnabled(False)
         # Setup WinTaskbar
@@ -558,10 +608,11 @@ class MainWindow(QtWidgets.QWidget):
         self.winTaskbar.setOverlayIcon(QtGui.QIcon(ResourcePaths.images.folder))
         self.winTaskbar_progress.setVisible(True)
 
-    def seperation_write(self, text: str, priority: Optional[int] = 'default'):
+    def seperation_write(self, text: str):
         """
         Write to GUI
         """
+        self.logger.info(text)
         self.write_to_command(text)
 
     def seperation_update_progress(self, progress: int):
@@ -569,9 +620,15 @@ class MainWindow(QtWidgets.QWidget):
         Update both progressbars in Taskbar and GUI
         with the given progress
         """
-        self.app.debug_to_command(f'Updating progress: {progress}%')
+        # self.logger.info(f'Updating progress: {progress}%')
+        # # Given progress is (0-100) but (0-200) is needed
+        progress *= 2
+        cur_progress = self.ui.progressBar.value()
+        self.pbar_animation.stop()
+        self.pbar_animation.setStartValue(cur_progress)
+        self.pbar_animation.setEndValue(progress)
+        self.pbar_animation.start()
         self.winTaskbar_progress.setValue(progress)
-        self.ui.progressBar.setValue(progress)
 
     def seperation_error(self, message: Tuple[str, str]):
         """
@@ -582,13 +639,10 @@ class MainWindow(QtWidgets.QWidget):
                 Index 0: Error Message
                 Index 1: Detailed Message
         """
-        self.app.debug_to_command(f'An error occured!\nMessage: {message[0]}\nDetailed Message: {message[1]}',
-                                  priority=1)
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle('An Error Occurred')
         msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
-        msg.setText(
-            message[0] + '\n\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!')
+        msg.setText(message[0] + '\n\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!')  # nopep8
         msg.setDetailedText(message[1])
         msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
         msg.setWindowFlag(Qt.WindowStaysOnTopHint)
@@ -596,7 +650,7 @@ class MainWindow(QtWidgets.QWidget):
 
         self.seperation_finish(failed=True)
 
-    def seperation_finish(self, elapsed_time: str = '1:02:03', failed: bool = False):
+    def seperation_finish(self, elapsed_time: str = 'N/A', failed: bool = False):
         """
         Finished seperation
         """
@@ -607,34 +661,61 @@ class MainWindow(QtWidgets.QWidget):
             self.winTaskbar.setOverlayAccessibleDescription('')
             self.winTaskbar.clearOverlayIcon()
             self.winTaskbar_progress.setVisible(False)
-            self.seperation_update_progress(0)
-        self.app.debug_to_command(f'The seperation has finished.',
-                                  priority=2)
+            QtCore.QTimer.singleShot(2500, lambda: self.ui.progressBar.setValue(0))
 
         # -Create MessageBox-
-        msg = QtWidgets.QMessageBox()
-        msg.setWindowTitle('Seperation Complete')
-        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
-        msg.setText(f"UVR:\nYour seperation has finished!\n\nTime elapsed: {elapsed_time}")  # nopep8
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msg.setWindowFlag(Qt.WindowStaysOnTopHint)
-        msg.exec_()
+        if failed:
+            # Error message was already displayed in the seperation_error function
+            self.logger.warn(msg=f'----- The seperation has failed! -----')
+        else:
+            self.logger.info(msg=f'----- The seperation has finished! (in {elapsed_time}) -----')
+            if self.app.windows['settings'].ui.checkBox_notifiyOnFinish.isChecked():
+                msg = QtWidgets.QMessageBox()
+                msg.setWindowTitle('Seperation Complete')
+                msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+                msg.setText(f"UVR:\nYour seperation has finished!\n\nTime elapsed: {elapsed_time}")  # nopep8
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+                # Focus main window
+                self.activateWindow()
+                self.raise_()
+                # Show messagebox
+                msg.exec_()
+            else:
+                # Highlight window in taskbar
+                self.app.alert(self)
+
         # -Reset progress-
         seperation_reset()
-        # -Focus main window-
-        self.activateWindow()
-        self.raise_()
         # -Enable Seperation Button
         self.ui.pushButton_seperate.setEnabled(True)
 
     # -Other Methods-
-
     def update_window(self):
         """
         Update the text and states of widgets
         in this window
         """
-        self.ui.label_musicFiles.setText(repr(self.inputPaths))
+        self.logger.info('Updating main window...',
+                         indent_forwards=True)
+
+        if self.inputPaths:
+            self.listWidget_musicFiles_update()
+            self.ui.listWidget_musicFiles.setVisible(True)
+            self.ui.pushButton_musicFiles.setVisible(False)
+        else:
+            self.ui.listWidget_musicFiles.setVisible(False)
+            self.ui.pushButton_musicFiles.setVisible(True)
+        self.logger.indent_backwards()
+
+    def listWidget_musicFiles_update(self):
+        """
+        Write to the list view
+        """
+        self.ui.listWidget_musicFiles.clear()
+        self.ui.listWidget_musicFiles.addItems(self.inputPaths)
+        self.ui.listWidget_musicFiles.setFixedSize(self.ui.listWidget_musicFiles.sizeHintForColumn(0) + 2 * self.ui.listWidget_musicFiles.frameWidth(
+        ), self.ui.listWidget_musicFiles.sizeHintForRow(0) * self.ui.listWidget_musicFiles.count() + 2 * self.ui.listWidget_musicFiles.frameWidth())
 
     def write_to_command(self, text: str):
         """
@@ -654,20 +735,20 @@ class MainWindow(QtWidgets.QWidget):
         Catch close event of this window to save data
         """
         # -Save the geometry for this window-
-        self.settings.beginGroup('mainwindow')
-        self.settings.setValue('geometry',
-                               self.geometry())
-        self.settings.endGroup()
+        self.settings.setValue('mainwindow/size',
+                               self.size())
+        self.settings.setValue('mainwindow/pos',
+                               self.pos())
         # Commit Save
         self.settings.sync()
         # -Close all windows-
         self.app.closeAllWindows()
-        event.accept()
 
     def update_translation(self):
         """
         Update translation of this window
         """
+        self.logger.info('Main: Retranslating UI')
         self.ui.retranslateUi(self)
 
 
@@ -677,36 +758,48 @@ class SettingsWindow(QtWidgets.QWidget):
         self.ui = settingswindow.Ui_SettingsWindow()
         self.ui.setupUi(self)
         self.app = app
+        self.logger = app.logger
         self.settings = QtCore.QSettings(APPLICATION_SHORTNAME, APPLICATION_NAME)
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
         # -Other Variables-
+        self.menu_update_methods = {
+            0: self.update_page_seperationSettings,
+            1: self.update_page_shortcuts,
+            2: self.update_page_customization,
+            3: self.update_page_preferences,
+        }
         # Independent data
         self.exportDirectory = self.settings.value('settingswindow/exportDirectory',
                                                    DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
-    # -Initialization methods-
 
+    # -Initialization methods-
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
 
         (Only run right after window initialization of main and settings window)
         """
+        self.logger.info('Settings -> Setting up',
+                         indent_forwards=True)
+
         def load_geometry():
             """
             Load the geometry of this window
             """
             # Window is centered on primary window
-            default_geometry = self.geometry()
-            point = QtCore.QPoint()
-            point.setX(self.app.primaryScreen().size().width() / 2)
-            point.setY(self.app.primaryScreen().size().height() / 2)
-            default_geometry.moveCenter(point)
+            default_size = self.size()
+            default_pos = QtCore.QPoint()
+            default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
+            default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
             # Get geometry
-            geometry = self.settings.value('settingswindow/geometry',
-                                           default_geometry)
-            self.setGeometry(geometry)
+            size = self.settings.value('settingswindow/size',
+                                       default_size)
+            pos = self.settings.value('settingswindow/pos',
+                                      default_pos)
+            self.resize(size)
+            self.move(pos)
 
         def load_images():
             """
@@ -781,6 +874,10 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.comboBox_command.currentIndexChanged.connect(self.comboBox_command_currentIndexChanged)
 
         # -Before setup-
+        # Load saved settings for widgets
+        self._load_data()
+        # Update available model lists
+        self._update_selectable_models()
         # Connect button group for menu together
         self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
         self.menu_group.addButton(self.ui.radioButton_seperationSettings,
@@ -798,9 +895,12 @@ class SettingsWindow(QtWidgets.QWidget):
         bind_widgets()
 
         # -After setup-
-        self._update_selectable_models()
-        # Load saved settings for widgets
-        self._load_data()
+        # Clear command
+        self.pushButton_clearCommand_clicked()
+        # Load menu (Preferences)
+        self.menu_loadPage(3)
+        self.update_window()
+        self.logger.indent_backwards()
 
     def _load_data(self, default: bool = False):
         """
@@ -812,6 +912,8 @@ class SettingsWindow(QtWidgets.QWidget):
             default(bool):
                 Reset to the default settings
         """
+        self.logger.info('Loading data...',
+                         indent_forwards=True)
         self.settings.beginGroup('settingswindow')
         if default:
             # Delete settings group
@@ -829,8 +931,7 @@ class SettingsWindow(QtWidgets.QWidget):
                     # Empty object name no need to notify
                     continue
                 # Default settings do not exist
-                self.app.debug_to_command(text=f'"{widgetObjectName}" does not have a default setting!',
-                                          priority=2)
+                self.logger.warn(f'"{widgetObjectName}"; {widget.__class__} does not have a default setting!')
                 continue
 
             # -Finding the instance and loading appropiately-
@@ -861,50 +962,42 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # -Done-
         self.settings.endGroup()
-        self._late_update()
-
-    def _late_update(self):
-        """
-        Late update cross-windows
-
-        (Only run right after window initialization)
-        """
-        self.comboBox_command_currentIndexChanged()
-        self.update_window()
+        self.logger.indent_backwards()
 
     # -Widget Binds-
     def pushButton_clearCommand_clicked(self):
         """
         Clear the command line and append
         """
-        self.app.debug_to_command(text='Clearing Command Line...')
+        self.logger.info('Clearing Command Line...')
         self.ui.pushButton_clearCommand.setVisible(False)
+        self.app.windows['main'].ui.textBrowser_command.clear()
 
         index = self.ui.comboBox_command.currentIndex()
-        current_date = dt.datetime.now().strftime("%H:%M:%S")
-
-        self.app.windows['main'].ui.textBrowser_command.clear()
-        if index == 1:
+        if index:
+            current_date = dt.datetime.now().strftime("%H:%M:%S")
             self.app.windows['main'].ui.textBrowser_command.append(f'Command Line [{current_date}]')
-        elif index == 2:
-            self.app.windows['main'].ui.textBrowser_command.append(f'Command Line (DEBUG MODE) [{current_date}]')
 
     def pushButton_exportDirectory_clicked(self):
         """
         Let user select an export directory for the seperation
         """
-        self.app.debug_to_command(text='Selecting Export Directory...')
+        self.logger.info('Selecting Export Directory...',
+                         indent_forwards=True)
         # Ask for directory
         filepath = QtWidgets.QFileDialog.getExistingDirectory(parent=self,
                                                               caption='Select Export Directory',
-                                                              dir=self.settings.value('seperation/export_path',
-                                                                                      DEFAULT_SETTINGS['exportDirectory'])
+                                                              dir=self.exportDirectory,
                                                               )
 
         if not filepath:
             # No directory specified
+            self.logger.info('No file selected!',)
+            self.logger.indent_backwards()
             return
         # Update export path value
+        self.logger.info(f'Selected Path: "{filepath}"',)
+        self.logger.indent_backwards()
         self.exportDirectory = filepath
         self.update_page_preferences()
 
@@ -912,26 +1005,35 @@ class SettingsWindow(QtWidgets.QWidget):
         """
         Reset settings to default
         """
+        self.logger.info('Resetting to default settings...',
+                         indent_forwards=True)
         self._load_data(default=True)
+        self.logger.indent_backwards()
 
     def comboBox_command_currentIndexChanged(self):
         """
         Changed mode for command line
         """
-        self.pushButton_clearCommand_clicked()
+        self.logger.info('Changing Command mode...',
+                         indent_forwards=True)
         self.update_page_preferences()
+        self.pushButton_clearCommand_clicked()
+        self.logger.indent_backwards()
 
-    # -Update and Save Methods-
+    # -Update Methods-
     # Whole window (All widgets)
     def update_window(self):
         """
         Update the values and states of all widgets
         in this window
         """
+        self.logger.info('Updating settings window...',
+                         indent_forwards=True)
         self.update_page_seperationSettings()
         self.update_page_shortcuts()
         self.update_page_customization()
         self.update_page_preferences()
+        self.logger.indent_backwards()
 
     def save_window(self):
         """
@@ -1015,6 +1117,8 @@ class SettingsWindow(QtWidgets.QWidget):
                 widget.setEnabled(False)
                 widget.setText(str(constants[key]))
 
+        self.logger.info('Updating: "Seperation Settings" page',
+                         indent_forwards=True)
         # -Conversion Subgroup-
         # Stack Passes
         if self.ui.checkBox_stackPasses.isChecked():
@@ -1072,12 +1176,7 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.comboBox_winSize_stacked.setVisible(False)
             for widget in stacked_widgets.values():
                 widget.setVisible(False)
-
-    def save_page_seperationSettings(self):
-        """
-        Save the values of the widgets in the
-        seperation settings page
-        """
+        self.logger.indent_backwards()
 
     def _update_selectable_models(self):
         """
@@ -1123,13 +1222,9 @@ class SettingsWindow(QtWidgets.QWidget):
         Update values and states of all widgets in the
         shortcuts page
         """
-        pass
-
-    def save_page_shortcuts(self):
-        """
-        Save the values of the widgets in the
-        shortcuts page
-        """
+        self.logger.info('Updating: "Shortcuts" page',
+                         indent_forwards=True)
+        self.logger.indent_backwards()
 
     # Customization Page
     def update_page_customization(self):
@@ -1137,13 +1232,9 @@ class SettingsWindow(QtWidgets.QWidget):
         Update values and states of all widgets in the
         customization page
         """
-        pass
-
-    def save_page_customization(self):
-        """
-        Save the values of the widgets in the
-        customization page
-        """
+        self.logger.info('Updating: "Customization" page',
+                         indent_forwards=True)
+        self.logger.indent_backwards()
 
     # Preferences Page
     def update_page_preferences(self):
@@ -1151,21 +1242,15 @@ class SettingsWindow(QtWidgets.QWidget):
         Update values and states of all widgets in the
         preferences page
         """
+        self.logger.info('Updating: "Preferences" page',
+                         indent_forwards=True)
         # -Command Line-
         # Index:
         # 0 = off
         # 1 = on
-        # 2 = debug
         index = self.ui.comboBox_command.currentIndex()
 
-        if index == 0:
-            # Adjust window size to size without the textbrowser
-            if self.app.windows['main'].ui.textBrowser_command.isVisible():
-                win_size = QtCore.QSize(self.app.windows['main'].width() - self.app.windows['main'].ui.textBrowser_command.width(),
-                                        self.app.windows['main'].height())
-                # Call after 1 ms to prevent window not being resized due to unknown reasons
-                # (Workaround)
-                QtCore.QTimer.singleShot(1, lambda: self.app.windows['main'].resize(win_size))
+        if not index:
             # Hide Textbrowser
             self.app.windows['main'].ui.textBrowser_command.setVisible(False)
         else:
@@ -1174,12 +1259,7 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # -Export Directory-
         self.ui.label_exportDirectory.setText(self.exportDirectory)
-
-    def save_page_preferences(self):
-        """
-        Save the values of the widgets in the
-        seperation settings page
-        """
+        self.logger.indent_backwards()
 
     # -Other-
     def decode_modelNames(self):
@@ -1200,6 +1280,8 @@ class SettingsWindow(QtWidgets.QWidget):
                 2 = Customization
                 3 = Preferences
         """
+        self.logger.info(f'Loading page with index {index}',
+                         indent_forwards=True)
         # Load Page
         stackedWidget = self.ui.stackedWidget
         stackedWidget.setCurrentIndex(index)
@@ -1211,8 +1293,9 @@ class SettingsWindow(QtWidgets.QWidget):
         min_width = page.property('minimumFrameWidth')
         self.ui.frame_14.setMinimumWidth(min_width)
 
-        # Update states and values of widgets
-        self.update_window()
+        # Update page based on index
+        self.menu_update_methods[index]()
+        self.logger.indent_backwards()
 
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
@@ -1220,10 +1303,10 @@ class SettingsWindow(QtWidgets.QWidget):
         Catch close event of this window to save data
         """
         # -Save the geometry for this window-
-        self.settings.beginGroup('settingswindow')
-        self.settings.setValue('geometry',
-                               self.geometry())
-        self.settings.endGroup()
+        self.settings.setValue('settingswindow/size',
+                               self.size())
+        self.settings.setValue('settingswindow/pos',
+                               self.pos())
         # Commit Save
         self.settings.sync()
         # -Close Window-
@@ -1233,6 +1316,7 @@ class SettingsWindow(QtWidgets.QWidget):
         """
         Update translation of this window
         """
+        self.logger.info('Settings: Retranslating UI')
         self.ui.retranslateUi(self)
 
 

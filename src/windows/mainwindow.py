@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(911, 492)
+        MainWindow.resize(911, 501)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"/* Universal */\n"
                                  "* {\n"
@@ -121,6 +121,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.listWidget_musicFiles = QListWidget(self.frame_musicFiles)
         self.listWidget_musicFiles.setObjectName(u"listWidget_musicFiles")
+        self.listWidget_musicFiles.setMaximumSize(QSize(16777215, 0))
         self.listWidget_musicFiles.setFrameShape(QFrame.NoFrame)
         self.listWidget_musicFiles.setLineWidth(0)
 

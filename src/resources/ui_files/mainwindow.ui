@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>911</width>
-    <height>492</height>
+    <height>501</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -205,6 +205,12 @@ QTextBrowser {
             </property>
             <item>
              <widget class="QListWidget" name="listWidget_musicFiles">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>0</height>
+               </size>
+              </property>
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
               </property>

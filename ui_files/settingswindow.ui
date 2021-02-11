@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1097</width>
-    <height>508</height>
+    <width>938</width>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -1529,8 +1529,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
-               <height>40</height>
+               <width>598</width>
+               <height>442</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1609,8 +1609,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>917</width>
-               <height>447</height>
+               <width>758</width>
+               <height>442</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1908,7 +1908,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                              <item row="2" column="0">
                               <widget class="QCheckBox" name="checkBox_settingsStartup">
                                <property name="text">
-                                <string>Open Settings on Startup</string>
+                                <string>Open Settings on application startup</string>
                                </property>
                               </widget>
                              </item>
@@ -2060,6 +2060,37 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             </layout>
                            </widget>
                           </item>
+                          <item row="0" column="1">
+                           <widget class="QLabel" name="label_exportDirectory">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="text">
+                             <string notr="true">B:/Downloads</string>
+                            </property>
+                            <property name="textFormat">
+                             <enum>Qt::AutoText</enum>
+                            </property>
+                            <property name="scaledContents">
+                             <bool>true</bool>
+                            </property>
+                            <property name="alignment">
+                             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                            </property>
+                            <property name="wordWrap">
+                             <bool>true</bool>
+                            </property>
+                            <property name="indent">
+                             <number>5</number>
+                            </property>
+                            <property name="path" stdset="0">
+                             <bool>true</bool>
+                            </property>
+                           </widget>
+                          </item>
                           <item row="1" column="0">
                            <widget class="QLabel" name="label_autoSave">
                             <property name="text">
@@ -2109,37 +2140,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                               </widget>
                              </item>
                             </layout>
-                           </widget>
-                          </item>
-                          <item row="0" column="1">
-                           <widget class="QLabel" name="label_exportDirectory">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="text">
-                             <string notr="true">B:/Downloads</string>
-                            </property>
-                            <property name="textFormat">
-                             <enum>Qt::AutoText</enum>
-                            </property>
-                            <property name="scaledContents">
-                             <bool>true</bool>
-                            </property>
-                            <property name="alignment">
-                             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                            </property>
-                            <property name="wordWrap">
-                             <bool>true</bool>
-                            </property>
-                            <property name="indent">
-                             <number>5</number>
-                            </property>
-                            <property name="path" stdset="0">
-                             <bool>true</bool>
-                            </property>
                            </widget>
                           </item>
                          </layout>

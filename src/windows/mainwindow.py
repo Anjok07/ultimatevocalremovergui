@@ -423,14 +423,12 @@ class MainWindow(QtWidgets.QWidget):
         """
         Update both progressbars in Taskbar and GUI
         with the given progress
-        """
-        # self.logger.info(f'Updating progress: {progress}%')
-        # # Given progress is (0-100) but (0-200) is needed
-        progress *= 2
+        """        
         cur_progress = self.ui.progressBar.value()
         self.pbar_animation.stop()
         self.pbar_animation.setStartValue(cur_progress)
-        self.pbar_animation.setEndValue(progress)
+        # Given progress is (0-100) but (0-200) is needed
+        self.pbar_animation.setEndValue(progress * 2)
         self.pbar_animation.start()
         self.winTaskbar_progress.setValue(progress)
 

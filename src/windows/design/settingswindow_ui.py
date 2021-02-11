@@ -18,7 +18,7 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(1097, 508)
+        SettingsWindow.resize(938, 503)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -704,7 +704,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 53, 40))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 598, 442))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -740,7 +740,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 917, 447))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 758, 442))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -922,6 +922,23 @@ class Ui_SettingsWindow(object):
 
         self.formLayout.setWidget(0, QFormLayout.LabelRole, self.frame_13)
 
+        self.label_exportDirectory = QLabel(self.groupBox_export)
+        self.label_exportDirectory.setObjectName(u"label_exportDirectory")
+        sizePolicy2.setHeightForWidth(
+            self.label_exportDirectory.sizePolicy().hasHeightForWidth())
+        self.label_exportDirectory.setSizePolicy(sizePolicy2)
+        self.label_exportDirectory.setText(u"B:/Downloads")
+        self.label_exportDirectory.setTextFormat(Qt.AutoText)
+        self.label_exportDirectory.setScaledContents(True)
+        self.label_exportDirectory.setAlignment(
+            Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
+        self.label_exportDirectory.setWordWrap(True)
+        self.label_exportDirectory.setIndent(5)
+        self.label_exportDirectory.setProperty("path", True)
+
+        self.formLayout.setWidget(
+            0, QFormLayout.FieldRole, self.label_exportDirectory)
+
         self.label_autoSave = QLabel(self.groupBox_export)
         self.label_autoSave.setObjectName(u"label_autoSave")
 
@@ -953,23 +970,6 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_7.setStretch(1, 1)
 
         self.formLayout.setWidget(1, QFormLayout.FieldRole, self.frame_7)
-
-        self.label_exportDirectory = QLabel(self.groupBox_export)
-        self.label_exportDirectory.setObjectName(u"label_exportDirectory")
-        sizePolicy2.setHeightForWidth(
-            self.label_exportDirectory.sizePolicy().hasHeightForWidth())
-        self.label_exportDirectory.setSizePolicy(sizePolicy2)
-        self.label_exportDirectory.setText(u"B:/Downloads")
-        self.label_exportDirectory.setTextFormat(Qt.AutoText)
-        self.label_exportDirectory.setScaledContents(True)
-        self.label_exportDirectory.setAlignment(
-            Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
-        self.label_exportDirectory.setWordWrap(True)
-        self.label_exportDirectory.setIndent(5)
-        self.label_exportDirectory.setProperty("path", True)
-
-        self.formLayout.setWidget(
-            0, QFormLayout.FieldRole, self.label_exportDirectory)
 
         self.verticalLayout_20.addWidget(self.groupBox_export)
 
@@ -1207,7 +1207,7 @@ class Ui_SettingsWindow(object):
         self.checkBox_notifyUpdates.setText(QCoreApplication.translate(
             "SettingsWindow", u"Notify me of application updates", None))
         self.checkBox_settingsStartup.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Open Settings on Startup", None))
+            "SettingsWindow", u"Open Settings on application startup", None))
         self.checkBox_notifiyOnFinish.setText(QCoreApplication.translate(
             "SettingsWindow", u"Notify me on finish of seperation", None))
 # if QT_CONFIG(tooltip)

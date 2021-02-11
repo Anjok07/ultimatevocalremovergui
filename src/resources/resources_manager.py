@@ -24,6 +24,7 @@ else:
 LOGS_FOLDER = 'logs'
 IMAGE_FOLDER = 'images'
 MODELS_FOLDER = 'models'
+TEMP_MUSIC_FILES_FOLDER = 'temp_music_files'
 INSTRUMENTAL_FOLDER_NAME = 'Main Models'
 STACKED_FOLDER_NAME = 'Stacked Models'
 TRANSLATIONS_FOLDER = 'translations'
@@ -41,6 +42,9 @@ class ResourcePaths:
         banner = os.path.join(abs_path, IMAGE_FOLDER, 'banner.png')
         settings = os.path.join(abs_path, IMAGE_FOLDER, 'settings.png')
         folder = os.path.join(abs_path, IMAGE_FOLDER, 'folder.png')
+        audio_play = os.path.join(abs_path, IMAGE_FOLDER, 'audio_play.png')
+        audio_pause = os.path.join(abs_path, IMAGE_FOLDER, 'audio_pause.png')
+        save = os.path.join(abs_path, IMAGE_FOLDER, 'save.png')
 
         class flags:
             _FLAG_FOLDER = 'flags'
@@ -55,6 +59,9 @@ class ResourcePaths:
     instrumentalDirName = INSTRUMENTAL_FOLDER_NAME
     stackedDirName = STACKED_FOLDER_NAME
     localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
+
+    temp_vocal = os.path.join(abs_path, TEMP_MUSIC_FILES_FOLDER, 'temp_vocals.wav')
+    temp_instrumental = os.path.join(abs_path, TEMP_MUSIC_FILES_FOLDER, 'temp_instrumentals.wav')
 
 
 class Logger(logging.Logger):

@@ -1,316 +1,481 @@
-# -*- coding: utf-8 -*-
+# pylint: disable=no-name-in-module, import-error
+# -GUI-
+from PySide2 import QtWidgets
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2.QtGui import Qt
+from PySide2.QtWinExtras import (QWinTaskbarButton)
+from PySide2 import QtMultimedia
+# -Root imports-
+from ..resources.resources_manager import ResourcePaths
+from ..inference import converter_v4
+from .. import constants as const
+from .design import mainwindow_ui
+# -Other-
+# System
+import os
+# Code annotation
+from typing import (Tuple,)
 
-################################################################################
-# Form generated from reading UI file 'mainwindow.ui'
-##
-# Created by: Qt User Interface Compiler version 5.15.2
-##
-# WARNING! All changes made in this file will be lost when recompiling UI file!
-################################################################################
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+def dict_to_HTMLtable(x: dict, header: str) -> str:
+    """
+    Convert a 1D-dictionary into an HTML table
+    """
+    # Generate table contents
+    values = ''
+    for i, (key, value) in enumerate(x.items()):
+        if i % 2:
+            color = "#000"
+        else:
+            color = "#333"
+
+        values += f'<tr style="background-color:{color};border:none;"><td>{key}</td><td>{value}</td></tr>\n'
+    # HTML string
+    htmlTable = """
+    <table border="1" cellspacing="0" cellpadding="0" width="100%">
+        <tr><th colspan="2" style="background-color:#555500">{header}</th></tr>
+        {values}
+    </table>
+    """.format(header=header,
+               values=values)
+    # Return HTML string
+    return htmlTable
 
 
-class Ui_MainWindow(object):
-    def setupUi(self, MainWindow):
-        if not MainWindow.objectName():
-            MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(911, 501)
-        MainWindow.setMinimumSize(QSize(0, 0))
-        MainWindow.setStyleSheet(u"/* Universal */\n"
-                                 "* {\n"
-                                 "	font: 15pt \"Yu Gothic UI\";	\n"
-                                 "	color: rgb(255, 255, 255);\n"
-                                 "	background-color: none;\n"
-                                 "	background: rgb(12, 23, 40);\n"
-                                 "}\n"
-                                 "/* Labels */\n"
-                                 "QLabel[audioFile=\"true\"] {\n"
-                                 "	color:rgba(160, 160, 160, 80);\n"
-                                 "	border-width: 3px;\n"
-                                 "    border-style: dotted;\n"
-                                 "    border-color: rgb(60, 60, 80);\n"
-                                 "	border-radius: 5px;\n"
-                                 "}\n"
-                                 "/* Button */\n"
-                                 "QPushButton[seperate=\"true\"] {\n"
-                                 "	border-width: 2px;\n"
-                                 "	border-style: solid;\n"
-                                 "	border-radius: 15px;\n"
-                                 "	border-color: rgb(109, 213, 237);\n"
-                                 "	background-color: rgba(109, 213, 237, 4);\n"
-                                 "}\n"
-                                 "QPushButton[seperate=\"true\"]:hover {\n"
-                                 "	background-color: rgba(109, 213, 237, 10);\n"
-                                 "}\n"
-                                 "QPushButton[seperate=\"true\"]:pressed {\n"
-                                 "	background-color: rgba(109, 213, 237, 30);\n"
-                                 "}\n"
-                                 "QPushButton[dragFile=\"true\"] {\n"
-                                 "	color:  rgb(160, 160, 160);\n"
-                                 "	border-width: 3px;\n"
-                                 "    border-style: dotted;\n"
-                                 "    border-color: rgb(160, 160, 160);\n"
-                                 "	border-radius: 5px;\n"
-                                 "}\n"
-                                 "QPushButton[dragFile=\"true\"]:hover"
-                                 " {\n"
-                                 "	background-color: rgb(2, 24, 53);\n"
-                                 "}\n"
-                                 "QPushButton[dragFile=\"true\"]:pressed {\n"
-                                 "	background-color: rgb(1, 24, 61);\n"
-                                 "}\n"
-                                 "\n"
-                                 "/* Progressbar */\n"
-                                 "\n"
-                                 "/* Command Line*/\n"
-                                 "QTextBrowser {\n"
-                                 "	border-left: 2px;\n"
-                                 "	border-style: solid;\n"
-                                 "	border-color: rgb(109, 213, 237);\n"
-                                 "	font: 8pt \"Courier\";\n"
-                                 "}")
-        self.horizontalLayout_2 = QHBoxLayout(MainWindow)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 5, 0)
-        self.frame_5 = QFrame(MainWindow)
-        self.frame_5.setObjectName(u"frame_5")
-        self.frame_5.setMinimumSize(QSize(650, 0))
-        self.frame_5.setFrameShape(QFrame.NoFrame)
-        self.frame_5.setFrameShadow(QFrame.Plain)
-        self.frame_5.setLineWidth(0)
-        self.verticalLayout_3 = QVBoxLayout(self.frame_5)
-        self.verticalLayout_3.setSpacing(0)
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
-        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.frame_2 = QFrame(self.frame_5)
-        self.frame_2.setObjectName(u"frame_2")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(
-            self.frame_2.sizePolicy().hasHeightForWidth())
-        self.frame_2.setSizePolicy(sizePolicy)
-        self.frame_2.setMinimumSize(QSize(0, 0))
-        self.frame_2.setMaximumSize(QSize(16777215, 16777215))
-        self.frame_2.setFrameShape(QFrame.NoFrame)
-        self.frame_2.setFrameShadow(QFrame.Raised)
-        self.verticalLayout = QVBoxLayout(self.frame_2)
-        self.verticalLayout.setSpacing(5)
-        self.verticalLayout.setObjectName(u"verticalLayout")
-        self.verticalLayout.setContentsMargins(30, 30, 30, 30)
-        self.frame_musicFiles = QFrame(self.frame_2)
-        self.frame_musicFiles.setObjectName(u"frame_musicFiles")
-        sizePolicy1 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
-        sizePolicy1.setHorizontalStretch(0)
-        sizePolicy1.setVerticalStretch(0)
-        sizePolicy1.setHeightForWidth(
-            self.frame_musicFiles.sizePolicy().hasHeightForWidth())
-        self.frame_musicFiles.setSizePolicy(sizePolicy1)
-        self.frame_musicFiles.setAcceptDrops(True)
-        self.frame_musicFiles.setStyleSheet(u"")
-        self.frame_musicFiles.setFrameShape(QFrame.NoFrame)
-        self.frame_musicFiles.setFrameShadow(QFrame.Plain)
-        self.frame_musicFiles.setLineWidth(1)
-        self.verticalLayout_2 = QVBoxLayout(self.frame_musicFiles)
-        self.verticalLayout_2.setSpacing(0)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.listWidget_musicFiles = QListWidget(self.frame_musicFiles)
-        self.listWidget_musicFiles.setObjectName(u"listWidget_musicFiles")
-        self.listWidget_musicFiles.setMaximumSize(QSize(16777215, 0))
-        self.listWidget_musicFiles.setFrameShape(QFrame.NoFrame)
-        self.listWidget_musicFiles.setLineWidth(0)
+class AudioPlayer(QtMultimedia.QMediaPlayer):
+    def __init__(self, parent, wig_play_pause: QtWidgets.QPushButton, wig_slider: QtWidgets.QSlider):
+        super().__init__(parent=parent)
+        self.logger = parent.logger
+        self.wig_play_pause = wig_play_pause
+        self.wig_slider = wig_slider
+        self.last_state = self.state()
 
-        self.verticalLayout_2.addWidget(self.listWidget_musicFiles)
+        # -Images-
+        self.play_img = QtGui.QPixmap(ResourcePaths.images.audio_play)
+        self.pause_img = QtGui.QPixmap(ResourcePaths.images.audio_pause)
+        self.wig_play_pause.setIconSize(QtCore.QSize(23, 23))
+        self.pause()
 
-        self.pushButton_musicFiles = QPushButton(self.frame_musicFiles)
-        self.pushButton_musicFiles.setObjectName(u"pushButton_musicFiles")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(
-            self.pushButton_musicFiles.sizePolicy().hasHeightForWidth())
-        self.pushButton_musicFiles.setSizePolicy(sizePolicy2)
-        self.pushButton_musicFiles.setCursor(QCursor(Qt.PointingHandCursor))
-        self.pushButton_musicFiles.setProperty("dragFile", True)
+        # -Binds-
+        # Player
+        self.error.connect(self.error_occurred)
+        self.durationChanged.connect(self.update_slider_max)
+        self.positionChanged.connect(self.update_slider)
+        # Widgets
+        self.wig_play_pause.pressed.connect(self.play_or_pause)
+        self.wig_slider.sliderPressed.connect(self.sliderPressed)
+        self.wig_slider.sliderReleased.connect(self.sliderReleased)
 
-        self.verticalLayout_2.addWidget(self.pushButton_musicFiles)
+    def play(self):
+        self.wig_play_pause.setIcon(self.pause_img)
 
-        self.verticalLayout.addWidget(self.frame_musicFiles)
+        super().play()
 
-        self.label_arrow = QLabel(self.frame_2)
-        self.label_arrow.setObjectName(u"label_arrow")
-        self.label_arrow.setMaximumSize(QSize(16777215, 60))
-        self.label_arrow.setStyleSheet(u"font-size: 40px;")
-        self.label_arrow.setAlignment(Qt.AlignCenter)
+    def pause(self):
+        self.wig_play_pause.setIcon(self.play_img)
+        super().pause()
 
-        self.verticalLayout.addWidget(self.label_arrow)
+    def play_or_pause(self):
+        if self.state() != QtMultimedia.QMediaPlayer.PlayingState:
+            # Not playing -> Play
+            self.play()
+        else:
+            # Playing -> Pause
+            self.pause()
 
-        self.frame_3 = QFrame(self.frame_2)
-        self.frame_3.setObjectName(u"frame_3")
-        self.frame_3.setMinimumSize(QSize(0, 175))
-        self.frame_3.setMaximumSize(QSize(16777215, 175))
-        self.frame_3.setFrameShape(QFrame.StyledPanel)
-        self.frame_3.setFrameShadow(QFrame.Raised)
-        self.gridLayout_2 = QGridLayout(self.frame_3)
-        self.gridLayout_2.setObjectName(u"gridLayout_2")
-        self.gridLayout_2.setHorizontalSpacing(25)
-        self.gridLayout_2.setVerticalSpacing(20)
-        self.gridLayout_2.setContentsMargins(-1, -1, -1, 30)
-        self.label_instrumental = QLabel(self.frame_3)
-        self.label_instrumental.setObjectName(u"label_instrumental")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(
-            self.label_instrumental.sizePolicy().hasHeightForWidth())
-        self.label_instrumental.setSizePolicy(sizePolicy3)
+    def sliderPressed(self):
+        self.last_state = self.state()
+        self.pause()
 
-        self.gridLayout_2.addWidget(self.label_instrumental, 0, 0, 1, 1)
+    def sliderReleased(self):
+        if self.last_state == QtMultimedia.QMediaPlayer.PlayingState:
+            self.play()
+        self.setPosition(self.wig_slider.value())
 
-        self.label_instrumentalFiles = QLabel(self.frame_3)
-        self.label_instrumentalFiles.setObjectName(u"label_instrumentalFiles")
-        self.label_instrumentalFiles.setAlignment(Qt.AlignCenter)
-        self.label_instrumentalFiles.setProperty("audioFile", True)
+    def set_song(self, path: str):
+        self.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(path)))
 
-        self.gridLayout_2.addWidget(self.label_instrumentalFiles, 0, 1, 1, 1)
+    def update_slider_max(self, duration):
+        self.wig_slider.setMaximum(duration)
 
-        self.label_vocals = QLabel(self.frame_3)
-        self.label_vocals.setObjectName(u"label_vocals")
+    def update_slider(self, position):
+        # Disable the events to prevent updating triggering a setPosition event (can cause stuttering).
+        self.wig_slider.blockSignals(True)
+        self.wig_slider.setValue(position)
+        self.wig_slider.blockSignals(False)
 
-        self.gridLayout_2.addWidget(self.label_vocals, 1, 0, 1, 1)
+    def error_occurred(self, *args):
+        self.logger.info(args)
 
-        self.label_vocalsFile = QLabel(self.frame_3)
-        self.label_vocalsFile.setObjectName(u"label_vocalsFile")
-        self.label_vocalsFile.setAlignment(Qt.AlignCenter)
-        self.label_vocalsFile.setProperty("audioFile", True)
 
-        self.gridLayout_2.addWidget(self.label_vocalsFile, 1, 1, 1, 1)
+class MainWindow(QtWidgets.QWidget):
+    def __init__(self, app: QtWidgets.QApplication):
+        # -Window setup-
+        super(MainWindow, self).__init__()
+        self.ui = mainwindow_ui.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.app = app
+        self.logger = app.logger
+        self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
+        self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.icon))
 
-        self.verticalLayout.addWidget(self.frame_3)
+        # -Other Variables-
+        # Independent data
+        self.inputPaths = self.settings.value('inputPaths',
+                                              const.DEFAULT_SETTINGS['inputPaths'],
+                                              type=list)
 
-        self.frame = QFrame(self.frame_2)
-        self.frame.setObjectName(u"frame")
-        self.frame.setMaximumSize(QSize(250, 50))
-        self.frame.setFrameShape(QFrame.NoFrame)
-        self.frame.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout = QHBoxLayout(self.frame)
-        self.horizontalLayout.setSpacing(0)
-        self.horizontalLayout.setObjectName(u"horizontalLayout")
-        self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.pushButton_seperate = QPushButton(self.frame)
-        self.pushButton_seperate.setObjectName(u"pushButton_seperate")
-        self.pushButton_seperate.setMinimumSize(QSize(160, 0))
-        self.pushButton_seperate.setMaximumSize(QSize(16777215, 50))
-        self.pushButton_seperate.setStyleSheet(u"border-top-right-radius: 0px;\n"
-                                               "border-bottom-right-radius: 0px;")
-        self.pushButton_seperate.setProperty("seperate", True)
+        self.instrumentals_audioPlayer = AudioPlayer(self,
+                                                     self.ui.pushButton_play_instrumentals,
+                                                     self.ui.horizontalSlider_instrumentals,)
+        self.vocals_audioPlayer = AudioPlayer(self,
+                                              self.ui.pushButton_play_vocals,
+                                              self.ui.horizontalSlider_vocals)
 
-        self.horizontalLayout.addWidget(self.pushButton_seperate)
+    # -Initialization methods-
+    def setup_window(self):
+        """
+        Set up the window with binds, images, saved settings
 
-        self.pushButton_settings = QPushButton(self.frame)
-        self.pushButton_settings.setObjectName(u"pushButton_settings")
-        self.pushButton_settings.setMinimumSize(QSize(50, 50))
-        self.pushButton_settings.setMaximumSize(QSize(50, 50))
-        self.pushButton_settings.setStyleSheet(u"border-left: none;\n"
-                                               "border-top-left-radius: 0px;\n"
-                                               "border-bottom-left-radius: 0px;")
-        self.pushButton_settings.setText(u"")
-        self.pushButton_settings.setProperty("seperate", True)
+        (Only run right after window initialization of main and settings window)
+        """
+        def load_geometry():
+            """
+            Load the geometry of this window
+            """
+            # Window is centered on primary window
+            default_size = self.size()
+            default_pos = QtCore.QPoint()
+            default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
+            default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
+            # Get geometry
+            size = self.settings.value('mainwindow/size',
+                                       default_size)
+            pos = self.settings.value('mainwindow/pos',
+                                      default_pos)
+            self.resize(size)
+            self.move(pos)
 
-        self.horizontalLayout.addWidget(self.pushButton_settings)
+        def load_images():
+            """
+            Load the images for this window and assign them to their widgets
+            """
+            # Settings button
+            icon = QtGui.QPixmap(ResourcePaths.images.settings)
+            self.ui.pushButton_settings.setIcon(icon)
+            self.ui.pushButton_settings.setIconSize(QtCore.QSize(25, 25))
 
-        self.verticalLayout.addWidget(self.frame, 0, Qt.AlignHCenter)
+        def bind_widgets():
+            """
+            Bind the widgets here
+            """
+            # -Override binds-
+            # Music file drag & drop
+            self.ui.stackedWidget_musicFiles.dragEnterEvent = self.stackedWidget_musicFiles_dragEnterEvent
+            self.ui.stackedWidget_musicFiles.dropEvent = self.stackedWidget_musicFiles_dropEvent
+            # -Pushbuttons-
+            self.ui.pushButton_settings.clicked.connect(self.pushButton_settings_clicked)
+            self.ui.pushButton_seperate.clicked.connect(self.pushButton_seperate_clicked)
 
-        self.verticalLayout_3.addWidget(self.frame_2)
+        def create_animation_objects():
+            """
+            Create the animation objects that are used
+            multiple times here
+            """
+            def style_progressbar():
+                """
+                Style pogressbar manually as when styled in Qt Designer
+                a bug occurs that prevents smooth animation of progressbar
+                """
+                self.ui.progressBar.setStyleSheet("""QProgressBar:horizontal {
+                    border: 0px solid gray;
+                }
+                QProgressBar::chunk {
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));
+                    border-top-right-radius: 2px;
+                    border-bottom-right-radius: 2px;
+                } """)
+                self.seperation_update_progress(0)
+            self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
+                                                            parent=self)
+            # This is all to prevent the progressbar animation not working propertly
+            self.pbar_animation.setDuration(8)
+            self.pbar_animation.setStartValue(0)
+            self.pbar_animation.setEndValue(8)
+            self.pbar_animation.start()
+            self.pbar_animation.setDuration(500)
+            QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
 
-        self.progressBar = QProgressBar(self.frame_5)
-        self.progressBar.setObjectName(u"progressBar")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(
-            self.progressBar.sizePolicy().hasHeightForWidth())
-        self.progressBar.setSizePolicy(sizePolicy4)
-        self.progressBar.setMinimumSize(QSize(0, 10))
-        self.progressBar.setMaximumSize(QSize(16777215, 6))
-        self.progressBar.setStyleSheet(u"QProgressBar:horizontal {\n"
-                                       "	border: 0px solid gray;\n"
-                                       "}\n"
-                                       "QProgressBar::chunk {\n"
-                                       "}")
-        self.progressBar.setMaximum(200)
-        self.progressBar.setValue(200)
-        self.progressBar.setTextVisible(False)
-        self.progressBar.setTextDirection(QProgressBar.TopToBottom)
-        self.progressBar.setFormat(u"")
+        # -Before setup-
+        self.logger.info('Main -> Setting up',
+                         indent_forwards=True)
+        # Load saved settings for widgets
+        self._load_data()
+        # Create WinTaskbar
+        self.winTaskbar = QWinTaskbarButton(self)
+        self.winTaskbar.setWindow(self.windowHandle())
+        self.winTaskbar_progress = self.winTaskbar.progress()
 
-        self.verticalLayout_3.addWidget(self.progressBar)
+        # -Setup-
+        load_geometry()
+        load_images()
+        bind_widgets()
+        create_animation_objects()
 
-        self.horizontalLayout_2.addWidget(self.frame_5)
+        # -After setup-
+        # Create instance
+        self.vocalRemoverRunnable = converter_v4.VocalRemoverWorker(logger=self.logger)
+        # Bind events
+        self.vocalRemoverRunnable.signals.start.connect(self.seperation_start)
+        self.vocalRemoverRunnable.signals.message.connect(self.seperation_write)
+        self.vocalRemoverRunnable.signals.progress.connect(self.seperation_update_progress)
+        self.vocalRemoverRunnable.signals.error.connect(self.seperation_error)
+        self.vocalRemoverRunnable.signals.finished.connect(self.seperation_finish)
+        # Late update
+        self.update_window()
+        self.logger.indent_backwards()
 
-        self.textBrowser_command = QTextBrowser(MainWindow)
-        self.textBrowser_command.setObjectName(u"textBrowser_command")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(
-            self.textBrowser_command.sizePolicy().hasHeightForWidth())
-        self.textBrowser_command.setSizePolicy(sizePolicy5)
-        self.textBrowser_command.setMinimumSize(QSize(0, 0))
-        self.textBrowser_command.setFrameShape(QFrame.StyledPanel)
-        self.textBrowser_command.setFrameShadow(QFrame.Plain)
-        self.textBrowser_command.setLineWidth(0)
-        self.textBrowser_command.setVerticalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff)
-        self.textBrowser_command.setHorizontalScrollBarPolicy(
-            Qt.ScrollBarAlwaysOff)
-        self.textBrowser_command.setHtml(u"<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-                                         "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-                                         "p, li { white-space: pre-wrap; }\n"
-                                         "</style></head><body style=\" font-family:'Courier'; font-size:8pt; font-weight:400; font-style:normal;\">\n"
-                                         "<table border=\"1\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px;\" width=\"100%\" cellspacing=\"2\" cellpadding=\"0\">\n"
-                                         "<tr>\n"
-                                         "<td colspan=\"2\">\n"
-                                         "<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">HEADER</span>        </p></td></tr>\n"
-                                         "<tr>\n"
-                                         "<td>\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">name</p></td>\n"
-                                         "<td>\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">val"
-                                         "ue        </p></td></tr>\n"
-                                         "<tr>\n"
-                                         "<td>\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">name</p></td>\n"
-                                         "<td>\n"
-                                         "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">value    </p></td></tr></table></body></html>")
+    def _load_data(self, default: bool = False):
+        """
+        Load the data for this window
 
-        self.horizontalLayout_2.addWidget(self.textBrowser_command)
+        (Only run right after window initialization or to reset settings)
 
-        self.retranslateUi(MainWindow)
+        Parameters:
+            default(bool):
+                Reset to the default settings
+        """
+        self.settings.beginGroup('mainwindow')
+        if default:
+            # Delete settings group
+            self.settings.remove('mainwindow')
 
-        QMetaObject.connectSlotsByName(MainWindow)
-    # setupUi
+        # -Load Settings-
+        # None
 
-    def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate(
-            "MainWindow", u"Vocal Remover", None))
-        self.pushButton_musicFiles.setText(QCoreApplication.translate(
-            "MainWindow", u"Drag your music files", None))
-        self.label_arrow.setText(
-            QCoreApplication.translate("MainWindow", u"\u2193", None))
-        self.label_instrumental.setText(
-            QCoreApplication.translate("MainWindow", u"Instrumentals", None))
-        self.label_instrumentalFiles.setText(
-            QCoreApplication.translate("MainWindow", u"Audio File", None))
-        self.label_vocals.setText(
-            QCoreApplication.translate("MainWindow", u"Vocals", None))
-        self.label_vocalsFile.setText(
-            QCoreApplication.translate("MainWindow", u"Audio File", None))
-        self.pushButton_seperate.setText(
-            QCoreApplication.translate("MainWindow", u"  Seperate", None))
-    # retranslateUi
+        # -Done-
+        self.settings.endGroup()
+
+    # -Widget Binds-
+    def pushButton_settings_clicked(self):
+        """
+        Open the settings window
+        """
+        self.logger.info('Opening settings window...')
+        # Reshow window
+        self.app.windows['settings'].setWindowState(Qt.WindowNoState)
+        self.app.windows['settings'].show()
+        # Focus window
+        self.app.windows['settings'].activateWindow()
+        self.app.windows['settings'].raise_()
+
+    def pushButton_seperate_clicked(self):
+        """
+        Seperate given files
+        """
+        # -Extract seperation info from GUI-
+        self.app.logger.info('Seperation button pressed')
+        seperation_data = self.app.extract_seperation_data()
+        self.vocalRemoverRunnable.seperation_data = seperation_data.copy()
+        # Start seperation
+        self.app.threadpool.start(self.vocalRemoverRunnable)
+
+    def stackedWidget_musicFiles_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
+        """
+        Check whether the files the user is dragging over the widget
+        is valid or not
+        """
+        if event.mimeData().urls():
+            # URLs dragged
+            event.accept()
+        else:
+            event.ignore()
+
+    def stackedWidget_musicFiles_dropEvent(self, event: QtGui.QDropEvent):
+        """
+        Assign dropped paths to list
+        """
+        urls = event.mimeData().urls()
+        self.logger.info(f'Selected {len(urls)} files',
+                         indent_forwards=True)
+        inputPaths = []
+        for url in urls:
+            path = url.toLocalFile()
+            if os.path.isfile(path):
+                inputPaths.append(path)
+
+            self.logger.info(repr(path))
+        self.inputPaths = inputPaths
+        self.update_window()
+        self.logger.indent_backwards()
+
+    # -Seperation Methods-
+    def seperation_start(self):
+        """
+        Seperation has started
+        """
+        # Disable Seperation Button
+        self.ui.pushButton_seperate.setEnabled(False)
+        # Setup WinTaskbar
+        self.winTaskbar.setOverlayAccessibleDescription('Seperating...')
+        self.winTaskbar.setOverlayIcon(QtGui.QIcon(ResourcePaths.images.folder))
+        self.winTaskbar_progress.setVisible(True)
+        # Media player
+        self.deactivate_audio_players()
+
+    def seperation_write(self, text: str):
+        """
+        Write to GUI
+        """
+        self.logger.info(text)
+        self.write_to_command(text)
+
+    def seperation_update_progress(self, progress: int):
+        """
+        Update both progressbars in Taskbar and GUI
+        with the given progress
+        """
+        # self.logger.info(f'Updating progress: {progress}%')
+        # # Given progress is (0-100) but (0-200) is needed
+        progress *= 2
+        cur_progress = self.ui.progressBar.value()
+        self.pbar_animation.stop()
+        self.pbar_animation.setStartValue(cur_progress)
+        self.pbar_animation.setEndValue(progress)
+        self.pbar_animation.start()
+        self.winTaskbar_progress.setValue(progress)
+
+    def seperation_error(self, message: Tuple[str, str]):
+        """
+        Error occured while seperating
+
+        Parameters:
+            message(tuple):
+                Index 0: Error Message
+                Index 1: Detailed Message
+        """
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle('An Error Occurred')
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Critical)
+        msg.setText(message[0] + '\n\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!')  # nopep8
+        msg.setDetailedText(message[1])
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+        msg.exec_()
+
+        self.seperation_finish(failed=True)
+
+    def seperation_finish(self, elapsed_time: str = 'N/A', failed: bool = False):
+        """
+        Finished seperation
+        """
+        def seperation_reset():
+            """
+            Reset the progress bars and WinTaskbar
+            """
+            self.winTaskbar.setOverlayAccessibleDescription('')
+            self.winTaskbar.clearOverlayIcon()
+            self.winTaskbar_progress.setVisible(False)
+            QtCore.QTimer.singleShot(2500, lambda: self.ui.progressBar.setValue(0))
+
+        # -Create MessageBox-
+        if failed:
+            # Error message was already displayed in the seperation_error function
+            self.logger.warn(msg=f'----- The seperation has failed! -----')
+        else:
+            self.logger.info(msg=f'----- The seperation has finished! (in {elapsed_time}) -----')
+            if self.app.windows['settings'].ui.checkBox_notifiyOnFinish.isChecked():
+                msg = QtWidgets.QMessageBox()
+                msg.setWindowTitle('Seperation Complete')
+                msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+                msg.setText(f"UVR:\nYour seperation has finished!\n\nTime elapsed: {elapsed_time}")  # nopep8
+                msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+                msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+                # Focus main window
+                self.activateWindow()
+                self.raise_()
+                # Show messagebox
+                msg.exec_()
+            else:
+                # Highlight window in taskbar
+                self.app.alert(self)
+
+        # -Reset progress-
+        seperation_reset()
+        # -Activate Audio Players-
+        QtCore.QTimer.singleShot(1000, lambda: self.activate_audio_players())
+        # -Enable Seperation Button
+        self.ui.pushButton_seperate.setEnabled(True)
+
+    def activate_audio_players(self):
+        self.ui.stackedWidget_instrumentals.setCurrentIndex(1)
+        self.ui.stackedWidget_vocals.setCurrentIndex(1)
+        self.instrumentals_audioPlayer.set_song(ResourcePaths.temp_instrumental)
+        self.vocals_audioPlayer.set_song(ResourcePaths.temp_vocal)
+
+    def deactivate_audio_players(self):
+        self.ui.stackedWidget_instrumentals.setCurrentIndex(0)
+        self.ui.stackedWidget_vocals.setCurrentIndex(0)
+        self.instrumentals_audioPlayer.stop()
+        self.vocals_audioPlayer.stop()
+        # Remove all connections to previous media content
+        self.instrumentals_audioPlayer.setMedia(QtMultimedia.QMediaContent())
+        self.vocals_audioPlayer.setMedia(QtMultimedia.QMediaContent())
+
+    # -Other Methods-
+    def update_window(self):
+        """
+        Update the text and states of widgets
+        in this window
+        """
+        self.logger.info('Updating main window...',
+                         indent_forwards=True)
+
+        if self.inputPaths:
+            self.listWidget_musicFiles_update()
+            self.ui.stackedWidget_musicFiles.setCurrentIndex(1)
+        else:
+            self.ui.stackedWidget_musicFiles.setCurrentIndex(0)
+        self.logger.indent_backwards()
+
+    def listWidget_musicFiles_update(self):
+        """
+        Write to the list view
+        """
+        self.ui.listWidget_musicFiles.clear()
+        self.ui.listWidget_musicFiles.addItems(self.inputPaths)
+
+    def write_to_command(self, text: str):
+        """
+        Write to the command line
+
+        Parameters:
+            text(str):
+                Text written in the command on a new line
+        """
+        if hasattr(self.app, 'windows'):
+            self.app.windows['settings'].ui.pushButton_clearCommand.setVisible(True)
+        self.ui.textBrowser_command.append(text)
+
+    # -Overriden methods-
+    def closeEvent(self, event: QtCore.QEvent):
+        """
+        Catch close event of this window to save data
+        """
+        # -Save the geometry for this window-
+        self.settings.setValue('mainwindow/size',
+                               self.size())
+        self.settings.setValue('mainwindow/pos',
+                               self.pos())
+        # Commit Save
+        self.settings.sync()
+        # -Close all windows-
+        self.app.closeAllWindows()
+
+    def update_translation(self):
+        """
+        Update translation of this window
+        """
+        self.logger.info('Main: Retranslating UI')
+        self.ui.retranslateUi(self)

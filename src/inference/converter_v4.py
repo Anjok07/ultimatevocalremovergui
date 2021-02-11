@@ -18,7 +18,7 @@ import torch
 from .lib.lib_v4 import dataset
 from .lib.lib_v4 import nets
 from .lib.lib_v4 import spec_utils
-from ..resources.resources_manager import Logger
+from ..resources.resources_manager import (ResourcePaths, Logger)
 # -Other-
 # Loading Bar
 from tqdm import tqdm
@@ -141,7 +141,7 @@ class VocalRemover:
         self._check_for_valid_inputs()
         self._fill_general_data()
         self.all_threads = []
-        
+
         for file_num, file_path in enumerate(self.seperation_data['input_paths'], start=1):
             if self.seperation_data['multithreading']:
                 thread = threading.Thread(target=self._seperate, args=(file_path, file_num),
@@ -150,7 +150,7 @@ class VocalRemover:
                 self.all_threads.append(thread)
             else:
                 self._seperate(file_path,
-                                    file_num)
+                               file_num)
 
         for thread in self.all_threads:
             thread.join()
@@ -357,7 +357,7 @@ class VocalRemover:
                 self._save_mask()
 
         self.write_to_gui(text='Completed Seperation!\n',
-                            progress_step=1)
+                          progress_step=1)
 
     # -Data Getter Methods-
     def _get_base_text(self) -> str:
@@ -370,8 +370,8 @@ class VocalRemover:
             loop_add_on = f" ({self.loop_data['loop_num']+1}/{self.general_data['total_loops']})"
 
         return 'File {file_num}/{total_files}:{loop} '.format(file_num=self.loop_data['file_num'],
-                                                                total_files=self.general_data['total_files'],
-                                                                loop=loop_add_on)
+                                                              total_files=self.general_data['total_files'],
+                                                              loop=loop_add_on)
 
     def _get_constants(self, model_name: str) -> dict:
         """
@@ -485,7 +485,7 @@ class VocalRemover:
         Load the wave source
         """
         self.write_to_gui(text='Loading wave source...',
-                            progress_step=0)
+                          progress_step=0)
 
         X, sampling_rate = librosa.load(path=self.loop_data['music_file'],
                                         sr=self.loop_data['constants']['sr'],
@@ -532,7 +532,7 @@ class VocalRemover:
 
                     start = i * roi_size
                     X_mag_window = X_mag_pad[None, :, :,
-                                                start:start + self.seperation_data['window_size']]
+                                             start:start + self.seperation_data['window_size']]
                     X_mag_window = torch.from_numpy(X_mag_window).to(device)
 
                     pred = model.predict(X_mag_window)
@@ -552,14 +552,14 @@ class VocalRemover:
 
             n_frame = X_mag_pre.shape[2]
             pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
-                                                            self.seperation_data['window_size'], model.offset)
+                                                          self.seperation_data['window_size'], model.offset)
             n_window = int(np.ceil(n_frame / roi_size))
 
             X_mag_pad = np.pad(
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred = execute(X_mag_pad, roi_size, n_window,
-                            device, model)
+                           device, model)
             pred = pred[:, :, :n_frame]
 
             return pred * coef, X_mag, np.exp(1.j * X_phase)
@@ -572,14 +572,14 @@ class VocalRemover:
 
             n_frame = X_mag_pre.shape[2]
             pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
-                                                            self.seperation_data['window_size'], model.offset)
+                                                          self.seperation_data['window_size'], model.offset)
             n_window = int(np.ceil(n_frame / roi_size))
 
             X_mag_pad = np.pad(
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred = execute(X_mag_pad, roi_size, n_window,
-                            device, model, progrs_info='1/2')
+                           device, model, progrs_info='1/2')
             pred = pred[:, :, :n_frame]
 
             pad_l += roi_size // 2
@@ -590,30 +590,30 @@ class VocalRemover:
                 X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
 
             pred_tta = execute(X_mag_pad, roi_size, n_window,
-                                device, model, progrs_info='2/2')
+                               device, model, progrs_info='2/2')
             pred_tta = pred_tta[:, :, roi_size // 2:]
             pred_tta = pred_tta[:, :, :n_frame]
 
             return (pred + pred_tta) * 0.5 * coef, X_mag, np.exp(1.j * X_phase)
 
         self.write_to_gui(text='Stft of wave source...',
-                            progress_step=0.1)
+                          progress_step=0.1)
 
         if not self.loop_data['loop_num']:
             X = spec_utils.wave_to_spectrogram(wave=self.loop_data['X'],
-                                                hop_length=self.seperation_data['hop_length'],
-                                                n_fft=self.seperation_data['n_fft'])
+                                               hop_length=self.seperation_data['hop_length'],
+                                               n_fft=self.seperation_data['n_fft'])
         else:
             X = self.loop_data['temp_spectogramm']
 
         if self.seperation_data['tta']:
             prediction, X_mag, X_phase = inference_tta(X_spec=X,
-                                                        device=self.loop_data['model_device']['device'],
-                                                        model=self.loop_data['model_device']['model'])
+                                                       device=self.loop_data['model_device']['device'],
+                                                       model=self.loop_data['model_device']['model'])
         else:
             prediction, X_mag, X_phase = inference(X_spec=X,
-                                                    device=self.loop_data['model_device']['device'],
-                                                    model=self.loop_data['model_device']['model'])
+                                                   device=self.loop_data['model_device']['device'],
+                                                   model=self.loop_data['model_device']['model'])
 
         self.loop_data['prediction'] = prediction
         self.loop_data['X'] = X
@@ -625,7 +625,7 @@ class VocalRemover:
         Post process
         """
         self.write_to_gui(text='Post processing...',
-                            progress_step=0.8)
+                          progress_step=0.8)
 
         pred_inv = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'], 0, np.inf)
         prediction = spec_utils.mask_silence(self.loop_data['prediction'], pred_inv)
@@ -637,11 +637,11 @@ class VocalRemover:
         Inverse stft of instrumentals and vocals
         """
         self.write_to_gui(text='Inverse stft of instruments and vocals...',
-                            progress_step=0.85)
+                          progress_step=0.85)
 
         y_spec = self.loop_data['prediction'] * self.loop_data['X_phase']
         v_spec = np.clip(self.loop_data['X_mag'] - self.loop_data['prediction'],
-                            0, np.inf) * self.loop_data['X_phase']
+                         0, np.inf) * self.loop_data['X_phase']
 
         if self.loop_data['loop_num'] == (self.general_data['total_loops'] - 1):
             # Only compute wave on last loop
@@ -726,7 +726,7 @@ class VocalRemover:
             return vocal_name, instrumental_name, folder_path
 
         self.write_to_gui(text='Saving Files...',
-                            progress_step=0.9)
+                          progress_step=0.9)
 
         vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name()
 
@@ -735,17 +735,17 @@ class VocalRemover:
         if instrumental_name is not None:
             instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
             instrumental_path = os.path.join(folder_path,
-                                                instrumental_file_name)
+                                             instrumental_file_name)
 
             sf.write(instrumental_path,
-                        self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
+                     self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
         # Vocal
         if vocal_name is not None:
             vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
             vocal_path = os.path.join(folder_path,
-                                        vocal_file_name)
+                                      vocal_file_name)
             sf.write(vocal_path,
-                        self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
+                     self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
 
     def _save_mask(self):
         """
@@ -856,3 +856,13 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
 
         if progress_step is not None:
             self.signals.progress.emit(self._get_progress(progress_step))
+
+    def _save_files(self):
+        """
+        Also save files in temp location for in GUI audio playback
+        """
+        sf.write(ResourcePaths.temp_instrumental,
+                 self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
+        sf.write(ResourcePaths.temp_vocal,
+                 self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
+        super()._save_files()

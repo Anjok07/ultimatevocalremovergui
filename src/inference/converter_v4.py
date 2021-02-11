@@ -162,7 +162,7 @@ class VocalRemover:
 
     def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         """
-        Update progress and/or write text to the command line 
+        Update progress and/or write text to the command line
 
         A new line '\\n' will be automatically appended to the text
         """
@@ -312,12 +312,13 @@ class VocalRemover:
             # No or invalid instrumental/vocal model given
             # but model is needed
             raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
-        if (not os.path.isfile(self.seperation_data['stackModel']) and
-            (self.seperation_data['stackOnly'] or
-                self.seperation_data['stackPasses'] > 0)):
-            # No or invalid stack model given
-            # but model is needed
-            raise TypeError(f"Not specified or invalid model path for stacked model!")
+        if (self.seperation_data['stackOnly'] or
+                self.seperation_data['stackPasses'] > 0):
+            # First check if stacked model is needed
+            if not os.path.isfile(self.seperation_data['stackModel']):
+                # No or invalid stack model given
+                # but model is needed
+                raise TypeError(f"Not specified or invalid model path for stacked model!")
 
     def _seperate(self, file_path: str, file_num: int):
         """
@@ -823,7 +824,7 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
         self.seperation_data = seperation_data
         self.setAutoDelete(False)
 
-    @QtCore.Slot()
+    @ QtCore.Slot()
     def run(self):
         """
         Seperate files

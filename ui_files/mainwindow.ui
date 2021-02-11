@@ -86,7 +86,7 @@ QPushButton[audioPlayer=&quot;true&quot;] {
 }
 QSlider[audioPlayer=&quot;true&quot;]::groove:horizontal { 
 	background-color: rgb(66, 72, 83);
-	height: 6px; 
+	height: 4px; 
 	border-radius: 2px;
 }
 
@@ -94,8 +94,8 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal {
 	background-color: rgb(109, 213, 237); 
 	border: 2px solid rgb(109, 213, 237); 
 	width: 10px; 
-	margin-top: -4px; 
-	margin-bottom: -4px; 
+	margin-top: -5px; 
+	margin-bottom: -5px; 
 	border-radius: 5px; 
 }
 
@@ -378,7 +378,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
             <item row="1" column="2">
              <widget class="QStackedWidget" name="stackedWidget_vocals">
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="page_3">
                <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -489,7 +489,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_save_vocals">
+                    <widget class="QPushButton" name="pushButton_menu_vocals">
                      <property name="maximumSize">
                       <size>
                        <width>30</width>
@@ -520,7 +520,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
             <item row="0" column="2">
              <widget class="QStackedWidget" name="stackedWidget_instrumentals">
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="page">
                <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -631,7 +631,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_save_instrumentals">
+                    <widget class="QPushButton" name="pushButton_menu_instrumentals">
                      <property name="maximumSize">
                       <size>
                        <width>30</width>

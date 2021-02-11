@@ -45,6 +45,8 @@ class ResourcePaths:
         audio_play = os.path.join(abs_path, IMAGE_FOLDER, 'audio_play.png')
         audio_pause = os.path.join(abs_path, IMAGE_FOLDER, 'audio_pause.png')
         save = os.path.join(abs_path, IMAGE_FOLDER, 'save.png')
+        menu = os.path.join(abs_path, IMAGE_FOLDER, 'menu.png')
+        playpause_gif = os.path.join(abs_path, IMAGE_FOLDER, 'playpause.gif')
 
         class flags:
             _FLAG_FOLDER = 'flags'

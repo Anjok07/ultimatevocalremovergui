@@ -7,7 +7,7 @@ from PySide2.QtGui import Qt
 from PySide2.QtWinExtras import (QWinTaskbarButton)
 from PySide2 import QtMultimedia
 # -Root imports-
-from ..resources.resources_manager import ResourcePaths
+from ..resources.resources_manager import (ResourcePaths)
 from ..inference import converter_v4
 from .. import constants as const
 from .design import mainwindow_ui
@@ -44,39 +44,98 @@ def dict_to_HTMLtable(x: dict, header: str) -> str:
 
 
 class AudioPlayer(QtMultimedia.QMediaPlayer):
-    def __init__(self, parent, wig_play_pause: QtWidgets.QPushButton, wig_slider: QtWidgets.QSlider):
+    """
+    Custom Audio Player for playing seperated instrumentals and vocals embedded into the GUI
+    """
+    # Frames to stop on to display given image (key)
+    PLAYPAUSE_STEPS = {
+        'play': 0,
+        'pause': 33
+    }
+
+    def __init__(self, parent, wig_play_pause: QtWidgets.QPushButton, wig_slider: QtWidgets.QSlider, wig_menu: QtWidgets.QPushButton):
         super().__init__(parent=parent)
+        self.parent = parent
         self.logger = parent.logger
         self.wig_play_pause = wig_play_pause
         self.wig_slider = wig_slider
+        self.wig_menu = wig_menu
         self.last_state = self.state()
+        self.sliderPressed = False
 
         # -Images-
+        self.playpause_gif = QtGui.QMovie(self.parent)
+        self.playpause_gif.setSpeed(110)
+        self.playpause_gif.setFileName(ResourcePaths.images.playpause_gif)
+        self.playpause_gif.frameChanged.connect(lambda: self.frameChanged())
+        self.playpause_gif.jumpToFrame(1)
+        self.playpause_gif.setPaused(True)
+        # Play/Pause
         self.play_img = QtGui.QPixmap(ResourcePaths.images.audio_play)
         self.pause_img = QtGui.QPixmap(ResourcePaths.images.audio_pause)
-        self.wig_play_pause.setIconSize(QtCore.QSize(23, 23))
+        self.wig_play_pause.setIconSize(QtCore.QSize(26, 26))
         self.pause()
+        # Menu
+        self.menu_img = QtGui.QPixmap(ResourcePaths.images.menu)
+        self.wig_menu.setIcon(self.menu_img)
+        self.wig_menu.setIconSize(QtCore.QSize(15, 15))
 
         # -Binds-
-        # Player
+        # Music Player
+        self.setNotifyInterval(50)  # Smooth slider
         self.error.connect(self.error_occurred)
         self.durationChanged.connect(self.update_slider_max)
         self.positionChanged.connect(self.update_slider)
         # Widgets
         self.wig_play_pause.pressed.connect(self.play_or_pause)
-        self.wig_slider.sliderPressed.connect(self.sliderPressed)
-        self.wig_slider.sliderReleased.connect(self.sliderReleased)
+        self.wig_slider.sliderPressed.connect(self.event_sliderPressed)
+        self.wig_slider.sliderReleased.connect(self.event_sliderReleased)
+
+    def frameChanged(self):
+        cur_frame = self.playpause_gif.currentFrameNumber()
+        if self.sliderPressed:
+            # Just finish gif
+            for frame in self.PLAYPAUSE_STEPS.values():
+                if cur_frame == frame:
+                    # Pause frame
+                    self.playpause_gif.setPaused(True)
+        else:
+            if self.state() == QtMultimedia.QMediaPlayer.PlayingState:
+                # Song is currently playing so finish aniamtion at pause img
+                pause_frame = self.PLAYPAUSE_STEPS['pause']
+            else:
+                # Song is currently paused so finish aniamtion at play img
+                pause_frame = self.PLAYPAUSE_STEPS['play']
+
+            if cur_frame == pause_frame:
+                # Current frame matches the pause frame so stop gif
+                self.playpause_gif.setPaused(True)
+        # Set Frame
+        self.wig_play_pause.setIcon(self.playpause_gif.currentPixmap())
 
     def play(self):
-        self.wig_play_pause.setIcon(self.pause_img)
-
+        """
+        Resume playing the song and update image to pause
+        """
+        # Start gif
+        self.playpause_gif.setPaused(False)
+        # Play audio
         super().play()
 
     def pause(self):
-        self.wig_play_pause.setIcon(self.play_img)
+        """
+        Pause output and update image to play
+        """
+        # Start gif
+        self.playpause_gif.setPaused(False)
+        # Play audio
         super().pause()
 
     def play_or_pause(self):
+        """
+        Switch play or pause based on QMusicPlayer's state
+        """
+
         if self.state() != QtMultimedia.QMediaPlayer.PlayingState:
             # Not playing -> Play
             self.play()
@@ -84,32 +143,58 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
             # Playing -> Pause
             self.pause()
 
-    def sliderPressed(self):
+    def event_sliderPressed(self):
+        """
+        Pause song and save last playing state so that if the song was
+        playing previously the song will continue as soon as slider is taken off
+        """
         self.last_state = self.state()
-        self.pause()
+        self.sliderPressed = True
+        super().pause()
 
-    def sliderReleased(self):
+    def event_sliderReleased(self):
+        """
+        Update QMediaPlayer position and play song if has been playing before sliderPressed
+        """
         if self.last_state == QtMultimedia.QMediaPlayer.PlayingState:
-            self.play()
+            super().play()
+        self.sliderPressed = False
         self.setPosition(self.wig_slider.value())
 
-    def set_song(self, path: str):
-        self.setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(path)))
+    def updateMedia(self, path: str):
+        """
+        Update Audio file that is currently playing
+        """
+        assert os.path.isfile(path), f'Path is invalid\nPath: "{path}"'
+        super().setMedia(QtMultimedia.QMediaContent(QtCore.QUrl.fromLocalFile(path)))
 
     def update_slider_max(self, duration):
+        """
+        Update sliders maximum value to the songs duration in ms
+        """
         self.wig_slider.setMaximum(duration)
 
     def update_slider(self, position):
+        """
+        Sync sliders position based on current progress of QMediaPlayer
+        """
         # Disable the events to prevent updating triggering a setPosition event (can cause stuttering).
         self.wig_slider.blockSignals(True)
         self.wig_slider.setValue(position)
         self.wig_slider.blockSignals(False)
 
     def error_occurred(self, *args):
-        self.logger.info(args)
+        """
+        Log error
+        """
+        self.logger.error(args)
 
 
 class MainWindow(QtWidgets.QWidget):
+    """
+    Main Window of UVR where seperation, progress and embedded seperated song-playing takes place
+    """
+
     def __init__(self, app: QtWidgets.QApplication):
         # -Window setup-
         super(MainWindow, self).__init__()
@@ -128,12 +213,15 @@ class MainWindow(QtWidgets.QWidget):
 
         self.instrumentals_audioPlayer = AudioPlayer(self,
                                                      self.ui.pushButton_play_instrumentals,
-                                                     self.ui.horizontalSlider_instrumentals,)
+                                                     self.ui.horizontalSlider_instrumentals,
+                                                     self.ui.pushButton_menu_instrumentals)
         self.vocals_audioPlayer = AudioPlayer(self,
                                               self.ui.pushButton_play_vocals,
-                                              self.ui.horizontalSlider_vocals)
-
+                                              self.ui.horizontalSlider_vocals,
+                                              self.ui.pushButton_menu_vocals)
+        self._activate_audio_players()
     # -Initialization methods-
+
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
@@ -322,7 +410,7 @@ class MainWindow(QtWidgets.QWidget):
         self.winTaskbar.setOverlayIcon(QtGui.QIcon(ResourcePaths.images.folder))
         self.winTaskbar_progress.setVisible(True)
         # Media player
-        self.deactivate_audio_players()
+        self._deactivate_audio_players()
 
     def seperation_write(self, text: str):
         """
@@ -384,6 +472,9 @@ class MainWindow(QtWidgets.QWidget):
             # Error message was already displayed in the seperation_error function
             self.logger.warn(msg=f'----- The seperation has failed! -----')
         else:
+            # -Activate Audio Players-
+            self._activate_audio_players()
+
             self.logger.info(msg=f'----- The seperation has finished! (in {elapsed_time}) -----')
             if self.app.windows['settings'].ui.checkBox_notifiyOnFinish.isChecked():
                 msg = QtWidgets.QMessageBox()
@@ -403,18 +494,29 @@ class MainWindow(QtWidgets.QWidget):
 
         # -Reset progress-
         seperation_reset()
-        # -Activate Audio Players-
-        QtCore.QTimer.singleShot(1000, lambda: self.activate_audio_players())
         # -Enable Seperation Button
         self.ui.pushButton_seperate.setEnabled(True)
 
-    def activate_audio_players(self):
+    def _activate_audio_players(self):
+        """
+        Run after successful seperation
+
+        Switches to audio player page and updates media with recently saved temp files
+        """
+        self.logger.info('Activating audio player mode...')
         self.ui.stackedWidget_instrumentals.setCurrentIndex(1)
         self.ui.stackedWidget_vocals.setCurrentIndex(1)
-        self.instrumentals_audioPlayer.set_song(ResourcePaths.temp_instrumental)
-        self.vocals_audioPlayer.set_song(ResourcePaths.temp_vocal)
+        self.instrumentals_audioPlayer.updateMedia(ResourcePaths.temp_instrumental)
+        self.vocals_audioPlayer.updateMedia(ResourcePaths.temp_vocal)
 
-    def deactivate_audio_players(self):
+    def _deactivate_audio_players(self):
+        """
+        Run on start of seperation or when wanting to discard
+
+        Switches to basic page and updates media with empty objects to delete
+        any I/O connections that prevent the seperator to save the temporary files
+        """
+        self.logger.info('Deactivating audio player mode...')
         self.ui.stackedWidget_instrumentals.setCurrentIndex(0)
         self.ui.stackedWidget_vocals.setCurrentIndex(0)
         self.instrumentals_audioPlayer.stop()

@@ -17,6 +17,14 @@ import os
 from typing import (Dict, )
 
 class SettingsWindow(QtWidgets.QWidget):
+    """
+    Settings window for UVR, available sections are:
+        - Seperation Settings: Modify settings, like model and ai engine for the seperation of audio files
+        - Shortcuts: Set shortcuts to quickly change settings or select other music files/new export directory
+        - Customization: Select from different themes for the application
+        - Preferences: Change personalised settings like language, export directory,
+                       and whether to show the command line
+    """
     def __init__(self, app: QtWidgets.QApplication):
         super(SettingsWindow, self).__init__()
         self.ui = settingswindow_ui.Ui_SettingsWindow()

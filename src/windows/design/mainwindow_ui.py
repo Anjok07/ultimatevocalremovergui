@@ -86,7 +86,7 @@ class Ui_MainWindow(object):
                                  "}\n"
                                  "QSlider[audioPlayer=\"true\"]::groove:horizontal { \n"
                                  "	background-color: rgb(66, 72, 83);\n"
-                                 "	height: 6px; \n"
+                                 "	height: 4px; \n"
                                  "	border-radius: 2px;\n"
                                  "}\n"
                                  "\n"
@@ -94,8 +94,8 @@ class Ui_MainWindow(object):
                                  "	background-color: rgb(109, 213, 237); \n"
                                  "	border: 2px solid rgb(109, 213, 237); \n"
                                  "	width: 10px; \n"
-                                 "	margin-top: -4px; \n"
-                                 "	margin-bottom: -4px; \n"
+                                 "	margin-top: -5px; \n"
+                                 "	margin-bottom: -5px; \n"
                                  "	border-radius: 5px; \n"
                                  "}\n"
                                  "\n"
@@ -266,14 +266,14 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_3.addWidget(self.horizontalSlider_vocals)
 
-        self.pushButton_save_vocals = QPushButton(self.frame_4)
-        self.pushButton_save_vocals.setObjectName(u"pushButton_save_vocals")
-        self.pushButton_save_vocals.setMaximumSize(QSize(30, 30))
-        self.pushButton_save_vocals.setCursor(QCursor(Qt.PointingHandCursor))
-        self.pushButton_save_vocals.setStyleSheet(u"")
-        self.pushButton_save_vocals.setProperty("audioPlayer", True)
+        self.pushButton_menu_vocals = QPushButton(self.frame_4)
+        self.pushButton_menu_vocals.setObjectName(u"pushButton_menu_vocals")
+        self.pushButton_menu_vocals.setMaximumSize(QSize(30, 30))
+        self.pushButton_menu_vocals.setCursor(QCursor(Qt.PointingHandCursor))
+        self.pushButton_menu_vocals.setStyleSheet(u"")
+        self.pushButton_menu_vocals.setProperty("audioPlayer", True)
 
-        self.horizontalLayout_3.addWidget(self.pushButton_save_vocals)
+        self.horizontalLayout_3.addWidget(self.pushButton_menu_vocals)
 
         self.verticalLayout_7.addWidget(self.frame_4)
 
@@ -331,16 +331,16 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_4.addWidget(self.horizontalSlider_instrumentals)
 
-        self.pushButton_save_instrumentals = QPushButton(self.frame_6)
-        self.pushButton_save_instrumentals.setObjectName(
-            u"pushButton_save_instrumentals")
-        self.pushButton_save_instrumentals.setMaximumSize(QSize(30, 30))
-        self.pushButton_save_instrumentals.setCursor(
+        self.pushButton_menu_instrumentals = QPushButton(self.frame_6)
+        self.pushButton_menu_instrumentals.setObjectName(
+            u"pushButton_menu_instrumentals")
+        self.pushButton_menu_instrumentals.setMaximumSize(QSize(30, 30))
+        self.pushButton_menu_instrumentals.setCursor(
             QCursor(Qt.PointingHandCursor))
-        self.pushButton_save_instrumentals.setStyleSheet(u"")
-        self.pushButton_save_instrumentals.setProperty("audioPlayer", True)
+        self.pushButton_menu_instrumentals.setStyleSheet(u"")
+        self.pushButton_menu_instrumentals.setProperty("audioPlayer", True)
 
-        self.horizontalLayout_4.addWidget(self.pushButton_save_instrumentals)
+        self.horizontalLayout_4.addWidget(self.pushButton_menu_instrumentals)
 
         self.verticalLayout_8.addWidget(self.frame_6)
 
@@ -468,8 +468,8 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
 
         self.stackedWidget_musicFiles.setCurrentIndex(0)
-        self.stackedWidget_vocals.setCurrentIndex(0)
-        self.stackedWidget_instrumentals.setCurrentIndex(0)
+        self.stackedWidget_vocals.setCurrentIndex(1)
+        self.stackedWidget_instrumentals.setCurrentIndex(1)
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -495,11 +495,11 @@ class Ui_MainWindow(object):
         self.label_vocalsFile.setText(
             QCoreApplication.translate("MainWindow", u"Audio File", None))
         self.pushButton_play_vocals.setText("")
-        self.pushButton_save_vocals.setText("")
+        self.pushButton_menu_vocals.setText("")
         self.label_instrumentalFiles.setText(
             QCoreApplication.translate("MainWindow", u"Audio File", None))
         self.pushButton_play_instrumentals.setText("")
-        self.pushButton_save_instrumentals.setText("")
+        self.pushButton_menu_instrumentals.setText("")
         self.label_instrumental.setText(
             QCoreApplication.translate("MainWindow", u"Instrumentals", None))
         self.label_vocals.setText(

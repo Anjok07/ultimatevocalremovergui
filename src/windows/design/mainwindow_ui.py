@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
                                  "	border: none;\n"
                                  "}\n"
                                  "QSlider[audioPlayer=\"true\"]::groove:horizontal { \n"
-                                 "	background-color: rgb(66, 72, 83);\n"
+                                 "	background-color: rgb(44, 51, 65);\n"
                                  "	height: 4px; \n"
                                  "	border-radius: 2px;\n"
                                  "}\n"

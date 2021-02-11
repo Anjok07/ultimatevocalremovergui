@@ -219,7 +219,6 @@ class MainWindow(QtWidgets.QWidget):
                                               self.ui.pushButton_play_vocals,
                                               self.ui.horizontalSlider_vocals,
                                               self.ui.pushButton_menu_vocals)
-        self._activate_audio_players()
     # -Initialization methods-
 
     def setup_window(self):
@@ -304,6 +303,7 @@ class MainWindow(QtWidgets.QWidget):
         self.winTaskbar = QWinTaskbarButton(self)
         self.winTaskbar.setWindow(self.windowHandle())
         self.winTaskbar_progress = self.winTaskbar.progress()
+        self._deactivate_audio_players()
 
         # -Setup-
         load_geometry()

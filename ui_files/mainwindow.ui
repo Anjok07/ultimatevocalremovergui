@@ -85,7 +85,7 @@ QPushButton[audioPlayer=&quot;true&quot;] {
 	border: none;
 }
 QSlider[audioPlayer=&quot;true&quot;]::groove:horizontal { 
-	background-color: rgb(66, 72, 83);
+	background-color: rgb(44, 51, 65);
 	height: 4px; 
 	border-radius: 2px;
 }

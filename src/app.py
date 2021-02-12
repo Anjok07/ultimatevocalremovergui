@@ -121,7 +121,7 @@ class CustomApplication(QtWidgets.QApplication):
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
                                             bool)
         if open_settings:
-            self.windows['main'].pushButton_settings_clicked()
+            self.windows['main'].pushButton_settings_clicked(animate=False)
         # Load language
         language = QtCore.QLocale(self.settings.value('settingswindow/language',
                                                       const.DEFAULT_SETTINGS['language'])).language()

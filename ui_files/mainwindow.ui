@@ -103,7 +103,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
 	border-radius: 5px;
 }</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,2">
    <property name="spacing">
     <number>0</number>
    </property>

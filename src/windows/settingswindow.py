@@ -16,6 +16,7 @@ import os
 # Code annotation
 from typing import (Dict, )
 
+
 class SettingsWindow(QtWidgets.QWidget):
     """
     Settings window for UVR, available sections are:
@@ -25,6 +26,7 @@ class SettingsWindow(QtWidgets.QWidget):
         - Preferences: Change personalised settings like language, export directory,
                        and whether to show the command line
     """
+
     def __init__(self, app: QtWidgets.QApplication):
         super(SettingsWindow, self).__init__()
         self.ui = settingswindow_ui.Ui_SettingsWindow()
@@ -149,6 +151,22 @@ class SettingsWindow(QtWidgets.QWidget):
             # Comboboxes
             self.ui.comboBox_command.currentIndexChanged.connect(self.comboBox_command_currentIndexChanged)
 
+        def create_animation_objects():
+            """
+            Create the animation objects that are used
+            multiple times here
+            """
+            self.effect = QtWidgets.QGraphicsOpacityEffect(self)
+            self.ui.stackedWidget.setGraphicsEffect(self.effect)
+            # Stackedwidget
+            self.pages_ani = QtCore.QPropertyAnimation(self.effect, b'opacity')
+            self.pages_ani.setDuration(400)
+            # self.pages_ani.setEasingCurve(QtCore.QEasingCurve.OutBack)
+            self.pages_ani.setStartValue(1)
+            self.pages_ani.setKeyValueAt(0.5, 0)
+            self.pages_ani.setEndValue(1)
+            self.pages_ani.setLoopCount(1)
+
         # -Before setup-
         # Load saved settings for widgets
         self._load_data()
@@ -169,6 +187,7 @@ class SettingsWindow(QtWidgets.QWidget):
         load_geometry()
         load_images()
         bind_widgets()
+        create_animation_objects()
 
         # -After setup-
         # Clear command
@@ -613,20 +632,26 @@ class SettingsWindow(QtWidgets.QWidget):
         """
         self.logger.info(f'Loading page with index {index}',
                          indent_forwards=True)
-        # Load Page
-        stackedWidget = self.ui.stackedWidget
-        stackedWidget.setCurrentIndex(index)
-        # Check Radiobutton
-        self.menu_group.button(index).setChecked(True)
 
-        # Find Frame which specifies the minimum width
-        page = stackedWidget.currentWidget()
-        min_width = page.property('minimumFrameWidth')
-        self.ui.frame_14.setMinimumWidth(min_width)
+        def load():
+            # Load Page
+            stackedWidget = self.ui.stackedWidget
+            stackedWidget.setCurrentIndex(index)
+            # Check Radiobutton
+            self.menu_group.button(index).setChecked(True)
 
-        # Update page based on index
-        self.menu_update_methods[index]()
-        self.logger.indent_backwards()
+            # Find Frame which specifies the minimum width
+            page = stackedWidget.currentWidget()
+            min_width = page.property('minimumFrameWidth')
+            self.ui.frame_14.setMinimumWidth(min_width)
+
+            # Update page based on index
+            self.menu_update_methods[index]()
+            self.logger.indent_backwards()
+
+        self.pages_ani.start()
+        QtCore.QTimer.singleShot(self.pages_ani.duration() / 2,
+                                 load)
 
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):

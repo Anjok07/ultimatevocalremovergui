@@ -465,6 +465,9 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.textBrowser_command)
 
+        self.horizontalLayout_2.setStretch(0, 3)
+        self.horizontalLayout_2.setStretch(1, 2)
+
         self.retranslateUi(MainWindow)
 
         self.stackedWidget_musicFiles.setCurrentIndex(0)

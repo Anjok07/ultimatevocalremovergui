@@ -12,6 +12,7 @@ from ..inference import converter_v4
 from .. import constants as const
 from .design import mainwindow_ui
 # -Other-
+import math
 # System
 import os
 # Code annotation
@@ -90,6 +91,7 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         self.wig_play_pause.pressed.connect(self.play_or_pause)
         self.wig_slider.sliderPressed.connect(self.event_sliderPressed)
         self.wig_slider.sliderReleased.connect(self.event_sliderReleased)
+        self.wig_slider.mouseDoubleClickEvent = self.event_sliderMouseDoubleClickEvent
 
     def frameChanged(self):
         cur_frame = self.playpause_gif.currentFrameNumber()
@@ -143,6 +145,20 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
             # Playing -> Pause
             self.pause()
 
+    def event_sliderMouseDoubleClickEvent(self, e):
+        """
+        Bind left mouse double click event to setting
+        the progress in the audio file
+        """
+        if e.button() == Qt.LeftButton:
+            e.accept()
+            x = e.pos().x()
+            value = (self.wig_slider.maximum() - self.wig_slider.minimum()) * \
+                x / self.wig_slider.width() + self.wig_slider.minimum()
+            self.setPosition(value)
+        else:
+            return super(self.wig_slider).mousePressEvent(self.wig_slider, e)
+
     def event_sliderPressed(self):
         """
         Pause song and save last playing state so that if the song was
@@ -182,6 +198,11 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         self.wig_slider.blockSignals(True)
         self.wig_slider.setValue(position)
         self.wig_slider.blockSignals(False)
+
+        if position == self.duration():
+            # Seperation finished
+            # Start gif to go from play to pause
+            self.playpause_gif.setPaused(False)
 
     def error_occurred(self, *args):
         """
@@ -249,8 +270,8 @@ class MainWindow(QtWidgets.QWidget):
             Load the images for this window and assign them to their widgets
             """
             # Settings button
-            icon = QtGui.QPixmap(ResourcePaths.images.settings)
-            self.ui.pushButton_settings.setIcon(icon)
+            self.settings_img = QtGui.QPixmap(ResourcePaths.images.settings)
+            self.ui.pushButton_settings.setIcon(self.settings_img)
             self.ui.pushButton_settings.setIconSize(QtCore.QSize(25, 25))
 
         def bind_widgets():
@@ -284,6 +305,7 @@ class MainWindow(QtWidgets.QWidget):
                     border-bottom-right-radius: 2px;
                 } """)
                 self.seperation_update_progress(0)
+            # -Progress Bar-
             self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
                                                             parent=self)
             # This is all to prevent the progressbar animation not working propertly
@@ -293,6 +315,25 @@ class MainWindow(QtWidgets.QWidget):
             self.pbar_animation.start()
             self.pbar_animation.setDuration(500)
             QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
+            # -Settings Icon-
+
+            def rotate_settings_icon():
+                rotation = self.settings_ani.currentValue()
+                t = QtGui.QTransform()
+                t = t.rotate(rotation)
+                new_pixmap = self.settings_img.transformed(t, QtCore.Qt.FastTransformation)
+                xoffset = (new_pixmap.width() - self.settings_img.width()) / 2;
+                yoffset = (new_pixmap.height() - self.settings_img.height()) / 2
+                new_pixmap = new_pixmap.copy(xoffset, yoffset, self.settings_img.width(), self.settings_img.height());
+                self.ui.pushButton_settings.setIcon(new_pixmap)
+
+            self.settings_ani = QtCore.QVariantAnimation(self)
+            self.settings_ani.setDuration(1750)
+            self.settings_ani.setEasingCurve(QtCore.QEasingCurve.OutBack)
+            self.settings_ani.setStartValue(0.0)
+            self.settings_ani.setEndValue(180.0)
+            self.settings_ani.setLoopCount(1)
+            self.settings_ani.valueChanged.connect(rotate_settings_icon)
 
         # -Before setup-
         self.logger.info('Main -> Setting up',
@@ -303,7 +344,7 @@ class MainWindow(QtWidgets.QWidget):
         self.winTaskbar = QWinTaskbarButton(self)
         self.winTaskbar.setWindow(self.windowHandle())
         self.winTaskbar_progress = self.winTaskbar.progress()
-        self._deactivate_audio_players()
+        self._activate_audio_players()
 
         # -Setup-
         load_geometry()
@@ -346,11 +387,13 @@ class MainWindow(QtWidgets.QWidget):
         self.settings.endGroup()
 
     # -Widget Binds-
-    def pushButton_settings_clicked(self):
+    def pushButton_settings_clicked(self, animate: bool = True):
         """
         Open the settings window
         """
         self.logger.info('Opening settings window...')
+        if animate:
+            self.settings_ani.start()
         # Reshow window
         self.app.windows['settings'].setWindowState(Qt.WindowNoState)
         self.app.windows['settings'].show()
@@ -423,7 +466,7 @@ class MainWindow(QtWidgets.QWidget):
         """
         Update both progressbars in Taskbar and GUI
         with the given progress
-        """        
+        """
         cur_progress = self.ui.progressBar.value()
         self.pbar_animation.stop()
         self.pbar_animation.setStartValue(cur_progress)

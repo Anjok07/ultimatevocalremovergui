@@ -19,6 +19,8 @@ DEFAULT_SETTINGS = {
     'exportDirectory': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
     # Language in format {language}_{country} (Default: system language)
     'language': QtCore.QLocale.system().name(),
+    # Presets for seperations
+    'presets': {},
     # --Settings window -> Seperation Settings--
     # -Conversion-
     # Boolean

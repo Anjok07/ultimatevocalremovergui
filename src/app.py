@@ -9,7 +9,6 @@ from PySide2 import QtGui
 from PySide2.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import (ResourcePaths, Logger)
-from .windows import (mainwindow, settingswindow)
 from .inference import converter_v4
 from . import constants as const
 # -Other-
@@ -56,19 +55,18 @@ class CustomApplication(QtWidgets.QApplication):
         self.translator = Translator(self)
         self.threadpool = QtCore.QThreadPool(self)
         # -Load Windows-
+        # Workaround for circular dependency
+        from .windows import (mainwindow, settingswindow, presetseditorwindow)
         # Collection of windows
         self.windows: Dict[str, QtWidgets.QWidget] = {
             'main': mainwindow.MainWindow(self),
             'settings': settingswindow.SettingsWindow(self),
+            'presetsEditor': presetseditorwindow.PresetsEditorWindow(self),
         }
-        self.windows['main'].show()
 
         self.logger.info('--- Setting up application ---',
                          indent_forwards=True)
         self.setup_application()
-        # Raise main window
-        self.windows['main'].activateWindow()
-        self.windows['main'].raise_()
         # self.windows['main'].pushButton_seperate_clicked()
         self.logger.indent_backwards()
         self.logger.info('--- Finished setup ---')
@@ -108,7 +106,6 @@ class CustomApplication(QtWidgets.QApplication):
                 widget.setValidator(validator)
 
         # -Before-
-        # None
 
         # -Setup-
         setup_windows()
@@ -116,16 +113,13 @@ class CustomApplication(QtWidgets.QApplication):
         assign_lineEdit_validators()
 
         # -After-
-        # Open settings window on startup
-        open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
-                                            const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
-                                            bool)
-        if open_settings:
-            self.windows['main'].pushButton_settings_clicked(animate=False)
         # Load language
         language = QtCore.QLocale(self.settings.value('settingswindow/language',
                                                       const.DEFAULT_SETTINGS['language'])).language()
         self.translator.load_language(language)
+        # Raise main window
+        self.windows['main'].activateWindow()
+        self.windows['main'].raise_()
 
     @staticmethod
     def improved_combobox_showPopUp(widget: QtWidgets.QComboBox, popup_func: QtWidgets.QComboBox.showPopup):
@@ -164,6 +158,8 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['modelFolder'] = self.windows['settings'].ui.checkBox_modelFolder.isChecked()
         seperation_data['customParameters'] = self.windows['settings'].ui.checkBox_customParameters.isChecked()
         seperation_data['multithreading'] = self.windows['settings'].ui.checkBox_multiThreading.isChecked()
+        seperation_data['save_instrumentals'] = self.windows['settings'].ui.checkBox_autoSaveInstrumentals.isChecked()
+        seperation_data['save_vocals'] = self.windows['settings'].ui.checkBox_autoSaveVocals.isChecked()
         # Combobox
         seperation_data['useModel'] = 'instrumental'
         seperation_data['instrumentalModel'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
@@ -241,12 +237,18 @@ class CustomApplication(QtWidgets.QApplication):
                 value = widget.text()
                 self.settings.setValue(widgetObjectName,
                                        value)
-        # Back-end Data
-        self.settings.setValue('exportDirectory',
-                               self.windows['settings'].exportDirectory)
-        self.settings.setValue('language',
-                               self.translator.loaded_language)
         self.settings.endGroup()
+        # Back-end Data
+        self.settings.setValue('settingswindow/exportDirectory',
+                               self.windows['settings'].exportDirectory)
+        self.settings.setValue('settingswindow/language',
+                               self.translator.loaded_language)
+        self.settings.setValue('mainwindow/inputPaths',
+                               self.windows['main'].inputPaths)
+        self.settings.setValue('mainwindow/inputsDirectory',
+                               self.windows['main'].inputsDirectory)
+        self.settings.setValue('user/presets',
+                               self.windows['presetsEditor'].get_presets())
         self.settings.sync()
 
         self.logger.info('Closing windows...')

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>911</width>
-    <height>583</height>
+    <height>0</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -72,6 +72,9 @@ QListWidget {
 QListWidget::item {
 	outline: none;
 	border: none;
+}
+QScrollBar {
+	background-color: none;
 }
 /* Command Line*/
 QTextBrowser {
@@ -218,7 +221,7 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
             <number>1</number>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_select">
             <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -310,16 +313,6 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
                <property name="wordWrap">
                 <bool>true</bool>
                </property>
-               <item>
-                <property name="text">
-                 <string>B:/boska/Desktop/Test inference/1_Part 1-[AudioTrimmer.com]_(Instrumental).wav</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>B:/boska/Desktop/Test inference/1_Part 1-[AudioTrimmer.com]_(Instrumental).wav</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>
@@ -499,6 +492,9 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
                      <property name="cursor">
                       <cursorShape>PointingHandCursor</cursorShape>
                      </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::CustomContextMenu</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true"/>
                      </property>
@@ -640,6 +636,9 @@ QSlider[audioPlayer=&quot;true&quot;]::handle:horizontal:hover {
                      </property>
                      <property name="cursor">
                       <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::CustomContextMenu</enum>
                      </property>
                      <property name="styleSheet">
                       <string notr="true"/>

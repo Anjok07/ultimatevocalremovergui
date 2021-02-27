@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>938</width>
-    <height>503</height>
+    <width>920</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,7 +48,7 @@ QComboBox QAbstractItemView {
 	selection-background-color: rgb(49, 96, 107);
 }
 QGroupBox,
-QLabel[title=&quot;true&quot;] {
+QLabel[titleText=&quot;true&quot;] {
 	font: 15pt &quot;Yu Gothic UI&quot;;
 }
 QLabel[path=&quot;true&quot;] {
@@ -57,18 +57,13 @@ QLabel[path=&quot;true&quot;] {
 }
 /* Pushbutton */
 QPushButton {
-	border-radius: 5px;
-	background-color: rgb(49, 96, 107);
-}
-QPushButton:hover {
-	background-color: rgb(25, 45, 60);
-}
-QPushButton:pressed {
-	background-color: rgb(49, 96, 107);
+	background: none;
+	color: #000;
 }
 QPushButton[clear=&quot;true&quot;] {
 	border: 2px solid rgb(109, 213, 237);
 	background-color: none;
+	color: #FFF;
 	border-radius: 5px;
 }
 QPushButton[clear=&quot;true&quot;]:hover {
@@ -79,7 +74,7 @@ QPushButton[clear=&quot;true&quot;]:pressed {
 }
 QPushButton[export=&quot;true&quot;] {
 	border: none;
-background-color: none;
+	background-color: none;
 }
 /* LANGUAGE */
 QPushButton[language=&quot;true&quot;] {
@@ -321,14 +316,14 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
           <string notr="true"/>
          </property>
          <property name="minimumFrameWidth" stdset="0">
-          <number>780</number>
+          <number>770</number>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <property name="spacing">
@@ -374,8 +369,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>735</width>
-               <height>424</height>
+               <width>740</width>
+               <height>481</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -398,7 +393,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                <number>0</number>
               </property>
               <property name="topMargin">
-               <number>30</number>
+               <number>25</number>
               </property>
               <property name="rightMargin">
                <number>35</number>
@@ -437,7 +432,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                   <number>0</number>
                  </property>
                  <property name="bottomMargin">
-                  <number>10</number>
+                  <number>0</number>
                  </property>
                  <item>
                   <widget class="QFrame" name="horizontalFrame_1">
@@ -582,6 +577,9 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="maxVisibleItems">
                              <number>4</number>
                             </property>
+                            <property name="sizeAdjustPolicy">
+                             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                            </property>
                             <item>
                              <property name="text">
                               <string notr="true">1</string>
@@ -684,148 +682,253 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                      </widget>
                     </item>
                     <item>
-                     <widget class="QGroupBox" name="groupBox_2">
-                      <property name="title">
-                       <string>Engine </string>
+                     <widget class="QFrame" name="frame_17">
+                      <property name="frameShape">
+                       <enum>QFrame::NoFrame</enum>
                       </property>
-                      <property name="flat">
-                       <bool>true</bool>
+                      <property name="frameShadow">
+                       <enum>QFrame::Raised</enum>
                       </property>
-                      <property name="titleText" stdset="0">
-                       <bool>true</bool>
-                      </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_8">
+                      <layout class="QVBoxLayout" name="verticalLayout_9">
                        <property name="spacing">
                         <number>10</number>
                        </property>
                        <property name="leftMargin">
-                        <number>35</number>
+                        <number>0</number>
                        </property>
                        <property name="topMargin">
-                        <number>10</number>
+                        <number>0</number>
                        </property>
                        <property name="rightMargin">
-                        <number>30</number>
+                        <number>0</number>
                        </property>
                        <property name="bottomMargin">
-                        <number>10</number>
+                        <number>0</number>
                        </property>
-                       <item alignment="Qt::AlignTop">
-                        <widget class="QFrame" name="frame_12">
-                         <property name="frameShape">
-                          <enum>QFrame::StyledPanel</enum>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox_2">
+                         <property name="title">
+                          <string>Engine </string>
                          </property>
-                         <property name="frameShadow">
-                          <enum>QFrame::Raised</enum>
+                         <property name="flat">
+                          <bool>true</bool>
                          </property>
-                         <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="92,92">
+                         <property name="titleText" stdset="0">
+                          <bool>true</bool>
+                         </property>
+                         <layout class="QVBoxLayout" name="verticalLayout_8">
+                          <property name="spacing">
+                           <number>10</number>
+                          </property>
                           <property name="leftMargin">
-                           <number>0</number>
+                           <number>35</number>
                           </property>
                           <property name="topMargin">
-                           <number>0</number>
+                           <number>10</number>
                           </property>
                           <property name="rightMargin">
-                           <number>0</number>
+                           <number>30</number>
                           </property>
                           <property name="bottomMargin">
-                           <number>0</number>
+                           <number>10</number>
                           </property>
-                          <property name="horizontalSpacing">
+                          <item alignment="Qt::AlignTop">
+                           <widget class="QFrame" name="frame_12">
+                            <property name="frameShape">
+                             <enum>QFrame::StyledPanel</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
+                            </property>
+                            <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="92,92">
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="horizontalSpacing">
+                              <number>20</number>
+                             </property>
+                             <property name="verticalSpacing">
+                              <number>15</number>
+                             </property>
+                             <item row="0" column="0">
+                              <widget class="QLabel" name="label_engine">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="minimumSize">
+                                <size>
+                                 <width>0</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string>AI Engine</string>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignCenter</set>
+                               </property>
+                               <property name="indent">
+                                <number>10</number>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0">
+                              <widget class="QComboBox" name="comboBox_engine">
+                               <property name="enabled">
+                                <bool>true</bool>
+                               </property>
+                               <property name="minimumSize">
+                                <size>
+                                 <width>0</width>
+                                 <height>25</height>
+                                </size>
+                               </property>
+                               <property name="sizeAdjustPolicy">
+                                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                               </property>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">v2</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">v4</string>
+                                </property>
+                               </item>
+                              </widget>
+                             </item>
+                             <item row="1" column="1">
+                              <widget class="QComboBox" name="comboBox_resType">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>0</width>
+                                 <height>25</height>
+                                </size>
+                               </property>
+                               <property name="sizeAdjustPolicy">
+                                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                               </property>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">Kaiser Fast</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">Kaiser Best</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">Scipy</string>
+                                </property>
+                               </item>
+                              </widget>
+                             </item>
+                             <item row="0" column="1">
+                              <widget class="QLabel" name="label_resType">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="text">
+                                <string>Resolution Type</string>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignCenter</set>
+                               </property>
+                               <property name="indent">
+                                <number>10</number>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QGroupBox" name="groupBox">
+                         <property name="title">
+                          <string>Presets </string>
+                         </property>
+                         <property name="flat">
+                          <bool>true</bool>
+                         </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_10" stretch="1,0">
+                          <property name="spacing">
+                           <number>10</number>
+                          </property>
+                          <property name="leftMargin">
                            <number>20</number>
                           </property>
-                          <property name="verticalSpacing">
+                          <property name="topMargin">
                            <number>15</number>
                           </property>
-                          <item row="0" column="0">
-                           <widget class="QLabel" name="label_engine">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
-                            </property>
-                            <property name="minimumSize">
-                             <size>
-                              <width>0</width>
-                              <height>0</height>
-                             </size>
-                            </property>
-                            <property name="text">
-                             <string>AI Engine</string>
-                            </property>
-                            <property name="alignment">
-                             <set>Qt::AlignCenter</set>
-                            </property>
-                            <property name="indent">
-                             <number>10</number>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QComboBox" name="comboBox_engine">
-                            <property name="enabled">
-                             <bool>true</bool>
-                            </property>
+                          <property name="rightMargin">
+                           <number>15</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>15</number>
+                          </property>
+                          <item>
+                           <widget class="QComboBox" name="comboBox_presets">
                             <property name="minimumSize">
                              <size>
                               <width>0</width>
                               <height>25</height>
                              </size>
                             </property>
+                            <property name="sizeAdjustPolicy">
+                             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                            </property>
+                            <property name="modelColumn">
+                             <number>0</number>
+                            </property>
                             <item>
                              <property name="text">
-                              <string notr="true">v2</string>
+                              <string>fsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsga</string>
                              </property>
                             </item>
                             <item>
                              <property name="text">
-                              <string notr="true">v4</string>
+                              <string>Instrumental</string>
                              </property>
                             </item>
                            </widget>
                           </item>
-                          <item row="1" column="1">
-                           <widget class="QComboBox" name="comboBox_resType">
+                          <item>
+                           <widget class="QPushButton" name="pushButton_presetsEdit">
                             <property name="minimumSize">
                              <size>
-                              <width>0</width>
-                              <height>25</height>
+                              <width>65</width>
+                              <height>27</height>
                              </size>
                             </property>
-                            <item>
-                             <property name="text">
-                              <string notr="true">Kaiser Fast</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">Kaiser Best</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">Scipy</string>
-                             </property>
-                            </item>
-                           </widget>
-                          </item>
-                          <item row="0" column="1">
-                           <widget class="QLabel" name="label_resType">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
+                            <property name="maximumSize">
+                             <size>
+                              <width>65</width>
+                              <height>16777215</height>
+                             </size>
                             </property>
                             <property name="text">
-                             <string>Resolution Type</string>
-                            </property>
-                            <property name="alignment">
-                             <set>Qt::AlignCenter</set>
-                            </property>
-                            <property name="indent">
-                             <number>10</number>
+                             <string>Edit</string>
                             </property>
                            </widget>
                           </item>
@@ -922,7 +1025,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          <property name="maximumSize">
                           <size>
                            <width>16777215</width>
-                           <height>30</height>
+                           <height>16777215</height>
                           </size>
                          </property>
                          <property name="editable">
@@ -1384,7 +1487,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                          <property name="maximumSize">
                           <size>
                            <width>16777215</width>
-                           <height>30</height>
+                           <height>16777215</height>
                           </size>
                          </property>
                          <property name="editable">
@@ -1452,8 +1555,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
-               <height>40</height>
+               <width>98</width>
+               <height>35</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1469,7 +1572,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                <number>0</number>
               </property>
               <property name="topMargin">
-               <number>30</number>
+               <number>25</number>
               </property>
               <property name="rightMargin">
                <number>35</number>
@@ -1529,8 +1632,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>598</width>
-               <height>442</height>
+               <width>98</width>
+               <height>35</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1546,7 +1649,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                <number>0</number>
               </property>
               <property name="topMargin">
-               <number>30</number>
+               <number>25</number>
               </property>
               <property name="rightMargin">
                <number>35</number>
@@ -1609,8 +1712,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>758</width>
-               <height>442</height>
+               <width>600</width>
+               <height>397</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1632,7 +1735,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                <number>0</number>
               </property>
               <property name="topMargin">
-               <number>30</number>
+               <number>25</number>
               </property>
               <property name="rightMargin">
                <number>35</number>
@@ -2371,7 +2474,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
         </widget>
        </widget>
       </item>
-      <item alignment="Qt::AlignRight">
+      <item>
        <widget class="QFrame" name="frame_16">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -2381,9 +2484,12 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
         </property>
         <property name="minimumSize">
          <size>
-          <width>0</width>
-          <height>60</height>
+          <width>661</width>
+          <height>0</height>
          </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true"/>
         </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
@@ -2391,9 +2497,9 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <layout class="QHBoxLayout" name="horizontalLayout_9" stretch="0">
          <property name="spacing">
-          <number>10</number>
+          <number>50</number>
          </property>
          <property name="leftMargin">
           <number>0</number>
@@ -2407,26 +2513,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <property name="bottomMargin">
           <number>15</number>
          </property>
-         <item>
-          <widget class="QPushButton" name="pushButton">
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>29</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>25</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>Get Log File</string>
-           </property>
-          </widget>
-         </item>
-         <item>
+         <item alignment="Qt::AlignRight">
           <widget class="QPushButton" name="pushButton_resetDefault">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -2437,13 +2524,13 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
            <property name="minimumSize">
             <size>
              <width>110</width>
-             <height>29</height>
+             <height>27</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>25</height>
+             <height>27</height>
             </size>
            </property>
            <property name="text">

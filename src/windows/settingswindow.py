@@ -4,9 +4,10 @@ from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2.QtGui import Qt
-from PySide2.QtWinExtras import (QWinTaskbarButton)
 # -Root imports-
+from ..inference.lib.model_param_init import ModelParameters
 from ..resources.resources_manager import ResourcePaths
+from ..app import CustomApplication
 from .. import constants as const
 from .design import settingswindow_ui
 # -Other-
@@ -27,7 +28,8 @@ class SettingsWindow(QtWidgets.QWidget):
                        and whether to show the command line
     """
 
-    def __init__(self, app: QtWidgets.QApplication):
+    def __init__(self, app: CustomApplication):
+        # -Window setup-
         super(SettingsWindow, self).__init__()
         self.ui = settingswindow_ui.Ui_SettingsWindow()
         self.ui.setupUi(self)
@@ -37,6 +39,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
         # -Other Variables-
+        self.pageSwitchTimer = QtCore.QTimer(self)
         self.menu_update_methods = {
             0: self.update_page_seperationSettings,
             1: self.update_page_shortcuts,
@@ -127,6 +130,7 @@ class SettingsWindow(QtWidgets.QWidget):
             self.menu_group.buttonClicked.connect(lambda btn:
                                                   self.menu_loadPage(index=self.menu_group.id(btn)))
             # -Seperation Settings Page-
+            self.ui.pushButton_presetsEdit.clicked.connect(self.pushButton_presetsEdit_clicked)
             # Checkboxes
             self.ui.checkBox_stackPasses.stateChanged.connect(self.update_page_seperationSettings)
             self.ui.checkBox_stackOnly.stateChanged.connect(self.update_page_seperationSettings)
@@ -157,6 +161,7 @@ class SettingsWindow(QtWidgets.QWidget):
             multiple times here
             """
             self.effect = QtWidgets.QGraphicsOpacityEffect(self)
+            self.effect.setOpacity(1)
             self.ui.stackedWidget.setGraphicsEffect(self.effect)
             # Stackedwidget
             self.pages_ani = QtCore.QPropertyAnimation(self.effect, b'opacity')
@@ -166,6 +171,8 @@ class SettingsWindow(QtWidgets.QWidget):
             self.pages_ani.setKeyValueAt(0.5, 0)
             self.pages_ani.setEndValue(1)
             self.pages_ani.setLoopCount(1)
+            self.pageSwitchTimer.setSingleShot(True)
+            self.pageSwitchTimer.setInterval(self.pages_ani.duration() / 2)
 
         # -Before setup-
         # Load saved settings for widgets
@@ -182,12 +189,18 @@ class SettingsWindow(QtWidgets.QWidget):
                                   id=2)
         self.menu_group.addButton(self.ui.radioButton_preferences,
                                   id=3)
+        # Open settings window on startup
+        open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
+                                            const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
+                                            bool)
 
         # -Setup-
         load_geometry()
         load_images()
         bind_widgets()
         create_animation_objects()
+        if open_settings:
+            self.app.windows['main'].pushButton_settings_clicked()
 
         # -After setup-
         # Clear command
@@ -296,6 +309,17 @@ class SettingsWindow(QtWidgets.QWidget):
         self.update_page_preferences()
 
         self.logger.indent_backwards()
+
+    def pushButton_presetsEdit_clicked(self):
+        """
+        Open the presets editor window
+        """
+        # Reshow window
+        self.app.windows['presetsEditor'].setWindowState(Qt.WindowNoState)
+        self.app.windows['presetsEditor'].show()
+        # Focus window
+        self.app.windows['presetsEditor'].activateWindow()
+        self.app.windows['presetsEditor'].raise_()
 
     def pushButton_resetDefault_clicked(self):
         """
@@ -526,6 +550,21 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.comboBox_winSize_stacked.setVisible(False)
             for widget in stacked_widgets.values():
                 widget.setVisible(False)
+        
+        # -Presets subgroup-
+        last_text = self.ui.comboBox_presets.currentText()
+        self.ui.comboBox_presets.clear()
+        for idx in range(self.app.windows['presetsEditor'].ui.listWidget_presets.count()):
+            # Loop through every preset in the list on the window
+            # Get item by index
+            item = self.app.windows['presetsEditor'].ui.listWidget_presets.item(idx)
+            # Get text
+            text = item.text()
+            # Add text to combobox
+            self.ui.comboBox_presets.addItem(text)
+            if text == last_text:
+                self.ui.comboBox_presets.setCurrentText(text)
+
         self.logger.indent_backwards()
 
     def _update_selectable_models(self):
@@ -612,11 +651,37 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     # -Other-
-    def decode_modelNames(self):
+    def get_seperation_settings(self) -> dict:
         """
-        Decode the selected model file names and adjust states
-        and cosntants of widgets accordingly
+        Get the currently selected seperation settings
+
+        (Used for presets)
         """
+        settings = {
+            'instrumentalModel_id': self.get_model_id(self.ui.comboBox_instrumental.currentData()),
+            'stackedModel_id': self.get_model_id(self.ui.comboBox_stacked.currentData()),
+        }
+        return settings
+
+    def set_seperation_settings(self, settings: dict):
+        """
+        Set the seperation settings
+
+        (Used for presets)
+        """
+
+    def get_model_id(self, model_path: str):
+        """
+        Get the models id
+
+        If no id has been found return the filename
+        """
+        # print(model_path)
+        # model_params = ModelParameters(model_path)
+        # print(model_params.param['id'])
+        model_name = os.path.splitext(os.path.basename(model_path))[0]
+
+        return model_name
 
     def menu_loadPage(self, index: int):
         """
@@ -633,7 +698,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.info(f'Loading page with index {index}',
                          indent_forwards=True)
 
-        def load():
+        def menu_loadPage():
             # Load Page
             stackedWidget = self.ui.stackedWidget
             stackedWidget.setCurrentIndex(index)
@@ -649,9 +714,14 @@ class SettingsWindow(QtWidgets.QWidget):
             self.menu_update_methods[index]()
             self.logger.indent_backwards()
 
-        self.pages_ani.start()
-        QtCore.QTimer.singleShot(self.pages_ani.duration() / 2,
-                                 load)
+        if not self.ui.checkBox_disableAnimations.isChecked():
+            # Animations enabled
+            self.pages_ani.start()
+            # On half of whole aniamtion loaad new window
+            self.pageSwitchTimer.timeout.connect(menu_loadPage)
+            self.pageSwitchTimer.start()
+        else:
+            menu_loadPage()
 
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
@@ -666,6 +736,7 @@ class SettingsWindow(QtWidgets.QWidget):
         # Commit Save
         self.settings.sync()
         # -Close Window-
+        self.app.windows['presetsEditor'].hide()
         event.accept()
 
     def update_translation(self):

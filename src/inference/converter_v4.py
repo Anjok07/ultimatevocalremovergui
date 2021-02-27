@@ -11,6 +11,7 @@ from multiprocessing import Pool
 # -Required for conversion-
 import cv2
 import librosa
+import audioread
 import numpy as np
 import soundfile as sf
 import torch
@@ -20,6 +21,7 @@ from .lib.lib_v4 import nets
 from .lib.lib_v4 import spec_utils
 from ..resources.resources_manager import (ResourcePaths, Logger)
 # -Other-
+import traceback
 # Loading Bar
 from tqdm import tqdm
 # Timer
@@ -66,6 +68,9 @@ default_data = {
     'customParameters': False,
     # Allows to process multiple music files at once
     'multithreading': False,
+    # What to save
+    'save_instrumentals': True,
+    'save_vocals': True,
 }
 
 
@@ -84,7 +89,7 @@ def splitlist(input_paths: list, chunk_size: int) -> list:
 
 
 class VocalRemover:
-    def __init__(self, seperation_data: dict, logger: Logger):
+    def __init__(self, seperation_data: dict, logger: Optional[Logger] = None):
         # -Universal Data (Same for each file)-
         self.seperation_data = seperation_data
         self.general_data = {
@@ -131,6 +136,9 @@ class VocalRemover:
             # Spectogram from last seperation
             'temp_spectogramm': None,
         }
+        # Needed for embedded audio player (GUI)
+        self.latest_instrumental_path: str
+        self.latest_vocal_path: str
 
     def seperate_files(self):
         """
@@ -288,37 +296,37 @@ class VocalRemover:
         # Check input paths
         if not len(self.seperation_data['input_paths']):
             # No music file specified
-            raise TypeError('No music file to seperate defined!')
+            raise Exception('No music file to seperate defined!')
         if (not isinstance(self.seperation_data['input_paths'], tuple) and
                 not isinstance(self.seperation_data['input_paths'], list)):
             # Music file not specified in a list or tuple
-            raise TypeError('Please specify your music file path/s in a list or tuple!')
+            raise Exception('Please specify your music file path/s in a list or tuple!')
         for input_path in self.seperation_data['input_paths']:
             # Go through each music file
             if not os.path.isfile(input_path):
                 # Invalid path
-                raise TypeError(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
+                raise Exception(f'Invalid music file! Please make sure that the file still exists or that the path is valid!\nPath: "{input_path}"')  # nopep8
         # Output path
         if (not os.path.isdir(self.seperation_data['export_path']) and
                 not self.seperation_data['export_path'] == ''):
             # Export path either invalid or not specified
-            raise TypeError(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
+            raise Exception(f'Invalid export directory! Please make sure that the directory still exists or that the path is valid!\nPath: "{self.seperation_data["export_path"]}"')  # nopep8
 
         # Check models
         if not self.seperation_data['useModel'] in ['vocal', 'instrumental']:
             # Invalid 'useModel'
-            raise TypeError("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
+            raise Exception("Parameter 'useModel' has to be either 'vocal' or 'instrumental'")
         if not os.path.isfile(self.seperation_data[f"{self.seperation_data['useModel']}Model"]):
             # No or invalid instrumental/vocal model given
             # but model is needed
-            raise TypeError(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
+            raise Exception(f"Not specified or invalid model path for {self.seperation_data['useModel']} model!")
         if (self.seperation_data['stackOnly'] or
                 self.seperation_data['stackPasses'] > 0):
             # First check if stacked model is needed
             if not os.path.isfile(self.seperation_data['stackModel']):
                 # No or invalid stack model given
                 # but model is needed
-                raise TypeError(f"Not specified or invalid model path for stacked model!")
+                raise Exception(f"Not specified or invalid model path for stacked model!")
 
     def _seperate(self, file_path: str, file_num: int):
         """
@@ -487,11 +495,15 @@ class VocalRemover:
         """
         self.write_to_gui(text='Loading wave source...',
                           progress_step=0)
+        try:
+            X, sampling_rate = librosa.load(path=self.loop_data['music_file'],
+                                            sr=self.loop_data['constants']['sr'],
+                                            mono=False, dtype=np.float32,
+                                            res_type=self.seperation_data['resType'])
+        except audioread.NoBackendError:
+            raise Exception(
+                f'Invalid music file provided! Please check its validity.\nFile: "{self.loop_data["music_file"]}"')
 
-        X, sampling_rate = librosa.load(path=self.loop_data['music_file'],
-                                        sr=self.loop_data['constants']['sr'],
-                                        mono=False, dtype=np.float32,
-                                        res_type=self.seperation_data['resType'])
         if X.ndim == 1:
             X = np.asarray([X, X])
 
@@ -663,7 +675,6 @@ class VocalRemover:
         """
         Save the files
         """
-
         def get_vocal_instrumental_name() -> Tuple[str, str, str]:
             """
             Get vocal and instrumental file names and update the
@@ -733,19 +744,21 @@ class VocalRemover:
 
         # -Save files-
         # Instrumental
-        if instrumental_name is not None:
+        if (instrumental_name is not None and
+                self.seperation_data['save_instrumentals']):
             instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
-            instrumental_path = os.path.join(folder_path,
-                                             instrumental_file_name)
+            self.latest_instrumental_path = os.path.join(folder_path,
+                                                         instrumental_file_name)
 
-            sf.write(instrumental_path,
+            sf.write(self.latest_instrumental_path,
                      self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
         # Vocal
-        if vocal_name is not None:
+        if (vocal_name is not None and
+                self.seperation_data['save_vocals']):
             vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
-            vocal_path = os.path.join(folder_path,
-                                      vocal_file_name)
-            sf.write(vocal_path,
+            self.latest_vocal_path = os.path.join(folder_path,
+                                                  vocal_file_name)
+            sf.write(self.latest_vocal_path,
                      self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
 
     def _save_mask(self):
@@ -802,7 +815,7 @@ class WorkerSignals(QtCore.QObject):
 
     '''
     start = QtCore.Signal()
-    finished = QtCore.Signal(str)
+    finished = QtCore.Signal(str, tuple)
     message = QtCore.Signal(str)
     progress = QtCore.Signal(int)
     error = QtCore.Signal(tuple)
@@ -834,10 +847,14 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
         try:
             self.signals.start.emit()
             self.logger.info(msg='----- The seperation has started! -----')
-            self.seperate_files()
+            try:
+                self.seperate_files()
+            except RuntimeError:
+                # Application was forcefully closed
+                print('Application forcefully closed')
+                return
         except Exception as e:
             self.logger.exception(msg='An Exception has occurred!')
-            import traceback
             traceback_text = ''.join(traceback.format_tb(e.__traceback__))
             message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\nIf the issue is not clear, please contact the creator and attach a screenshot of the detailed message with the file and settings that caused it!'
             print(traceback_text)
@@ -846,7 +863,7 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
             return
         elapsed_seconds = int(time.perf_counter() - stime)
         elapsed_time = str(dt.timedelta(seconds=elapsed_seconds))
-        self.signals.finished.emit(elapsed_time)
+        self.signals.finished.emit(elapsed_time, [self.latest_instrumental_path, self.latest_vocal_path])
 
     def write_to_gui(self, text: Optional[str] = None, include_base_text: bool = True, progress_step: Optional[float] = None):
         if text is not None:
@@ -862,8 +879,8 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
         """
         Also save files in temp location for in GUI audio playback
         """
-        sf.write(ResourcePaths.temp_instrumental,
-                 self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
-        sf.write(ResourcePaths.temp_vocal,
-                 self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
         super()._save_files()
+        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_instrumental_path),
+                 self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
+        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_vocal_path),
+                 self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])

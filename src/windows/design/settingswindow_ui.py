@@ -18,7 +18,7 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(938, 503)
+        SettingsWindow.resize(920, 540)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -50,7 +50,7 @@ class Ui_SettingsWindow(object):
                                      "	selection-background-color: rgb(49, 96, 107);\n"
                                      "}\n"
                                      "QGroupBox,\n"
-                                     "QLabel[title=\"true\"] {\n"
+                                     "QLabel[titleText=\"true\"] {\n"
                                      "	font: 15pt \"Yu Gothic UI\";\n"
                                      "}\n"
                                      "QLabel[path=\"true\"] {\n"
@@ -59,19 +59,14 @@ class Ui_SettingsWindow(object):
                                      "}\n"
                                      "/* Pushbutton */\n"
                                      "QPushButton {\n"
-                                     "	border-radius: 5px;\n"
-                                     "	background-color: rgb(49, 96, 107);\n"
-                                     "}\n"
-                                     "QPushButton:hover {\n"
-                                     "	background-color: rgb(25, 45, 60);\n"
-                                     "}\n"
-                                     "QPushB"
-                                     "utton:pressed {\n"
-                                     "	background-color: rgb(49, 96, 107);\n"
+                                     "	background: none;\n"
+                                     "	color: #000;\n"
                                      "}\n"
                                      "QPushButton[clear=\"true\"] {\n"
                                      "	border: 2px solid rgb(109, 213, 237);\n"
-                                     "	background-color: none;\n"
+                                     "	background-color: n"
+                                     "one;\n"
+                                     "	color: #FFF;\n"
                                      "	border-radius: 5px;\n"
                                      "}\n"
                                      "QPushButton[clear=\"true\"]:hover {\n"
@@ -82,7 +77,7 @@ class Ui_SettingsWindow(object):
                                      "}\n"
                                      "QPushButton[export=\"true\"] {\n"
                                      "	border: none;\n"
-                                     "background-color: none;\n"
+                                     "	background-color: none;\n"
                                      "}\n"
                                      "/* LANGUAGE */\n"
                                      "QPushButton[language=\"true\"] {\n"
@@ -103,12 +98,12 @@ class Ui_SettingsWindow(object):
                                      "QRadioButton[menu=\"true\"]::indicator::unchecked {\n"
                                      "    background-color: rgb(49, 96, 107);\n"
                                      "}\n"
-                                     "QRadioButton"
-                                     "[menu=\"true\"]::unchecked::hover, \n"
+                                     "QRadioButton[menu=\"true\"]::unchecked::hover, \n"
                                      "QRadioButton[menu=\"true\"]::indicator::hover {\n"
                                      "    background-color: rgb(25, 50, 60);\n"
                                      "}\n"
-                                     "QRadioButton[menu=\"true\"]::checked,\n"
+                                     "QRad"
+                                     "ioButton[menu=\"true\"]::checked,\n"
                                      "QRadioButton[menu=\"true\"]::indicator::checked {\n"
                                      "    background-color: rgb(2, 18, 40);\n"
                                      "}")
@@ -205,7 +200,7 @@ class Ui_SettingsWindow(object):
         self.page_seperationSettings = QWidget()
         self.page_seperationSettings.setObjectName(u"page_seperationSettings")
         self.page_seperationSettings.setStyleSheet(u"")
-        self.page_seperationSettings.setProperty("minimumFrameWidth", 780)
+        self.page_seperationSettings.setProperty("minimumFrameWidth", 770)
         self.verticalLayout_10 = QVBoxLayout(self.page_seperationSettings)
         self.verticalLayout_10.setSpacing(0)
         self.verticalLayout_10.setObjectName(u"verticalLayout_10")
@@ -223,7 +218,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 735, 424))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 740, 481))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -234,7 +229,7 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_5 = QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_5.setSpacing(0)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.verticalLayout_5.setContentsMargins(0, 30, 35, 0)
+        self.verticalLayout_5.setContentsMargins(0, 25, 35, 0)
         self.frame_3 = QFrame(self.scrollAreaWidgetContents_2)
         self.frame_3.setObjectName(u"frame_3")
         sizePolicy2.setHeightForWidth(
@@ -246,7 +241,7 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_6 = QVBoxLayout(self.frame_3)
         self.verticalLayout_6.setSpacing(15)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.verticalLayout_6.setContentsMargins(0, 0, 0, 10)
+        self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.horizontalFrame_1 = QFrame(self.frame_3)
         self.horizontalFrame_1.setObjectName(u"horizontalFrame_1")
         self.horizontalLayout_4 = QHBoxLayout(self.horizontalFrame_1)
@@ -314,6 +309,8 @@ class Ui_SettingsWindow(object):
         self.comboBox_stackPasses.setMaximumSize(QSize(45, 21))
         self.comboBox_stackPasses.setCurrentText(u"1")
         self.comboBox_stackPasses.setMaxVisibleItems(4)
+        self.comboBox_stackPasses.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLength)
 
         self.horizontalLayout_3.addWidget(self.comboBox_stackPasses)
 
@@ -355,7 +352,15 @@ class Ui_SettingsWindow(object):
 
         self.horizontalLayout_4.addWidget(self.groupBox_conversion)
 
-        self.groupBox_2 = QGroupBox(self.horizontalFrame_1)
+        self.frame_17 = QFrame(self.horizontalFrame_1)
+        self.frame_17.setObjectName(u"frame_17")
+        self.frame_17.setFrameShape(QFrame.NoFrame)
+        self.frame_17.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_9 = QVBoxLayout(self.frame_17)
+        self.verticalLayout_9.setSpacing(10)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.groupBox_2 = QGroupBox(self.frame_17)
         self.groupBox_2.setObjectName(u"groupBox_2")
         self.groupBox_2.setFlat(True)
         self.groupBox_2.setProperty("titleText", True)
@@ -392,6 +397,8 @@ class Ui_SettingsWindow(object):
         self.comboBox_engine.setObjectName(u"comboBox_engine")
         self.comboBox_engine.setEnabled(True)
         self.comboBox_engine.setMinimumSize(QSize(0, 25))
+        self.comboBox_engine.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLength)
 
         self.gridLayout_6.addWidget(self.comboBox_engine, 1, 0, 1, 1)
 
@@ -401,6 +408,8 @@ class Ui_SettingsWindow(object):
         self.comboBox_resType.addItem(u"Scipy")
         self.comboBox_resType.setObjectName(u"comboBox_resType")
         self.comboBox_resType.setMinimumSize(QSize(0, 25))
+        self.comboBox_resType.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLength)
 
         self.gridLayout_6.addWidget(self.comboBox_resType, 1, 1, 1, 1)
 
@@ -419,7 +428,38 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_8.addWidget(self.frame_12, 0, Qt.AlignTop)
 
-        self.horizontalLayout_4.addWidget(self.groupBox_2)
+        self.verticalLayout_9.addWidget(self.groupBox_2)
+
+        self.groupBox = QGroupBox(self.frame_17)
+        self.groupBox.setObjectName(u"groupBox")
+        self.groupBox.setFlat(True)
+        self.horizontalLayout_10 = QHBoxLayout(self.groupBox)
+        self.horizontalLayout_10.setSpacing(10)
+        self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
+        self.horizontalLayout_10.setContentsMargins(20, 15, 15, 15)
+        self.comboBox_presets = QComboBox(self.groupBox)
+        self.comboBox_presets.addItem("")
+        self.comboBox_presets.addItem("")
+        self.comboBox_presets.setObjectName(u"comboBox_presets")
+        self.comboBox_presets.setMinimumSize(QSize(0, 25))
+        self.comboBox_presets.setSizeAdjustPolicy(
+            QComboBox.AdjustToMinimumContentsLength)
+        self.comboBox_presets.setModelColumn(0)
+
+        self.horizontalLayout_10.addWidget(self.comboBox_presets)
+
+        self.pushButton_presetsEdit = QPushButton(self.groupBox)
+        self.pushButton_presetsEdit.setObjectName(u"pushButton_presetsEdit")
+        self.pushButton_presetsEdit.setMinimumSize(QSize(65, 27))
+        self.pushButton_presetsEdit.setMaximumSize(QSize(65, 16777215))
+
+        self.horizontalLayout_10.addWidget(self.pushButton_presetsEdit)
+
+        self.horizontalLayout_10.setStretch(0, 1)
+
+        self.verticalLayout_9.addWidget(self.groupBox)
+
+        self.horizontalLayout_4.addWidget(self.frame_17)
 
         self.horizontalLayout_4.setStretch(0, 4)
         self.horizontalLayout_4.setStretch(1, 3)
@@ -454,7 +494,7 @@ class Ui_SettingsWindow(object):
         self.comboBox_instrumental = QComboBox(self.frame_instrumentalComboBox)
         self.comboBox_instrumental.setObjectName(u"comboBox_instrumental")
         self.comboBox_instrumental.setMinimumSize(QSize(0, 25))
-        self.comboBox_instrumental.setMaximumSize(QSize(16777215, 30))
+        self.comboBox_instrumental.setMaximumSize(QSize(16777215, 16777215))
         self.comboBox_instrumental.setEditable(False)
         self.comboBox_instrumental.setCurrentText(u"")
         self.comboBox_instrumental.setMaxVisibleItems(5)
@@ -631,7 +671,7 @@ class Ui_SettingsWindow(object):
         self.comboBox_stacked.setObjectName(u"comboBox_stacked")
         self.comboBox_stacked.setEnabled(True)
         self.comboBox_stacked.setMinimumSize(QSize(0, 25))
-        self.comboBox_stacked.setMaximumSize(QSize(16777215, 30))
+        self.comboBox_stacked.setMaximumSize(QSize(16777215, 16777215))
         self.comboBox_stacked.setEditable(False)
         self.comboBox_stacked.setCurrentText(u"")
         self.comboBox_stacked.setMaxVisibleItems(5)
@@ -669,14 +709,14 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 40))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 35))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
         self.verticalLayout_14 = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_14.setSpacing(0)
         self.verticalLayout_14.setObjectName(u"verticalLayout_14")
-        self.verticalLayout_14.setContentsMargins(0, 30, 35, 0)
+        self.verticalLayout_14.setContentsMargins(0, 25, 35, 0)
         self.frame = QFrame(self.scrollAreaWidgetContents)
         self.frame.setObjectName(u"frame")
         self.frame.setFrameShape(QFrame.NoFrame)
@@ -704,14 +744,14 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 598, 442))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 98, 35))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
         self.verticalLayout_15 = QVBoxLayout(self.scrollAreaWidgetContents_4)
         self.verticalLayout_15.setSpacing(0)
         self.verticalLayout_15.setObjectName(u"verticalLayout_15")
-        self.verticalLayout_15.setContentsMargins(0, 30, 35, 0)
+        self.verticalLayout_15.setContentsMargins(0, 25, 35, 0)
         self.frame_2 = QFrame(self.scrollAreaWidgetContents_4)
         self.frame_2.setObjectName(u"frame_2")
         self.frame_2.setFrameShape(QFrame.NoFrame)
@@ -740,7 +780,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 758, 442))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 397))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -748,7 +788,7 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_16 = QVBoxLayout(self.scrollAreaWidgetContents_5)
         self.verticalLayout_16.setSpacing(0)
         self.verticalLayout_16.setObjectName(u"verticalLayout_16")
-        self.verticalLayout_16.setContentsMargins(0, 30, 35, 0)
+        self.verticalLayout_16.setContentsMargins(0, 25, 35, 0)
         self.frame_4 = QFrame(self.scrollAreaWidgetContents_5)
         self.frame_4.setObjectName(u"frame_4")
         self.frame_4.setFrameShape(QFrame.NoFrame)
@@ -1068,20 +1108,14 @@ class Ui_SettingsWindow(object):
         sizePolicy.setHeightForWidth(
             self.frame_16.sizePolicy().hasHeightForWidth())
         self.frame_16.setSizePolicy(sizePolicy)
-        self.frame_16.setMinimumSize(QSize(0, 60))
+        self.frame_16.setMinimumSize(QSize(661, 0))
+        self.frame_16.setStyleSheet(u"")
         self.frame_16.setFrameShape(QFrame.StyledPanel)
         self.frame_16.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_9 = QHBoxLayout(self.frame_16)
-        self.horizontalLayout_9.setSpacing(10)
+        self.horizontalLayout_9.setSpacing(50)
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
         self.horizontalLayout_9.setContentsMargins(0, 15, 15, 15)
-        self.pushButton = QPushButton(self.frame_16)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setMinimumSize(QSize(100, 29))
-        self.pushButton.setMaximumSize(QSize(16777215, 25))
-
-        self.horizontalLayout_9.addWidget(self.pushButton)
-
         self.pushButton_resetDefault = QPushButton(self.frame_16)
         self.pushButton_resetDefault.setObjectName(u"pushButton_resetDefault")
         sizePolicy7 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -1090,18 +1124,19 @@ class Ui_SettingsWindow(object):
         sizePolicy7.setHeightForWidth(
             self.pushButton_resetDefault.sizePolicy().hasHeightForWidth())
         self.pushButton_resetDefault.setSizePolicy(sizePolicy7)
-        self.pushButton_resetDefault.setMinimumSize(QSize(110, 29))
-        self.pushButton_resetDefault.setMaximumSize(QSize(16777215, 25))
+        self.pushButton_resetDefault.setMinimumSize(QSize(110, 27))
+        self.pushButton_resetDefault.setMaximumSize(QSize(16777215, 27))
 
-        self.horizontalLayout_9.addWidget(self.pushButton_resetDefault)
+        self.horizontalLayout_9.addWidget(
+            self.pushButton_resetDefault, 0, Qt.AlignRight)
 
-        self.verticalLayout_18.addWidget(self.frame_16, 0, Qt.AlignRight)
+        self.verticalLayout_18.addWidget(self.frame_16)
 
         self.horizontalLayout.addWidget(self.frame_14)
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
         self.comboBox_winSize_stacked.setCurrentIndex(2)
         self.comboBox_winSize.setCurrentIndex(2)
         self.pushButton_english.setDefault(False)
@@ -1153,6 +1188,15 @@ class Ui_SettingsWindow(object):
 
         self.label_resType.setText(QCoreApplication.translate(
             "SettingsWindow", u"Resolution Type", None))
+        self.groupBox.setTitle(QCoreApplication.translate(
+            "SettingsWindow", u"Presets ", None))
+        self.comboBox_presets.setItemText(0, QCoreApplication.translate(
+            "SettingsWindow", u"fsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsga", None))
+        self.comboBox_presets.setItemText(1, QCoreApplication.translate(
+            "SettingsWindow", u"Instrumental", None))
+
+        self.pushButton_presetsEdit.setText(
+            QCoreApplication.translate("SettingsWindow", u"Edit", None))
         self.groupBox_3.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Models ", None))
         self.label_2.setText(QCoreApplication.translate(
@@ -1248,8 +1292,6 @@ class Ui_SettingsWindow(object):
 #endif // QT_CONFIG(tooltip)
         self.pushButton_japanese.setText("")
         self.pushButton_turkish.setText("")
-        self.pushButton.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Get Log File", None))
         self.pushButton_resetDefault.setText(QCoreApplication.translate(
             "SettingsWindow", u"Reset to default", None))
     # retranslateUi

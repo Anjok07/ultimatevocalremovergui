@@ -1,0 +1,30 @@
+--- 27-02-2021 [22:58] Initialized Logger ---
+INFO | --- Setting up application ---
+	INFO | Main -> Setting up
+		INFO | Activating audio player mode...
+		INFO | Updating main window...
+	INFO | Settings -> Setting up
+		INFO | Loading data...
+			WARNING | "comboBox_presets"; <class 'PySide2.QtWidgets.QComboBox'> does not have a default setting!
+		INFO | Opening settings window...
+		INFO | Clearing Command Line...
+		INFO | Loading page with index 3
+			INFO | Updating settings window...
+				INFO | Updating: "Seperation Settings" page
+				INFO | Updating: "Shortcuts" page
+				INFO | Updating: "Customization" page
+				INFO | Updating: "Preferences" page
+		INFO | Updating: "Seperation Settings" page
+		INFO | Updating: "Seperation Settings" page
+		INFO | Translating to german...
+			INFO | Main: Retranslating UI
+			INFO | Settings: Retranslating UI
+			INFO | Presets: Retranslating UI
+			INFO | Updating: "Seperation Settings" page
+	INFO | --- Finished setup ---
+	INFO | Updating: "Preferences" page
+INFO | --- Closing application ---
+	INFO | Saving application data...
+	WARNING | "comboBox_presets"; <class 'PySide2.QtWidgets.QComboBox'> does not have a default setting!
+	INFO | Closing windows...
+INFO | --- Done! ---

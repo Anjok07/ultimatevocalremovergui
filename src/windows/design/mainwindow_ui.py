@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(911, 583)
+        MainWindow.resize(911, 0)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"/* Universal */\n"
                                  "* {\n"
@@ -73,6 +73,9 @@ class Ui_MainWindow(object):
                                  "	outline: none;\n"
                                  "	border: none;\n"
                                  "}\n"
+                                 "QScrollBar {\n"
+                                 "	background-color: none;\n"
+                                 "}\n"
                                  "/* Command Line*/\n"
                                  "QTextBrowser {\n"
                                  "	border-left: 2px;\n"
@@ -95,12 +98,12 @@ class Ui_MainWindow(object):
                                  "	border: 2px solid rgb(109, 213, 237); \n"
                                  "	width: 10px; \n"
                                  "	margin-top: -5px; \n"
-                                 "	margin-bottom: -5px; \n"
+                                 "	margin-botto"
+                                 "m: -5px; \n"
                                  "	border-radius: 5px; \n"
                                  "}\n"
                                  "\n"
-                                 "Q"
-                                 "Slider[audioPlayer=\"true\"]::handle:horizontal:hover { \n"
+                                 "QSlider[audioPlayer=\"true\"]::handle:horizontal:hover { \n"
                                  "	border-radius: 5px;\n"
                                  "}")
         self.horizontalLayout_2 = QHBoxLayout(MainWindow)
@@ -174,8 +177,6 @@ class Ui_MainWindow(object):
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.listWidget_musicFiles = QListWidget(self.page_display)
-        QListWidgetItem(self.listWidget_musicFiles)
-        QListWidgetItem(self.listWidget_musicFiles)
         self.listWidget_musicFiles.setObjectName(u"listWidget_musicFiles")
         sizePolicy3 = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
         sizePolicy3.setHorizontalStretch(0)
@@ -270,6 +271,7 @@ class Ui_MainWindow(object):
         self.pushButton_menu_vocals.setObjectName(u"pushButton_menu_vocals")
         self.pushButton_menu_vocals.setMaximumSize(QSize(30, 30))
         self.pushButton_menu_vocals.setCursor(QCursor(Qt.PointingHandCursor))
+        self.pushButton_menu_vocals.setContextMenuPolicy(Qt.CustomContextMenu)
         self.pushButton_menu_vocals.setStyleSheet(u"")
         self.pushButton_menu_vocals.setProperty("audioPlayer", True)
 
@@ -337,6 +339,8 @@ class Ui_MainWindow(object):
         self.pushButton_menu_instrumentals.setMaximumSize(QSize(30, 30))
         self.pushButton_menu_instrumentals.setCursor(
             QCursor(Qt.PointingHandCursor))
+        self.pushButton_menu_instrumentals.setContextMenuPolicy(
+            Qt.CustomContextMenu)
         self.pushButton_menu_instrumentals.setStyleSheet(u"")
         self.pushButton_menu_instrumentals.setProperty("audioPlayer", True)
 
@@ -470,7 +474,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget_musicFiles.setCurrentIndex(0)
+        self.stackedWidget_musicFiles.setCurrentIndex(1)
         self.stackedWidget_vocals.setCurrentIndex(1)
         self.stackedWidget_instrumentals.setCurrentIndex(1)
 
@@ -482,17 +486,6 @@ class Ui_MainWindow(object):
             "MainWindow", u"Vocal Remover", None))
         self.pushButton_musicFiles.setText(QCoreApplication.translate(
             "MainWindow", u"Drag your music files", None))
-
-        __sortingEnabled = self.listWidget_musicFiles.isSortingEnabled()
-        self.listWidget_musicFiles.setSortingEnabled(False)
-        ___qlistwidgetitem = self.listWidget_musicFiles.item(0)
-        ___qlistwidgetitem.setText(QCoreApplication.translate(
-            "MainWindow", u"B:/boska/Desktop/Test inference/1_Part 1-[AudioTrimmer.com]_(Instrumental).wav", None))
-        ___qlistwidgetitem1 = self.listWidget_musicFiles.item(1)
-        ___qlistwidgetitem1.setText(QCoreApplication.translate(
-            "MainWindow", u"B:/boska/Desktop/Test inference/1_Part 1-[AudioTrimmer.com]_(Instrumental).wav", None))
-        self.listWidget_musicFiles.setSortingEnabled(__sortingEnabled)
-
         self.label_arrow.setText(
             QCoreApplication.translate("MainWindow", u"\u2193", None))
         self.label_vocalsFile.setText(

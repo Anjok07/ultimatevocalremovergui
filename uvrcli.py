@@ -4,7 +4,7 @@ Currently only v4 is supported
 """
 import argparse
 import sys
-from converter_v4 import (VocalRemover, default_data)
+from src.inference.converter_v4 import (VocalRemover, default_data)
 
 
 parser = argparse.ArgumentParser(description=__doc__,
@@ -84,6 +84,16 @@ arguments = {
         'help': 'Allows you to set custom parameters (SR, HOP LENGNTH, & N_FFT) instead of using the ones appended to the model filenames',
         'type': bool,
     },
+    'save_instrumentals': {
+        'flags': ['-saveInst', '--saveInstrumentals'],
+        'help': 'Save instrumentals',
+        'type': bool,
+    },
+    'save_vocals': {
+        'flags': ['-saveVoc', '--saveVocals'],
+        'help': 'Save Vocals',
+        'type': bool,
+    },
     'sr': {
         'flags': ['-sr', '--samplingRate'],
         'help': '[Required: --customParameters is True] Sampling Rate',
@@ -139,7 +149,7 @@ for argument_name, options in arguments.items():
     optional.add_argument(*options['flags'], metavar='\b', type=options['type'],
                           required=required, dest=argument_name, default=default,
                           choices=choices,
-                          help=options['help'] + f' (default: "{default}")')
+                          help=options['help'] + f' (default: {default})')
 parser._action_groups.append(optional)  # added this line
 args = parser.parse_args()
 seperation_data = dict(args._get_kwargs())

@@ -21,13 +21,14 @@ else:
     abs_path = os.path.dirname(os.path.abspath(__file__))
 
 
-LOGS_FOLDER = 'logs'
 IMAGE_FOLDER = 'images'
+TRANSLATIONS_FOLDER = 'translations'
+USER_FOLDER = 'user'
+LOGS_FOLDER = 'logs'
 MODELS_FOLDER = 'models'
-TEMP_MUSIC_FILES_FOLDER = 'temp_music_files'
 INSTRUMENTAL_FOLDER_NAME = 'Main Models'
 STACKED_FOLDER_NAME = 'Stacked Models'
-TRANSLATIONS_FOLDER = 'translations'
+TEMP_MUSIC_FILES_FOLDER = 'tmp'
 
 
 class ResourcePaths:
@@ -47,6 +48,8 @@ class ResourcePaths:
         save = os.path.join(abs_path, IMAGE_FOLDER, 'save.png')
         menu = os.path.join(abs_path, IMAGE_FOLDER, 'menu.png')
         playpause_gif = os.path.join(abs_path, IMAGE_FOLDER, 'playpause.gif')
+        upload = os.path.join(abs_path, IMAGE_FOLDER, 'upload.png')
+        download = os.path.join(abs_path, IMAGE_FOLDER, 'download.png')
 
         class flags:
             _FLAG_FOLDER = 'flags'
@@ -55,15 +58,15 @@ class ResourcePaths:
             japanese = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'japan.png')
             filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
             turkish = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'turkish.png')
-
-    logsDir = os.path.join(abs_path, LOGS_FOLDER)
-    modelsDir = os.path.join(abs_path, MODELS_FOLDER)
+    
+    localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
+    # -User Folder-
+    logsDir = os.path.join(abs_path, USER_FOLDER, LOGS_FOLDER)
+    modelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER)
     instrumentalDirName = INSTRUMENTAL_FOLDER_NAME
     stackedDirName = STACKED_FOLDER_NAME
-    localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
+    tempDir = os.path.join(abs_path, USER_FOLDER, TEMP_MUSIC_FILES_FOLDER)
 
-    temp_vocal = os.path.join(abs_path, TEMP_MUSIC_FILES_FOLDER, 'temp_vocals.wav')
-    temp_instrumental = os.path.join(abs_path, TEMP_MUSIC_FILES_FOLDER, 'temp_instrumentals.wav')
 
 
 class Logger(logging.Logger):
@@ -152,7 +155,7 @@ class Logger(logging.Logger):
         basename = basename[:len(os.path.splitext(basename)[0])]
         filename = os.path.join(ResourcePaths.logsDir, basename)
         date = dt.datetime.now().strftime('-%H.%M.%S-%d-%m-%Y')
-        filename = filename + date + '.log'
+        filename = filename + '-BACKUP' + date + '.log'
         return filename
 
     def info(self, msg, *args, indent_forwards: bool = False, **kwargs):

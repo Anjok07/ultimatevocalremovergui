@@ -36,6 +36,12 @@ os.chdir(base_path)  # Change the current working directory to the base path
 
 
 class CustomApplication(QtWidgets.QApplication):
+    """Application of the GUI
+
+    The class contains instances of all windows and performs
+    general tasks like setting up the windows, saving data,
+    or improving the functionality of widgets across all windows
+    """
     def __init__(self):
         # -Init Application-
         # Suppress QT Warnings
@@ -50,7 +56,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        self.settings.clear()
+        # self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.threadpool = QtCore.QThreadPool(self)
@@ -75,8 +81,12 @@ class CustomApplication(QtWidgets.QApplication):
         self.logger.info('--- Finished setup ---')
 
     def setup_application(self):
-        """
-        Update windows
+        """Set up the windows of this application
+
+        - Execute setup methods of the windows
+        - Improve widgets across all windows
+        - Load some user data
+        - Show the main window
         """
 
         def setup_windows():
@@ -94,7 +104,8 @@ class CustomApplication(QtWidgets.QApplication):
             """
             for window in self.windows.values():
                 for combobox in window.findChildren(QtWidgets.QComboBox):
-                    combobox.showPopup = lambda wig=combobox, func=combobox.showPopup: self.improved_combobox_showPopUp(wig, func)  # nopep8
+                    # Monkeypatch showPopup function
+                    combobox.showPopup = lambda wig=combobox, func=combobox.showPopup: self.improved_combobox_showPopup(wig, func)  # nopep8
 
                     if combobox.isEditable():
                         # Align editable comboboxes to center
@@ -125,10 +136,16 @@ class CustomApplication(QtWidgets.QApplication):
         self.windows['main'].raise_()
 
     @staticmethod
-    def improved_combobox_showPopUp(widget: QtWidgets.QComboBox, popup_func: QtWidgets.QComboBox.showPopup):
-        """
+    def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):
+        """Extend functionality for the QComboBox.showPopup function
+        
         Improve the QComboBox by overriding the showPopup function to
-        also adjust the size of the view to its contents before showing 
+        adjust the size of the view (list that opens on click)
+        to the contents before showing 
+
+        Args:
+            widget (QtWidgets.QComboBox): Widget to apply improvement on
+            showPopup (QtWidgets.QComboBox.showPopup): showPopup function of the given widget
         """
         view = widget.view()
         fm = widget.fontMetrics()
@@ -138,12 +155,11 @@ class CustomApplication(QtWidgets.QApplication):
             # Combobox has contents
             # + 30 as a buffer for the scrollbar
             view.setMinimumWidth(max(widths) + 30)
-        popup_func()
+
+        showPopup()
 
     def extract_seperation_data(self) -> dict:
-        """
-        Extract the saved seperation data
-        """
+        
         seperation_data = OrderedDict()
 
         # Input/Export

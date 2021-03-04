@@ -743,21 +743,21 @@ class VocalRemover:
         vocal_name, instrumental_name, folder_path = get_vocal_instrumental_name()
 
         # -Save files-
+        instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
+        vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
+        self.latest_instrumental_path = os.path.join(folder_path,
+                                                        instrumental_file_name)
+        self.latest_vocal_path = os.path.join(folder_path,
+                                                vocal_file_name)
         # Instrumental
         if (instrumental_name is not None and
                 self.seperation_data['save_instrumentals']):
-            instrumental_file_name = f"{self.loop_data['file_base_name']}_{instrumental_name}{self.general_data['file_add_on']}.wav"
-            self.latest_instrumental_path = os.path.join(folder_path,
-                                                         instrumental_file_name)
 
             sf.write(self.latest_instrumental_path,
                      self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
         # Vocal
         if (vocal_name is not None and
                 self.seperation_data['save_vocals']):
-            vocal_file_name = f"{self.loop_data['file_base_name']}_{vocal_name}{self.general_data['file_add_on']}.wav"
-            self.latest_vocal_path = os.path.join(folder_path,
-                                                  vocal_file_name)
             sf.write(self.latest_vocal_path,
                      self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
 
@@ -880,7 +880,8 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
         Also save files in temp location for in GUI audio playback
         """
         super()._save_files()
-        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_instrumental_path),
-                 self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
-        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_vocal_path),
-                 self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])
+        if self.loop_data['loop_num'] == (self.general_data['total_loops'] - 1): # Last loop
+            sf.write(os.path.join(ResourcePaths.tempDir, self.latest_instrumental_path),
+                    self.loop_data['wav_instrument'].T, self.loop_data['sampling_rate'])
+            sf.write(os.path.join(ResourcePaths.tempDir, self.latest_vocal_path),
+                    self.loop_data['wav_vocals'].T, self.loop_data['sampling_rate'])

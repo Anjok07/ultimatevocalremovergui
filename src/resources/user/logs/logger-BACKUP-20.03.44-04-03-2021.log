@@ -1,4 +1,4 @@
---- 04-03-2021 [19:25] Initialized Logger ---
+--- 04-03-2021 [20:03] Initialized Logger ---
 INFO | --- Setting up application ---
 	INFO | Main -> Setting up
 		INFO | Deactivating audio player mode...
@@ -6,7 +6,7 @@ INFO | --- Setting up application ---
 	INFO | Settings -> Setting up
 		INFO | Loading data...
 		INFO | Clearing Command Line...
-		INFO | Loading page with index 3
+		INFO | Loading page with index 0
 			INFO | Updating settings window...
 				INFO | Updating: "Seperation Settings" page
 				INFO | Updating: "Shortcuts" page
@@ -17,7 +17,9 @@ INFO | --- Setting up application ---
 			INFO | Settings: Retranslating UI
 			INFO | Presets: Retranslating UI
 	INFO | --- Finished setup ---
-	INFO | Updating: "Preferences" page
+	INFO | Updating: "Seperation Settings" page
+INFO | Selecting Music Files...
+	INFO | No files selected!
 INFO | --- Closing application ---
 	INFO | Saving application data...
 	INFO | Closing windows...

@@ -118,3 +118,78 @@ DEFAULT_SETTINGS = {
     'checkBox_autoSaveInstrumentals': False,
     'checkBox_autoSaveVocals': False,
 }
+
+
+class QWinTaskbar_PLACEHOLDER:
+    def __init__(self, parent):
+        self.parent = parent
+        self.progress_class = QWinTaskbarProgress_PLACEHOLDER(self.parent)
+
+    def clearOverlayIcon(self):
+        pass
+
+    def eventFilter(self, arg__1 , arg__2):
+        pass
+
+    def overlayAccessibleDescription(self):
+        pass
+
+    def overlayIcon(self):
+        pass
+
+    def progress(self):
+        return self.progress_class
+
+    def setOverlayAccessibleDescription(self, description):
+        pass
+
+    def setOverlayIcon(self, icon):
+        pass
+
+    def setWindow(self, window):
+        pass
+
+    def window(self):
+        pass
+
+class QWinTaskbarProgress_PLACEHOLDER:
+
+    def __init__(self, parent):
+        self.parent = parent
+
+    def hide(self):
+        pass
+    def isPaused(self):
+        pass
+    def isStopped(self):
+        pass
+    def isVisible(self):
+        pass
+    def maximum(self):
+        pass
+    def minimum(self):
+        pass
+    def pause(self):
+        pass
+    def reset(self):
+        pass
+    def resume(self):
+        pass
+    def setMaximum(self, maximum):
+        pass
+    def setMinimum(self, minimum):
+        pass
+    def setPaused(self, paused):
+        pass
+    def setRange(self, minimum, maximum):
+        pass
+    def setValue(self, value):
+        pass
+    def setVisible(self, visible):
+        pass
+    def show(self):
+        pass
+    def stop(self):
+        pass
+    def value(self):
+        pass

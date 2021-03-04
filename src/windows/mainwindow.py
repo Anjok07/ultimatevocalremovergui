@@ -4,7 +4,6 @@ from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2.QtGui import Qt
-from PySide2.QtWinExtras import (QWinTaskbarButton)
 from PySide2 import QtMultimedia
 # -Root imports-
 from ..resources.resources_manager import (ResourcePaths)
@@ -18,7 +17,10 @@ import subprocess
 import os
 # Code annotation
 from typing import (Tuple, Optional)
-
+try:
+    from PySide2.QtWinExtras import (QWinTaskbarButton)
+except ImportError:
+    QWinTaskbarButton = const.QWinTaskbar_PLACEHOLDER
 
 def dict_to_HTMLtable(x: dict, header: str) -> str:
     """
@@ -184,7 +186,7 @@ class MainWindow(QtWidgets.QWidget):
         self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
                                    os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
         self._deactivate_audio_players()
-        
+
         # -Setup-
         load_geometry()
         load_images()

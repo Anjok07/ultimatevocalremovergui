@@ -1,4 +1,4 @@
---- 04-03-2021 [19:26] Initialized Logger ---
+--- 04-03-2021 [20:05] Initialized Logger ---
 INFO | --- Setting up application ---
 	INFO | Main -> Setting up
 		INFO | Deactivating audio player mode...
@@ -18,37 +18,30 @@ INFO | --- Setting up application ---
 			INFO | Presets: Retranslating UI
 	INFO | --- Finished setup ---
 	INFO | Updating: "Seperation Settings" page
-INFO | Opening settings window...
-INFO | Opening settings window...
-INFO | Loading page with index 1
-	INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Shortcuts" page
-INFO | Opening settings window...
-INFO | Opening settings window...
-INFO | Loading page with index 2
-	INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Shortcuts" page
-INFO | Updating: "Customization" page
-INFO | Loading page with index 0
-	INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Shortcuts" page
-INFO | Updating: "Customization" page
-INFO | Updating: "Seperation Settings" page
-INFO | Loading page with index 3
-	INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Shortcuts" page
-INFO | Updating: "Customization" page
-INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Preferences" page
-INFO | Opening settings window...
-INFO | Loading page with index 0
-	INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Shortcuts" page
-INFO | Updating: "Customization" page
-INFO | Updating: "Seperation Settings" page
-INFO | Updating: "Preferences" page
-INFO | Updating: "Seperation Settings" page
-INFO | --- Closing application ---
-	INFO | Saving application data...
-	INFO | Closing windows...
-INFO | --- Done! ---
+INFO | Seperation button pressed
+INFO | Successful extraction of seperation data!
+	Extracted Values:
+	OrderedDict([('input_paths', ['B:/boska/Desktop/Test inference/Part 1.mp3']),
+             ('export_path', 'B:/boska/Desktop'), ('gpuConversion', False),
+             ('postProcess', True), ('tta', True), ('outputImage', False),
+             ('stackOnly', False), ('saveAllStacked', False),
+             ('modelFolder', False), ('customParameters', False),
+             ('multithreading', False), ('save_instrumentals', False),
+             ('save_vocals', False), ('useModel', 'instrumental'),
+             ('instrumentalModel',
+              'b:\\boska\\Documents\\Dilan\\GitHub\\ultimatevocalremovergui\\src\\resources\\user\\models\\v4\\Main '
+              'Models\\MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'),
+             ('vocalModel', ''),
+             ('stackModel',
+              'b:\\boska\\Documents\\Dilan\\GitHub\\ultimatevocalremovergui\\src\\resources\\user\\models\\v4\\Stacked '
+              'Models\\StackedMGM_LL_v4_sr32000_hl512_nf2048.pth'),
+             ('sr', 44100), ('hop_length', 1024), ('window_size', 320),
+             ('n_fft', 2048), ('sr_stacked', 32000),
+             ('hop_length_stacked', 512), ('window_size_stacked', 320),
+             ('n_fft_stacked', 2048), ('stackPasses', 0),
+             ('resType', 'kaiser_fast')])
+INFO | ----- The seperation has started! -----
+INFO | Deactivating audio player mode...
+INFO | Loading models...
+INFO | File 1/1:  Loading wave source...
+INFO | File 1/1:  Stft of wave source...

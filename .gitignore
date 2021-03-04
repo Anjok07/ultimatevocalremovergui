@@ -3,6 +3,7 @@ __pycache__
 UIFileConverter.ps1
 developer_notes.txt
 languages
+ui_files
 # Do not include model files and logs
 src/resources/user/models/**/*.pth
 src/resources/user/logs/*.log

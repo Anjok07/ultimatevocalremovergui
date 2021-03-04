@@ -220,6 +220,18 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     # -Other Methods-
+    def update_window(self):
+        """
+        Update the text and states of widgets
+        in this window
+        """
+
+    def save_window(self):
+        """Save window
+
+        Save states of the widgets in this window
+        """
+        
     def get_presets(self) -> dict:
         """
         Obtain the presets from the window
@@ -242,12 +254,6 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             return presets[name]
         else:
             return {}
-
-    def update_window(self):
-        """
-        Update the text and states of widgets
-        in this window
-        """
 
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):

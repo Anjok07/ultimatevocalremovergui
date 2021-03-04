@@ -1,0 +1,1 @@
+Placeholder file so that the log folder gets added when commiting

@@ -8,7 +8,7 @@ from PySide2 import QtCore
 from .inference import converter_v4
 from collections import OrderedDict
 
-VERSION = "0.0.1"
+VERSION = "0.0.5"
 APPLICATION_SHORTNAME = 'UVR'
 APPLICATION_NAME = 'Ultimate Vocal Remover'
 # Values that are inside a preset with their corresponding label
@@ -115,8 +115,8 @@ DEFAULT_SETTINGS = {
     'checkBox_multiThreading': False,
     # -Export Settings-
     # Autosave Instrumentals/Vocals
-    'checkBox_autoSaveInstrumentals': False,
-    'checkBox_autoSaveVocals': False,
+    'checkBox_autoSaveInstrumentals': True,
+    'checkBox_autoSaveVocals': True,
 }
 
 

@@ -497,6 +497,12 @@ class MainWindow(QtWidgets.QWidget):
             self.ui.stackedWidget_musicFiles.setCurrentIndex(0)
         self.logger.indent_backwards()
 
+    def save_window(self):
+        """Save window
+
+        Save states of the widgets in this window
+        """
+
     def listWidget_musicFiles_update(self):
         """
         Write to the list view

@@ -16,7 +16,7 @@ from collections import OrderedDict
 # System
 import os
 # Code annotation
-from typing import (Dict, Optional)
+from typing import (Dict, Union, Optional)
 
 
 class SettingsWindow(QtWidgets.QWidget):
@@ -37,7 +37,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.app = app
         self.logger = app.logger
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        self.settingsManager = SettingsManager(app=self.app)
+        self.settingsManager = SettingsManager(win=self)
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
         # -Other Variables-
@@ -54,10 +54,10 @@ class SettingsWindow(QtWidgets.QWidget):
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
 
-
         # self.get_model_id(r"B:\boska\Documents\Dilan\GitHub\ultimatevocalremovergui\src\resources\user\models\v4\Main Models\multifft_bv_agr2.pth")
 
     # -Initialization methods-
+
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
@@ -139,7 +139,7 @@ class SettingsWindow(QtWidgets.QWidget):
                     elif isinstance(widget, QtWidgets.QLineEdit):
                         widget.textChanged.connect(self.settings_changed)
                     else:
-                        assert TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+                        raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
 
             # -Override binds-
             # Music file drag & drop
@@ -201,7 +201,7 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # -Before setup-
         # Load saved settings for widgets
-        self._load_data()
+        self.settingsManager.load_window()
         # Update available model lists
         self._update_selectable_models()
         # Update available model lists
@@ -452,11 +452,20 @@ class SettingsWindow(QtWidgets.QWidget):
         self.update_page_preferences()
         self.logger.indent_backwards()
 
+    def load_window(self):
+        """Load window
+
+        Load states of the widgets in this window
+        from the settings
+        """
+        self.settingsManager.load_window()
+
     def save_window(self):
+        """Save window
+
+        Save states of the widgets in this window
         """
-        Save all values of the widgets in the
-        settings window
-        """
+        self.settingsManager.save_window()
 
     # Seperation Settings Page
     def update_page_seperationSettings(self):
@@ -776,8 +785,21 @@ class SettingsWindow(QtWidgets.QWidget):
 
 
 class SettingsManager:
-    def __init__(self, app: CustomApplication):
-        self.app = app
+    """Manage the states of the widgets in the SettingsWindow
+
+    Attributes:
+        win (SettingsWindow): Settings window that is being managed
+        save_widgets (dict): Configurable widgets that the window contains
+            Key - Page number
+    """
+
+    def __init__(self, win: SettingsWindow):
+        """Inits SettingsManager
+
+        Args:
+            win (SettingsWindow): Settings window that is to be managed
+        """
+        self.win = win
         self.save_widgets = {
             0: [],
             1: [],
@@ -786,100 +808,142 @@ class SettingsManager:
         }
 
     def fill_save_widgets(self):
+        """Update the save_widgets variable
+        
+        Assign all instances of the widgets on the
+        settings window to their corresponding page.
+        (Only run right after window initialization)
         """
-        Find all instances of the widgets on the
-        settings window
-        """
+        # Get widgets
         seperation_settings_widgets = [
             # -Conversion-
             # Checkbox
-            self.app.settingsWindow.ui.checkBox_gpuConversion,
-            self.app.settingsWindow.ui.checkBox_tta,
-            self.app.settingsWindow.ui.checkBox_modelFolder,
-            self.app.settingsWindow.ui.checkBox_customParameters,
-            self.app.settingsWindow.ui.checkBox_outputImage,
-            self.app.settingsWindow.ui.checkBox_postProcess,
-            self.app.settingsWindow.ui.checkBox_stackPasses,
-            self.app.settingsWindow.ui.checkBox_saveAllStacked,
-            self.app.settingsWindow.ui.checkBox_stackOnly,
+            self.win.ui.checkBox_gpuConversion,
+            self.win.ui.checkBox_tta,
+            self.win.ui.checkBox_modelFolder,
+            self.win.ui.checkBox_customParameters,
+            self.win.ui.checkBox_outputImage,
+            self.win.ui.checkBox_postProcess,
+            self.win.ui.checkBox_stackPasses,
+            self.win.ui.checkBox_saveAllStacked,
+            self.win.ui.checkBox_stackOnly,
             # Combobox
-            self.app.settingsWindow.ui.comboBox_stackPasses,
+            self.win.ui.comboBox_stackPasses,
             # -Models-
             # Combobox
-            self.app.settingsWindow.ui.comboBox_instrumental,
-            self.app.settingsWindow.ui.comboBox_winSize,
-            self.app.settingsWindow.ui.comboBox_winSize_stacked,
-            self.app.settingsWindow.ui.comboBox_stacked,
+            self.win.ui.comboBox_instrumental,
+            self.win.ui.comboBox_winSize,
+            self.win.ui.comboBox_winSize_stacked,
+            self.win.ui.comboBox_stacked,
             # Lineedit
-            self.app.settingsWindow.ui.lineEdit_sr,
-            self.app.settingsWindow.ui.lineEdit_sr_stacked,
-            self.app.settingsWindow.ui.lineEdit_hopLength,
-            self.app.settingsWindow.ui.lineEdit_hopLength_stacked,
-            self.app.settingsWindow.ui.lineEdit_nfft,
-            self.app.settingsWindow.ui.lineEdit_nfft_stacked,
+            self.win.ui.lineEdit_sr,
+            self.win.ui.lineEdit_sr_stacked,
+            self.win.ui.lineEdit_hopLength,
+            self.win.ui.lineEdit_hopLength_stacked,
+            self.win.ui.lineEdit_nfft,
+            self.win.ui.lineEdit_nfft_stacked,
             # -Engine-
             # Combobox
-            self.app.settingsWindow.ui.comboBox_resType,
-            self.app.settingsWindow.ui.comboBox_engine,
+            self.win.ui.comboBox_resType,
+            self.win.ui.comboBox_engine,
             # -Presets-
             # Combobox
-            self.app.settingsWindow.ui.comboBox_presets,]
+            self.win.ui.comboBox_presets, ]
         shortcuts_widgets = []
         customization_widgets = []
         preferences_widgets = [
             # -Settings-
             # Checkbox
-            self.app.settingsWindow.ui.checkBox_notifiyOnFinish,
-            self.app.settingsWindow.ui.checkBox_notifyUpdates,
-            self.app.settingsWindow.ui.checkBox_settingsStartup,
-            self.app.settingsWindow.ui.checkBox_disableAnimations,
-            self.app.settingsWindow.ui.checkBox_disableShortcuts,
-            self.app.settingsWindow.ui.checkBox_multiThreading,
+            self.win.ui.checkBox_notifiyOnFinish,
+            self.win.ui.checkBox_notifyUpdates,
+            self.win.ui.checkBox_settingsStartup,
+            self.win.ui.checkBox_disableAnimations,
+            self.win.ui.checkBox_disableShortcuts,
+            self.win.ui.checkBox_multiThreading,
             # Combobox
-            self.app.settingsWindow.ui.comboBox_command,
+            self.win.ui.comboBox_command,
             # -Export Settings-
             # Checkbox
-            self.app.settingsWindow.ui.checkBox_autoSaveInstrumentals,
-            self.app.settingsWindow.ui.checkBox_autoSaveVocals,]
+            self.win.ui.checkBox_autoSaveInstrumentals,
+            self.win.ui.checkBox_autoSaveVocals, ]
 
+        # Assign to save_widgets
         self.save_widgets[0] = seperation_settings_widgets
         self.save_widgets[1] = shortcuts_widgets
         self.save_widgets[2] = customization_widgets
         self.save_widgets[3] = preferences_widgets
 
-    def get_settings(self, page: Optional[int] = None) -> dict:
-        """Obtain values of the widgets
+    def get_settings(self, page: Optional[int] = None) -> Dict[str, Union[bool, str]]:
+        """Obtain states of the widgets
+
+        Args:
+            page (Optional[int], optional):
+                Which page to load the widgets from.
+                Defaults to None.
+
+                0 - Seperation Settings Page
+                1 - Shortcuts Page
+                2 - Customization Page
+                3 - Preferences Page
+                None - All widgets
+
+        Raises:
+            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+
+        Returns:
+            Dict[str, Union[bool, str]]: Widget states
+                Key - Widget object name
+                Value - State of the widget
         """
         settings = OrderedDict()
-        
-        save_widgets = self._get_widgets(page=page)
+
+        save_widgets = self.get_widgets(page=page)
 
         for widget in save_widgets:
             # Get value
             if isinstance(widget, QtWidgets.QCheckBox):
                 value = widget.isChecked()
-            elif isinstance(widget, QtWidgets.QComboBox):
-                value = widget.currentText()
             elif isinstance(widget, QtWidgets.QLineEdit):
                 value = widget.text()
+            elif isinstance(widget, QtWidgets.QComboBox):
+                value = widget.currentText()
             else:
-                assert TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+                raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
 
             # Set value
             settings[widget.objectName()] = value
 
         return settings
 
-    def set_settings(self, settings: dict):
-        """
-        Set the seperation settings
+    def set_settings(self, settings: Dict[str, Union[bool, str]]):
+        """Update states of the widgets
 
-        (Used for presets)
+        The given dict's key should be the widgets object name
+        and its value a valid state for that widget.
+
+        Note:
+            settings arg info:
+                Key - Widget object name
+                Value - State of widget
+
+                There are given expected value types for the
+                settings argument depending on the widgets type:
+
+                    QCheckBox - bool
+                    QLineEdit - str
+                    QComboBox - str
+
+
+        Args:
+            settings (Dict[str, Union[bool, str]]): States of the widgets to update
+
+        Raises:
+            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
         """
-        self.app.settingsWindow.suppress_settings_change_event = True
+        self.win.suppress_settings_change_event = True
         for widget_objectName, value in settings.items():
             # Get widget
-            widget = self.app.settingsWindow.findChild(QtCore.QObject, widget_objectName)
+            widget = self.win.findChild(QtCore.QObject, widget_objectName)
 
             # Set value
             if isinstance(widget, QtWidgets.QCheckBox):
@@ -898,21 +962,117 @@ class SettingsManager:
                             # Both have the same text
                             widget.setCurrentIndex(i)
             else:
-                assert TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
-        self.app.settingsWindow.suppress_settings_change_event = False
-        self.app.settingsWindow.update_window()
+                raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+        self.win.suppress_settings_change_event = False
+        self.win.update_window()
 
-    def save_settings(self):
+    def load_window(self):
+        """Load states of the widgets of the window
+        
+        Raises:
+            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
         """
-        Save the settings
-        """
-        pass
+        # Before
+        self.win.logger.info('Settings: Loading window')
 
-    def _get_widgets(self, page: Optional[int] = None) -> list:
+        # -Load states-
+        self.win.settings.beginGroup('settingswindow')
+        for widget in self.get_widgets():
+            # Get widget name
+            widget_objectName = widget.objectName()
+            if not widget_objectName in const.DEFAULT_SETTINGS:
+                # Default setting does not exist for this widget
+                self.win.logger.warn(f'"{widget_objectName}"; {widget.__class__} does not have a default setting!')
+                # Skip saving
+                continue
+
+            # Get value from settings and set to widget
+            if isinstance(widget, QtWidgets.QCheckBox):
+                value = self.win.settings.value(widget_objectName,
+                                                defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
+                                                type=bool)
+                widget.setChecked(value)
+            elif isinstance(widget, QtWidgets.QLineEdit):
+                value = self.win.settings.value(widget_objectName,
+                                                defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
+                                                type=str)
+                widget.setText(value)
+            elif isinstance(widget, QtWidgets.QComboBox):
+                value = self.win.settings.value(widget_objectName,
+                                                defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
+                                                type=str)
+                if widget.isEditable():
+                    # Allows self-typing
+                    widget.setCurrentText(value)
+                else:
+                    # Only allows a list to choose from
+                    all_items = [widget.itemText(i) for i in range(widget.count())]
+                    for i, item in enumerate(all_items):
+                        if item == value:
+                            # Both have the same text
+                            widget.setCurrentIndex(i)
+            else:
+                raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+        self.win.settings.endGroup()
+
+    def save_window(self):
+        """Save states of the widgets of the window
+
+        Raises:
+            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+        """
+        # Before
+        self.win.logger.info('Settings: Saving window')
+
+        # -Save states-
+        self.win.settings.beginGroup('settingswindow')
+        for widget in self.get_widgets():
+            # Get widget name
+            widget_objectName = widget.objectName()
+            if not widget_objectName in const.DEFAULT_SETTINGS:
+                # Default setting does not exist for this widget (so state is not saved)
+                self.win.logger.warn(f'"{widget_objectName}"; {widget.__class__} does not have a default setting!')
+                # Skip saving
+                continue
+            # Get value
+            if isinstance(widget, QtWidgets.QCheckBox):
+                value = widget.isChecked()
+            elif isinstance(widget, QtWidgets.QLineEdit):
+                value = widget.text()
+            elif isinstance(widget, QtWidgets.QComboBox):
+                value = widget.currentText()
+            else:
+                raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+            # Save value
+            self.win.settings.setValue(widget_objectName,
+                                       value)
+        self.win.settings.endGroup()
+
+    def get_widgets(self, page: Optional[int] = None) -> list:
+        """Obtain the configurable widgets in the window
+
+        Args:
+            page (Optional[int], optional):
+                Which page to load the widgets from.
+                Defaults to None.
+
+                0 - Seperation Settings Page
+                1 - Shortcuts Page
+                2 - Customization Page
+                3 - Preferences Page
+                None - All widgets
+
+        Returns:
+            list: Widgets of the given page
+        """
         if page is None:
+            # Load all widgets
             widgets = []
             for widget_list in self.save_widgets.values():
                 widgets.extend(widget_list)
         else:
+            # Load one page of widgets
+            assert page in self.save_widgets.keys(), "Invalid page index!"
             widgets = self.save_widgets[page]
+
         return widgets

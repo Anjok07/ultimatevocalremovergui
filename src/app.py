@@ -42,6 +42,7 @@ class CustomApplication(QtWidgets.QApplication):
     general tasks like setting up the windows, saving data,
     or improving the functionality of widgets across all windows
     """
+
     def __init__(self):
         # -Init Application-
         # Suppress QT Warnings
@@ -88,7 +89,6 @@ class CustomApplication(QtWidgets.QApplication):
         - Load some user data
         - Show the main window
         """
-
         def setup_windows():
             """
             Setup all windows in this application
@@ -138,7 +138,7 @@ class CustomApplication(QtWidgets.QApplication):
     @staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):
         """Extend functionality for the QComboBox.showPopup function
-        
+
         Improve the QComboBox by overriding the showPopup function to
         adjust the size of the view (list that opens on click)
         to the contents before showing 
@@ -147,19 +147,25 @@ class CustomApplication(QtWidgets.QApplication):
             widget (QtWidgets.QComboBox): Widget to apply improvement on
             showPopup (QtWidgets.QComboBox.showPopup): showPopup function of the given widget
         """
+        # Get variables
         view = widget.view()
         fm = widget.fontMetrics()
         widths = [fm.size(0, widget.itemText(i)).width()
                   for i in range(widget.count())]
         if widths:
-            # Combobox has contents
+            # Combobox has content
             # + 30 as a buffer for the scrollbar
             view.setMinimumWidth(max(widths) + 30)
 
         showPopup()
 
     def extract_seperation_data(self) -> dict:
-        
+        """Collects the settings required for seperation
+
+        Returns:
+            dict: Seperation settings
+        """
+
         seperation_data = OrderedDict()
 
         # Input/Export
@@ -222,60 +228,57 @@ class CustomApplication(QtWidgets.QApplication):
 
         return seperation_data
 
-    def closeAllWindows(self):
+    def save_application(self):
+        """Save the data for the application
+
+        This includes widget states as well as user specific
+        data like presets, selected language, ect.
         """
-        Capture application close to save data
+        def save_user_data():
+            """Save user specific data"""
+            self.settings.setValue('user/exportDirectory',
+                                   self.windows['settings'].exportDirectory)
+            self.settings.setValue('user/language',
+                                   self.translator.loaded_language)
+            self.settings.setValue('user/inputPaths',
+                                   self.windows['main'].inputPaths)
+            self.settings.setValue('user/inputsDirectory',
+                                   self.windows['main'].inputsDirectory)
+            self.settings.setValue('user/presets',
+                                   self.windows['presetsEditor'].get_presets())
+            self.settings.setValue('user/presets_loadDir',
+                                   self.windows['presetsEditor'].presets_loadDir)
+            self.settings.setValue('user/presets_saveDir',
+                                   self.windows['presetsEditor'].presets_saveDir)
+        
+        def save_widgets_data():
+            """Save widget states
+
+            Uses the save_window function for each window
+            in the application
+            """
+            for window in self.windows.values():
+                window.save_window()
+        
+        # Save
+        save_widgets_data()
+        save_user_data()
+
+    def closeAllWindows(self):
+        """Capture application close to save data
         """
         self.logger.info('--- Closing application ---',
                          indent_forwards=True)
-        # --Settings Window--
-        self.settings.beginGroup('settingswindow')
-        # Widgets
-        self.logger.info('Saving application data...')
-        setting_widgets = [*self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QCheckBox),
-                           *self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QComboBox),
-                           *self.windows['settings'].ui.stackedWidget.findChildren(QtWidgets.QLineEdit), ]
-        for widget in setting_widgets:
-            widgetObjectName = widget.objectName()
-            if not widgetObjectName in const.DEFAULT_SETTINGS:
-                if not widgetObjectName:
-                    # Empty object name no need to notify
-                    continue
-                # Default settings do not exist
-                self.logger.warn(f'"{widgetObjectName}"; {widget.__class__} does not have a default setting!')
-                continue
-            if isinstance(widget, QtWidgets.QCheckBox):
-                value = widget.isChecked()
-                self.settings.setValue(widgetObjectName,
-                                       value)
-            elif isinstance(widget, QtWidgets.QComboBox):
-                value = widget.currentText()
-                self.settings.setValue(widgetObjectName,
-                                       value)
-            elif isinstance(widget, QtWidgets.QLineEdit):
-                value = widget.text()
-                self.settings.setValue(widgetObjectName,
-                                       value)
-        self.settings.endGroup()
-        # User Data (Independent Data)
-        self.settings.setValue('user/exportDirectory',
-                               self.windows['settings'].exportDirectory)
-        self.settings.setValue('user/language',
-                               self.translator.loaded_language)
-        self.settings.setValue('user/inputPaths',
-                               self.windows['main'].inputPaths)
-        self.settings.setValue('user/inputsDirectory',
-                               self.windows['main'].inputsDirectory)
-        self.settings.setValue('user/presets',
-                               self.windows['presetsEditor'].get_presets())
-        self.settings.setValue('user/presets_loadDir',
-                               self.windows['presetsEditor'].presets_loadDir)
-        self.settings.setValue('user/presets_saveDir',
-                               self.windows['presetsEditor'].presets_saveDir)
-        self.settings.sync()
 
+        # Save Application
+        self.save_application()
+
+        # Close Windows
         self.logger.info('Closing windows...')
         super().closeAllWindows()
+
+        # Finish
+        self.settings.sync()
         self.logger.indent_backwards()
         self.logger.info('--- Done! ---')
 
@@ -336,8 +339,10 @@ class Translator:
 
 
 def run():
-    """
-    Start the application
+    """Start UVR
+
+    This function is executed by the main.py
+    file one directory up
     """
     app = CustomApplication()
     sys.exit(app.exec_())

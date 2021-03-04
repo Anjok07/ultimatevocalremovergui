@@ -4,5 +4,5 @@ UIFileConverter.ps1
 developer_notes.txt
 languages
 # Do not include model files and logs
-src/resources/models/**/*.pth
-src/resources/logs/*.log
+src/resources/user/models/**/*.pth
+src/resources/user/logs/*.log

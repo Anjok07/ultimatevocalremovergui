@@ -62,9 +62,9 @@ class MainWindow(QtWidgets.QWidget):
 
         # -Other Variables-
         # Independent data
-        self.inputPaths: list = self.settings.value('mainwindow/inputPaths',
+        self.inputPaths: list = self.settings.value('user/inputPaths',
                                                     const.DEFAULT_SETTINGS['inputPaths'])
-        self.inputsDirectory: str = self.settings.value('mainwindow/inputsDirectory',
+        self.inputsDirectory: str = self.settings.value('user/inputsDirectory',
                                                         const.DEFAULT_SETTINGS['inputsDirectory'],
                                                         type=str)
 
@@ -183,16 +183,14 @@ class MainWindow(QtWidgets.QWidget):
         # Temp func
         self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
                                    os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
-
-        self._activate_audio_players()
-
+        self._deactivate_audio_players()
+        
         # -Setup-
         load_geometry()
         load_images()
         bind_widgets()
         create_animation_objects()
         self.show()
-        self.app.windows['presetsEditor'].show()
 
         # -After setup-
         # Create WinTaskbar

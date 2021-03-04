@@ -10,6 +10,9 @@ from ..app import CustomApplication
 from .. import constants as const
 from .design import presetseditorwindow_ui
 # -Other-
+# File saving
+from collections import OrderedDict
+import json
 # System
 import os
 import sys
@@ -21,6 +24,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
     """
     Window for editing presets for the seperation settings
     """
+    PRESET_PREFIX = 'UVR_'
 
     def __init__(self, app: CustomApplication):
         # -Window setup-
@@ -33,9 +37,15 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
         # -Other Variables-
-
+        # Independent data
+        self.presets_saveDir: str = self.settings.value('user/presets_saveDir',
+                                                        const.DEFAULT_SETTINGS['presets_saveDir'])
+        self.presets_loadDir: str = self.settings.value('user/presets_loadDir',
+                                                        const.DEFAULT_SETTINGS['presets_loadDir'],
+                                                        type=str)
 
     # -Initialization methods-
+
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
@@ -74,7 +84,8 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             """
             Bind the widgets here
             """
-            self.ui.listWidget_presets.itemChanged.connect(lambda: self.app.windows['settings'].update_page_seperationSettings())
+            self.ui.listWidget_presets.itemChanged.connect(
+                lambda: self.app.settingsWindow.update_page_seperationSettings())
             self.ui.pushButton_add.clicked.connect(self.pushButton_add_clicked)
             self.ui.pushButton_delete.clicked.connect(self.pushButton_delete_clicked)
             self.ui.pushButton_export.clicked.connect(self.pushButton_export_clicked)
@@ -116,8 +127,14 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.ui.listWidget_presets.insertItem(0, item)
         # -Obtain data-
         if settings is None:
+            settingsManager = self.app.settingsWindow.settingsManager
             # Get current
-            settings = self.app.windows['settings'].get_seperation_settings()
+            settings = settingsManager.get_settings(page=0)
+            del settings['comboBox_presets']
+            name_to_json = {v: k for k, v in const.JSON_TO_NAME.items()}  # Invert dict
+            for widget_objectName in list(settings.keys()):
+                json_key = name_to_json[widget_objectName]
+                settings[json_key] = settings.pop(widget_objectName)
         if label is None:
             # Generate generic name for preset
             i = self.ui.listWidget_presets.count() + 1
@@ -126,10 +143,10 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             self.ui.listWidget_presets.editItem(item)
         # -Set data-
         item.setText(label)
-        item.setData(Qt.UserRole, settings)
+        item.setData(Qt.UserRole, settings.copy())
 
         # -Update settings window-
-        self.app.windows['settings'].update_page_seperationSettings()
+        self.app.settingsWindow.update_page_seperationSettings()
 
     def pushButton_delete_clicked(self):
         """
@@ -141,18 +158,66 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             self.ui.listWidget_presets.takeItem(row)
 
         # -Update settings window-
-        self.app.windows['settings'].update_page_seperationSettings()
+        self.app.settingsWindow.update_page_seperationSettings()
 
     def pushButton_export_clicked(self):
         """
         Export selected preset as a json file
         """
+        self.logger.info('Exporting Preset...',
+                         indent_forwards=True)
+        # 
+        item = self.ui.listWidget_presets.selectedItems()[0]
+        itemText = item.text().replace(' ', '_')
+        file_name = f'{self.PRESET_PREFIX}{itemText}.json'
+        path = QtWidgets.QFileDialog().getSaveFileName(parent=self,
+                                                       caption='Save Preset',
+                                                       dir=os.path.join(self.presets_saveDir,
+                                                                        file_name),
+                                                       filter='JSON File (*.json)',
+                                                       )[0]
+
+        if not path:
+            # No files specified
+            self.logger.info('Canceled preset export!',)
+            self.logger.indent_backwards()
+            return
+        self.presets_saveDir = os.path.dirname(path)
+
+        settings = item.data(Qt.UserRole)
+        with open(path, 'w') as f:
+            json.dump(settings, f, indent=2)
 
     def pushButton_import_clicked(self):
         """
         Import a .json preset file
         """
-        print(self.get_presets())
+        self.logger.info('Importing Preset Files...',
+                         indent_forwards=True)
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent=self,
+                                                       caption='Select Presets',
+                                                       filter='JSON Files (*.json)',
+                                                       dir=self.presets_loadDir,
+                                                       )[0]
+
+        if not paths:
+            # No files specified
+            self.logger.info('No presets selected!',)
+            self.logger.indent_backwards()
+            return
+        self.presets_loadDir = os.path.dirname(paths[0])
+
+        for path in paths:
+            with open(path, 'r') as f:
+                settings = json.load(f, object_pairs_hook=OrderedDict)
+            file_name = os.path.splitext(os.path.basename(path))[0]
+            file_name = file_name.replace(self.PRESET_PREFIX, '')
+            file_name = file_name.replace('_', ' ')
+
+            self.pushButton_add_clicked(label=file_name,
+                                        settings=settings)
+
+        self.logger.indent_backwards()
 
     # -Other Methods-
     def get_presets(self) -> dict:
@@ -165,8 +230,18 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         for idx in range(self.ui.listWidget_presets.count()):
             item = self.ui.listWidget_presets.item(idx)
             presets[item.text()] = item.data(Qt.UserRole)
-            
+
         return presets
+
+    def get_settings(self, name: str):
+        """
+        Get settings of a preset by name
+        """
+        presets = self.get_presets()
+        if name in presets:
+            return presets[name]
+        else:
+            return {}
 
     def update_window(self):
         """

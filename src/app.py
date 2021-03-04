@@ -50,7 +50,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        # self.settings.clear()
+        self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.threadpool = QtCore.QThreadPool(self)
@@ -63,6 +63,9 @@ class CustomApplication(QtWidgets.QApplication):
             'settings': settingswindow.SettingsWindow(self),
             'presetsEditor': presetseditorwindow.PresetsEditorWindow(self),
         }
+        self.mainWindow = self.windows['main']
+        self.settingsWindow = self.windows['settings']
+        self.presetsEditorWindow = self.windows['presetsEditor']
 
         self.logger.info('--- Setting up application ---',
                          indent_forwards=True)
@@ -114,7 +117,7 @@ class CustomApplication(QtWidgets.QApplication):
 
         # -After-
         # Load language
-        language = QtCore.QLocale(self.settings.value('settingswindow/language',
+        language = QtCore.QLocale(self.settings.value('user/language',
                                                       const.DEFAULT_SETTINGS['language'])).language()
         self.translator.load_language(language)
         # Raise main window
@@ -238,17 +241,21 @@ class CustomApplication(QtWidgets.QApplication):
                 self.settings.setValue(widgetObjectName,
                                        value)
         self.settings.endGroup()
-        # Back-end Data
-        self.settings.setValue('settingswindow/exportDirectory',
+        # User Data (Independent Data)
+        self.settings.setValue('user/exportDirectory',
                                self.windows['settings'].exportDirectory)
-        self.settings.setValue('settingswindow/language',
+        self.settings.setValue('user/language',
                                self.translator.loaded_language)
-        self.settings.setValue('mainwindow/inputPaths',
+        self.settings.setValue('user/inputPaths',
                                self.windows['main'].inputPaths)
-        self.settings.setValue('mainwindow/inputsDirectory',
+        self.settings.setValue('user/inputsDirectory',
                                self.windows['main'].inputsDirectory)
         self.settings.setValue('user/presets',
                                self.windows['presetsEditor'].get_presets())
+        self.settings.setValue('user/presets_loadDir',
+                               self.windows['presetsEditor'].presets_loadDir)
+        self.settings.setValue('user/presets_saveDir',
+                               self.windows['presetsEditor'].presets_saveDir)
         self.settings.sync()
 
         self.logger.info('Closing windows...')

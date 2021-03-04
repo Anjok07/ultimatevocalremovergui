@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>920</width>
-    <height>540</height>
+    <width>953</width>
+    <height>453</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -316,7 +316,7 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -901,16 +901,6 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
                             <property name="modelColumn">
                              <number>0</number>
                             </property>
-                            <item>
-                             <property name="text">
-                              <string>fsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsga</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string>Instrumental</string>
-                             </property>
-                            </item>
                            </widget>
                           </item>
                           <item>
@@ -1712,8 +1702,8 @@ QRadioButton[menu=&quot;true&quot;]::indicator::checked {
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>600</width>
-               <height>397</height>
+               <width>773</width>
+               <height>394</height>
               </rect>
              </property>
              <property name="minimumSize">

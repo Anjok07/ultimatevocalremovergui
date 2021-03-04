@@ -18,7 +18,7 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(920, 540)
+        SettingsWindow.resize(953, 453)
         SettingsWindow.setStyleSheet(u"/* Universal */\n"
                                      "* {\n"
                                      "	font: 10pt \"Yu Gothic UI\";	\n"
@@ -438,8 +438,6 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_10.setObjectName(u"horizontalLayout_10")
         self.horizontalLayout_10.setContentsMargins(20, 15, 15, 15)
         self.comboBox_presets = QComboBox(self.groupBox)
-        self.comboBox_presets.addItem("")
-        self.comboBox_presets.addItem("")
         self.comboBox_presets.setObjectName(u"comboBox_presets")
         self.comboBox_presets.setMinimumSize(QSize(0, 25))
         self.comboBox_presets.setSizeAdjustPolicy(
@@ -780,7 +778,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 397))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 773, 394))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -1136,7 +1134,7 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(3)
         self.comboBox_winSize_stacked.setCurrentIndex(2)
         self.comboBox_winSize.setCurrentIndex(2)
         self.pushButton_english.setDefault(False)
@@ -1190,11 +1188,6 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Resolution Type", None))
         self.groupBox.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Presets ", None))
-        self.comboBox_presets.setItemText(0, QCoreApplication.translate(
-            "SettingsWindow", u"fsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsgafsdgfdsgsga", None))
-        self.comboBox_presets.setItemText(1, QCoreApplication.translate(
-            "SettingsWindow", u"Instrumental", None))
-
         self.pushButton_presetsEdit.setText(
             QCoreApplication.translate("SettingsWindow", u"Edit", None))
         self.groupBox_3.setTitle(QCoreApplication.translate(

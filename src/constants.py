@@ -6,10 +6,48 @@ Store Appliation info and default data
 from PySide2 import QtCore
 # -Root imports-
 from .inference import converter_v4
+from collections import OrderedDict
 
 VERSION = "0.0.1"
 APPLICATION_SHORTNAME = 'UVR'
 APPLICATION_NAME = 'Ultimate Vocal Remover'
+# Values that are inside a preset with their corresponding label
+# Key -> json key
+# Value -> widget object name
+JSON_TO_NAME = OrderedDict(**{
+    # -Conversion-
+    # Boolean
+    'gpuConversion': 'checkBox_gpuConversion',
+    'postProcess': 'checkBox_postProcess',
+    'tta': 'checkBox_tta',
+    'outputImage': 'checkBox_outputImage',
+    'useStackPasses': 'checkBox_stackPasses',
+    'stackOnly': 'checkBox_stackOnly',
+    'saveAllStacked': 'checkBox_saveAllStacked',
+    'modelFolder': 'checkBox_modelFolder',
+    'customParameters': 'checkBox_customParameters',
+    # Combobox
+    'stackPassesNum': 'comboBox_stackPasses',
+    # -Engine-
+    'aiEngine': 'comboBox_engine',
+    'resolutionType': 'comboBox_resType',
+    # -Models-
+    'instrumentalModelName': 'comboBox_instrumental',
+    'stackedModelName': 'comboBox_stacked',
+    # Sampling Rate (SR)
+    'sr': 'lineEdit_sr',
+    'srStacked': 'lineEdit_sr_stacked',
+    # Hop Length
+    'hopLength': 'lineEdit_hopLength',
+    'hopLengthStacked': 'lineEdit_hopLength_stacked',
+    # Window size
+    'windowSize': 'comboBox_winSize',
+    'windowSizeStacked': 'comboBox_winSize_stacked',
+    # NFFT
+    'nfft': 'lineEdit_nfft',
+    'nfftStacked': 'lineEdit_nfft_stacked',
+})
+
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
     'inputPaths': [],
@@ -21,6 +59,10 @@ DEFAULT_SETTINGS = {
     'language': QtCore.QLocale.system().name(),
     # Presets for seperations
     'presets': {},
+    # Presets save directory (Default: desktop)
+    'presets_saveDir': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
+    # Presets load directory (Default: desktop)
+    'presets_loadDir': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
     # --Settings window -> Seperation Settings--
     # -Conversion-
     # Boolean
@@ -32,7 +74,7 @@ DEFAULT_SETTINGS = {
     'checkBox_saveAllStacked': converter_v4.default_data['saveAllStacked'],
     'checkBox_modelFolder': converter_v4.default_data['modelFolder'],
     'checkBox_customParameters': converter_v4.default_data['customParameters'],
-    'checkBox_stackPasses': False,
+    'checkBox_stackPasses': True,
     # Combobox
     'comboBox_stackPasses': 1,
     # -Engine-
@@ -53,7 +95,8 @@ DEFAULT_SETTINGS = {
     # NFFT
     'lineEdit_nfft': converter_v4.default_data['n_fft'],
     'lineEdit_nfft_stacked': converter_v4.default_data['n_fft'],
-
+    # -Presets-
+    'comboBox_presets': '',
     # --Settings window -> Preferences--
     # -Settings-
     # Command off
@@ -63,7 +106,7 @@ DEFAULT_SETTINGS = {
     # Notify on application updates
     'checkBox_notifyUpdates': True,
     # Open settings on startup
-    'checkBox_settingsStartup': True,
+    'checkBox_settingsStartup': False,
     # Disable animations
     'checkBox_disableAnimations': False,
     # Disable Shortcuts

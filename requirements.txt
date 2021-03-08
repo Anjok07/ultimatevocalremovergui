@@ -5,6 +5,5 @@ opencv-python
 numba==0.48.0
 numpy==1.19.3
 PySide2==5.15.2
-torch
 SoundFile
 soundstretch

@@ -150,7 +150,7 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.pushButton_resetDefault.clicked.connect(self.pushButton_resetDefault_clicked)
             # Menu
             self.menu_group.buttonClicked.connect(lambda btn:
-                                                  self.menu_loadPage(index=self.menu_group.id(btn)))
+                                                  self.menu_loadPage(page_idx=self.menu_group.id(btn)))
             # -Seperation Settings Page-
             self.ui.pushButton_presetsEdit.clicked.connect(self.pushButton_presetsEdit_clicked)
             # Checkboxes
@@ -208,7 +208,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.settingsManager.fill_save_widgets()
         # Connect button group for menu together
         self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
-        self.menu_group.addButton(self.ui.radioButton_seperationSettings,
+        self.menu_group.addButton(self.ui.radioButton_separationSettings,
                                   id=0)
         self.menu_group.addButton(self.ui.radioButton_shortcuts,
                                   id=1)
@@ -235,68 +235,6 @@ class SettingsWindow(QtWidgets.QWidget):
         # Load menu (Preferences)
         self.menu_loadPage(0)
         self.update_window()
-        self.logger.indent_backwards()
-
-    def _load_data(self, default: bool = False):
-        """
-        Load the data for this window
-
-        (Only run right after window initialization or to reset settings)
-
-        Parameters:
-            default(bool):
-                Reset to the default settings
-        """
-        self.logger.info('Loading data...',
-                         indent_forwards=True)
-        self.settings.beginGroup('settingswindow')
-        if default:
-            # Delete settings group
-            self.settings.remove("")
-        # -Load Settings-
-        # Widgets
-        setting_widgets = [*self.ui.stackedWidget.findChildren(QtWidgets.QCheckBox),
-                           *self.ui.stackedWidget.findChildren(QtWidgets.QComboBox),
-                           *self.ui.stackedWidget.findChildren(QtWidgets.QLineEdit), ]
-        for widget in setting_widgets:
-            widgetObjectName = widget.objectName()
-            # -Errors-
-            if not widgetObjectName in const.DEFAULT_SETTINGS:
-                if not widgetObjectName:
-                    # Empty object name no need to notify
-                    continue
-                # Default settings do not exist
-                self.logger.warn(f'"{widgetObjectName}"; {widget.__class__} does not have a default setting!')
-                continue
-
-            # -Finding the instance and loading appropiately-
-            if isinstance(widget, QtWidgets.QCheckBox):
-                value = self.settings.value(widgetObjectName,
-                                            defaultValue=const.DEFAULT_SETTINGS[widgetObjectName],
-                                            type=bool)
-                widget.setChecked(value)
-            elif isinstance(widget, QtWidgets.QComboBox):
-                value = self.settings.value(widgetObjectName,
-                                            defaultValue=const.DEFAULT_SETTINGS[widgetObjectName],
-                                            type=str)
-                if widget.isEditable():
-                    # Allows self-typing
-                    widget.setCurrentText(value)
-                else:
-                    # Only allows a list to choose from
-                    all_items = [widget.itemText(i) for i in range(widget.count())]
-                    for i, item in enumerate(all_items):
-                        if item == value:
-                            # Both have the same text
-                            widget.setCurrentIndex(i)
-            elif isinstance(widget, QtWidgets.QLineEdit):
-                value = self.settings.value(widgetObjectName,
-                                            defaultValue=const.DEFAULT_SETTINGS[widgetObjectName],
-                                            type=str)
-                widget.setText(value)
-
-        # -Done-
-        self.settings.endGroup()
         self.logger.indent_backwards()
 
     # -Widget Binds-
@@ -720,51 +658,66 @@ class SettingsWindow(QtWidgets.QWidget):
 
         return model_name
 
-    def menu_loadPage(self, index: int):
-        """
-        Load the given menu page by index and
-        adjust minimum size of window
+    def menu_loadPage(self, page_idx: int):
+        """Load the given menu page by index
 
-        Parameters:
-            index(int):
-                0 = Seperation Settings
-                1 = Shortcuts
-                2 = Customization
-                3 = Preferences
+        Note:
+            Also adjust the minimum size of the window
+            based on the stored minimum width in the page
+
+        Args:
+            page_idx (int):
+                Which page to load.
+
+                0 - Seperation Settings Page
+                1 - Shortcuts Page
+                2 - Customization Page
+                3 - Preferences Page
         """
-        self.logger.info(f'Loading page with index {index}',
+        self.logger.info(f'Loading page with index {page_idx}',
                          indent_forwards=True)
 
         def menu_loadPage():
             # Load Page
             stackedWidget = self.ui.stackedWidget
-            stackedWidget.setCurrentIndex(index)
+            stackedWidget.setCurrentIndex(page_idx)
             # Check Radiobutton
-            self.menu_group.button(index).setChecked(True)
+            self.menu_group.button(page_idx).setChecked(True)
 
-            # Find Frame which specifies the minimum width
+            # Get specified minimum width from page
             page = stackedWidget.currentWidget()
             min_width = page.property('minimumFrameWidth')
             self.ui.frame_14.setMinimumWidth(min_width)
 
             # Update page based on index
-            self.menu_update_methods[index]()
+            self.menu_update_methods[page_idx]()
+
+        if self.ui.stackedWidget.currentIndex() == page_idx:
+            # Trying to load same page
+            self.logger.info('Skipping load -> page already loaded')
             self.logger.indent_backwards()
+            return
 
         if not self.ui.checkBox_disableAnimations.isChecked():
             # Animations enabled
             self.pages_ani.start()
-            # On half of whole aniamtion loaad new window
+            try:
+                # Disconnect last menu_loadPage
+                self.pageSwitchTimer.timeout.disconnect()
+            except RuntimeError:
+                # No signal to disconnect
+                pass
+            # On half of whole aniamtion load new window
             self.pageSwitchTimer.timeout.connect(menu_loadPage)
             self.pageSwitchTimer.start()
         else:
             menu_loadPage()
 
+        self.logger.indent_backwards()
+
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
-        """
-        Catch close event of this window to save data
-        """
+        """Catch close event of this window to save data"""
         # -Save the geometry for this window-
         self.settings.setValue('settingswindow/size',
                                self.size())
@@ -773,13 +726,12 @@ class SettingsWindow(QtWidgets.QWidget):
         # Commit Save
         self.settings.sync()
         # -Close Window-
-        self.app.windows['presetsEditor'].hide()
+        # Hide the presets editor window (child window)
+        self.app.presetsEditorWindow.hide()
         event.accept()
 
     def update_translation(self):
-        """
-        Update translation of this window
-        """
+        """Update translation of this window"""
         self.logger.info('Settings: Retranslating UI')
         self.ui.retranslateUi(self)
 
@@ -791,6 +743,7 @@ class SettingsManager:
         win (SettingsWindow): Settings window that is being managed
         save_widgets (dict): Configurable widgets that the window contains
             Key - Page number
+            Value - Widgets
     """
 
     def __init__(self, win: SettingsWindow):
@@ -809,10 +762,12 @@ class SettingsManager:
 
     def fill_save_widgets(self):
         """Update the save_widgets variable
-        
+
         Assign all instances of the widgets on the
         settings window to their corresponding page.
-        (Only run right after window initialization)
+
+        Note:
+            Only run right after window initialization
         """
         # Get widgets
         seperation_settings_widgets = [
@@ -873,12 +828,12 @@ class SettingsManager:
         self.save_widgets[2] = customization_widgets
         self.save_widgets[3] = preferences_widgets
 
-    def get_settings(self, page: Optional[int] = None) -> Dict[str, Union[bool, str]]:
+    def get_settings(self, page_idx: Optional[int] = None) -> Dict[str, Union[bool, str]]:
         """Obtain states of the widgets
 
         Args:
-            page (Optional[int], optional):
-                Which page to load the widgets from.
+            page_idx (Optional[int], optional):
+                Which page to load the widgets from to get the settings.
                 Defaults to None.
 
                 0 - Seperation Settings Page
@@ -888,7 +843,7 @@ class SettingsManager:
                 None - All widgets
 
         Raises:
-            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
 
         Returns:
             Dict[str, Union[bool, str]]: Widget states
@@ -897,7 +852,7 @@ class SettingsManager:
         """
         settings = OrderedDict()
 
-        save_widgets = self.get_widgets(page=page)
+        save_widgets = self.get_widgets(page_idx=page_idx)
 
         for widget in save_widgets:
             # Get value
@@ -938,7 +893,7 @@ class SettingsManager:
             settings (Dict[str, Union[bool, str]]): States of the widgets to update
 
         Raises:
-            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
         """
         self.win.suppress_settings_change_event = True
         for widget_objectName, value in settings.items():
@@ -968,9 +923,9 @@ class SettingsManager:
 
     def load_window(self):
         """Load states of the widgets of the window
-        
+
         Raises:
-            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
         """
         # Before
         self.win.logger.info('Settings: Loading window')
@@ -1019,7 +974,7 @@ class SettingsManager:
         """Save states of the widgets of the window
 
         Raises:
-            TypeError: Invalid widget type in the settings (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
         """
         # Before
         self.win.logger.info('Settings: Saving window')
@@ -1048,11 +1003,11 @@ class SettingsManager:
                                        value)
         self.win.settings.endGroup()
 
-    def get_widgets(self, page: Optional[int] = None) -> list:
+    def get_widgets(self, page_idx: Optional[int] = None) -> list:
         """Obtain the configurable widgets in the window
 
         Args:
-            page (Optional[int], optional):
+            page_idx (Optional[int], optional):
                 Which page to load the widgets from.
                 Defaults to None.
 
@@ -1065,14 +1020,14 @@ class SettingsManager:
         Returns:
             list: Widgets of the given page
         """
-        if page is None:
+        if page_idx is None:
             # Load all widgets
             widgets = []
             for widget_list in self.save_widgets.values():
                 widgets.extend(widget_list)
         else:
             # Load one page of widgets
-            assert page in self.save_widgets.keys(), "Invalid page index!"
-            widgets = self.save_widgets[page]
+            assert page_idx in self.save_widgets.keys(), "Invalid page index!"
+            widgets = self.save_widgets[page_idx]
 
         return widgets

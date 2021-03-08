@@ -129,7 +129,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         if settings is None:
             settingsManager = self.app.settingsWindow.settingsManager
             # Get current
-            settings = settingsManager.get_settings(page=0)
+            settings = settingsManager.get_settings(page_idx=0)
             del settings['comboBox_presets']
             name_to_json = {v: k for k, v in const.JSON_TO_NAME.items()}  # Invert dict
             for widget_objectName in list(settings.keys()):
@@ -166,8 +166,14 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         """
         self.logger.info('Exporting Preset...',
                          indent_forwards=True)
-        # 
-        item = self.ui.listWidget_presets.selectedItems()[0]
+        selected_items = self.ui.listWidget_presets.selectedItems()
+        if not selected_items:
+            # No item selected
+            self.logger.info('No item selected')
+            self.logger.indent_backwards()
+            return
+    
+        item = selected_items[0]
         itemText = item.text().replace(' ', '_')
         file_name = f'{self.PRESET_PREFIX}{itemText}.json'
         path = QtWidgets.QFileDialog().getSaveFileName(parent=self,
@@ -182,6 +188,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             self.logger.info('Canceled preset export!',)
             self.logger.indent_backwards()
             return
+    
         self.presets_saveDir = os.path.dirname(path)
 
         settings = item.data(Qt.UserRole)

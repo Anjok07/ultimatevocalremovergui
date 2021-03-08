@@ -206,6 +206,7 @@ class Ui_MainWindow(object):
         self.label_arrow.setObjectName(u"label_arrow")
         self.label_arrow.setMaximumSize(QSize(16777215, 60))
         self.label_arrow.setStyleSheet(u"font-size: 40px;")
+        self.label_arrow.setText(u"\u2193")
         self.label_arrow.setAlignment(Qt.AlignCenter)
 
         self.verticalLayout.addWidget(self.label_arrow)
@@ -486,8 +487,6 @@ class Ui_MainWindow(object):
             "MainWindow", u"Vocal Remover", None))
         self.pushButton_musicFiles.setText(QCoreApplication.translate(
             "MainWindow", u"Drag your music files", None))
-        self.label_arrow.setText(
-            QCoreApplication.translate("MainWindow", u"\u2193", None))
         self.label_vocalsFile.setText(
             QCoreApplication.translate("MainWindow", u"Audio File", None))
         self.pushButton_play_vocals.setText("")
@@ -501,5 +500,5 @@ class Ui_MainWindow(object):
         self.label_vocals.setText(
             QCoreApplication.translate("MainWindow", u"Vocals", None))
         self.pushButton_seperate.setText(
-            QCoreApplication.translate("MainWindow", u"  Seperate", None))
+            QCoreApplication.translate("MainWindow", u" Separate", None))
     # retranslateUi

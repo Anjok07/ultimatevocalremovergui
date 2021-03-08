@@ -77,6 +77,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_add.setObjectName(u"pushButton_add")
         self.pushButton_add.setMinimumSize(QSize(35, 35))
         self.pushButton_add.setMaximumSize(QSize(35, 35))
+        self.pushButton_add.setText(u"+")
 
         self.horizontalLayout.addWidget(self.pushButton_add)
 
@@ -84,6 +85,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_delete.setObjectName(u"pushButton_delete")
         self.pushButton_delete.setMinimumSize(QSize(35, 35))
         self.pushButton_delete.setMaximumSize(QSize(35, 35))
+        self.pushButton_delete.setText(u"-")
 
         self.horizontalLayout.addWidget(self.pushButton_delete)
 
@@ -91,6 +93,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_import.setObjectName(u"pushButton_import")
         self.pushButton_import.setMinimumSize(QSize(35, 35))
         self.pushButton_import.setMaximumSize(QSize(35, 35))
+        self.pushButton_import.setText(u"")
 
         self.horizontalLayout.addWidget(self.pushButton_import)
 
@@ -98,6 +101,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_export.setObjectName(u"pushButton_export")
         self.pushButton_export.setMinimumSize(QSize(35, 35))
         self.pushButton_export.setMaximumSize(QSize(35, 35))
+        self.pushButton_export.setText(u"")
 
         self.horizontalLayout.addWidget(self.pushButton_export)
 
@@ -113,10 +117,4 @@ class Ui_PresetsEditor(object):
             "PresetsEditor", u"Presets Editor", None))
         self.label.setText(QCoreApplication.translate(
             "PresetsEditor", u"Seperation Presets", None))
-        self.pushButton_add.setText(
-            QCoreApplication.translate("PresetsEditor", u"+", None))
-        self.pushButton_delete.setText(
-            QCoreApplication.translate("PresetsEditor", u"-", None))
-        self.pushButton_import.setText("")
-        self.pushButton_export.setText("")
     # retranslateUi

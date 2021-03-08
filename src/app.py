@@ -265,8 +265,7 @@ class CustomApplication(QtWidgets.QApplication):
         save_user_data()
 
     def closeAllWindows(self):
-        """Capture application close to save data
-        """
+        """Capture application close to save data"""
         self.logger.info('--- Closing application ---',
                          indent_forwards=True)
 
@@ -297,7 +296,7 @@ class Translator:
         Default is english
         """
         language_str = QtCore.QLocale.languageToString(language).lower()
-        self.logger.info(f'Translating to {language_str}...',
+        self.logger.info(f'Translating to "{language_str.capitalize()}"...',
                          indent_forwards=True)
         # Get path where translation file should be
         translation_path = os.path.join(self.app.resources.localizationDir, f'{language_str}.qm')

@@ -40,7 +40,7 @@ class CustomApplication(QtWidgets.QApplication):
 
     The class contains instances of all windows and performs
     general tasks like setting up the windows, saving data,
-    or improving the functionality of widgets across all windows
+    or improving the functionality of widgets, across all windows.
     """
 
     def __init__(self):
@@ -77,7 +77,6 @@ class CustomApplication(QtWidgets.QApplication):
         self.logger.info('--- Setting up application ---',
                          indent_forwards=True)
         self.setup_application()
-        # self.windows['main'].pushButton_seperate_clicked()
         self.logger.indent_backwards()
         self.logger.info('--- Finished setup ---')
 
@@ -284,17 +283,33 @@ class CustomApplication(QtWidgets.QApplication):
 
 
 class Translator:
+    """Localizer for the application
+
+    Manages the languages for the applications
+
+    Args:
+        loaded_language (str):
+            Currently loaded language in the application. To change, run method load_language.
+    """
     def __init__(self, app: CustomApplication):
         self.app = app
         self.logger = app.logger
         self.loaded_language: str
         self._translator = QtCore.QTranslator(self.app)
 
-    def load_language(self, language: QtCore.QLocale.Language = QtCore.QLocale.English):
-        """
-        Load specified language by file name
+    def load_language(self, language: QtCore.QLocale.Language = QtCore.QLocale.English) -> bool:
+        """Load a language on the application
 
-        Default is english
+        Note:
+            language arg info:
+                If the language given is not supported, a warning message will be reported to the logger
+                and the language will be set to english
+
+        Args:
+            language (QtCore.QLocale.Language, optional): Language to load. Defaults to English.
+
+        Returns:
+            bool: Whether the applications language was successfully changed to the given language
         """
         language_str = QtCore.QLocale.languageToString(language).lower()
         self.logger.info(f'Translating to {language_str}...',
@@ -308,7 +323,7 @@ class Translator:
             self.logger.warning(f'Translation file does not exist! Switching to English. Language: {language_str}')
             self.logger.indent_backwards()
             self.load_language()
-            return
+            return False
         # get language name to later store in settings
         self.loaded_language = QtCore.QLocale(language).name()
         # Load language
@@ -319,23 +334,23 @@ class Translator:
             self._translator.load(translation_path)
             self.app.installTranslator(self._translator)
 
-        if hasattr(self.app, 'windows'):
-            # -Windows are initialized-
-            # Update translation on all windows
-            for window in self.app.windows.values():
-                window.update_translation()
-            # Update settings window
-            for button in self.app.windows['settings'].ui.frame_languages.findChildren(QtWidgets.QPushButton):
-                language_str = QtCore.QLocale.languageToString(language).lower()
-                button_name = f'pushButton_{language_str}'
-                if button.objectName() == button_name:
-                    # Language found
-                    button.setChecked(True)
-                else:
-                    # Not selected language
-                    button.setChecked(False)
-
+        # -Windows are initialized-
+        # Update translation on all windows
+        for window in self.app.windows.values():
+            window.update_translation()
+        # Update settings window
+        for button in self.app.windows['settings'].ui.frame_languages.findChildren(QtWidgets.QPushButton):
+            language_str = QtCore.QLocale.languageToString(language).lower()
+            button_name = f'pushButton_{language_str}'
+            if button.objectName() == button_name:
+                # Language found
+                button.setChecked(True)
+            else:
+                # Not selected language
+                button.setChecked(False)
+        
         self.logger.indent_backwards()
+        return True
 
 
 def run():

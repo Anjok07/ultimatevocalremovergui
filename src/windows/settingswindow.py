@@ -233,7 +233,7 @@ class SettingsWindow(QtWidgets.QWidget):
         # Clear command
         self.pushButton_clearCommand_clicked()
         # Load menu (Preferences)
-        self.menu_loadPage(0)
+        self.ui.radioButton_separationSettings.click()
         self.update_window()
         self.logger.indent_backwards()
 

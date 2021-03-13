@@ -6,6 +6,7 @@ from PySide2 import QtGui
 from PySide2.QtGui import Qt
 # -Root imports-
 from ..resources.resources_manager import (ResourcePaths)
+from ..resources import resources
 from ..app import CustomApplication
 from .. import constants as const
 from .design import presetseditorwindow_ui
@@ -74,7 +75,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             Load the images for this window and assign them to their widgets
             """
             upload_img = QtGui.QPixmap(ResourcePaths.images.upload)
-            download_img = QtGui.QPixmap(ResourcePaths.images.download)
+            download_img = QtGui.QPixmap(":/img/images/download.png")
             self.ui.pushButton_export.setIcon(upload_img)
             self.ui.pushButton_import.setIcon(download_img)
             self.ui.pushButton_export.setIconSize(QtCore.QSize(18, 18))
@@ -144,7 +145,6 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         # -Set data-
         item.setText(label)
         item.setData(Qt.UserRole, settings.copy())
-
         # -Update settings window-
         self.app.settingsWindow.update_page_seperationSettings()
 
@@ -153,6 +153,20 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         Delete selected presets after asking for
         confirmation
         """
+        selected_items = self.ui.listWidget_presets.selectedItems()
+        # Some paths already selected
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle(self.tr('Confirmation'))
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msg.setText(f'You will delete {len(selected_items)} items. Do you wish to continue?')
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+        val = msg.exec_()
+
+        if val == QtWidgets.QMessageBox.No:
+            # Cancel
+            return
+
         for item in self.ui.listWidget_presets.selectedItems():
             row = self.ui.listWidget_presets.row(item)
             self.ui.listWidget_presets.takeItem(row)
@@ -172,7 +186,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             self.logger.info('No item selected')
             self.logger.indent_backwards()
             return
-    
+
         item = selected_items[0]
         itemText = item.text().replace(' ', '_')
         file_name = f'{self.PRESET_PREFIX}{itemText}.json'
@@ -188,7 +202,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             self.logger.info('Canceled preset export!',)
             self.logger.indent_backwards()
             return
-    
+
         self.presets_saveDir = os.path.dirname(path)
 
         settings = item.data(Qt.UserRole)
@@ -238,7 +252,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
 
         Save states of the widgets in this window
         """
-        
+
     def get_presets(self) -> dict:
         """
         Obtain the presets from the window

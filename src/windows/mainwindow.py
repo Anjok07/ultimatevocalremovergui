@@ -7,6 +7,7 @@ from PySide2.QtGui import Qt
 from PySide2 import QtMultimedia
 # -Root imports-
 from ..resources.resources_manager import (ResourcePaths)
+from ..resources import resources
 from ..inference import converter_v4
 from ..app import CustomApplication
 from .. import constants as const

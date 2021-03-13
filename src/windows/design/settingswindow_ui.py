@@ -710,7 +710,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 747, 394))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 35))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -745,7 +745,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 747, 394))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 53, 35))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -923,32 +923,13 @@ class Ui_SettingsWindow(object):
         self.groupBox_export.setMinimumSize(QSize(0, 104))
         self.groupBox_export.setAcceptDrops(True)
         self.groupBox_export.setFlat(True)
-        self.gridLayout_8 = QGridLayout(self.groupBox_export)
-        self.gridLayout_8.setObjectName(u"gridLayout_8")
-        self.gridLayout_8.setHorizontalSpacing(20)
-        self.gridLayout_8.setVerticalSpacing(10)
-        self.gridLayout_8.setContentsMargins(35, 10, 30, 10)
-        self.frame_13 = QFrame(self.groupBox_export)
-        self.frame_13.setObjectName(u"frame_13")
-        self.frame_13.setMinimumSize(QSize(100, 0))
-        self.frame_13.setFrameShape(QFrame.NoFrame)
-        self.frame_13.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_8 = QHBoxLayout(self.frame_13)
-        self.horizontalLayout_8.setSpacing(0)
-        self.horizontalLayout_8.setObjectName(u"horizontalLayout_8")
-        self.horizontalLayout_8.setContentsMargins(0, 0, 0, 0)
-        self.label_3 = QLabel(self.frame_13)
-        self.label_3.setObjectName(u"label_3")
-        sizePolicy5.setHeightForWidth(
-            self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy5)
-        self.label_3.setMinimumSize(QSize(110, 0))
-        self.label_3.setAlignment(
-            Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
-
-        self.horizontalLayout_8.addWidget(self.label_3)
-
-        self.pushButton_exportDirectory = QPushButton(self.frame_13)
+        self.horizontalLayout_11 = QHBoxLayout(self.groupBox_export)
+        self.horizontalLayout_11.setObjectName(u"horizontalLayout_11")
+        self.horizontalLayout_11.setContentsMargins(35, 10, 30, 10)
+        self.gridLayout_10 = QGridLayout()
+        self.gridLayout_10.setObjectName(u"gridLayout_10")
+        self.gridLayout_10.setHorizontalSpacing(10)
+        self.pushButton_exportDirectory = QPushButton(self.groupBox_export)
         self.pushButton_exportDirectory.setObjectName(
             u"pushButton_exportDirectory")
         self.pushButton_exportDirectory.setMinimumSize(QSize(18, 18))
@@ -958,58 +939,60 @@ class Ui_SettingsWindow(object):
         self.pushButton_exportDirectory.setFlat(True)
         self.pushButton_exportDirectory.setProperty("export", True)
 
-        self.horizontalLayout_8.addWidget(self.pushButton_exportDirectory)
+        self.gridLayout_10.addWidget(
+            self.pushButton_exportDirectory, 0, 1, 1, 1)
 
-        self.gridLayout_8.addWidget(self.frame_13, 0, 0, 1, 1)
-
-        self.label_exportDirectory = QLabel(self.groupBox_export)
-        self.label_exportDirectory.setObjectName(u"label_exportDirectory")
-        sizePolicy2.setHeightForWidth(
-            self.label_exportDirectory.sizePolicy().hasHeightForWidth())
-        self.label_exportDirectory.setSizePolicy(sizePolicy2)
-        self.label_exportDirectory.setText(u"B:/Downloads")
-        self.label_exportDirectory.setTextFormat(Qt.AutoText)
-        self.label_exportDirectory.setScaledContents(True)
-        self.label_exportDirectory.setAlignment(
+        self.label_3 = QLabel(self.groupBox_export)
+        self.label_3.setObjectName(u"label_3")
+        sizePolicy5.setHeightForWidth(
+            self.label_3.sizePolicy().hasHeightForWidth())
+        self.label_3.setSizePolicy(sizePolicy5)
+        self.label_3.setMinimumSize(QSize(110, 0))
+        self.label_3.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
-        self.label_exportDirectory.setWordWrap(True)
-        self.label_exportDirectory.setIndent(5)
-        self.label_exportDirectory.setProperty("path", True)
 
-        self.gridLayout_8.addWidget(self.label_exportDirectory, 0, 1, 1, 1)
+        self.gridLayout_10.addWidget(self.label_3, 0, 0, 1, 1)
 
         self.label_autoSave = QLabel(self.groupBox_export)
         self.label_autoSave.setObjectName(u"label_autoSave")
         self.label_autoSave.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
 
-        self.gridLayout_8.addWidget(self.label_autoSave, 1, 0, 1, 1)
+        self.gridLayout_10.addWidget(self.label_autoSave, 1, 0, 1, 2)
 
-        self.frame_7 = QFrame(self.groupBox_export)
-        self.frame_7.setObjectName(u"frame_7")
-        self.frame_7.setMinimumSize(QSize(0, 30))
-        self.frame_7.setFrameShape(QFrame.NoFrame)
-        self.frame_7.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_7 = QHBoxLayout(self.frame_7)
-        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
-        self.horizontalLayout_7.setContentsMargins(5, 0, 0, 0)
-        self.checkBox_autoSaveInstrumentals = QCheckBox(self.frame_7)
+        self.checkBox_autoSaveInstrumentals = QCheckBox(self.groupBox_export)
         self.checkBox_autoSaveInstrumentals.setObjectName(
             u"checkBox_autoSaveInstrumentals")
 
-        self.horizontalLayout_7.addWidget(
-            self.checkBox_autoSaveInstrumentals, 0, Qt.AlignHCenter)
+        self.gridLayout_10.addWidget(
+            self.checkBox_autoSaveInstrumentals, 1, 2, 1, 1)
 
-        self.checkBox_autoSaveVocals = QCheckBox(self.frame_7)
+        self.checkBox_autoSaveVocals = QCheckBox(self.groupBox_export)
         self.checkBox_autoSaveVocals.setObjectName(u"checkBox_autoSaveVocals")
 
-        self.horizontalLayout_7.addWidget(
-            self.checkBox_autoSaveVocals, 0, Qt.AlignHCenter)
+        self.gridLayout_10.addWidget(self.checkBox_autoSaveVocals, 1, 3, 1, 1)
 
-        self.horizontalLayout_7.setStretch(0, 1)
-        self.horizontalLayout_7.setStretch(1, 1)
+        self.label_exportDirectory = QLabel(self.groupBox_export)
+        self.label_exportDirectory.setObjectName(u"label_exportDirectory")
+        sizePolicy2.setHeightForWidth(
+            self.label_exportDirectory.sizePolicy().hasHeightForWidth())
+        self.label_exportDirectory.setSizePolicy(sizePolicy2)
+        self.label_exportDirectory.setLineWidth(0)
+        self.label_exportDirectory.setText(u"B:/Downloads")
+        self.label_exportDirectory.setTextFormat(Qt.AutoText)
+        self.label_exportDirectory.setScaledContents(True)
+        self.label_exportDirectory.setAlignment(
+            Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
+        self.label_exportDirectory.setWordWrap(True)
+        self.label_exportDirectory.setIndent(1)
+        self.label_exportDirectory.setProperty("path", True)
 
-        self.gridLayout_8.addWidget(self.frame_7, 1, 1, 1, 1)
+        self.gridLayout_10.addWidget(self.label_exportDirectory, 0, 2, 1, 2)
+
+        self.gridLayout_10.setRowStretch(0, 1)
+        self.gridLayout_10.setRowStretch(1, 1)
+
+        self.horizontalLayout_11.addLayout(self.gridLayout_10)
 
         self.verticalLayout_20.addWidget(self.groupBox_export)
 
@@ -1136,7 +1119,7 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(3)
         self.comboBox_winSize_stacked.setCurrentIndex(0)
         self.comboBox_winSize.setCurrentIndex(0)
         self.pushButton_english.setDefault(False)
@@ -1241,9 +1224,9 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Multithreading (experimental)", None))
         self.groupBox_export.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Export Settings ", None))
+        self.pushButton_exportDirectory.setText("")
         self.label_3.setText(QCoreApplication.translate(
             "SettingsWindow", u"Export Directory:", None))
-        self.pushButton_exportDirectory.setText("")
         self.label_autoSave.setText(QCoreApplication.translate(
             "SettingsWindow", u"Automatically Save:", None))
         self.checkBox_autoSaveInstrumentals.setText(

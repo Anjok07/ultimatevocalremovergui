@@ -6,7 +6,6 @@ from PySide2 import QtGui
 from PySide2.QtGui import Qt
 # -Root imports-
 from ..resources.resources_manager import (ResourcePaths)
-from ..resources import resources
 from ..app import CustomApplication
 from .. import constants as const
 from .design import presetseditorwindow_ui

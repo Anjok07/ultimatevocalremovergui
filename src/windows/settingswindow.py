@@ -56,8 +56,145 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # self.get_model_id(r"B:\boska\Documents\Dilan\GitHub\ultimatevocalremovergui\src\resources\user\models\v4\Main Models\multifft_bv_agr2.pth")
 
-    # -Initialization methods-
+    # -Widget Binds-
+    def pushButton_clearCommand_clicked(self):
+        """
+        Clear the command line and append
+        """
+        self.logger.info('Clearing Command Line...')
+        self.ui.pushButton_clearCommand.setVisible(False)
+        self.app.windows['main'].ui.textBrowser_command.clear()
 
+        index = self.ui.comboBox_command.currentIndex()
+        if index:
+            current_date = dt.datetime.now().strftime("%H:%M:%S")
+            self.app.windows['main'].ui.textBrowser_command.append(f'Command Line [{current_date}]')
+
+    def pushButton_exportDirectory_clicked(self):
+        """
+        Let user select an export directory for the seperation
+        """
+        self.logger.info('Selecting Export Directory...',
+                         indent_forwards=True)
+        # Ask for directory
+        path = QtWidgets.QFileDialog.getExistingDirectory(parent=self,
+                                                          caption='Select Export Directory',
+                                                          dir=self.exportDirectory,
+                                                          )
+
+        if not path:
+            # No directory specified
+            self.logger.info('No directory selected!',)
+            self.logger.indent_backwards()
+            return
+        # Update export path value
+        self.logger.info(repr(path))
+        self.exportDirectory = path
+        self.update_page_preferences()
+
+        self.logger.indent_backwards()
+
+    def pushButton_presetsEdit_clicked(self):
+        """
+        Open the presets editor window
+        """
+        # Reshow window
+        self.app.windows['presetsEditor'].setWindowState(Qt.WindowNoState)
+        self.app.windows['presetsEditor'].show()
+        # Focus window
+        self.app.windows['presetsEditor'].activateWindow()
+        self.app.windows['presetsEditor'].raise_()
+
+    def pushButton_resetDefault_clicked(self):
+        """
+        Reset settings to default
+        """
+        self.logger.info('Resetting to default settings...',
+                         indent_forwards=True)
+        self._load_data(default=True)
+        self.logger.indent_backwards()
+
+    def comboBox_command_currentIndexChanged(self):
+        """
+        Changed mode for command line
+        """
+        self.logger.info('Changing Command mode...',
+                         indent_forwards=True)
+        self.update_page_preferences()
+        self.pushButton_clearCommand_clicked()
+        self.logger.indent_backwards()
+
+    def comboBox_presets_currentIndexChanged(self):
+        """
+        Changed preset
+        """
+        name = self.ui.comboBox_presets.currentText()
+        settings = self.app.windows['presetsEditor'].get_settings(name)
+        for json_key in list(settings.keys()):
+            widget_objectName = const.JSON_TO_NAME[json_key]
+            settings[widget_objectName] = settings.pop(json_key)
+        self.settingsManager.set_settings(settings)
+
+    def frame_export_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
+        """
+        Check whether the files the user is dragging over the widget
+        is valid or not
+        """
+        # -Get Path-
+        urls = event.mimeData().urls()
+        if not urls:
+            # No urls given
+            event.ignore()
+            return
+        # Get first given path
+        path = urls[0].toLocalFile()
+        # Convert to file info
+        fileInfo = QtCore.QFileInfo(path)
+        if fileInfo.isShortcut():
+            # Path is shortcut -> Resolve shortcut
+            path = fileInfo.symLinkTarget()
+        else:
+            # Path is not shortcut
+            path = fileInfo.absoluteFilePath()
+
+        # -Check Path-
+        if os.path.isdir(path):
+            # File is a folder
+            event.accept()
+        else:
+            event.ignore()
+
+    def frame_export_dropEvent(self, event: QtGui.QDropEvent):
+        """
+        Assign dropped paths to list
+        """
+        self.logger.info('Dragged Export Directory...',
+                         indent_forwards=True)
+        # -Get Path-
+        # Get first given path
+        path = event.mimeData().urls()[0].toLocalFile()
+        # Convert to file info
+        fileInfo = QtCore.QFileInfo(path)
+        if fileInfo.isShortcut():
+            # Path is shortcut -> Resolve shortcut
+            path = fileInfo.symLinkTarget()
+        else:
+            # Path is not shortcut
+            path = fileInfo.absoluteFilePath()
+
+        # -Update path-
+        self.logger.info(repr(path))
+        self.exportDirectory = path
+        self.update_page_preferences()
+
+        self.logger.indent_backwards()
+
+    def settings_changed(self):
+        if (self.ui.comboBox_presets.currentText() and
+                not self.suppress_settings_change_event):
+            self.ui.comboBox_presets.setCurrentText('')
+
+    # -Window Setup Methods-
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
@@ -143,8 +280,8 @@ class SettingsWindow(QtWidgets.QWidget):
 
             # -Override binds-
             # Music file drag & drop
-            self.ui.groupBox_export.dragEnterEvent = self.groupBox_export_dragEnterEvent
-            self.ui.groupBox_export.dropEvent = self.groupBox_export_dropEvent
+            self.ui.frame_export.dragEnterEvent = self.frame_export_dragEnterEvent
+            self.ui.frame_export.dropEvent = self.frame_export_dropEvent
             # -Main buttons-
             # Main control
             self.ui.pushButton_resetDefault.clicked.connect(self.pushButton_resetDefault_clicked)
@@ -177,6 +314,9 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.pushButton_clearCommand.clicked.connect(self.pushButton_clearCommand_clicked)
             # Comboboxes
             self.ui.comboBox_command.currentIndexChanged.connect(self.comboBox_command_currentIndexChanged)
+
+            self.ui.radioButton_lightTheme.clicked.connect(lambda: self.app.themeManager.load_theme('light'))
+            self.ui.radioButton_darkTheme.clicked.connect(lambda: self.app.themeManager.load_theme('dark'))
 
             bind_settings_changed()
 
@@ -233,161 +373,8 @@ class SettingsWindow(QtWidgets.QWidget):
         # Clear command
         self.pushButton_clearCommand_clicked()
         # Load menu (Preferences)
-        self.ui.radioButton_separationSettings.click()
         self.update_window()
-        self.logger.indent_backwards()
-
-    # -Widget Binds-
-    def pushButton_clearCommand_clicked(self):
-        """
-        Clear the command line and append
-        """
-        self.logger.info('Clearing Command Line...')
-        self.ui.pushButton_clearCommand.setVisible(False)
-        self.app.windows['main'].ui.textBrowser_command.clear()
-
-        index = self.ui.comboBox_command.currentIndex()
-        if index:
-            current_date = dt.datetime.now().strftime("%H:%M:%S")
-            self.app.windows['main'].ui.textBrowser_command.append(f'Command Line [{current_date}]')
-
-    def pushButton_exportDirectory_clicked(self):
-        """
-        Let user select an export directory for the seperation
-        """
-        self.logger.info('Selecting Export Directory...',
-                         indent_forwards=True)
-        # Ask for directory
-        path = QtWidgets.QFileDialog.getExistingDirectory(parent=self,
-                                                          caption='Select Export Directory',
-                                                          dir=self.exportDirectory,
-                                                          )
-
-        if not path:
-            # No directory specified
-            self.logger.info('No directory selected!',)
-            self.logger.indent_backwards()
-            return
-        # Update export path value
-        self.logger.info(repr(path))
-        self.exportDirectory = path
-        self.update_page_preferences()
-
-        self.logger.indent_backwards()
-
-    def pushButton_presetsEdit_clicked(self):
-        """
-        Open the presets editor window
-        """
-        # Reshow window
-        self.app.windows['presetsEditor'].setWindowState(Qt.WindowNoState)
-        self.app.windows['presetsEditor'].show()
-        # Focus window
-        self.app.windows['presetsEditor'].activateWindow()
-        self.app.windows['presetsEditor'].raise_()
-
-    def pushButton_resetDefault_clicked(self):
-        """
-        Reset settings to default
-        """
-        self.logger.info('Resetting to default settings...',
-                         indent_forwards=True)
-        self._load_data(default=True)
-        self.logger.indent_backwards()
-
-    def comboBox_command_currentIndexChanged(self):
-        """
-        Changed mode for command line
-        """
-        self.logger.info('Changing Command mode...',
-                         indent_forwards=True)
-        self.update_page_preferences()
-        self.pushButton_clearCommand_clicked()
-        self.logger.indent_backwards()
-
-    def comboBox_presets_currentIndexChanged(self):
-        """
-        Changed preset
-        """
-        name = self.ui.comboBox_presets.currentText()
-        settings = self.app.windows['presetsEditor'].get_settings(name)
-        for json_key in list(settings.keys()):
-            widget_objectName = const.JSON_TO_NAME[json_key]
-            settings[widget_objectName] = settings.pop(json_key)
-        self.settingsManager.set_settings(settings)
-
-    def groupBox_export_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
-        """
-        Check whether the files the user is dragging over the widget
-        is valid or not
-        """
-        # -Get Path-
-        urls = event.mimeData().urls()
-        if not urls:
-            # No urls given
-            event.ignore()
-            return
-        # Get first given path
-        path = urls[0].toLocalFile()
-        # Convert to file info
-        fileInfo = QtCore.QFileInfo(path)
-        if fileInfo.isShortcut():
-            # Path is shortcut -> Resolve shortcut
-            path = fileInfo.symLinkTarget()
-        else:
-            # Path is not shortcut
-            path = fileInfo.absoluteFilePath()
-
-        # -Check Path-
-        if os.path.isdir(path):
-            # File is a folder
-            event.accept()
-        else:
-            event.ignore()
-
-    def groupBox_export_dropEvent(self, event: QtGui.QDropEvent):
-        """
-        Assign dropped paths to list
-        """
-        self.logger.info('Dragged Export Directory...',
-                         indent_forwards=True)
-        # -Get Path-
-        # Get first given path
-        path = event.mimeData().urls()[0].toLocalFile()
-        # Convert to file info
-        fileInfo = QtCore.QFileInfo(path)
-        if fileInfo.isShortcut():
-            # Path is shortcut -> Resolve shortcut
-            path = fileInfo.symLinkTarget()
-        else:
-            # Path is not shortcut
-            path = fileInfo.absoluteFilePath()
-
-        # -Update path-
-        self.logger.info(repr(path))
-        self.exportDirectory = path
-        self.update_page_preferences()
-
-        self.logger.indent_backwards()
-
-    def settings_changed(self):
-        if (self.ui.comboBox_presets.currentText() and
-                not self.suppress_settings_change_event):
-            self.ui.comboBox_presets.setCurrentText('')
-
-    # -Update Methods-
-    # Whole window (All widgets)
-    def update_window(self):
-        """
-        Update the values and states of all widgets
-        in this window
-        """
-        self.logger.info('Updating settings window...',
-                         indent_forwards=True)
-        self.update_page_seperationSettings()
-        self.update_page_shortcuts()
-        self.update_page_customization()
-        self.update_page_preferences()
+        self.menu_loadPage(0, True)
         self.logger.indent_backwards()
 
     def load_window(self):
@@ -404,6 +391,20 @@ class SettingsWindow(QtWidgets.QWidget):
         Save states of the widgets in this window
         """
         self.settingsManager.save_window()
+
+    # -Update Methods-
+    def update_window(self):
+        """
+        Update the values and states of all widgets
+        in this window
+        """
+        self.logger.info('Updating settings window...',
+                         indent_forwards=True)
+        self.update_page_seperationSettings()
+        self.update_page_shortcuts()
+        self.update_page_customization()
+        self.update_page_preferences()
+        self.logger.indent_backwards()
 
     # Seperation Settings Page
     def update_page_seperationSettings(self):
@@ -644,7 +645,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     # -Other-
-
     def get_model_id(self, model_path: str):
         """
         Get the models id
@@ -658,12 +658,15 @@ class SettingsWindow(QtWidgets.QWidget):
 
         return model_name
 
-    def menu_loadPage(self, page_idx: int):
+    def menu_loadPage(self, page_idx: int, force: bool = False):
         """Load the given menu page by index
 
         Note:
             Also adjust the minimum size of the window
             based on the stored minimum width in the page
+
+            If the page is already loaded, the function to
+            load the menu will not be executed (see force)
 
         Args:
             page_idx (int):
@@ -673,6 +676,8 @@ class SettingsWindow(QtWidgets.QWidget):
                 1 - Shortcuts Page
                 2 - Customization Page
                 3 - Preferences Page
+            force (bool):
+                Force the menu load
         """
         self.logger.info(f'Loading page with index {page_idx}',
                          indent_forwards=True)
@@ -692,7 +697,8 @@ class SettingsWindow(QtWidgets.QWidget):
             # Update page based on index
             self.menu_update_methods[page_idx]()
 
-        if self.ui.stackedWidget.currentIndex() == page_idx:
+        if (self.ui.stackedWidget.currentIndex() == page_idx and
+                not force):
             # Trying to load same page
             self.logger.info('Skipping load -> page already loaded')
             self.logger.indent_backwards()

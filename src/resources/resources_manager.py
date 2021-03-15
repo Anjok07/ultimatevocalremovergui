@@ -26,6 +26,7 @@ TRANSLATIONS_FOLDER = 'translations'
 USER_FOLDER = 'user'
 LOGS_FOLDER = 'logs'
 MODELS_FOLDER = 'models'
+THEMES_FOLDER = 'themes'
 INSTRUMENTAL_FOLDER_NAME = 'Main Models'
 STACKED_FOLDER_NAME = 'Stacked Models'
 TEMP_MUSIC_FILES_FOLDER = 'tmp'
@@ -58,7 +59,16 @@ class ResourcePaths:
             japanese = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'japan.png')
             filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
             turkish = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'turkish.png')
-    
+
+    class themes:
+        dark_path = os.path.join(abs_path, THEMES_FOLDER, 'dark.qss')
+        light_path = os.path.join(abs_path, THEMES_FOLDER, 'light.qss')
+
+        with open(dark_path, 'r') as f:
+            dark = f.read()
+        with open(light_path, 'r') as f:
+            light = f.read()
+
     localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
     # -User Folder-
     logsDir = os.path.join(abs_path, USER_FOLDER, LOGS_FOLDER)
@@ -66,8 +76,6 @@ class ResourcePaths:
     instrumentalDirName = INSTRUMENTAL_FOLDER_NAME
     stackedDirName = STACKED_FOLDER_NAME
     tempDir = os.path.join(abs_path, USER_FOLDER, TEMP_MUSIC_FILES_FOLDER)
-
-
 
 class Logger(logging.Logger):
     """

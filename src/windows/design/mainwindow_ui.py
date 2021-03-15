@@ -19,28 +19,102 @@ class Ui_MainWindow(object):
             MainWindow.setObjectName(u"MainWindow")
         MainWindow.resize(911, 559)
         MainWindow.setMinimumSize(QSize(0, 0))
-        MainWindow.setStyleSheet(u"/* Universal */\n"
+        MainWindow.setStyleSheet(u"/* --- General --- */\n"
                                  "* {\n"
-                                 "	font: 15pt \"Yu Gothic UI\";	\n"
+                                 "	font: 10pt \"Yu Gothic UI\";	\n"
                                  "	color: rgb(255, 255, 255);\n"
                                  "	background-color: none;\n"
-                                 "	background: rgb(12, 23, 40);\n"
+                                 "	background: rgb(0, 0, 0);\n"
                                  "}\n"
-                                 "/* Labels */\n"
-                                 "QLabel[audioFile=\"true\"] {\n"
-                                 "	color:rgba(160, 160, 160, 80);\n"
-                                 "	border-width: 3px;\n"
-                                 "    border-style: dotted;\n"
-                                 "    border-color: rgb(60, 60, 80);\n"
+                                 "*[title=\"true\"],\n"
+                                 "QGroupBox {\n"
+                                 "	font: 15pt \"Yu Gothic UI\";\n"
+                                 "}\n"
+                                 "QPushButton,\n"
+                                 "QLineEdit,\n"
+                                 "QComboBox  {\n"
+                                 "	background: none;\n"
+                                 "	color: #000;\n"
+                                 "}\n"
+                                 "QCheckBox {\n"
+                                 "	color: #CCC;\n"
+                                 "}\n"
+                                 "QToolTip {\n"
+                                 "	color: rgb(0, 0, 0);\n"
+                                 "}\n"
+                                 "QScrollBar {\n"
+                                 "	background-color: none;\n"
+                                 "}\n"
+                                 "QComboBox QAbstractItemView {\n"
+                                 "    border: 2px solid rgb(49, 96, 107);\n"
+                                 "	outline: none;\n"
+                                 "	background-color: rgb(2, 18, 40);\n"
+                                 "	selection-background-color: rgb(49, 96, 107);\n"
+                                 "}\n"
+                                 "QLineEdit:disabled {\n"
+                                 "	color: #222;\n"
+                                 "	border: 1px solid gray;\n"
+                                 "	background-color: #999;\n"
+                                 "}\n"
+                                 "/* --- Settings Window Specific --- */\n"
+                                 "/* Left Menu */\n"
+                                 "QRadioButton[menu=\"true\"]::indicator {\n"
+                                 "	width: 0px;\n"
+                                 "	height: 0px;\n"
+                                 "}\n"
+                                 "QFrame[menu=\"true\"] {\n"
+                                 "	background-color: rgb(31, 31, 31);\n"
+                                 "}\n"
+                                 "QRadioButton[menu=\""
+                                 "true\"]::unchecked, \n"
+                                 "QRadioButton[menu=\"true\"]::indicator::unchecked {\n"
+                                 "	background-color: rgb(31, 31, 31);\n"
+                                 "	padding: 1px;\n"
+                                 "}\n"
+                                 "QRadioButton[menu=\"true\"]::unchecked::hover, \n"
+                                 "QRadioButton[menu=\"true\"]::indicator::hover {\n"
+                                 "    background-color: rgb(51, 51, 51);\n"
+                                 "}\n"
+                                 "QRadioButton[menu=\"true\"]::checked,\n"
+                                 "QRadioButton[menu=\"true\"]::indicator::checked {\n"
+                                 "   border-left: 5px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.505682 rgba(0, 120, 212, 255), stop:1 rgba(255, 255, 255, 0));\n"
+                                 "}\n"
+                                 "/* Command clear */\n"
+                                 "QPushButton[clear=\"true\"] {\n"
+                                 "	border: 2px solid rgb(109, 213, 237);\n"
                                  "	border-radius: 5px;\n"
+                                 "	color: #FFF;\n"
                                  "}\n"
-                                 "/* Button */\n"
+                                 "QPushButton[clear=\"true\"]:hover {\n"
+                                 "	background-color: rgb(25, 45, 60);\n"
+                                 "}\n"
+                                 "QPushButton[clear=\"true\"]:pressed {\n"
+                                 "	background-color: rgb(49, 96, 107);\n"
+                                 "}\n"
+                                 "/* Language */\n"
+                                 "QPushButton[language=\"true\"] {\n"
+                                 "	border-radius: 10px;\n"
+                                 "	background-color: rgba(255, 255, 255, 5);\n"
+                                 "	border: none;\n"
+                                 ""
+                                 "}\n"
+                                 "QPushButton[language=\"true\"]:checked {\n"
+                                 "	border: 3px solid rgb(109, 213, 237);\n"
+                                 "}\n"
+                                 "/* Export */\n"
+                                 "QLabel[path=\"true\"] {\n"
+                                 "	font: 7pt \"Yu Gothic UI\";	\n"
+                                 "	color: #ccc;\n"
+                                 "}\n"
+                                 "/* --- Main Window Specific --- */\n"
+                                 "/* Seperate Button */\n"
                                  "QPushButton[seperate=\"true\"] {\n"
                                  "	border-width: 2px;\n"
                                  "	border-style: solid;\n"
                                  "	border-radius: 15px;\n"
                                  "	border-color: rgb(109, 213, 237);\n"
                                  "	background-color: rgba(109, 213, 237, 4);\n"
+                                 "	color: #FFF;\n"
                                  "}\n"
                                  "QPushButton[seperate=\"true\"]:hover {\n"
                                  "	background-color: rgba(109, 213, 237, 10);\n"
@@ -48,32 +122,32 @@ class Ui_MainWindow(object):
                                  "QPushButton[seperate=\"true\"]:pressed {\n"
                                  "	background-color: rgba(109, 213, 237, 30);\n"
                                  "}\n"
-                                 "QPushButton[dragFile=\"true\"] {\n"
+                                 "/* Music File Selection */\n"
+                                 "QPushButton[musicSelect=\"true\"] {\n"
                                  "	color:  rgb(160, 160, 160);\n"
                                  "	border-width: 3px;\n"
                                  "    border-style: dotted;\n"
                                  "    border-color: rgb(160, 160, 160);\n"
                                  "	border-radius: 5px;\n"
                                  "}\n"
-                                 "QPushButton[dragFile=\"true\"]:hover"
-                                 " {\n"
+                                 "QPushButton[musicSelect=\"true\"]:hover {\n"
                                  "	background-color: rgb(2, 24, 53);\n"
                                  "}\n"
-                                 "QPushButton[dragFile=\"true\"]:pressed {\n"
+                                 "QPushButton[musi"
+                                 "cSelect=\"true\"]:pressed {\n"
                                  "	background-color: rgb(1, 24, 61);\n"
                                  "}\n"
-                                 "\n"
-                                 "QListWidget {\n"
+                                 "QListWidget[musicSelect=\"true\"] {\n"
                                  "	font-size: 13pt;\n"
                                  "	background-color: rgb(12, 23, 40);\n"
                                  "	alternate-background-color: rgb(2, 18, 40);\n"
                                  "	outline: none;\n"
                                  "}\n"
-                                 "QListWidget::item {\n"
+                                 "QListWidget[musicSelect=\"true\"]::item {\n"
                                  "	outline: none;\n"
                                  "	border: none;\n"
                                  "}\n"
-                                 "QScrollBar {\n"
+                                 "QScrollBar[musicSelect=\"true\"] {\n"
                                  "	background-color: none;\n"
                                  "}\n"
                                  "/* Command Line*/\n"
@@ -84,6 +158,13 @@ class Ui_MainWindow(object):
                                  "	font: 8pt \"Courier\";\n"
                                  "}\n"
                                  "/* Audio Player */\n"
+                                 "QLabel[audioPlayer=\"true\"] {\n"
+                                 "	color: rgba(160, 160, 160, 80);\n"
+                                 "	border-width: 3px;\n"
+                                 "    border-style: dotted;\n"
+                                 "    border-color: rgb(60, 60, 80);\n"
+                                 "	border-radius: 5px;\n"
+                                 "}\n"
                                  "QPushButton[audioPlayer=\"true\"] {\n"
                                  "	border: none;\n"
                                  "}\n"
@@ -93,19 +174,20 @@ class Ui_MainWindow(object):
                                  "	border-radius: 2px;\n"
                                  "}\n"
                                  "\n"
-                                 "QSlider[audioPlayer=\"true\"]::handle:horizontal { \n"
+                                 "QSlider["
+                                 "audioPlayer=\"true\"]::handle:horizontal { \n"
                                  "	background-color: rgb(109, 213, 237); \n"
                                  "	border: 2px solid rgb(109, 213, 237); \n"
                                  "	width: 10px; \n"
                                  "	margin-top: -5px; \n"
-                                 "	margin-botto"
-                                 "m: -5px; \n"
+                                 "	margin-bottom: -5px; \n"
                                  "	border-radius: 5px; \n"
                                  "}\n"
                                  "\n"
                                  "QSlider[audioPlayer=\"true\"]::handle:horizontal:hover { \n"
                                  "	border-radius: 5px;\n"
-                                 "}")
+                                 "}\n"
+                                 "")
         self.horizontalLayout_2 = QHBoxLayout(MainWindow)
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
@@ -165,7 +247,8 @@ class Ui_MainWindow(object):
             self.pushButton_musicFiles.sizePolicy().hasHeightForWidth())
         self.pushButton_musicFiles.setSizePolicy(sizePolicy2)
         self.pushButton_musicFiles.setCursor(QCursor(Qt.PointingHandCursor))
-        self.pushButton_musicFiles.setProperty("dragFile", True)
+        self.pushButton_musicFiles.setProperty("musicSelect", True)
+        self.pushButton_musicFiles.setProperty("title", True)
 
         self.verticalLayout_2.addWidget(self.pushButton_musicFiles)
 
@@ -195,6 +278,7 @@ class Ui_MainWindow(object):
         self.listWidget_musicFiles.setSelectionMode(
             QAbstractItemView.NoSelection)
         self.listWidget_musicFiles.setWordWrap(True)
+        self.listWidget_musicFiles.setProperty("musicSelect", True)
 
         self.verticalLayout_4.addWidget(self.listWidget_musicFiles)
 
@@ -233,7 +317,8 @@ class Ui_MainWindow(object):
         self.label_vocalsFile = QLabel(self.page_3)
         self.label_vocalsFile.setObjectName(u"label_vocalsFile")
         self.label_vocalsFile.setAlignment(Qt.AlignCenter)
-        self.label_vocalsFile.setProperty("audioFile", True)
+        self.label_vocalsFile.setProperty("audioPlayer", True)
+        self.label_vocalsFile.setProperty("title", True)
 
         self.verticalLayout_6.addWidget(self.label_vocalsFile)
 
@@ -296,7 +381,8 @@ class Ui_MainWindow(object):
         self.label_instrumentalFiles = QLabel(self.page)
         self.label_instrumentalFiles.setObjectName(u"label_instrumentalFiles")
         self.label_instrumentalFiles.setAlignment(Qt.AlignCenter)
-        self.label_instrumentalFiles.setProperty("audioFile", True)
+        self.label_instrumentalFiles.setProperty("audioPlayer", True)
+        self.label_instrumentalFiles.setProperty("title", True)
 
         self.verticalLayout_5.addWidget(self.label_instrumentalFiles)
 
@@ -362,11 +448,13 @@ class Ui_MainWindow(object):
         sizePolicy4.setHeightForWidth(
             self.label_instrumental.sizePolicy().hasHeightForWidth())
         self.label_instrumental.setSizePolicy(sizePolicy4)
+        self.label_instrumental.setProperty("title", True)
 
         self.gridLayout_2.addWidget(self.label_instrumental, 0, 0, 1, 1)
 
         self.label_vocals = QLabel(self.frame_3)
         self.label_vocals.setObjectName(u"label_vocals")
+        self.label_vocals.setProperty("title", True)
 
         self.gridLayout_2.addWidget(self.label_vocals, 1, 0, 1, 1)
 
@@ -388,6 +476,7 @@ class Ui_MainWindow(object):
         self.pushButton_seperate.setStyleSheet(u"border-top-right-radius: 0px;\n"
                                                "border-bottom-right-radius: 0px;")
         self.pushButton_seperate.setProperty("seperate", True)
+        self.pushButton_seperate.setProperty("title", True)
 
         self.horizontalLayout.addWidget(self.pushButton_seperate)
 
@@ -475,9 +564,9 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget_musicFiles.setCurrentIndex(1)
-        self.stackedWidget_vocals.setCurrentIndex(1)
-        self.stackedWidget_instrumentals.setCurrentIndex(1)
+        self.stackedWidget_musicFiles.setCurrentIndex(0)
+        self.stackedWidget_vocals.setCurrentIndex(0)
+        self.stackedWidget_instrumentals.setCurrentIndex(0)
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi

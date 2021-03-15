@@ -60,6 +60,7 @@ class CustomApplication(QtWidgets.QApplication):
         # self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
+        self.themeManager = ThemeManager(self)
         self.threadpool = QtCore.QThreadPool(self)
         # -Load Windows-
         # Workaround for circular dependency
@@ -130,6 +131,8 @@ class CustomApplication(QtWidgets.QApplication):
         language = QtCore.QLocale(self.settings.value('user/language',
                                                       const.DEFAULT_SETTINGS['language'])).language()
         self.translator.load_language(language)
+        # Load Theme
+        self.themeManager.load_theme("dark")
         # Raise main window
         self.windows['main'].activateWindow()
         self.windows['main'].raise_()
@@ -249,7 +252,7 @@ class CustomApplication(QtWidgets.QApplication):
                                    self.windows['presetsEditor'].presets_loadDir)
             self.settings.setValue('user/presets_saveDir',
                                    self.windows['presetsEditor'].presets_saveDir)
-        
+
         def save_widgets_data():
             """Save widget states
 
@@ -258,7 +261,7 @@ class CustomApplication(QtWidgets.QApplication):
             """
             for window in self.windows.values():
                 window.save_window()
-        
+
         # Save
         save_widgets_data()
         save_user_data()
@@ -290,6 +293,7 @@ class Translator:
         loaded_language (str):
             Currently loaded language in the application. To change, run method load_language.
     """
+
     def __init__(self, app: CustomApplication):
         self.app = app
         self.logger = app.logger
@@ -347,9 +351,47 @@ class Translator:
             else:
                 # Not selected language
                 button.setChecked(False)
-        
+
         self.logger.indent_backwards()
         return True
+
+
+class ThemeManager:
+    """Theme Manager for the application
+
+    Manages the look of the widgets in the application
+
+    Args:
+        loaded_theme (str):
+            Currently loaded theme in the application. To change, run method load_theme.
+    """
+
+    def __init__(self, app: CustomApplication):
+        self.app = app
+        self.logger = app.logger
+        self.loaded_theme: str
+
+    def load_theme(self, theme: str = 'dark') -> bool:
+        """Load a theme for the whole application
+
+        Note:
+            theme arg info:
+                Casing is ignored
+
+        Args:
+            theme (str): Either "dark" or "light".  Defaults to "dark".
+
+        Returns:
+            bool: Whether the theme was successfully changed
+        """
+        stylesheet: str
+        if theme == "dark":
+            stylesheet = ResourcePaths.themes.dark
+        elif theme == "light":
+            stylesheet = ResourcePaths.themes.light
+
+        for window in self.app.windows.values():
+            window.setStyleSheet(stylesheet)
 
 
 def run():

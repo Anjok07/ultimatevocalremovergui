@@ -18,28 +18,7 @@ class Ui_PresetsEditor(object):
         if not PresetsEditor.objectName():
             PresetsEditor.setObjectName(u"PresetsEditor")
         PresetsEditor.resize(342, 400)
-        PresetsEditor.setStyleSheet(u"/* Universal */\n"
-                                    "* {\n"
-                                    "	font: 10pt \"Yu Gothic UI\";	\n"
-                                    "	color: rgb(255, 255, 255);\n"
-                                    "	background-color: rgb(2, 18, 40);\n"
-                                    "}\n"
-                                    "QToolTip {\n"
-                                    "	color: rgb(0, 0, 0);\n"
-                                    "}\n"
-                                    "QScrollBar {\n"
-                                    "	background-color: none;\n"
-                                    "}\n"
-                                    "\n"
-                                    "QGroupBox,\n"
-                                    "QLabel[titleText=\"true\"] {\n"
-                                    "	font: 15pt \"Yu Gothic UI\";\n"
-                                    "}\n"
-                                    "/* Pushbutton */\n"
-                                    "QPushButton {\n"
-                                    "	background: none;\n"
-                                    "	color: #000;\n"
-                                    "}")
+        PresetsEditor.setStyleSheet(u"")
         self.verticalLayout = QVBoxLayout(PresetsEditor)
         self.verticalLayout.setSpacing(15)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -47,7 +26,7 @@ class Ui_PresetsEditor(object):
         self.label = QLabel(PresetsEditor)
         self.label.setObjectName(u"label")
         self.label.setAlignment(Qt.AlignCenter)
-        self.label.setProperty("titleText", True)
+        self.label.setProperty("title", True)
 
         self.verticalLayout.addWidget(self.label)
 
@@ -77,6 +56,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_add.setObjectName(u"pushButton_add")
         self.pushButton_add.setMinimumSize(QSize(35, 35))
         self.pushButton_add.setMaximumSize(QSize(35, 35))
+        self.pushButton_add.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_add.setText(u"+")
 
         self.horizontalLayout.addWidget(self.pushButton_add)
@@ -85,6 +65,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_delete.setObjectName(u"pushButton_delete")
         self.pushButton_delete.setMinimumSize(QSize(35, 35))
         self.pushButton_delete.setMaximumSize(QSize(35, 35))
+        self.pushButton_delete.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_delete.setText(u"-")
 
         self.horizontalLayout.addWidget(self.pushButton_delete)
@@ -93,7 +74,12 @@ class Ui_PresetsEditor(object):
         self.pushButton_import.setObjectName(u"pushButton_import")
         self.pushButton_import.setMinimumSize(QSize(35, 35))
         self.pushButton_import.setMaximumSize(QSize(35, 35))
+        self.pushButton_import.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_import.setText(u"")
+        icon = QIcon()
+        icon.addFile(u":/img/images/download.png",
+                     QSize(), QIcon.Normal, QIcon.Off)
+        self.pushButton_import.setIcon(icon)
 
         self.horizontalLayout.addWidget(self.pushButton_import)
 
@@ -101,6 +87,7 @@ class Ui_PresetsEditor(object):
         self.pushButton_export.setObjectName(u"pushButton_export")
         self.pushButton_export.setMinimumSize(QSize(35, 35))
         self.pushButton_export.setMaximumSize(QSize(35, 35))
+        self.pushButton_export.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_export.setText(u"")
 
         self.horizontalLayout.addWidget(self.pushButton_export)

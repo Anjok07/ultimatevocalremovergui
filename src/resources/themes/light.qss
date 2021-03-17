@@ -1,0 +1,158 @@
+/* --- General --- */
+* {
+	font: 10pt "Yu Gothic UI";	
+}
+*[title="true"],
+QGroupBox {
+	font: 15pt "Yu Gothic UI";
+}
+QLineEdit,
+QComboBox  {
+	background: none;
+	color: #000;
+}
+QCheckBox {
+	color: #222;
+}
+QToolTip {
+	color: #000;
+	background-color: white;
+	border: 1px solid #CCC;
+}
+QScrollBar {
+	background: none;
+}
+QLineEdit:disabled {
+	color: #222;
+	border: 1px solid gray;
+	background-color: #999;
+}
+QListWidget::item {
+	height: 30;
+}
+/* --- Settings Window Specific --- */
+/* Left Menu */
+QRadioButton[menu="true"]::indicator {
+	width: 0px;
+	height: 0px;
+}
+QFrame[menu="true"] {
+	background-color: rgb(224, 224, 224);
+}
+QRadioButton[menu="true"]::unchecked, 
+QRadioButton[menu="true"]::indicator::unchecked {
+	background-color: rgb(224, 224, 224);
+	padding: 1px;
+}
+QRadioButton[menu="true"]::unchecked::hover, 
+QRadioButton[menu="true"]::indicator::hover {
+    background-color: rgb(204, 204, 204);
+}
+QRadioButton[menu="true"]::checked,
+QRadioButton[menu="true"]::indicator::checked {
+   border-left: 5px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.505682 rgba(0, 120, 212, 255), stop:1 rgba(255, 255, 255, 0));
+}
+/* Command clear */
+QPushButton[clear="true"] {
+	border: 2px solid rgb(109, 213, 237);
+	border-radius: 5px;
+	color: #000;
+}
+QPushButton[clear="true"]:hover {
+	background-color: rgb(25, 45, 60);
+}
+QPushButton[clear="true"]:pressed {
+	background-color: rgb(49, 96, 107);
+}
+/* Language */
+QPushButton[language="true"] {
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 5);
+	border: none;
+}
+QPushButton[language="true"]:checked {
+	border: 3px solid rgb(109, 213, 237);
+}
+/* Export */
+QLabel[path="true"] {
+	font: 7pt "Yu Gothic UI";	
+	color: #222;
+}
+/* --- Main Window Specific --- */
+/* Seperate Button */
+QPushButton[seperate="true"] {
+	border-width: 2px;
+	border-style: solid;
+	border-radius: 15px;
+	border-color: rgb(109, 213, 237);
+	background-color: rgba(109, 213, 237, 4);
+}
+QPushButton[seperate="true"]:hover {
+	background-color: rgba(109, 213, 237, 10);
+}
+QPushButton[seperate="true"]:pressed {
+	background-color: rgba(109, 213, 237, 30);
+}
+/* Music File Selection */
+QPushButton[musicSelect="true"] {
+	color:  rgb(160, 160, 160);
+	border-width: 3px;
+    border-style: dotted;
+    border-color: rgb(160, 160, 160);
+	border-radius: 5px;
+}
+QPushButton[musicSelect="true"]:hover {
+	background-color: rgb(2, 24, 53);
+}
+QPushButton[musicSelect="true"]:pressed {
+	background-color: rgb(1, 24, 61);
+}
+QListWidget[musicSelect="true"] {
+	font-size: 13pt;
+	background-color: rgb(12, 23, 40);
+	alternate-background-color: rgb(2, 18, 40);
+	outline: none;
+}
+QListWidget[musicSelect="true"]::item {
+	outline: none;
+	border: none;
+}
+QScrollBar[musicSelect="true"] {
+	background-color: none;
+}
+/* Command Line*/
+QTextBrowser {
+	border-left: 2px;
+	border-style: solid;
+	border-color: rgb(109, 213, 237);
+	font: 8pt "Courier";
+}
+/* Audio Player */
+QLabel[audioPlayer="true"] {
+	color: rgba(160, 160, 160, 80);
+	border-width: 3px;
+    border-style: dotted;
+    border-color: rgb(60, 60, 80);
+	border-radius: 5px;
+}
+QPushButton[audioPlayer="true"] {
+	border: none;
+}
+QSlider[audioPlayer="true"]::groove:horizontal { 
+	background-color: rgb(44, 51, 65);
+	height: 4px; 
+	border-radius: 2px;
+}
+
+QSlider[audioPlayer="true"]::handle:horizontal { 
+	background-color: rgb(109, 213, 237); 
+	border: 2px solid rgb(109, 213, 237); 
+	width: 10px; 
+	margin-top: -5px; 
+	margin-bottom: -5px; 
+	border-radius: 5px; 
+}
+
+QSlider[audioPlayer="true"]::handle:horizontal:hover { 
+	border-radius: 5px;
+}

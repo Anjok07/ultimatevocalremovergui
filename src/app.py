@@ -57,7 +57,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        # self.settings.clear()
+        self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.themeManager = ThemeManager(self)
@@ -132,18 +132,20 @@ class CustomApplication(QtWidgets.QApplication):
                                                       const.DEFAULT_SETTINGS['language'])).language()
         self.translator.load_language(language)
         # Load Theme
-        self.themeManager.load_theme("dark")
+        theme = self.settings.value('user/theme',
+                                    const.DEFAULT_SETTINGS['theme'])
+        self.themeManager.load_theme(theme)
         # Raise main window
         self.windows['main'].activateWindow()
         self.windows['main'].raise_()
 
-    @staticmethod
+    @ staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):
         """Extend functionality for the QComboBox.showPopup function
 
         Improve the QComboBox by overriding the showPopup function to
         adjust the size of the view (list that opens on click)
-        to the contents before showing 
+        to the contents before showing
 
         Args:
             widget (QtWidgets.QComboBox): Widget to apply improvement on
@@ -252,6 +254,8 @@ class CustomApplication(QtWidgets.QApplication):
                                    self.windows['presetsEditor'].presets_loadDir)
             self.settings.setValue('user/presets_saveDir',
                                    self.windows['presetsEditor'].presets_saveDir)
+            self.settings.setValue('user/theme',
+                                   self.themeManager.loaded_theme)
 
         def save_widgets_data():
             """Save widget states
@@ -370,6 +374,7 @@ class ThemeManager:
         self.app = app
         self.logger = app.logger
         self.loaded_theme: str
+        self.app.setStyle(QtWidgets.QStyleFactory.create('Fusion'))
 
     def load_theme(self, theme: str = 'dark') -> bool:
         """Load a theme for the whole application
@@ -384,14 +389,44 @@ class ThemeManager:
         Returns:
             bool: Whether the theme was successfully changed
         """
-        stylesheet: str
+        def load_dark_theme():
+            palette = QtGui.QPalette()
+
+            darkColor = QtGui.QColor(45, 45, 45)
+            disabledColor = QtGui.QColor(127, 127, 127)
+            palette.setColor(QtGui.QPalette.Window, darkColor)
+            palette.setColor(QtGui.QPalette.WindowText, Qt.white)
+            palette.setColor(QtGui.QPalette.Base, QtGui.QColor(18, 18, 18))
+            palette.setColor(QtGui.QPalette.AlternateBase, darkColor)
+            palette.setColor(QtGui.QPalette.ToolTipBase, Qt.white)
+            palette.setColor(QtGui.QPalette.ToolTipText, Qt.white)
+            palette.setColor(QtGui.QPalette.Text, Qt.white)
+            palette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, disabledColor)
+            palette.setColor(QtGui.QPalette.Button, darkColor)
+            palette.setColor(QtGui.QPalette.ButtonText, Qt.white)
+            palette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, disabledColor)
+            palette.setColor(QtGui.QPalette.BrightText, Qt.red)
+            palette.setColor(QtGui.QPalette.Link, QtGui.QColor(42, 130, 218))
+            palette.setColor(QtGui.QPalette.Highlight, QtGui.QColor(42, 130, 218))
+            palette.setColor(QtGui.QPalette.HighlightedText, Qt.black)
+            palette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.HighlightedText, disabledColor)
+
+            self.app.setPalette(palette)
+            self.loaded_theme = 'dark'
+
+        def load_light_theme():
+            self.app.setPalette(self.app.style().standardPalette())
+            self.loaded_theme = 'light'
+
         if theme == "dark":
             stylesheet = ResourcePaths.themes.dark
+            load_dark_theme()
         elif theme == "light":
             stylesheet = ResourcePaths.themes.light
+            load_light_theme()
 
         for window in self.app.windows.values():
-            window.setStyleSheet(stylesheet)
+            self.app.setStyleSheet(stylesheet)
 
 
 def run():

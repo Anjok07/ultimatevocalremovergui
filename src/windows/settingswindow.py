@@ -41,7 +41,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
         # -Other Variables-
-        self.pageSwitchTimer = QtCore.QTimer(self)
         self.suppress_settings_change_event = False
         self.menu_update_methods = {
             0: self.update_page_seperationSettings,
@@ -325,19 +324,6 @@ class SettingsWindow(QtWidgets.QWidget):
             Create the animation objects that are used
             multiple times here
             """
-            self.effect = QtWidgets.QGraphicsOpacityEffect(self)
-            self.effect.setOpacity(1)
-            self.ui.stackedWidget.setGraphicsEffect(self.effect)
-            # Stackedwidget
-            self.pages_ani = QtCore.QPropertyAnimation(self.effect, b'opacity')
-            self.pages_ani.setDuration(400)
-            # self.pages_ani.setEasingCurve(QtCore.QEasingCurve.OutBack)
-            self.pages_ani.setStartValue(1)
-            self.pages_ani.setKeyValueAt(0.5, 0)
-            self.pages_ani.setEndValue(1)
-            self.pages_ani.setLoopCount(1)
-            self.pageSwitchTimer.setSingleShot(True)
-            self.pageSwitchTimer.setInterval(self.pages_ani.duration() / 2)
 
         # -Before setup-
         # Load saved settings for widgets
@@ -345,7 +331,6 @@ class SettingsWindow(QtWidgets.QWidget):
         # Update available model lists
         self._update_selectable_models()
         # Update available model lists
-        self.settingsManager.fill_save_widgets()
         # Connect button group for menu together
         self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
         self.menu_group.addButton(self.ui.radioButton_separationSettings,
@@ -704,20 +689,20 @@ class SettingsWindow(QtWidgets.QWidget):
             self.logger.indent_backwards()
             return
 
-        if not self.ui.checkBox_disableAnimations.isChecked():
-            # Animations enabled
-            self.pages_ani.start()
-            try:
-                # Disconnect last menu_loadPage
-                self.pageSwitchTimer.timeout.disconnect()
-            except RuntimeError:
-                # No signal to disconnect
-                pass
-            # On half of whole aniamtion load new window
-            self.pageSwitchTimer.timeout.connect(menu_loadPage)
-            self.pageSwitchTimer.start()
-        else:
-            menu_loadPage()
+        # if not self.ui.checkBox_disableAnimations.isChecked():
+        #     # Animations enabled
+        #     self.pages_ani.start()
+        #     try:
+        #         # Disconnect last menu_loadPage
+        #         self.pageSwitchTimer.timeout.disconnect()
+        #     except RuntimeError:
+        #         # No signal to disconnect
+        #         pass
+        #     # On half of whole aniamtion load new window
+        #     self.pageSwitchTimer.timeout.connect(menu_loadPage)
+        #     self.pageSwitchTimer.start()
+        # else:
+        menu_loadPage()
 
         self.logger.indent_backwards()
 
@@ -765,6 +750,7 @@ class SettingsManager:
             2: [],
             3: [],
         }
+        self.fill_save_widgets()
 
     def fill_save_widgets(self):
         """Update the save_widgets variable
@@ -811,7 +797,10 @@ class SettingsManager:
             # Combobox
             self.win.ui.comboBox_presets, ]
         shortcuts_widgets = []
-        customization_widgets = []
+        customization_widgets = [
+            # self.win.ui.radioButton_lightTheme,
+            # self.win.ui.radioButton_darkTheme,
+        ]
         preferences_widgets = [
             # -Settings-
             # Checkbox
@@ -849,7 +838,7 @@ class SettingsManager:
                 None - All widgets
 
         Raises:
-            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
 
         Returns:
             Dict[str, Union[bool, str]]: Widget states
@@ -862,7 +851,8 @@ class SettingsManager:
 
         for widget in save_widgets:
             # Get value
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if (isinstance(widget, QtWidgets.QCheckBox) or
+                    isinstance(widget, QtWidgets.QRadioButton)):
                 value = widget.isChecked()
             elif isinstance(widget, QtWidgets.QLineEdit):
                 value = widget.text()
@@ -891,6 +881,7 @@ class SettingsManager:
                 settings argument depending on the widgets type:
 
                     QCheckBox - bool
+                    QRadioButton - bool
                     QLineEdit - str
                     QComboBox - str
 
@@ -899,7 +890,7 @@ class SettingsManager:
             settings (Dict[str, Union[bool, str]]): States of the widgets to update
 
         Raises:
-            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
         """
         self.win.suppress_settings_change_event = True
         for widget_objectName, value in settings.items():
@@ -907,7 +898,8 @@ class SettingsManager:
             widget = self.win.findChild(QtCore.QObject, widget_objectName)
 
             # Set value
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if (isinstance(widget, QtWidgets.QCheckBox) or
+                    isinstance(widget, QtWidgets.QRadioButton)):
                 widget.setChecked(value)
             elif isinstance(widget, QtWidgets.QLineEdit):
                 widget.setText(value)
@@ -931,7 +923,7 @@ class SettingsManager:
         """Load states of the widgets of the window
 
         Raises:
-            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
         """
         # Before
         self.win.logger.info('Settings: Loading window')
@@ -948,7 +940,8 @@ class SettingsManager:
                 continue
 
             # Get value from settings and set to widget
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if (isinstance(widget, QtWidgets.QCheckBox) or
+                    isinstance(widget, QtWidgets.QRadioButton)):
                 value = self.win.settings.value(widget_objectName,
                                                 defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
                                                 type=bool)
@@ -980,7 +973,7 @@ class SettingsManager:
         """Save states of the widgets of the window
 
         Raises:
-            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QLineEdit or QComboBox)
+            TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
         """
         # Before
         self.win.logger.info('Settings: Saving window')
@@ -996,7 +989,8 @@ class SettingsManager:
                 # Skip saving
                 continue
             # Get value
-            if isinstance(widget, QtWidgets.QCheckBox):
+            if (isinstance(widget, QtWidgets.QCheckBox) or
+                    isinstance(widget, QtWidgets.QRadioButton)):
                 value = widget.isChecked()
             elif isinstance(widget, QtWidgets.QLineEdit):
                 value = widget.text()
@@ -1035,5 +1029,4 @@ class SettingsManager:
             # Load one page of widgets
             assert page_idx in self.save_widgets.keys(), "Invalid page index!"
             widgets = self.save_widgets[page_idx]
-
         return widgets

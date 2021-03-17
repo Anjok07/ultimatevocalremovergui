@@ -1,9 +1,6 @@
 /* --- General --- */
 * {
 	font: 10pt "Yu Gothic UI";	
-	color: rgb(255, 255, 255);
-	background-color: none;
-	background: rgb(0, 0, 0);
 }
 *[title="true"],
 QGroupBox {
@@ -12,38 +9,26 @@ QGroupBox {
 QLineEdit,
 QComboBox  {
 	background: none;
-	color: #000;
+	color: #FFF;
 }
 QCheckBox {
-	color: #CCC;
+	color: #DDD;
 }
 QToolTip {
-	color: rgb(0, 0, 0);
+	color: #000;
+	background-color: white;
+	border: 1px solid #DDD;
 }
 QScrollBar {
 	background: none;
-}
-
-QComboBox QAbstractItemView {
-    border: 1px solid rgba(0, 120, 212, 122);
-	outline: none;
-	background-color: rgb(31, 31, 31);
-	selection-background-color: rgb(51, 51, 51);
-}
-QPushButton {
-	background-color: rgb(51, 121, 217);
-	border: none;
-}
-QPushButton:hover {
-	background-color: rgb(173, 216, 255);
-}
-QPushButton:pressed {
-	background-color: rgb(23, 66, 118);
 }
 QLineEdit:disabled {
 	color: #222;
 	border: 1px solid gray;
 	background-color: #999;
+}
+QListWidget::item {
+	height: 30;
 }
 /* --- Settings Window Specific --- */
 /* Left Menu */
@@ -91,7 +76,7 @@ QPushButton[language="true"]:checked {
 /* Export */
 QLabel[path="true"] {
 	font: 7pt "Yu Gothic UI";	
-	color: #ccc;
+	color: #DDD;
 }
 /* --- Main Window Specific --- */
 /* Seperate Button */
@@ -116,12 +101,12 @@ QPushButton[musicSelect="true"] {
     border-color: rgb(160, 160, 160);
 	border-radius: 5px;
 }
-QPushButton[musicSelect="true"]:hover {
+/* QPushButton[musicSelect="true"]:hover {
 	background-color: rgb(2, 24, 53);
 }
 QPushButton[musicSelect="true"]:pressed {
 	background-color: rgb(1, 24, 61);
-}
+} */
 QListWidget[musicSelect="true"] {
 	font-size: 13pt;
 	background-color: rgb(12, 23, 40);

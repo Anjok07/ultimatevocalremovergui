@@ -18,185 +18,8 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(905, 322)
-        SettingsWindow.setStyleSheet(u"/* --- General --- */\n"
-                                     "* {\n"
-                                     "	font: 10pt \"Yu Gothic UI\";	\n"
-                                     "	color: rgb(255, 255, 255);\n"
-                                     "	background-color: none;\n"
-                                     "	background: rgb(0, 0, 0);\n"
-                                     "}\n"
-                                     "*[title=\"true\"],\n"
-                                     "QGroupBox {\n"
-                                     "	font: 15pt \"Yu Gothic UI\";\n"
-                                     "}\n"
-                                     "QLineEdit,\n"
-                                     "QComboBox  {\n"
-                                     "	background: none;\n"
-                                     "	color: #000;\n"
-                                     "}\n"
-                                     "QCheckBox {\n"
-                                     "	color: #CCC;\n"
-                                     "}\n"
-                                     "QToolTip {\n"
-                                     "	color: rgb(0, 0, 0);\n"
-                                     "}\n"
-                                     "QScrollBar {\n"
-                                     "	background: none;\n"
-                                     "}\n"
-                                     "\n"
-                                     "QComboBox QAbstractItemView {\n"
-                                     "    border: 1px solid rgba(0, 120, 212, 122);\n"
-                                     "	outline: none;\n"
-                                     "	background-color: rgb(31, 31, 31);\n"
-                                     "	selection-background-color: rgb(51, 51, 51);\n"
-                                     "}\n"
-                                     "QPushButton {\n"
-                                     "	background-color: rgb(51, 121, 217);\n"
-                                     "	border: none;\n"
-                                     "}\n"
-                                     "QPushButton:hover {\n"
-                                     "	background-color: rgb(173, 216, 255);\n"
-                                     "}\n"
-                                     "QPushButton:pressed {\n"
-                                     "	background-color: rgb(23, 66, 118);\n"
-                                     "}\n"
-                                     "QLineEdit:disabled {\n"
-                                     "	color: #222;\n"
-                                     "	border: 1px solid gray;\n"
-                                     "	background-color: #999;\n"
-                                     "}\n"
-                                     "/* --- Settings Window S"
-                                     "pecific --- */\n"
-                                     "/* Left Menu */\n"
-                                     "QRadioButton[menu=\"true\"]::indicator {\n"
-                                     "	width: 0px;\n"
-                                     "	height: 0px;\n"
-                                     "}\n"
-                                     "QFrame[menu=\"true\"] {\n"
-                                     "	background-color: rgb(31, 31, 31);\n"
-                                     "}\n"
-                                     "QRadioButton[menu=\"true\"]::unchecked, \n"
-                                     "QRadioButton[menu=\"true\"]::indicator::unchecked {\n"
-                                     "	background-color: rgb(31, 31, 31);\n"
-                                     "	padding: 1px;\n"
-                                     "}\n"
-                                     "QRadioButton[menu=\"true\"]::unchecked::hover, \n"
-                                     "QRadioButton[menu=\"true\"]::indicator::hover {\n"
-                                     "    background-color: rgb(51, 51, 51);\n"
-                                     "}\n"
-                                     "QRadioButton[menu=\"true\"]::checked,\n"
-                                     "QRadioButton[menu=\"true\"]::indicator::checked {\n"
-                                     "   border-left: 5px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.505682 rgba(0, 120, 212, 255), stop:1 rgba(255, 255, 255, 0));\n"
-                                     "}\n"
-                                     "/* Command clear */\n"
-                                     "QPushButton[clear=\"true\"] {\n"
-                                     "	border: 2px solid rgb(109, 213, 237);\n"
-                                     "	border-radius: 5px;\n"
-                                     "	color: #FFF;\n"
-                                     "}\n"
-                                     "QPushButton[clear=\"true\"]:hover {\n"
-                                     "	background-color: rgb(25, 45, 60);\n"
-                                     "}\n"
-                                     "QPushButton[clear"
-                                     "=\"true\"]:pressed {\n"
-                                     "	background-color: rgb(49, 96, 107);\n"
-                                     "}\n"
-                                     "/* Language */\n"
-                                     "QPushButton[language=\"true\"] {\n"
-                                     "	border-radius: 10px;\n"
-                                     "	background-color: rgba(255, 255, 255, 5);\n"
-                                     "	border: none;\n"
-                                     "}\n"
-                                     "QPushButton[language=\"true\"]:checked {\n"
-                                     "	border: 3px solid rgb(109, 213, 237);\n"
-                                     "}\n"
-                                     "/* Export */\n"
-                                     "QLabel[path=\"true\"] {\n"
-                                     "	font: 7pt \"Yu Gothic UI\";	\n"
-                                     "	color: #ccc;\n"
-                                     "}\n"
-                                     "/* --- Main Window Specific --- */\n"
-                                     "/* Seperate Button */\n"
-                                     "QPushButton[seperate=\"true\"] {\n"
-                                     "	border-width: 2px;\n"
-                                     "	border-style: solid;\n"
-                                     "	border-radius: 15px;\n"
-                                     "	border-color: rgb(109, 213, 237);\n"
-                                     "	background-color: rgba(109, 213, 237, 4);\n"
-                                     "}\n"
-                                     "QPushButton[seperate=\"true\"]:hover {\n"
-                                     "	background-color: rgba(109, 213, 237, 10);\n"
-                                     "}\n"
-                                     "QPushButton[seperate=\"true\"]:pressed {\n"
-                                     "	background-color: rgba(109, 213, 237, 30);\n"
-                                     "}\n"
-                                     "/* Music File Selection */\n"
-                                     "QPushButton[musicSelect=\"true\"] {\n"
-                                     "	color:  rgb(160, 160, 160);\n"
-                                     "	border-width: 3px;\n"
-                                     "    bord"
-                                     "er-style: dotted;\n"
-                                     "    border-color: rgb(160, 160, 160);\n"
-                                     "	border-radius: 5px;\n"
-                                     "}\n"
-                                     "QPushButton[musicSelect=\"true\"]:hover {\n"
-                                     "	background-color: rgb(2, 24, 53);\n"
-                                     "}\n"
-                                     "QPushButton[musicSelect=\"true\"]:pressed {\n"
-                                     "	background-color: rgb(1, 24, 61);\n"
-                                     "}\n"
-                                     "QListWidget[musicSelect=\"true\"] {\n"
-                                     "	font-size: 13pt;\n"
-                                     "	background-color: rgb(12, 23, 40);\n"
-                                     "	alternate-background-color: rgb(2, 18, 40);\n"
-                                     "	outline: none;\n"
-                                     "}\n"
-                                     "QListWidget[musicSelect=\"true\"]::item {\n"
-                                     "	outline: none;\n"
-                                     "	border: none;\n"
-                                     "}\n"
-                                     "QScrollBar[musicSelect=\"true\"] {\n"
-                                     "	background-color: none;\n"
-                                     "}\n"
-                                     "/* Command Line*/\n"
-                                     "QTextBrowser {\n"
-                                     "	border-left: 2px;\n"
-                                     "	border-style: solid;\n"
-                                     "	border-color: rgb(109, 213, 237);\n"
-                                     "	font: 8pt \"Courier\";\n"
-                                     "}\n"
-                                     "/* Audio Player */\n"
-                                     "QLabel[audioPlayer=\"true\"] {\n"
-                                     "	color: rgba(160, 160, 160, 80);\n"
-                                     "	border-width: 3px;\n"
-                                     "    border-style: dotted;\n"
-                                     "    border-color: rgb(60, 60, 80);\n"
-                                     "	border-radius: 5px;\n"
-                                     "}\n"
-                                     "QPushButton[audioPlaye"
-                                     "r=\"true\"] {\n"
-                                     "	border: none;\n"
-                                     "}\n"
-                                     "QSlider[audioPlayer=\"true\"]::groove:horizontal { \n"
-                                     "	background-color: rgb(44, 51, 65);\n"
-                                     "	height: 4px; \n"
-                                     "	border-radius: 2px;\n"
-                                     "}\n"
-                                     "\n"
-                                     "QSlider[audioPlayer=\"true\"]::handle:horizontal { \n"
-                                     "	background-color: rgb(109, 213, 237); \n"
-                                     "	border: 2px solid rgb(109, 213, 237); \n"
-                                     "	width: 10px; \n"
-                                     "	margin-top: -5px; \n"
-                                     "	margin-bottom: -5px; \n"
-                                     "	border-radius: 5px; \n"
-                                     "}\n"
-                                     "\n"
-                                     "QSlider[audioPlayer=\"true\"]::handle:horizontal:hover { \n"
-                                     "	border-radius: 5px;\n"
-                                     "}\n"
-                                     "")
+        SettingsWindow.resize(934, 476)
+        SettingsWindow.setStyleSheet(u"")
         self.horizontalLayout = QHBoxLayout(SettingsWindow)
         self.horizontalLayout.setSpacing(0)
         self.horizontalLayout.setObjectName(u"horizontalLayout")
@@ -309,7 +132,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, -155, 735, 418))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 734, 417))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -461,7 +284,7 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_8.setContentsMargins(35, 10, 30, 10)
         self.frame_12 = QFrame(self.groupBox_2)
         self.frame_12.setObjectName(u"frame_12")
-        self.frame_12.setFrameShape(QFrame.StyledPanel)
+        self.frame_12.setFrameShape(QFrame.NoFrame)
         self.frame_12.setFrameShadow(QFrame.Raised)
         self.gridLayout_6 = QGridLayout(self.frame_12)
         self.gridLayout_6.setObjectName(u"gridLayout_6")
@@ -570,7 +393,7 @@ class Ui_SettingsWindow(object):
         self.frame_instrumentalComboBox = QFrame(self.groupBox_3)
         self.frame_instrumentalComboBox.setObjectName(
             u"frame_instrumentalComboBox")
-        self.frame_instrumentalComboBox.setFrameShape(QFrame.StyledPanel)
+        self.frame_instrumentalComboBox.setFrameShape(QFrame.NoFrame)
         self.frame_instrumentalComboBox.setFrameShadow(QFrame.Raised)
         self.verticalLayout_3 = QVBoxLayout(self.frame_instrumentalComboBox)
         self.verticalLayout_3.setSpacing(15)
@@ -608,8 +431,9 @@ class Ui_SettingsWindow(object):
         self.frame_constants.setSizePolicy(sizePolicy5)
         self.frame_constants.setMinimumSize(QSize(0, 0))
         self.frame_constants.setMaximumSize(QSize(230, 140))
-        self.frame_constants.setFrameShape(QFrame.StyledPanel)
+        self.frame_constants.setFrameShape(QFrame.NoFrame)
         self.frame_constants.setFrameShadow(QFrame.Raised)
+        self.frame_constants.setLineWidth(0)
         self.gridLayout_5 = QGridLayout(self.frame_constants)
         self.gridLayout_5.setObjectName(u"gridLayout_5")
         self.gridLayout_5.setContentsMargins(-1, 5, -1, 3)
@@ -746,7 +570,7 @@ class Ui_SettingsWindow(object):
 
         self.frame_stackComboBox = QFrame(self.groupBox_3)
         self.frame_stackComboBox.setObjectName(u"frame_stackComboBox")
-        self.frame_stackComboBox.setFrameShape(QFrame.StyledPanel)
+        self.frame_stackComboBox.setFrameShape(QFrame.NoFrame)
         self.frame_stackComboBox.setFrameShadow(QFrame.Raised)
         self.verticalLayout_4 = QVBoxLayout(self.frame_stackComboBox)
         self.verticalLayout_4.setSpacing(15)
@@ -802,7 +626,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 705, 263))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 83, 35))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -837,7 +661,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 735, 425))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 83, 35))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -893,7 +717,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 735, 425))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 734, 419))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -949,8 +773,9 @@ class Ui_SettingsWindow(object):
 
         self.frame_11 = QFrame(self.horizontalFrame)
         self.frame_11.setObjectName(u"frame_11")
-        self.frame_11.setFrameShape(QFrame.StyledPanel)
+        self.frame_11.setFrameShape(QFrame.NoFrame)
         self.frame_11.setFrameShadow(QFrame.Raised)
+        self.frame_11.setLineWidth(0)
         self.horizontalLayout_5 = QHBoxLayout(self.frame_11)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
@@ -1149,8 +974,9 @@ class Ui_SettingsWindow(object):
         self.gridLayout_2.setContentsMargins(35, 10, 30, 10)
         self.frame_languages = QFrame(self.groupBox_4)
         self.frame_languages.setObjectName(u"frame_languages")
-        self.frame_languages.setFrameShape(QFrame.StyledPanel)
+        self.frame_languages.setFrameShape(QFrame.NoFrame)
         self.frame_languages.setFrameShadow(QFrame.Raised)
+        self.frame_languages.setLineWidth(0)
         self.gridLayout_3 = QGridLayout(self.frame_languages)
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.pushButton_english = QPushButton(self.frame_languages)
@@ -1232,8 +1058,9 @@ class Ui_SettingsWindow(object):
         self.frame_16.setSizePolicy(sizePolicy)
         self.frame_16.setMinimumSize(QSize(661, 0))
         self.frame_16.setStyleSheet(u"")
-        self.frame_16.setFrameShape(QFrame.StyledPanel)
+        self.frame_16.setFrameShape(QFrame.NoFrame)
         self.frame_16.setFrameShadow(QFrame.Raised)
+        self.frame_16.setLineWidth(0)
         self.horizontalLayout_9 = QHBoxLayout(self.frame_16)
         self.horizontalLayout_9.setSpacing(50)
         self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
@@ -1259,7 +1086,7 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(0)
+        self.stackedWidget.setCurrentIndex(3)
         self.comboBox_winSize_stacked.setCurrentIndex(0)
         self.comboBox_winSize.setCurrentIndex(0)
         self.pushButton_english.setDefault(False)

@@ -122,7 +122,6 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         # -Create item-
         item = QtWidgets.QListWidgetItem('')
         item.setFlags(item.flags() | Qt.ItemIsEditable)
-        item.setSizeHint(QtCore.QSize(item.sizeHint().width(), 25))
         # Insert item at top and enter edit mode
         self.ui.listWidget_presets.insertItem(0, item)
         # -Obtain data-

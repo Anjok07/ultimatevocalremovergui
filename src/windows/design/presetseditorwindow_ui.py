@@ -32,6 +32,7 @@ class Ui_PresetsEditor(object):
 
         self.listWidget_presets = QListWidget(PresetsEditor)
         self.listWidget_presets.setObjectName(u"listWidget_presets")
+        self.listWidget_presets.setStyleSheet(u"")
         self.listWidget_presets.setFrameShape(QFrame.StyledPanel)
         self.listWidget_presets.setEditTriggers(
             QAbstractItemView.DoubleClicked)

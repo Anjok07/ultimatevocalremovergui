@@ -8,6 +8,8 @@ from PySide2 import QtCore
 from .inference import converter_v4
 from collections import OrderedDict
 
+__is_light_theme = bool(QtCore.QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QtCore.QSettings.NativeFormat).value("AppsUseLightTheme"))
+
 VERSION = "0.0.5"
 APPLICATION_SHORTNAME = 'UVR'
 APPLICATION_NAME = 'Ultimate Vocal Remover'
@@ -97,6 +99,8 @@ DEFAULT_SETTINGS = {
     'lineEdit_nfft_stacked': converter_v4.default_data['n_fft'],
     # -Presets-
     'comboBox_presets': '',
+    # --Settings window -> Customization--
+    'theme': 'light' if __is_light_theme else 'dark',
     # --Settings window -> Preferences--
     # -Settings-
     # Command off

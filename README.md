@@ -10,7 +10,7 @@ This application is a GUI version of the vocal remover AI created and posted by 
 
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
-    - [aufr33](https://github.com/aufr33) - Model collaborator and UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
+    - [aufr33](https://github.com/aufr33) - Model collaborator and fellow UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
     - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring this GUI to life! Your hard work and continued support is greatly appreciated.
 
 ## Installation

@@ -24,7 +24,7 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 - **Note:** If you are experiencing any errors when attempting to process any media files that are not in the *.wav* format, please ensure FFmpeg is installed & configured correctly.
 
-### Running the Vocal Remover GUI & Models
+### Running Inferences & Models
 
 ***Coming Soon***
 

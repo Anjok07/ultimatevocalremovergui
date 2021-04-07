@@ -53,14 +53,9 @@ A special thank you to aufr33 for helping me expand the dataset used to train so
 
 Please be as detailed as possible when posting a new issue. Make sure to provide any error outputs and/or screenshots/gif's to give us a clearer understanding of the issue you are experiencing.
 
-If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
+If you are unable to run conversions *under any circumstances* and all other resources have been exhausted, please do the following - 
 
-1. Open the cmd prompt from the UVR-V4GUI directory
-2. Run the following command - 
-```
-python VocalRemover.py
-```
-3. Copy and paste the error output shown in the cmd prompt to the issues center on the GitHub repository.
+1. Copy and paste the error output shown in the cmd prompt to the issues center on the GitHub repository.
 
 ## License
 
@@ -68,8 +63,8 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 
 ## Contributing
 
-- For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI** please send us a pull request and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
-- Please note that we do not maintain or directly support any of tsurumesos AI application code. We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
+- For anyone interested in the ongoing development of **Ultimate Vocal Remover** please send us a pull request and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
+- We only maintain the development and support for **Ultimate Vocal Remover** and the models provided. 
 
 ## References
 - [1] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf

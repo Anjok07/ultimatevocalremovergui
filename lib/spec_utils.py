@@ -266,21 +266,6 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
     wave_band = {}
     bands_n = len(mp.param['band'])    
     offset = 0
-    
-    if False:
-        from scipy import ndimage
-        
-        intersect_h2 = 167
-        intersect_y2 = 67
-        intersect_h1 = 62
-        intersect_y1 = 244
-
-        intersect_left = ndimage.zoom(spec_m[0, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
-        intersect_right = ndimage.zoom(spec_m[1, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
-        s = intersect_y2+intersect_left.shape[0]
-        
-        spec_m[0, intersect_y2:s, :] = np.where(np.abs(spec_m[0, intersect_y2:s, :]) <= np.abs(intersect_left) * 1.5, spec_m[0, intersect_y2:s, :], intersect_left)
-        spec_m[1, intersect_y2:s, :] = np.where(np.abs(spec_m[1, intersect_y2:s, :]) <= np.abs(intersect_right) * 1.5, spec_m[1, intersect_y2:s, :], intersect_right)
 
     for d in range(1, bands_n + 1):
         bp = mp.param['band'][d]

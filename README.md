@@ -53,20 +53,20 @@ Here's a list of the models included within the v5 beta package -
 
 - **V5 Beta Models**
     - **2band_32000 Models**
-        - **MGM-v5-2Band-32000-BETA1.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-2Band-32000-BETA2.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-2Band-32000-BETA1.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-2Band-32000-BETA2.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
         - **MGM-v5-KAROKEE-32000-BETA1.pth** - Model by aufr33. This model focuses on removing main vocals only, leaving the BV vocals mostly intact. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - Model by aufr33. This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-Vocal_2Band-32000-BETA1.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-Vocal_2Band-32000-BETA2.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - Model by aufr33. This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-Vocal_2Band-32000-BETA1.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-Vocal_2Band-32000-BETA2.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
     - **3band_44100 Models**
-        - **MGM-v5-3Band-44100-BETA.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100.json** file!
+        - **MGM-v5-3Band-44100-BETA.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100.json** file!
     - **3band_44100_mid Models**
-        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
-        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
+        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100_mid.json** file!
+        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100_mid.json** file!
     - **4band_44100**
-        - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
-        - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
+        - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
+        - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
 
 ### Inference Command Structure
 

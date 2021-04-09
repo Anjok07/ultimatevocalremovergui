@@ -73,6 +73,15 @@ The following example shows how to run a model from the "2band_32000 Models" sec
 python inference.py -g 0 -m 2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
 ```
 
+### Windows Batch Files
+
+We included Windows batch files to help automate the inference process for those running Microsoft Windows! The "windows-batch-files" folder contains a separate bat file for each model.
+
+- To use them, please do the following:
+	- Move the bat files to the main directory from the "windows-batch-files" folder.
+	- Drag an audio file into the bat file named after the model you wish to run it through.
+	- The outputs will be in the separated folder.
+
 ## Troubleshooting
 
 ### Common Issues

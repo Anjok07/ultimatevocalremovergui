@@ -7,7 +7,7 @@ This application is a heavily modified version of the vocal remover AI created a
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
     - [aufr33](https://github.com/aufr33) - Model collaborator and fellow UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
-    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring this GUI to life! Your hard work and continued support is greatly appreciated.
+    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring the GUI to life! Your hard work and continued support is greatly appreciated.
 
 ## Installation
 
@@ -34,11 +34,26 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 ## Models Included
 
-All of the models included in the release were trained on large datasets containing diverse sets of music genres.
+All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5!
 
-Here's a list of the models included within the package -
+Here's a list of the models included within the v5 beta package -
 
-***Coming Soon***
+- **V5 Beta Models**
+    - **2band_32000 Models**
+        - **MGM-v5-2Band-32000-BETA1.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-2Band-32000-BETA2.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-KAROKEE-32000-BETA1.pth** - Model by aufr33. This model focuses on removing main vocals only, leaving the BV vocals mostly intact. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-Vocal_2Band-32000-BETA1.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-Vocal_2Band-32000-BETA2.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+    - **3band_44100 Models**
+        - **MGM-v5-3Band-44100-BETA.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100.json** file!
+    - **3band_44100_mid Models**
+        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
+        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
+    - **4band_44100**
+        - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
+        - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
 
 A special thank you to aufr33 for helping me expand the dataset used to train some of these models and for the helpful training tips.
 

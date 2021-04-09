@@ -66,7 +66,7 @@ Here's a list of the models included within the v5 beta package -
         - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
         - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
 
-### Inference Commands
+### Inference Command Structure
 
 The following example shows how to run a model from the "2band_32000 Models" section above.
 ```

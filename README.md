@@ -28,20 +28,20 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 ## Running Inferences & Model Details
 
-Each model requires a specific parameters to run smoothly. Those parameters are intricatly defined within the .json files provided. Please make sure the correct .json files are selected!
+Each model requires specific parameters to run smoothly. Those parameters are intricately defined within the JSON files provided. Please make sure the correct JSON files are selected when running inferences!
 
 ### Option Guide
 
-Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's original code. Signifigant improvments and changes were made. Those changes include the following - 
+Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's original code. Significant improvements and changes were made. Those changes include the following - 
 
-- New format of spectrograms. Instead of a single spectrogram with a fixed FFT size, combined spectrograms are now used. This version combines several different types of spectrograms within specific frequecy ranges. This approach allowed for clearer view of the high frequencies and good resolutions at low frequencies, thus allowing for more targeted vocal removals.
+- New format of spectrograms. Instead of a single spectrogram with a fixed FFT size, combined spectrograms are now used. This version combines several different types of spectrograms within specific frequency ranges. This approach allowed for clearer view of the high frequencies and good resolutions at low frequencies, thus allowing for more targeted vocal removals.
 - The arguments --sr, --n_fft, --hop_length are removed. JSON files are now used instead.
 - The following new features were added
 	- **--high_end_process** - This argument restores the high frequencies of the instrumental (but not the vocals). The 3 choices for this argument are:
 		- *none* - No processing (default)
 		- *bypass* - This copies the missing frequencies from the input.
 		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies.
-	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.00-0.10 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals bepending on the track being converted, so this isn't always recommended. The default is 0.02. For the vocal model specifically, the recommended value is 0.05.
+	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.00-0.10 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.02. For the vocal model specifically, the recommended value is 0.05.
 
 ### Models Included
 
@@ -60,17 +60,15 @@ Here's a list of the models included within the v5 beta package -
     - **3band_44100 Models**
         - **MGM-v5-3Band-44100-BETA.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100.json** file!
     - **3band_44100_mid Models**
-        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
-        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
+        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
+        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 kHz. Must be used with **3band_44100_mid.json** file!
     - **4band_44100**
         - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
         - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
 
-A special thank you to aufr33 for helping me expand the dataset used to train some of these models and for the helpful training tips.
-
 ### Inference Commands
 
-The following example shows how to run a model from the "2band_32000 Models" above.
+The following example shows how to run a model from the "2band_32000 Models" section above.
 ```
 python inference.py -g 0 -m 2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
 ```

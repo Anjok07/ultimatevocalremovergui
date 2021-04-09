@@ -2,7 +2,7 @@
 
 ## About
 
-This application is a heavily modified version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). The official v5 GUI is still under developement and will be released some time in Q3 2021. New models for this version will be released at the end of the week.
+This application is a heavily modified version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). The official v5 GUI is still under developement and will be released some time in Q3 2021. New beta models for this version will be released at the end of the week.
 
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
@@ -13,9 +13,11 @@ This application is a heavily modified version of the vocal remover AI created a
 
 ### Install Required Applications & Packages
 
+Please run the requirements command even if you have v4 installed!
+
 ```
 pip install --no-cache-dir -r requirements.txt
-pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### FFmpeg 
@@ -24,15 +26,24 @@ FFmpeg must be installed and configured in order for the application to be able 
 
 - **Note:** If you are experiencing any errors when attempting to process any media files that are not in the *.wav* format, please ensure FFmpeg is installed & configured correctly.
 
-### Running Inferences & Models
+## Running Inferences & Model Details
 
-***Coming Soon***
+Each model requires a specific parameters to run smoothly. Those parameters are intricatly defined within the .json files provided. Please make sure the correct .json files are selected!
 
-## Option Guide
+### Option Guide
 
-***Coming Soon***
+Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's original code. Signifigant improvments and changes were made. Those changes include the following - 
 
-## Models Included
+- New format of spectrograms. Instead of a single spectrogram with a fixed FFT size, combined spectrograms are now used. This version combines several different types of spectrograms within specific frequecy ranges. This approach allowed for clearer view of the high frequencies and good resolutions at low frequencies, thus allowing for more targeted vocal removals.
+- The arguments --sr, --n_fft, --hop_length are removed. JSON files are now used instead.
+- The following new features were added
+	- **--high_end_process** - This argument restores the high frequencies of the instrumental (but not the vocals). The 3 choices for this argument are:
+		- *none* - No processing (default)
+		- *bypass* - This copies the missing frequencies from the input.
+		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies.
+	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.00-0.10 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals bepending on the track being converted, so this isn't always recommended. The default is 0.02. For the vocal model specifically, the recommended value is 0.05.
+
+### Models Included
 
 All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5!
 
@@ -56,6 +67,13 @@ Here's a list of the models included within the v5 beta package -
         - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 kHz. Must be used with **4band_44100.json** file!
 
 A special thank you to aufr33 for helping me expand the dataset used to train some of these models and for the helpful training tips.
+
+### Inference Commands
+
+The following example shows how to run a model from the "2band_32000 Models" above.
+```
+python inference.py -g 0 -m 2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
+```
 
 ## Troubleshooting
 

@@ -6,6 +6,8 @@
 
 ## About
 
+**Update April 9th 2021:** The v5 beta along with 11 beta models have been released! You can read more about it [here](https://github.com/Anjok07/ultimatevocalremovergui/tree/v5-beta-cml)!
+
 This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). This version also comes with a total of 11 high performance models trained by me. You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). 
 
 - **Special Thanks**
@@ -28,7 +30,7 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
 
 ```
 pip install --no-cache-dir -r requirements.txt
-pip install torch==1.6.0+cu101 torchvision==0.7.0+cu101 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### FFmpeg 

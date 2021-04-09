@@ -41,7 +41,7 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 		- *none* - No processing (default)
 		- *bypass* - This copies the missing frequencies from the input.
 		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies.
-	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.00-0.10 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.02. For the vocal model specifically, the recommended value is 0.05.
+	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.0-1.0 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.1. For the vocal model specifically, the recommended value is 0.5-0.6.
 
 ### Models Included
 

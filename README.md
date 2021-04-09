@@ -2,7 +2,7 @@
 
 ## About
 
-This application is a heavily modified version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). The official v5 GUI is still under developement and will be released some time in Q3 2021. New beta models for this version will be released at the end of the week.
+This application is a heavily modified version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). The official v5 GUI is still under developement and will be released some time in Q3 2021. New beta models for this version will be released at the end of the week. 
 
 - **Special Thanks**
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
@@ -45,7 +45,9 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 
 ### Models Included
 
-All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5!
+All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5! You can download the model pack [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.0)
+
+**Please Note:** These models are *not* compatible with the v4 GUI! The GUI for v5 is still under development.
 
 Here's a list of the models included within the v5 beta package -
 
@@ -54,7 +56,7 @@ Here's a list of the models included within the v5 beta package -
         - **MGM-v5-2Band-32000-BETA1.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
         - **MGM-v5-2Band-32000-BETA2.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
         - **MGM-v5-KAROKEE-32000-BETA1.pth** - Model by aufr33. This model focuses on removing main vocals only, leaving the BV vocals mostly intact. Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
+        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - Model by aufr33. This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
         - **MGM-v5-Vocal_2Band-32000-BETA1.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
         - **MGM-v5-Vocal_2Band-32000-BETA2.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 kHz. Must be used with **2band_32000.json** file!
     - **3band_44100 Models**

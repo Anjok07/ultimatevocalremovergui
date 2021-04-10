@@ -33,7 +33,7 @@
 			"crop_stop": 186,
 			"hpf_start": 93,
 			"hpf_stop": 46,
-			"lpf_start": 163,
+			"lpf_start": 164,
 			"lpf_stop": 186,
 			"res_type": "polyphase"
 		},	
@@ -43,7 +43,7 @@
 			"n_fft": 768,
 			"crop_start": 121,
 			"crop_stop": 382,
-			"hpf_start": 139,
+			"hpf_start": 138,
 			"hpf_stop": 123,
 			"res_type": "polyphase"
 		}

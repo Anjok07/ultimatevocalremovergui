@@ -31,7 +31,6 @@ if getattr(sys, 'frozen', False):
     base_path = os.path.dirname(sys.executable)
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
-
 os.chdir(base_path)  # Change the current working directory to the base path
 
 

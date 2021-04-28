@@ -77,12 +77,7 @@ python inference.py -g 0 -m 2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.
 
 ### Windows Batch Files
 
-We included Windows batch files to help automate the inference process for those running Microsoft Windows! The "windows-batch-files" folder contains a separate bat file for each model.
-
-- To use them, please do the following:
-	- Move the bat files to the main directory from the "windows-batch-files" folder.
-	- Drag an audio file into the bat file named after the model you wish to run it through.
-	- The outputs will be in the separated folder.
+We included a Windows batch file to help automate the inference process for those running Microsoft Windows! Sinply drag the audio file you wisj to convert into the 'Drag-n-Drop-Select-Model.bat' file provided. From there you will be prompted to tyype the number associated with the model you wish to run and hit "enter".
 
 ## Troubleshooting
 

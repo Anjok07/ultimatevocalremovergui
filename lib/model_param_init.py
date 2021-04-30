@@ -58,3 +58,6 @@ class ModelParameters(object):
         if not 'mid_side' in self.param:
             self.param['mid_side'] = False
         
+        if not 'reverse' in self.param:
+            self.param['reverse'] = False
+        

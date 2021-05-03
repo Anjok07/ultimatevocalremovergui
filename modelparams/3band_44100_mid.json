@@ -34,7 +34,7 @@
 			"crop_stop": 313,
 			"hpf_start": 154,
 			"hpf_stop": 141,
-			"res_type": "polyphase"
+			"res_type": "sinc_medium"
 		}
 	},
 	"sr": 44100,

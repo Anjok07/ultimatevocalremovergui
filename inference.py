@@ -104,7 +104,7 @@ def main():
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
     p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation'], default='none')
-    p.add_argument('--aggressiveness', '-A', type=float, default=0.05)
+    p.add_argument('--aggressiveness', '-A', type=float, default=0.07)
     args = p.parse_args()
     
     if args.nn_architecture == 'default':
@@ -232,8 +232,8 @@ def main():
 
         print('Performing Deep Extraction...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/tempV.wav -o ensembled/temp/difftemp")
-        os.system("python lib/diffext.py ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav ensembled/temp/aligned-difftemp_v.wav ensembled/temp/subtracted-difftemp_v.wav")
-        os.rename('ensembled/temp/subtracted-difftemp_v.wav', 'separated/{}_{}_DeepExtraction_Instruments.wav'.format(basename, model_name))
+        os.system("python lib/spec_utils.py -a invertB -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftemp")
+        os.rename('ensembled/temp/difftemp_v.wav', 'separated/{}_{}_DeepExtraction_Instruments.wav'.format(basename, model_name))
         print('Complete!')
         print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 

@@ -33,9 +33,9 @@ ECHO l. LOFI_2band_iter5_2
 ECHO m. LOFI_2band_iter5_2
 ECHO n. HighPrecison_4band_1
 ECHO o. HighPrecison_4band_2
-ECHO p. BigLayer_4band_1.pth
-ECHO q. BigLayer_4band_2.pth
-ECHO r. BigLayer_4band_3.pth
+ECHO p. NewLayer_4band_1.pth
+ECHO q. NewLayer_4band_2.pth
+ECHO r. NewLayer_4band_3.pth
 ECHO s. Ensemble 4Band Models (7 Models) - Final Outputs Save to Ensembled Folder!
 ECHO t. Ensemble All Models (12 Models) - Final Outputs Save to Ensembled Folder!
 set choice=
@@ -453,15 +453,15 @@ ECHO "%choice%" is not valid, try again
 ECHO.
 goto start
 :deep
-ECHO Running Model BigLayer_4band_1
-set model=BigLayer_4band_1
+ECHO Running Model NewLayer_4band_1
+set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -t -i %1
 goto start
 :default
-ECHO Running Model BigLayer_4band_1
-set model=BigLayer_4band_1
+ECHO Running Model NewLayer_4band_1
+set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -t -i %1
@@ -480,16 +480,16 @@ ECHO.
 goto start
 :deep
 
-ECHO Running Model BigLayer_4band_2
-set model=BigLayer_4band_2
+ECHO Running Model NewLayer_4band_2
+set model=NewLayer_4band_2
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -t -i %1
 goto end
 :default
 
-ECHO Running Model BigLayer_4band_2
-set model=BigLayer_4band_2
+ECHO Running Model NewLayer_4band_2
+set model=NewLayer_4band_2
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -t -i %1
@@ -509,7 +509,7 @@ goto start
 :deep
 
 ECHO Running Model 
-set model=BigLayer_4band_3
+set model=NewLayer_4band_3
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -t -i %1
@@ -517,7 +517,7 @@ goto end
 :default
 
 ECHO Running Model 
-set model=BigLayer_4band_3
+set model=NewLayer_4band_3
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -t -i %1
@@ -594,9 +594,9 @@ ECHO l. LOFI_2band_iter5_2
 ECHO m. LOFI_2band_iter5_2
 ECHO n. HighPrecison_4band_1
 ECHO o. HighPrecison_4band_2
-ECHO p. BigLayer_4band_1
-ECHO q. BigLayer_4band_2
-ECHO r. BigLayer_4band_3
+ECHO p. NewLayer_4band_1
+ECHO q. NewLayer_4band_2
+ECHO r. NewLayer_4band_3
 ECHO s. Ensemble 4Band Models (7 Models) - Final Outputs Save to Ensembled Folder!
 ECHO t. Ensemble All Models (12 Models) - Final Outputs Save to Ensembled Folder!
 set choice=
@@ -1014,15 +1014,15 @@ ECHO "%choice%" is not valid, try again
 ECHO.
 goto start
 :deep
-ECHO Running Model BigLayer_4band_1
-set model=BigLayer_4band_1
+ECHO Running Model NewLayer_4band_1
+set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -i %1
 goto start
 :default
-ECHO Running Model BigLayer_4band_1
-set model=BigLayer_4band_1
+ECHO Running Model NewLayer_4band_1
+set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -i %1
@@ -1041,16 +1041,16 @@ ECHO.
 goto start
 :deep
 
-ECHO Running Model BigLayer_4band_2
-set model=BigLayer_4band_2
+ECHO Running Model NewLayer_4band_2
+set model=NewLayer_4band_2
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -i %1
 goto end
 :default
 
-ECHO Running Model BigLayer_4band_2
-set model=BigLayer_4band_2
+ECHO Running Model NewLayer_4band_2
+set model=NewLayer_4band_2
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -i %1
@@ -1070,7 +1070,7 @@ goto start
 :deep
 
 ECHO Running Model 
-set model=BigLayer_4band_3
+set model=NewLayer_4band_3
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -i %1
@@ -1078,7 +1078,7 @@ goto end
 :default
 
 ECHO Running Model 
-set model=BigLayer_4band_3
+set model=NewLayer_4band_3
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -n 129605KB -P models\%model%.pth -i %1
@@ -1134,5 +1134,6 @@ ECHO Ensemble All 44100-Models
 cd /d %~dp0
  
 python allmodels_ens_inference.py -g 0 -w 352 -i %1
+goto end
 :end
 pause

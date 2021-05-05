@@ -98,9 +98,9 @@ def main():
     p.add_argument('--pretrained_modelB', '-B', type=str, default='models/MGM-v5-4Band-44100-BETA2.pth') ##DON'T CHNGE
     p.add_argument('--pretrained_modelC', '-C', type=str, default='models/HighPrecison_4band_1.pth') ##DON'T CHNGE
     p.add_argument('--pretrained_modelD', '-Da', type=str, default='models/HighPrecison_4band_2.pth') ##DON'T CHNGE
-    p.add_argument('--pretrained_modelE', '-E', type=str, default='models/BigLayer_4band_1.pth') ##DON'T CHNGE
-    p.add_argument('--pretrained_modelF', '-F', type=str, default='models/BigLayer_4band_2.pth') ##DON'T CHNGE
-    p.add_argument('--pretrained_modelG', '-G', type=str, default='models/BigLayer_4band_3.pth') ##DON'T CHNGE
+    p.add_argument('--pretrained_modelE', '-E', type=str, default='models/NewLayer_4band_1.pth') ##DON'T CHNGE
+    p.add_argument('--pretrained_modelF', '-F', type=str, default='models/NewLayer_4band_2.pth') ##DON'T CHNGE
+    p.add_argument('--pretrained_modelG', '-G', type=str, default='models/NewLayer_4band_3.pth') ##DON'T CHNGE
     p.add_argument('--deepextraction', '-D', action='store_true')
     p.add_argument('--saveindivsep', '-s', action='store_true')
     p.add_argument('--input', '-i', required=True)
@@ -113,7 +113,7 @@ def main():
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
     p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation'], default='none')
-    p.add_argument('--aggressiveness', '-A', type=float, default=0.05)
+    p.add_argument('--aggressiveness', '-A', type=float, default=0.09)
     args = p.parse_args()
     
  ####################################################-INERATION1-####################################################
@@ -591,7 +591,7 @@ def main():
     
     start_time = time.time()
 
-    print('loading BigLayer_4band_1...', end=' ')
+    print('loading NewLayer_4band_1...', end=' ')
 
     device = torch.device('cpu')
     model = nets.CascadedASPPNet(mp.param['bins'] * 2)
@@ -706,7 +706,7 @@ def main():
     
     start_time = time.time()
 
-    print('loading BigLayer_4band_2...', end=' ')
+    print('loading NewLayer_4band_2...', end=' ')
 
     device = torch.device('cpu')
     model = nets.CascadedASPPNet(mp.param['bins'] * 2)
@@ -821,7 +821,7 @@ def main():
     
     start_time = time.time()
 
-    print('loading BigLayer_4band_3...', end=' ')
+    print('loading NewLayer_4band_3...', end=' ')
 
     device = torch.device('cpu')
     model = nets.CascadedASPPNet(mp.param['bins'] * 2)
@@ -931,23 +931,23 @@ def main():
         print('Ensembling Instrumentals...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1_MGM-v5-4Band-44100-BETA1_Instruments.wav ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Instruments.wav -o ensembled/temp/1E2E_ensam1")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/3_HighPrecison_4band_1_Instruments.wav ensembled/temp/4_HighPrecison_4band_2_Instruments.wav -o ensembled/temp/3E4E_ensam1")
-        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_BigLayer_4band_1_Instruments.wav ensembled/temp/6_BigLayer_4band_2_Instruments.wav -o ensembled/temp/5E6E_ensam3")
+        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_NewLayer_4band_1_Instruments.wav ensembled/temp/6_NewLayer_4band_2_Instruments.wav -o ensembled/temp/5E6E_ensam3")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E_ensam1_v.wav ensembled/temp/3E4E_ensam1_v.wav -o ensembled/temp/1E2E3E4E_ensam4")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E3E4E_ensam4_v.wav ensembled/temp/5E6E_ensam3_v.wav -o ensembled/temp/A6_ensam5")
-        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_BigLayer_4band_3_Instruments.wav ensembled/temp/A6_ensam5_v.wav -o ensembled/temp/Complete")
+        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_NewLayer_4band_3_Instruments.wav ensembled/temp/A6_ensam5_v.wav -o ensembled/temp/Complete")
 
         print('Ensembling Vocals...')
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1_MGM-v5-4Band-44100-BETA1_Vocals.wav ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Vocals.wav -o ensembled/temp/1E2EV_ensam1")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/3_HighPrecison_4band_1_Vocals.wav ensembled/temp/4_HighPrecison_4band_2_Vocals.wav -o ensembled/temp/3E4EV_ensam1")
-        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_BigLayer_4band_1_Vocals.wav ensembled/temp/6_BigLayer_4band_2_Vocals.wav -o ensembled/temp/5E6EV_ensam3")
+        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_NewLayer_4band_1_Vocals.wav ensembled/temp/6_NewLayer_4band_2_Vocals.wav -o ensembled/temp/5E6EV_ensam3")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2EV_ensam1_v.wav ensembled/temp/3E4EV_ensam1_v.wav -o ensembled/temp/1E2E3E4EV_ensam4")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E3E4EV_ensam4_v.wav ensembled/temp/5E6EV_ensam3_v.wav -o ensembled/temp/A6V_ensam5")
-        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_BigLayer_4band_3_Vocals.wav ensembled/temp/A6V_ensam5_v.wav -o ensembled/temp/CompleteV")
+        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_NewLayer_4band_3_Vocals.wav ensembled/temp/A6V_ensam5_v.wav -o ensembled/temp/CompleteV")
 
         print('Performing Deep Extraction...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/Complete_v.wav ensembled/temp/CompleteV_v.wav -o ensembled/temp/difftemp")
-        os.system("python lib/diffext.py ensembled/temp/Complete_v.wav ensembled/temp/difftemp_v.wav ensembled/temp/aligned-difftemp_v.wav ensembled/temp/subtracted-difftemp_v.wav")
-        os.rename('ensembled/temp/subtracted-difftemp_v.wav', 'ensembled/{}_4BAND_Ensembled_DeepExtraction_Instrumental.wav'.format(basename))
+        os.system("python lib/spec_utils.py -a invertB -m modelparams/1band_sr44100_hl512.json ensembled/temp/Complete_v.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftempC")
+        os.rename('ensembled/temp/difftempC_v.wav', 'ensembled/{}_4BAND_Ensembled_DeepExtraction_Instrumental.wav'.format(basename))
         os.rename('ensembled/temp/Complete_v.wav', 'ensembled/{}_4BAND_Ensembled_Instrumental.wav'.format(basename))
         os.rename('ensembled/temp/CompleteV_v.wav', 'ensembled/{}_4BAND_Ensembled_Vocals.wav'.format(basename))
         print('Deep Extraction Complete!')
@@ -955,19 +955,19 @@ def main():
         print('Ensembling Instrumentals...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1_MGM-v5-4Band-44100-BETA1_Instruments.wav ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Instruments.wav -o ensembled/temp/1E2E_ensam1")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/3_HighPrecison_4band_1_Instruments.wav ensembled/temp/4_HighPrecison_4band_2_Instruments.wav -o ensembled/temp/3E4E_ensam1")
-        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_BigLayer_4band_1_Instruments.wav ensembled/temp/6_BigLayer_4band_2_Instruments.wav -o ensembled/temp/5E6E_ensam3")
+        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_NewLayer_4band_1_Instruments.wav ensembled/temp/6_NewLayer_4band_2_Instruments.wav -o ensembled/temp/5E6E_ensam3")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E_ensam1_v.wav ensembled/temp/3E4E_ensam1_v.wav -o ensembled/temp/1E2E3E4E_ensam4")
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E3E4E_ensam4_v.wav ensembled/temp/5E6E_ensam3_v.wav -o ensembled/temp/A6_ensam5")
-        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_BigLayer_4band_3_Instruments.wav ensembled/temp/A6_ensam5_v.wav -o ensembled/temp/Complete")
+        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_NewLayer_4band_3_Instruments.wav ensembled/temp/A6_ensam5_v.wav -o ensembled/temp/Complete")
         os.rename('ensembled/temp/Complete_v.wav', 'ensembled/{}_4BAND_Ensembled_Instrumental.wav'.format(basename))
 
         print('Ensembling Vocals...')
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1_MGM-v5-4Band-44100-BETA1_Vocals.wav ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Vocals.wav -o ensembled/temp/1E2EV_ensam1")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/3_HighPrecison_4band_1_Vocals.wav ensembled/temp/4_HighPrecison_4band_2_Vocals.wav -o ensembled/temp/3E4EV_ensam1")
-        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_BigLayer_4band_1_Vocals.wav ensembled/temp/6_BigLayer_4band_2_Vocals.wav -o ensembled/temp/5E6EV_ensam3")
+        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/5_NewLayer_4band_1_Vocals.wav ensembled/temp/6_NewLayer_4band_2_Vocals.wav -o ensembled/temp/5E6EV_ensam3")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2EV_ensam1_v.wav ensembled/temp/3E4EV_ensam1_v.wav -o ensembled/temp/1E2E3E4EV_ensam4")
         os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/1E2E3E4EV_ensam4_v.wav ensembled/temp/5E6EV_ensam3_v.wav -o ensembled/temp/A6V_ensam5")
-        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_BigLayer_4band_3_Vocals.wav ensembled/temp/A6V_ensam5_v.wav -o ensembled/temp/CompleteV")
+        os.system("python lib/spec_utils.py -a max_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/7_NewLayer_4band_3_Vocals.wav ensembled/temp/A6V_ensam5_v.wav -o ensembled/temp/CompleteV")
         os.rename('ensembled/temp/CompleteV_v.wav', 'ensembled/{}_4BAND_Ensembled_Vocals.wav'.format(basename))
 
     if args.saveindivsep:
@@ -976,16 +976,16 @@ def main():
         os.rename('ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Instruments.wav', 'separated/{}_MGM-v5-4Band-44100-BETA2_Instruments.wav'.format(basename))
         os.rename('ensembled/temp/3_HighPrecison_4band_1_Instruments.wav', 'separated/{}_HighPrecison_4band_1_Instruments.wav'.format(basename))
         os.rename('ensembled/temp/4_HighPrecison_4band_2_Instruments.wav', 'separated/{}_HighPrecison_4band_2_Instruments.wav'.format(basename))
-        os.rename('ensembled/temp/5_BigLayer_4band_1_Instruments.wav', 'separated/{}_BigLayer_4band_1_Instruments.wav'.format(basename))
-        os.rename('ensembled/temp/6_BigLayer_4band_2_Instruments.wav', 'separated/{}_BigLayer_4band_2_Instruments.wav'.format(basename))
-        os.rename('ensembled/temp/7_BigLayer_4band_3_Instruments.wav', 'separated/{}_BigLayer_4band_3_Instruments.wav'.format(basename))
+        os.rename('ensembled/temp/5_NewLayer_4band_1_Instruments.wav', 'separated/{}_NewLayer_4band_1_Instruments.wav'.format(basename))
+        os.rename('ensembled/temp/6_NewLayer_4band_2_Instruments.wav', 'separated/{}_NewLayer_4band_2_Instruments.wav'.format(basename))
+        os.rename('ensembled/temp/7_NewLayer_4band_3_Instruments.wav', 'separated/{}_NewLayer_4band_3_Instruments.wav'.format(basename))
         os.rename('ensembled/temp/1_MGM-v5-4Band-44100-BETA1_Vocals.wav', 'separated/{}_MGM-v5-4Band-44100-BETA1_Vocals.wav'.format(basename))
         os.rename('ensembled/temp/2_MGM-v5-4Band-44100-BETA2_Vocals.wav', 'separated/{}_MGM-v5-4Band-44100-BETA2_Vocals.wav'.format(basename))
         os.rename('ensembled/temp/3_HighPrecison_4band_1_Vocals.wav', 'separated/{}_HighPrecison_4band_1_Vocals.wav'.format(basename))
         os.rename('ensembled/temp/4_HighPrecison_4band_2_Vocals.wav', 'separated/{}_HighPrecison_4band_2_Vocals.wav'.format(basename))
-        os.rename('ensembled/temp/5_BigLayer_4band_1_Vocals.wav', 'separated/{}_BigLayer_4band_1_Vocals.wav'.format(basename))
-        os.rename('ensembled/temp/6_BigLayer_4band_2_Vocals.wav', 'separated/{}_BigLayer_4band_2_Vocals.wav'.format(basename))
-        os.rename('ensembled/temp/7_BigLayer_4band_3_Vocals.wav', 'separated/{}_BigLayer_4band_3_Vocals.wav'.format(basename))
+        os.rename('ensembled/temp/5_NewLayer_4band_1_Vocals.wav', 'separated/{}_NewLayer_4band_1_Vocals.wav'.format(basename))
+        os.rename('ensembled/temp/6_NewLayer_4band_2_Vocals.wav', 'separated/{}_NewLayer_4band_2_Vocals.wav'.format(basename))
+        os.rename('ensembled/temp/7_NewLayer_4band_3_Vocals.wav', 'separated/{}_NewLayer_4band_3_Vocals.wav'.format(basename))
         os.remove("ensembled/temp/A6V_ensam5_v.wav")
         os.remove("ensembled/temp/1E2E3E4EV_ensam4_v.wav")
         os.remove("ensembled/temp/5E6EV_ensam3_v.wav")

@@ -6,6 +6,7 @@ import soundfile as sf
 import math
 import json
 import hashlib
+from tqdm import tqdm
 
 
 def crop_center(h1, h2):
@@ -276,6 +277,21 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
     wave_band = {}
     bands_n = len(mp.param['band'])    
     offset = 0
+    
+    #if False:
+    #    from scipy import ndimage
+    #    
+    #    intersect_h2 = 167
+    #    intersect_y2 = 67
+    #    intersect_h1 = 62
+    #    intersect_y1 = 244
+
+    #    intersect_left = ndimage.zoom(spec_m[0, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
+    #    intersect_right = ndimage.zoom(spec_m[1, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
+    #    s = intersect_y2+intersect_left.shape[0]
+        
+    #    spec_m[0, intersect_y2:s, :] = np.where(np.abs(spec_m[0, intersect_y2:s, :]) <= np.abs(intersect_left) * 1.5, spec_m[0, intersect_y2:s, :], intersect_left)
+    #    spec_m[1, intersect_y2:s, :] = np.where(np.abs(spec_m[1, intersect_y2:s, :]) <= np.abs(intersect_right) * 1.5, spec_m[1, intersect_y2:s, :], intersect_right)
 
     for d in range(1, bands_n + 1):
         bp = mp.param['band'][d]
@@ -338,7 +354,7 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'min_mag', 'max_mag'], default='invert')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invertB', 'min_mag', 'max_mag'], default='invert') #'invertB' only writes output "v".
     p.add_argument('--model_params', '-m', type=str, default='4band_44100.json')
     p.add_argument('--output_name', '-o', type=str, default='test')
     p.add_argument('input', nargs='+')
@@ -368,7 +384,7 @@ if __name__ == "__main__":
         X_spec_s[d] = wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse'])
         y_spec_s[d] = wave_to_spectrogram(y_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse']) 
         
-        print('loaded!')
+        print('ok')
         
     del X_wave, y_wave
  
@@ -383,27 +399,31 @@ if __name__ == "__main__":
     if args.algorithm == 'invert':
         y_spec_m = reduce_vocal_aggressively(X_spec_m, y_spec_m, 0.2)
         v_spec_m = X_spec_m - y_spec_m
+    if args.algorithm == 'invertB':
+        y_spec_m = reduce_vocal_aggressively(X_spec_m, y_spec_m, 0.2)
+        v_spec_m = X_spec_m - y_spec_m
     if args.algorithm == 'min_mag':
         v_spec_m = np.where(np.abs(y_spec_m) <= np.abs(X_spec_m), y_spec_m, X_spec_m)
     if args.algorithm == 'max_mag':
         v_spec_m = np.where(np.abs(y_spec_m) >= np.abs(X_spec_m), y_spec_m, X_spec_m)
 
-    if args.algorithm == 'invert':
-        X_mag = np.abs(X_spec_m)
-        y_mag = np.abs(y_spec_m)
-        v_mag = np.abs(v_spec_m)
+    X_mag = np.abs(X_spec_m)
+    y_mag = np.abs(y_spec_m)
+    v_mag = np.abs(v_spec_m)
 
-        X_image = spectrogram_to_image(X_mag)
-        y_image = spectrogram_to_image(y_mag)
-        v_image = spectrogram_to_image(v_mag)
+    X_image = spectrogram_to_image(X_mag)
+    y_image = spectrogram_to_image(y_mag)
+    v_image = spectrogram_to_image(v_mag)
     
+    if args.algorithm == 'invert':
         cv2.imwrite('{}_X.png'.format(args.output_name), X_image)
         cv2.imwrite('{}_y.png'.format(args.output_name), y_image)
         cv2.imwrite('{}_v.png'.format(args.output_name), v_image)    
         
         sf.write('{}_X.wav'.format(args.output_name), cmb_spectrogram_to_wave(X_spec_m, mp), mp.param['sr'])
         sf.write('{}_y.wav'.format(args.output_name), cmb_spectrogram_to_wave(y_spec_m, mp), mp.param['sr'])
-        
-    sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec_m, mp), mp.param['sr'])
     
-    print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+    sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec_m, mp), mp.param['sr'])
+
+
+    #print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))

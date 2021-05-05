@@ -113,7 +113,7 @@ def main():
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
     p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation'], default='none')
-    p.add_argument('--aggressiveness', '-A', type=float, default=0.08)
+    p.add_argument('--aggressiveness', '-A', type=float, default=0.09)
     args = p.parse_args()
     
  ####################################################-INERATION1-####################################################

@@ -72,7 +72,7 @@ Here's a list of the models included within the v5 beta package -
 
 The following example shows how to run a model from the "2band_32000 Models" section above.
 ```
-python inference.py -g 0 -m 2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
+python inference.py -g 0 -m modelparams/2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
 ```
 
 The following examples show how to run the ensemble model scripts -

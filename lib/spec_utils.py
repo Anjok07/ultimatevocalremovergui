@@ -350,7 +350,7 @@ if __name__ == "__main__":
     mp = ModelParameters(args.model_params)
      
     for d in range(len(mp.param['band']), 0, -1):
-        print('band {}'.format(d), end=' ')
+        print('Band(s) {}'.format(d), end=' ')
         
         bp = mp.param['band'][d]
                 
@@ -368,7 +368,7 @@ if __name__ == "__main__":
         X_spec_s[d] = wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse'])
         y_spec_s[d] = wave_to_spectrogram(y_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse']) 
         
-        print('ok')
+        print('loaded!')
         
     del X_wave, y_wave
  

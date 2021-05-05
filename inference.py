@@ -100,10 +100,11 @@ def main():
     p.add_argument('--model_params', '-m', type=str, default='')
     p.add_argument('--window_size', '-w', type=int, default=512)
     p.add_argument('--output_image', '-I', action='store_true')
+    p.add_argument('--deepextraction', '-D', action='store_true')
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
     p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation'], default='none')
-    p.add_argument('--aggressiveness', '-A', type=float, default=0.09)
+    p.add_argument('--aggressiveness', '-A', type=float, default=0.07)
     args = p.parse_args()
     
     if args.nn_architecture == 'default':
@@ -114,6 +115,10 @@ def main():
             from lib import nets_123821KB as nets
     if args.nn_architecture == '129605KB':
             from lib import nets_129605KB as nets
+
+    dir = 'ensembled/temp'
+    for file in os.scandir(dir):
+        os.remove(file.path)
     
     #if '' == args.model_params:
     #    mp = ModelParameters(args.pretrained_model)
@@ -201,28 +206,69 @@ def main():
     else:
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
     
-    print('done')
-    model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
-    sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
-
-    if True:
-        print('inverse stft of {}...'.format(stems['vocals']), end=' ')
-        #v_spec_m = X_spec_m - y_spec_m
-        wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+    if args.deepextraction:
         print('done')
-        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
+        model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
+        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
+        sf.write(os.path.join('ensembled/temp', 'tempI.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
 
-    if args.output_image:
-        with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
-            image = spec_utils.spectrogram_to_image(y_spec_m)
-            _, bin_image = cv2.imencode('.jpg', image)
-            bin_image.tofile(f)
-        with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
-            image = spec_utils.spectrogram_to_image(v_spec_m)
-            _, bin_image = cv2.imencode('.jpg', image)
-            bin_image.tofile(f)
+        if True:
+            print('inverse stft of {}...'.format(stems['vocals']), end=' ')
+            #v_spec_m = X_spec_m - y_spec_m
+            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+            print('done')
+            sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
+            sf.write(os.path.join('ensembled/temp', 'tempV.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
 
-    print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+        if args.output_image:
+            with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
+                image = spec_utils.spectrogram_to_image(y_spec_m)
+                _, bin_image = cv2.imencode('.jpg', image)
+                bin_image.tofile(f)
+            with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
+                image = spec_utils.spectrogram_to_image(v_spec_m)
+                _, bin_image = cv2.imencode('.jpg', image)
+                bin_image.tofile(f)
+
+        print('Performing Deep Extraction...')
+        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/tempV.wav -o ensembled/temp/difftemp")
+        os.system("python lib/diffext.py ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav ensembled/temp/aligned-difftemp_v.wav ensembled/temp/subtracted-difftemp_v.wav")
+        os.rename('ensembled/temp/subtracted-difftemp_v.wav', 'separated/{}_{}_DeepExtraction_Instruments.wav'.format(basename, model_name))
+        print('Complete!')
+        print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+
+        dir = 'ensembled/temp'
+        for file in os.scandir(dir):
+            os.remove(file.path)
+    else:
+        print('done')
+        model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
+        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
+
+        if True:
+            print('inverse stft of {}...'.format(stems['vocals']), end=' ')
+            #v_spec_m = X_spec_m - y_spec_m
+            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+            print('done')
+            sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
+
+        if args.output_image:
+            with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
+                image = spec_utils.spectrogram_to_image(y_spec_m)
+                _, bin_image = cv2.imencode('.jpg', image)
+                bin_image.tofile(f)
+            with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
+                image = spec_utils.spectrogram_to_image(v_spec_m)
+                _, bin_image = cv2.imencode('.jpg', image)
+                bin_image.tofile(f)
+
+        dir = 'ensembled/temp'
+        for file in os.scandir(dir):
+            os.remove(file.path)
+
+            print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+
 
 if __name__ == '__main__':
     main()
+

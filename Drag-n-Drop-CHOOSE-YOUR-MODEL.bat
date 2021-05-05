@@ -508,7 +508,7 @@ ECHO.
 goto start
 :deep
 
-ECHO Running Model 
+ECHO Running NewLayer_4band_3
 set model=NewLayer_4band_3
 cd /d %~dp0
  
@@ -516,7 +516,7 @@ python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -
 goto end
 :default
 
-ECHO Running Model 
+ECHO Running NewLayer_4band_3
 set model=NewLayer_4band_3
 cd /d %~dp0
  
@@ -1069,7 +1069,7 @@ ECHO.
 goto start
 :deep
 
-ECHO Running Model 
+ECHO Running NewLayer_4band_3
 set model=NewLayer_4band_3
 cd /d %~dp0
  
@@ -1077,7 +1077,7 @@ python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -
 goto end
 :default
 
-ECHO Running Model 
+ECHO Running NewLayer_4band_3
 set model=NewLayer_4band_3
 cd /d %~dp0
  

@@ -43,6 +43,7 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies.
 	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.0-1.0 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.1. For the vocal model specifically, the recommended value is 0.5-0.6.
 	- **--deepextraction** - This argument generates an additional instrumental output with deep artifact vocal removal. This option is experimental and is more suited for acoustic or other light types of tracks with stubborn vocals. Many others might sound bad.
+
 ### Models Included
 
 All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5! You can download the model pack [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.0)
@@ -67,6 +68,14 @@ Here's a list of the models included within the v5 beta package -
     - **4band_44100**
         - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
         - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
+        - **HighPrecison_4band_1.pth** - This is a higher performance model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 123821KB' within the inference command to run this model!
+        - **HighPrecison_4band_2.pth** - This is a higher performance model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 123821KB' within the inference command to run this model!
+        - **NewLayer_4band_1.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
+        - **NewLayer_4band_2.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
+        - **NewLayer_4band_3.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
+    - **2band_44100_lofi**
+        - **LOFI_2band-1_33966KB.pth** - This model uses a different architecture. Frequency cut-off is 14000 Hz. Must be used with **2band_44100_lofi.json** file! Please include '-n 33966KB' within the inference command to run this model!
+        - **LOFI_2band-2_33966KB.pth** - This model uses a different architecture. Frequency cut-off is 14000 Hz. Must be used with **2band_44100_lofi.json** file! Please include '-n 33966KB' within the inference command to run this model!
 
 ### Inference Command Structure
 
@@ -80,14 +89,34 @@ The following examples show how to run the ensemble model scripts -
 python 4Band_ens_inference.py -g 0 -i "INPUT"
 ```
 ```
-python allmodels_ens_inference.py -g 0 -i "INPUT"
+python 12_model_ens_inference.py -g 0 -i "INPUT"
+```
+
+Or if you wish to save all individual outputs generated in addition to the final ensembled outputs, please run the following - 
+
+```
+python 4Band_ens_inference.py -g 0 -s -i "INPUT"
+```
+```
+python 12_model_ens_inference.py -g 0 -s -i "INPUT"
 ```
 
 - **Please Note:** Do not specify the model parameters or a model for the ensemble inference scripts! Those details are already fixed within the script. All final outputs generated through the ensemble scripts can be found in the "ensembled" folder.
 
 ### Windows Batch Files
 
-We included a Windows batch file to help automate the inference process for those running Microsoft Windows! Sinply drag the audio file you wisj to convert into the 'Drag-n-Drop-Select-Model.bat' file provided. From there you will be prompted to tyype the number associated with the model you wish to run and hit "enter".
+We included the following Windows batch files to help automate commands:
+- Drag-n-Drop-CHOOSE-YOUR-MODEL.bat
+	- Simply drag the audio file you wish to convert into the 'Drag-n-Drop-CHOOSE-YOUR-MODEL.bat' file provided. 
+	- From there you will be asked if you want TTA enabled, then prompted to type the letter associated with the model you wish to run and hit "enter". 
+	- Once you hit enter, you will be asked fs you want an additional "deep extraction" instrumental output in addition to the 2 to be provided.
+
+- Ensembler-2to9-Outputs.bat
+	- Simply drag up to 9 instrumental or vocal outputs into the batch script. 
+	- From there you will be asked if the outputs are instrumental or not.
+	- Once you hit enter, you will be asked to enter the number of files dropped into the batch script.
+	- The ensembled outputs can be found in the "ensembled" folder.
+	- **This script is going to be updated soon so that you won't have to manually enter the number of files dropped**
 
 ## Troubleshooting
 

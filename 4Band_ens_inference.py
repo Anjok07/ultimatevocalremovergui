@@ -996,6 +996,7 @@ def main():
         os.remove("ensembled/temp/5E6E_ensam3_v.wav")
         os.remove("ensembled/temp/3E4E_ensam1_v.wav")
         os.remove("ensembled/temp/1E2E_ensam1_v.wav")
+        os.remove("ensembled/temp/difftemp_v.wav")
         print('All Separations Saved!')
     else:
         print('Cleaning Up...')

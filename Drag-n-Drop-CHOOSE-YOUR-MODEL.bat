@@ -539,14 +539,14 @@ goto start
 ECHO Ensemble All 4Band Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -D -w 352 -D -s -t -i %1
+python 4Band_ens_inference.py -g 0 -w 352 -D -t -i %1
 goto end
 :default
 
 ECHO Ensemble All 4Band Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -D -s -t -i %1
+python 4Band_ens_inference.py -g 0 -w 352 -D -t -i %1
 goto end
 :model20
 set choice=
@@ -1107,7 +1107,7 @@ goto end
 ECHO Ensemble All 4Band Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -D -i %1
+python 4Band_ens_inference.py -g 0 -w 352 -i %1
 goto end
 :model20
 set choice=

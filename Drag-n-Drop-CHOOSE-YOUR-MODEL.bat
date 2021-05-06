@@ -29,8 +29,8 @@ ECHO h. MGM-v5-MIDSIDE-44100-BETA1
 ECHO i. MGM-v5-MIDSIDE-44100-BETA2
 ECHO j. MGM-v5-Vocal_2Band-32000-BETA1
 ECHO k. MGM-v5-Vocal_2Band-32000-BETA2
-ECHO l. LOFI_2band_iter5_2
-ECHO m. LOFI_2band_iter5_2
+ECHO l. LOFI_2band-1_33966KB
+ECHO m. LOFI_2band-2_33966KB
 ECHO n. HighPrecison_4band_1
 ECHO o. HighPrecison_4band_2
 ECHO p. NewLayer_4band_1.pth
@@ -458,7 +458,7 @@ set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -t -i %1
-goto start
+goto end
 :default
 ECHO Running Model NewLayer_4band_1
 set model=NewLayer_4band_1
@@ -565,15 +565,19 @@ goto start
 ECHO Ensemble All 44100-Models
 cd /d %~dp0
  
-python allmodels_ens_inference.py -g 0 -w 352 -D -t -i %1
+python 12_model_ens_inference.py -g 0 -w 352 -D -t -i %1
 goto end
 :default
 
 ECHO Ensemble All 44100-Models
 cd /d %~dp0
  
-python allmodels_ens_inference.py -g 0 -w 352 -t -i %1
+python 12_model_ens_inference.py -g 0 -w 352 -t -i %1
+goto end
+:end
+ECHO --------------------------------
 pause
+exit
 :notta
 ECHO =======================================
 ECHO           Choose Your Model
@@ -590,8 +594,8 @@ ECHO h. MGM-v5-MIDSIDE-44100-BETA1
 ECHO i. MGM-v5-MIDSIDE-44100-BETA2
 ECHO j. MGM-v5-Vocal_2Band-32000-BETA1
 ECHO k. MGM-v5-Vocal_2Band-32000-BETA2
-ECHO l. LOFI_2band_iter5_2
-ECHO m. LOFI_2band_iter5_2
+ECHO l. LOFI_2band-1_33966KB
+ECHO m. LOFI_2band-2_33966KB
 ECHO n. HighPrecison_4band_1
 ECHO o. HighPrecison_4band_2
 ECHO p. NewLayer_4band_1
@@ -1019,7 +1023,7 @@ set model=NewLayer_4band_1
 cd /d %~dp0
  
 python inference.py -g 0 -m modelparams\4band_44100.json -w 352 -D -n 129605KB -P models\%model%.pth -i %1
-goto start
+goto end
 :default
 ECHO Running Model NewLayer_4band_1
 set model=NewLayer_4band_1
@@ -1126,14 +1130,16 @@ goto start
 ECHO Ensemble All 44100-Models
 cd /d %~dp0
  
-python allmodels_ens_inference.py -g 0 -w 352 -D -i %1
+python 12_model_ens_inference.py -g 0 -w 352 -D -i %1
 goto end
 :default
 
 ECHO Ensemble All 44100-Models
 cd /d %~dp0
  
-python allmodels_ens_inference.py -g 0 -w 352 -i %1
+python 12_model_ens_inference.py -g 0 -w 352 -i %1
 goto end
 :end
+ECHO --------------------------------
 pause
+exit

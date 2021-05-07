@@ -94,32 +94,32 @@ class VocalRemover(object):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--gpu', '-g', type=int, default=-1)
-    p.add_argument('--pretrained_modelA', '-Am', type=str, default='models/MGM-v5-4Band-44100-BETA1.pth') ##DON'T CHNGE INERATION-1
-    p.add_argument('--pretrained_modelB', '-B', type=str, default='models/MGM-v5-4Band-44100-BETA2.pth') ##DON'T CHNGE INERATION-2
-    p.add_argument('--pretrained_modelC', '-C', type=str, default='models/HighPrecison_4band_1.pth') ##DON'T CHNGE INERATION-3
-    p.add_argument('--pretrained_modelD', '-Da', type=str, default='models/HighPrecison_4band_2.pth') ##DON'T CHNGE INERATION-4
-    p.add_argument('--pretrained_modelE', '-E', type=str, default='models/NewLayer_4band_1.pth') ##DON'T CHNGE INERATION-5
-    p.add_argument('--pretrained_modelF', '-F', type=str, default='models/NewLayer_4band_2.pth') ##DON'T CHNGE INERATION-6
-    p.add_argument('--pretrained_modelG', '-G', type=str, default='models/NewLayer_4band_3.pth') ##DON'T CHNGE INERATION-7
-    p.add_argument('--pretrained_modelH', '-Hm', type=str, default='models/MGM-v5-MIDSIDE-44100-BETA1.pth') ##DON'T CHNGE INERATION-8
-    p.add_argument('--pretrained_modelI', '-Im', type=str, default='models/MGM-v5-MIDSIDE-44100-BETA2.pth') ##DON'T CHNGE INERATION-9
-    p.add_argument('--pretrained_modelJ', '-J', type=str, default='models/MGM-v5-3Band-44100-BETA.pth') ##DON'T CHNGE INERATION-10
-    ##p.add_argument('--pretrained_modelK', '-K', type=str, default='models/MGM-v5-2Band-32000-BETA1.pth') ##DON'T CHNGE INERATION-11
-    ##p.add_argument('--pretrained_modelL', '-L', type=str, default='models/MGM-v5-2Band-32000-BETA2.pth') ##DON'T CHNGE INERATION-12
-    p.add_argument('--pretrained_modelM', '-Mm', type=str, default='models/LOFI_2band-1_33966KB.pth') ##DON'T CHNGE INERATION-13
-    p.add_argument('--pretrained_modelN', '-Nm', type=str, default='models/LOFI_2band-2_33966KB.pth') ##DON'T CHNGE INERATION-14
+    p.add_argument('--pretrained_modelA', '-Am', type=str, default='models/MGM-v5-4Band-44100-BETA1.pth') ##DON'T CHNGE ITERATION-1
+    p.add_argument('--pretrained_modelB', '-B', type=str, default='models/MGM-v5-4Band-44100-BETA2.pth') ##DON'T CHNGE ITERATION-2
+    p.add_argument('--pretrained_modelC', '-C', type=str, default='models/HighPrecison_4band_1.pth') ##DON'T CHNGE ITERATION-3
+    p.add_argument('--pretrained_modelD', '-Da', type=str, default='models/HighPrecison_4band_2.pth') ##DON'T CHNGE ITERATION-4
+    p.add_argument('--pretrained_modelE', '-E', type=str, default='models/NewLayer_4band_1.pth') ##DON'T CHNGE ITERATION-5
+    p.add_argument('--pretrained_modelF', '-F', type=str, default='models/NewLayer_4band_2.pth') ##DON'T CHNGE ITERATION-6
+    p.add_argument('--pretrained_modelG', '-G', type=str, default='models/NewLayer_4band_3.pth') ##DON'T CHNGE ITERATION-7
+    p.add_argument('--pretrained_modelH', '-Hm', type=str, default='models/MGM-v5-MIDSIDE-44100-BETA1.pth') ##DON'T CHNGE ITERATION-8
+    p.add_argument('--pretrained_modelI', '-Im', type=str, default='models/MGM-v5-MIDSIDE-44100-BETA2.pth') ##DON'T CHNGE ITERATION-9
+    p.add_argument('--pretrained_modelJ', '-J', type=str, default='models/MGM-v5-3Band-44100-BETA.pth') ##DON'T CHNGE ITERATION-10
+    ##p.add_argument('--pretrained_modelK', '-K', type=str, default='models/MGM-v5-2Band-32000-BETA1.pth') ##DON'T CHNGE ITERATION-11
+    ##p.add_argument('--pretrained_modelL', '-L', type=str, default='models/MGM-v5-2Band-32000-BETA2.pth') ##DON'T CHNGE ITERATION-12
+    p.add_argument('--pretrained_modelM', '-Mm', type=str, default='models/LOFI_2band-1_33966KB.pth') ##DON'T CHNGE ITERATION-13
+    p.add_argument('--pretrained_modelN', '-Nm', type=str, default='models/LOFI_2band-2_33966KB.pth') ##DON'T CHNGE ITERATION-14
     p.add_argument('--deepextraction', '-D', action='store_true')
     p.add_argument('--saveindivsep', '-s', action='store_true')
     p.add_argument('--input', '-i', required=True)
-    p.add_argument('--nn_architecture', '-n', type=str, default='default') ##DON'T CHNGE
-    p.add_argument('--nn_architectureA', '-aB', type=str, default='123821KB') ##DON'T CHNGE
-    p.add_argument('--nn_architectureB', '-bA', type=str, default='129605KB') ##DON'T CHNGE
-    p.add_argument('--nn_architectureC', '-bC', type=str, default='33966KB') ##DON'T CHNGE
-    p.add_argument('--model_params', '-m', type=str, default='modelparams/4band_44100.json') ##DON'T CHNGE
-    p.add_argument('--model_paramsB', '-mB', type=str, default='modelparams/3band_44100_mid.json') ##DON'T CHNGE
-    p.add_argument('--model_paramsC', '-mC', type=str, default='modelparams/3band_44100.json') ##DON'T CHNGE
-    p.add_argument('--model_paramsD', '-mD', type=str, default='modelparams/2band_32000.json') ##DON'T CHNGE
-    p.add_argument('--model_paramsE', '-mE', type=str, default='modelparams/2band_44100_lofi.json') ##DON'T CHNGE
+    p.add_argument('--nn_architecture', '-n', type=str, default='default') ##DON'T CHNGE ITERATION-1, ITERATION-2, ITERATION-8, ITERATION-9, ITERATION-10, ITERATION-11, ITERATION-12
+    p.add_argument('--nn_architectureA', '-aB', type=str, default='123821KB') ##DON'T CHNGE ITERATION-3, ITERATION-4
+    p.add_argument('--nn_architectureB', '-bA', type=str, default='129605KB') ##DON'T CHNGE ITERATION-5, ITERATION-6, ITERATION-7
+    p.add_argument('--nn_architectureC', '-bC', type=str, default='33966KB') ##DON'T CHNGE ITERATION-13, ITERATION-14
+    p.add_argument('--model_params', '-m', type=str, default='modelparams/4band_44100.json') ##DON'T CHNGE ITERATION-1, ITERATION-2, ITERATION-3, ITERATION-4, ITERATION-5, ITERATION-6, ITERATION-7
+    p.add_argument('--model_paramsB', '-mB', type=str, default='modelparams/3band_44100_mid.json') ##DON'T CHNGE ITERATION-8, ITERATION-9
+    p.add_argument('--model_paramsC', '-mC', type=str, default='modelparams/3band_44100.json') ##DON'T CHNGE ITERATION-10
+    p.add_argument('--model_paramsD', '-mD', type=str, default='modelparams/2band_32000.json') ##DON'T CHNGE ITERATION-11, ITERATION-12
+    p.add_argument('--model_paramsE', '-mE', type=str, default='modelparams/2band_44100_lofi.json') ##DON'T CHNGE ITERATION-13, ITERATION-14
     p.add_argument('--window_size', '-w', type=int, default=512)
     p.add_argument('--output_image', '-I', action='store_true')
     p.add_argument('--postprocess', '-p', action='store_true')
@@ -128,7 +128,7 @@ def main():
     p.add_argument('--aggressiveness', '-A', type=float, default=0.05)
     args = p.parse_args()
     
- ####################################################-INERATION-1-####################################################
+ ####################################################-ITERATION-1-####################################################
 
     if args.nn_architecture == 'default':
             from lib import nets
@@ -246,7 +246,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-2-####################################################
+ ####################################################-ITERATION-2-####################################################
 
     if args.nn_architecture == 'default':
             from lib import nets
@@ -360,7 +360,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-3-####################################################
+ ####################################################-ITERATION-3-####################################################
 
     if args.nn_architectureA == '123821KB':
             from lib import nets_123821KB as nets
@@ -475,7 +475,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-4-####################################################
+ ####################################################-ITERATION-4-####################################################
 
     if args.nn_architectureA == '123821KB':
             from lib import nets_123821KB as nets
@@ -590,7 +590,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-5-####################################################
+ ####################################################-ITERATION-5-####################################################
 
     if args.nn_architectureB == '129605KB':
             from lib import nets_129605KB as nets
@@ -705,7 +705,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-6-####################################################
+ ####################################################-ITERATION-6-####################################################
 
     if args.nn_architectureB == '129605KB':
             from lib import nets_129605KB as nets
@@ -820,7 +820,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-7-####################################################
+ ####################################################-ITERATION-7-####################################################
 
     if args.nn_architectureB == '129605KB':
             from lib import nets_129605KB as nets
@@ -935,7 +935,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
- ####################################################-INERATION-8-####################################################
+ ####################################################-ITERATION-8-####################################################
 
     if args.nn_architecture == 'default':
             from lib import nets
@@ -1050,7 +1050,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-9-####################################################
+####################################################-ITERATION-9-####################################################
 
     if args.nn_architecture == 'default':
             from lib import nets
@@ -1165,7 +1165,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-10-####################################################
+####################################################-ITERATION-10-####################################################
 
     if args.nn_architecture == 'default':
             from lib import nets
@@ -1280,7 +1280,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-11-####################################################
+####################################################-ITERATION-11-####################################################
 
 ##    if args.nn_architecture == 'default':
 ##            from lib import nets
@@ -1395,7 +1395,7 @@ def main():
 ##
 ##    print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-12-####################################################
+####################################################-ITERATION-12-####################################################
 
 ##    if args.nn_architecture == 'default':
 ##            from lib import nets
@@ -1510,7 +1510,7 @@ def main():
 ##
 ##    print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-13-####################################################
+####################################################-ITERATION-13-####################################################
 
     if args.nn_architectureC == '33966KB':
             from lib import nets_33966KB as nets
@@ -1625,7 +1625,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################-INERATION-14-####################################################
+####################################################-ITERATION-14-####################################################
 
     if args.nn_architectureC == '33966KB':
             from lib import nets_33966KB as nets
@@ -1740,7 +1740,7 @@ def main():
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-####################################################INERATIONS-COMPLETE######################################################
+####################################################ITERATIONS-COMPLETE######################################################
 
 ####################################################-ENSEMBLING-BEGIN-#######################################################
 

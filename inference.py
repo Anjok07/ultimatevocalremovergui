@@ -205,9 +205,9 @@ def main():
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end)        
     elif args.high_end_process == 'mirroring':
         mirror = np.multiply(np.flip(y_spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :], 1), 1.7)
-        input_high_end = np.where(np.abs(input_high_end) <= np.abs(mirror), input_high_end, mirror)
+        input_high_end_ = np.where(np.abs(input_high_end) <= np.abs(mirror), input_high_end, mirror)
             
-        wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end)        
+        wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end_)        
     else:
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
     
@@ -252,8 +252,13 @@ def main():
 
         if True:
             print('inverse stft of {}...'.format(stems['vocals']), end=' ')
-            #v_spec_m = X_spec_m - y_spec_m
-            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+
+            if args.high_end_process == 'mirroring':
+                mirror = np.multiply(np.flip(v_spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :], 1), 1.7)
+                input_high_end_ = np.where(np.abs(input_high_end) <= np.abs(mirror), input_high_end, mirror)
+                wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)        
+            else:        
+                wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
             print('done')
             sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
 

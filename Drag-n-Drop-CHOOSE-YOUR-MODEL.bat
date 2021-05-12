@@ -546,7 +546,7 @@ goto end
 ECHO Ensemble All 4Band Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -D -t -i %1
+python 4Band_ens_inference.py -g 0 -w 352 -t -i %1
 goto end
 :model20
 set choice=

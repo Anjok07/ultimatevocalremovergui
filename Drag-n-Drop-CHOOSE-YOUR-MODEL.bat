@@ -81,14 +81,14 @@ ECHO Running MGM-v5-2Band-32000-BETA1
 set model=MGM-v5-2Band-32000-BETA1
 cd /d %~dp0
 
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -t -i %1
 goto end
 :default
 ECHO Running MGM-v5-2Band-32000-BETA1
 set model=MGM-v5-2Band-32000-BETA1
 cd /d %~dp0
 
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model2
 set choice=
@@ -108,7 +108,7 @@ ECHO Running Model MGM-v5-2Band-32000-BETA2
 set model=Running Model MGM-v5-2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -D -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -D -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -116,7 +116,7 @@ ECHO Running Model MGM-v5-2Band-32000-BETA2
 set model=Running Model MGM-v5-2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model3
 set choice=
@@ -136,7 +136,7 @@ ECHO Running Model MGM-v5-3Band-44100-BETA
 set model=MGM-v5-3Band-44100-BETA
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100.json -w 352 -D -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100.json -H mirroring -w 352 -D -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -144,7 +144,7 @@ ECHO Running Model MGM-v5-3Band-44100-BETA
 set model=MGM-v5-3Band-44100-BETA
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model4
 set choice=
@@ -220,7 +220,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA1
 set model=MGM-v5-KAROKEE-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -228,7 +228,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA1
 set model=MGM-v5-KAROKEE-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model7
 set choice=
@@ -248,7 +248,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA2-AGR
 set model=MGM-v5-KAROKEE-32000-BETA2-AGR
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -256,7 +256,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA2-AGR
 set model=MGM-v5-KAROKEE-32000-BETA2-AGR
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model8
 set choice=
@@ -276,7 +276,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA1
 set model=MGM-v5-MIDSIDE-44100-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -H mirroring -D -w 352 -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -284,7 +284,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA1
 set model=MGM-v5-MIDSIDE-44100-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model9
 set choice=
@@ -304,7 +304,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA2
 set model=MGM-v5-MIDSIDE-44100-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -H mirroring -D -w 352 -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -312,21 +312,21 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA2
 set model=MGM-v5-MIDSIDE-44100-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model10
 ECHO Running Model MGM-v5-Vocal_2Band-32000-BETA1
 set model=MGM-v5-Vocal_2Band-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model11
 ECHO Running Model MGM-v5-Vocal_2Band-32000-BETA2
 set model=MGM-v5-Vocal_2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -t -i %1
 goto end
 :model12
 set choice=
@@ -346,7 +346,7 @@ ECHO Running Model LOFI_2band-1_33966KB
 set model=LOFI_2band-32000-1_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -D -w 352 -n 33966KB -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -H mirroring -D -w 352 -n 33966KB -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -354,7 +354,7 @@ ECHO Running Model LOFI_2band-1_33966KB
 set model=LOFI_2band-32000-1_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -n 33966KB -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -H mirroring -w 352 -n 33966KB -P models\%model%.pth -t -i %1
 goto end
 :model13
 set choice=
@@ -374,7 +374,7 @@ ECHO Running Model LOFI_2band-2_33966KB
 set model=LOFI_2band-2_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -D -w 352 -n 33966KB -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -H mirroring -D -w 352 -n 33966KB -P models\%model%.pth -t -i %1
 goto end
 :default
 
@@ -382,7 +382,7 @@ ECHO Running Model LOFI_2band-2_33966KB
 set model=LOFI_2band-2_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -n 33966KB -P models\%model%.pth -t -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -H mirroring -w 352 -n 33966KB -P models\%model%.pth -t -i %1
 goto end
 :model14
 set choice=
@@ -646,14 +646,14 @@ ECHO Running MGM-v5-2Band-32000-BETA1
 set model=MGM-v5-2Band-32000-BETA1
 cd /d %~dp0
 
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -i %1
 goto end
 :default
 ECHO Running MGM-v5-2Band-32000-BETA1
 set model=MGM-v5-2Band-32000-BETA1
 cd /d %~dp0
 
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model2
 set choice=
@@ -673,7 +673,7 @@ ECHO Running Model MGM-v5-2Band-32000-BETA2
 set model=Running Model MGM-v5-2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -D -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -D -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -681,7 +681,7 @@ ECHO Running Model MGM-v5-2Band-32000-BETA2
 set model=Running Model MGM-v5-2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model3
 set choice=
@@ -701,7 +701,7 @@ ECHO Running Model MGM-v5-3Band-44100-BETA
 set model=MGM-v5-3Band-44100-BETA
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100.json -w 352 -D -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100.json -H mirroring -w 352 -D -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -709,7 +709,7 @@ ECHO Running Model MGM-v5-3Band-44100-BETA
 set model=MGM-v5-3Band-44100-BETA
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model4
 set choice=
@@ -785,7 +785,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA1
 set model=MGM-v5-KAROKEE-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -793,7 +793,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA1
 set model=MGM-v5-KAROKEE-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model7
 set choice=
@@ -813,7 +813,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA2-AGR
 set model=MGM-v5-KAROKEE-32000-BETA2-AGR
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -D -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -D -w 352 -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -821,7 +821,7 @@ ECHO Running Model MGM-v5-KAROKEE-32000-BETA2-AGR
 set model=MGM-v5-KAROKEE-32000-BETA2-AGR
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model8
 set choice=
@@ -841,7 +841,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA1
 set model=MGM-v5-MIDSIDE-44100-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -849,7 +849,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA1
 set model=MGM-v5-MIDSIDE-44100-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model9
 set choice=
@@ -869,7 +869,7 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA2
 set model=MGM-v5-MIDSIDE-44100-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -D -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -877,21 +877,21 @@ ECHO Running Model MGM-v5-MIDSIDE-44100-BETA2
 set model=MGM-v5-MIDSIDE-44100-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\3band_44100_mid.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\3band_44100_mid.json -w 352 -H mirroring -P models\%model%.pth -i %1
 goto end
 :model10
 ECHO Running Model MGM-v5-Vocal_2Band-32000-BETA1
 set model=MGM-v5-Vocal_2Band-32000-BETA1
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model11
 ECHO Running Model MGM-v5-Vocal_2Band-32000-BETA2
 set model=MGM-v5-Vocal_2Band-32000-BETA2
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_32000.json -w 352 -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_32000.json -H mirroring -w 352 -P models\%model%.pth -i %1
 goto end
 :model12
 set choice=
@@ -911,7 +911,7 @@ ECHO Running Model LOFI_2band-1_33966KB
 set model=LOFI_2band-32000-1_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -D -w 352 -n 33966KB -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -D -H mirroring -w 352 -n 33966KB -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -919,7 +919,7 @@ ECHO Running Model LOFI_2band-1_33966KB
 set model=LOFI_2band-32000-1_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -n 33966KB -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -H mirroring -n 33966KB -P models\%model%.pth -i %1
 goto end
 :model13
 set choice=
@@ -939,7 +939,7 @@ ECHO Running Model LOFI_2band-2_33966KB
 set model=LOFI_2band-2_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -D -w 352 -n 33966KB -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -H mirroring -D -w 352 -n 33966KB -P models\%model%.pth -i %1
 goto end
 :default
 
@@ -947,7 +947,7 @@ ECHO Running Model LOFI_2band-2_33966KB
 set model=LOFI_2band-2_33966KB
 cd /d %~dp0
  
-python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -n 33966KB -P models\%model%.pth -i %1
+python inference.py -g 0 -m modelparams\2band_44100_lofi.json -w 352 -H mirroring -n 33966KB -P models\%model%.pth -i %1
 goto end
 :model14
 set choice=

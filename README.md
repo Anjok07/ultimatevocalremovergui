@@ -187,9 +187,7 @@ python VocalRemover.py
 
 The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE). 
 
-**PLEASE NOTE:** For all third party application developers who wish to use our models, please honor the MIT-license by providing credit to UVR and it's developers Anjok07, aufr33, & tsurumeso.
-
--
+- **PLEASE NOTE:** For all third party application developers who wish to use our models, please honor the MIT-license by providing credit to UVR and it's developers Anjok07, aufr33, & tsurumeso.
 
 ## Contributing
 

@@ -644,7 +644,7 @@ def main():
         
     print('done')
     
-    vr = VocalRemover(model, device, args.window_size)
+    vr = VocalRemover(model, device, max(args.window_size,320))
 
     if args.tta:
         pred, X_mag, X_phase = vr.inference_tta(X_spec_m, {'value': args.aggressiveness, 'split_bin': mp.param['band'][1]['crop_stop']})
@@ -759,7 +759,7 @@ def main():
         
     print('done')
     
-    vr = VocalRemover(model, device, args.window_size)
+    vr = VocalRemover(model, device, max(args.window_size,320))
 
     if args.tta:
         pred, X_mag, X_phase = vr.inference_tta(X_spec_m, {'value': args.aggressiveness, 'split_bin': mp.param['band'][1]['crop_stop']})
@@ -874,7 +874,7 @@ def main():
         
     print('done')
     
-    vr = VocalRemover(model, device, args.window_size)
+    vr = VocalRemover(model, device, max(args.window_size,320))
 
     if args.tta:
         pred, X_mag, X_phase = vr.inference_tta(X_spec_m, {'value': args.aggressiveness, 'split_bin': mp.param['band'][1]['crop_stop']})

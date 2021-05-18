@@ -5,7 +5,7 @@
 This application is a heavily modified version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). The official v5 GUI is still under developement and will be released some time in Q3 2021. New beta models for this version will be released at the end of the week. 
 
 - **Special Thanks**
-    - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI code UVR is built around!
+    - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI code UVR is built on!
     - [aufr33](https://github.com/aufr33) - Model collaborator and fellow UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
     - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring the GUI to life! Your hard work and continued support is greatly appreciated.
 

@@ -346,6 +346,20 @@ def fft_hp_filter(spec, bin_start, bin_stop):
     return spec
 
 
+def mirroring(a, spec_m, input_high_end, mp):
+    if 'mirroring' == a:
+        mirror = np.flip(np.abs(spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :]), 1)
+        mirror = mirror * np.exp(1.j * np.angle(input_high_end))
+        
+        return np.where(np.abs(input_high_end) <= np.abs(mirror), input_high_end, mirror)
+        
+    if 'mirroring2' == a:
+        mirror = np.flip(np.abs(spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :]), 1)
+        mi = np.multiply(mirror, input_high_end)
+        
+        return np.where(np.abs(input_high_end) <= np.abs(mi), input_high_end, mi)
+
+
 if __name__ == "__main__":
     import cv2
     import sys

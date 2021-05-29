@@ -75,7 +75,7 @@ def wave_to_spectrogram_mt(wave, hop_length, n_fft, mid_side=False, reverse=Fals
     
 def combine_spectrograms(specs, mp):
     l = min([specs[i].shape[2] for i in specs])    
-    spec_c = np.ndarray(shape=(2, mp.param['bins'] + 1, l), dtype=np.complex64)
+    spec_c = np.zeros(shape=(2, mp.param['bins'] + 1, l), dtype=np.complex64)
     offset = 0
     bands_n = len(mp.param['band'])
     

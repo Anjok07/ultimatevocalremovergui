@@ -121,9 +121,6 @@ def main():
     for file in os.scandir(dir):
         os.remove(file.path)
     
-    #if '' == args.model_params:
-    #    mp = ModelParameters(args.pretrained_model)
-    #else:
     mp = ModelParameters(args.model_params)    
     
     start_time = time.time()
@@ -193,7 +190,9 @@ def main():
    
     if args.high_end_process == 'bypass':
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end)        
-    elif args.high_end_process == 'correlation':       
+    elif args.high_end_process == 'correlation':  
+        print('Deprecated: correlation will be removed in the final release. Please use the mirroring instead.')
+        
         for i in range(input_high_end.shape[2]):            
             for c in range(2):
                 X_mag_max = np.amax(input_high_end[c, :, i])    

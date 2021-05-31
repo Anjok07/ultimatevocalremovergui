@@ -368,7 +368,7 @@ def main():
     def get_files(folder="", suffix=""):
         return [f"{folder}{i}" for i in os.listdir(folder) if i.endswith(suffix)]
     
-    ensambles = [
+    ensembles = [
         {
             'algorithm':'min_mag',
             'model_params':'modelparams/1band_sr44100_hl512.json',
@@ -383,7 +383,7 @@ def main():
         }
     ]
 
-    for i,e in tqdm(enumerate(ensambles), desc="Ensembling..."):
+    for i,e in tqdm(enumerate(ensembles), desc="Ensembling..."):
         os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {' '.join(e['files'])} -o {e['output']}")
      
      

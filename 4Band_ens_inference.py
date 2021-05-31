@@ -946,7 +946,7 @@ def main():
 
         print('Performing Deep Extraction...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/Complete_v.wav ensembled/temp/CompleteV_v.wav -o ensembled/temp/difftemp")
-        os.system("python lib/spec_utils.py -a invertB -m modelparams/1band_sr44100_hl512.json ensembled/temp/Complete_v.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftempC")
+        os.system("python lib/spec_utils.py -a invert -v -m modelparams/1band_sr44100_hl512.json ensembled/temp/Complete_v.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftempC")
         os.rename('ensembled/temp/difftempC_v.wav', 'ensembled/{}_4BAND_Ensembled_DeepExtraction_Instrumental.wav'.format(basename))
         os.rename('ensembled/temp/Complete_v.wav', 'ensembled/{}_4BAND_Ensembled_Instrumental.wav'.format(basename))
         os.rename('ensembled/temp/CompleteV_v.wav', 'ensembled/{}_4BAND_Ensembled_Vocals.wav'.format(basename))

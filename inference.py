@@ -236,7 +236,7 @@ def main():
 
         print('Performing Deep Extraction...')
         os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/tempV.wav -o ensembled/temp/difftemp")
-        os.system("python lib/spec_utils.py -a invertB -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftemp")
+        os.system("python lib/spec_utils.py -a invert -v -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftemp")
         os.rename('ensembled/temp/difftemp_v.wav', 'separated/{}_{}_DeepExtraction_Instruments.wav'.format(basename, model_name))
         print('Complete!')
         print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))

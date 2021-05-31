@@ -97,7 +97,7 @@ def combine_spectrograms(specs, mp):
                 g = math.pow(10, -(b - mp.param['pre_filter_start']) * (3.5 - gp) / 20.0)
                 gp = g
                 spec_c[:, b, :] *= g
-
+                
     return np.asfortranarray(spec_c)
     
 
@@ -174,7 +174,7 @@ def mask_silence(mag, ref, thres=0.2, min_range=64, fade_size=32):
     return mag
     
 
-def align_wave_head_and_tail(a, b, sr=0):
+def align_wave_head_and_tail(a, b):
     l = min([a[0].size, b[0].size])  
     
     return a[:l,:l], b[:l,:l]
@@ -185,8 +185,6 @@ def cache_or_load(mix_path, inst_path, mp):
     inst_basename = os.path.splitext(os.path.basename(inst_path))[0]
 
     cache_dir = 'mph{}'.format(hashlib.sha1(json.dumps(mp.param, sort_keys=True).encode('utf-8')).hexdigest())
-    #mix_cache_dir = os.path.join(os.path.dirname(mix_path), cache_dir)
-    #inst_cache_dir = os.path.join(os.path.dirname(inst_path), cache_dir)
     mix_cache_dir = os.path.join('cache', cache_dir)
     inst_cache_dir = os.path.join('cache', cache_dir)
 
@@ -277,21 +275,6 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
     wave_band = {}
     bands_n = len(mp.param['band'])    
     offset = 0
-    
-    #if False:
-    #    from scipy import ndimage
-    #    
-    #    intersect_h2 = 167
-    #    intersect_y2 = 67
-    #    intersect_h1 = 62
-    #    intersect_y1 = 244
-
-    #    intersect_left = ndimage.zoom(spec_m[0, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
-    #    intersect_right = ndimage.zoom(spec_m[1, intersect_y1:intersect_y1+intersect_h1, :].real, zoom=(intersect_h2 / intersect_h1, 1.0), order=3) * 6
-    #    s = intersect_y2+intersect_left.shape[0]
-        
-    #    spec_m[0, intersect_y2:s, :] = np.where(np.abs(spec_m[0, intersect_y2:s, :]) <= np.abs(intersect_left) * 1.5, spec_m[0, intersect_y2:s, :], intersect_left)
-    #    spec_m[1, intersect_y2:s, :] = np.where(np.abs(spec_m[1, intersect_y2:s, :]) <= np.abs(intersect_right) * 1.5, spec_m[1, intersect_y2:s, :], intersect_right)
 
     for d in range(1, bands_n + 1):
         bp = mp.param['band'][d]
@@ -307,18 +290,18 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
             if bp['hpf_start'] > 0:
                 spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
             if bands_n == 1:
-                wave = spectrogram_to_wave_mt(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse'])
+                wave = spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse'])
             else:
-                wave = np.add(wave, spectrogram_to_wave_mt(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']))
+                wave = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']))
         else:
             sr = mp.param['band'][d+1]['sr']
             if d == 1: # lower
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
-                wave = librosa.resample(spectrogram_to_wave_mt(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']), bp['sr'], sr, res_type="sinc_fastest")
+                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']), bp['sr'], sr, res_type="sinc_fastest")
             else: # mid
                 spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
-                wave2 = np.add(wave, spectrogram_to_wave_mt(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']))
+                wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['reverse']))
                 wave = librosa.resample(wave2, bp['sr'], sr, res_type="sinc_fastest")
         
     return wave.T
@@ -344,8 +327,8 @@ def fft_hp_filter(spec, bin_start, bin_stop):
     spec[:, 0:bin_stop+1, :] *= 0
 
     return spec
-
-
+    
+    
 def mirroring(a, spec_m, input_high_end, mp):
     if 'mirroring' == a:
         mirror = np.flip(np.abs(spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :]), 1)
@@ -360,6 +343,23 @@ def mirroring(a, spec_m, input_high_end, mp):
         return np.where(np.abs(input_high_end) <= np.abs(mi), input_high_end, mi)
 
 
+def ensembling(a, specs):
+    for i in range(1, len(specs)):
+        if i == 1:
+            spec = specs[i-1]
+    
+        ln = min([spec.shape[2], specs[i].shape[2]])
+        spec = spec[:,:,:ln]
+        specs[i] = specs[i][:,:,:ln]
+        
+        if 'min_mag' == a:
+            spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)
+        if 'max_mag' == a:
+            spec = np.where(np.abs(specs[i]) >= np.abs(spec), specs[i], spec)
+
+    return spec
+    
+
 if __name__ == "__main__":
     import cv2
     import sys
@@ -368,76 +368,66 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invertB', 'min_mag', 'max_mag'], default='invert') #'invertB' only writes output "v".
-    p.add_argument('--model_params', '-m', type=str, default='4band_44100.json')
-    p.add_argument('--output_name', '-o', type=str, default='test')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'min_mag', 'max_mag'], default='min_mag')
+    p.add_argument('--model_params', '-m', type=str, default=os.path.join('modelparams', '1band_sr44100_hl512.json'))
+    p.add_argument('--output_name', '-o', type=str, default='output')
+    p.add_argument('--vocals_only', '-v', action='store_true')
     p.add_argument('input', nargs='+')
     args = p.parse_args()
-    
+  
     start_time = time.time()
-   
-    X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
+    
+    if args.algorithm == 'invert' and len(args.input) != 2:
+        raise ValueError('There should be two input files.')    
+    
+    if args.algorithm != 'invert' and len(args.input) < 2:
+        raise ValueError('There must be at least two input files.')
+    
+    wave, specs = {}, {}
     mp = ModelParameters(args.model_params)
      
-    for d in range(len(mp.param['band']), 0, -1):
-        print('Band(s) {}'.format(d), end=' ')
-        
-        bp = mp.param['band'][d]
+    for i in range(len(args.input)):    
+        for d in range(len(mp.param['band']), 0, -1):          
+            bp = mp.param['band'][d]
+            spec = {}
+            
+            if d == len(mp.param['band']): # high-end band                
+                wave[d], _ = librosa.load(
+                    args.input[i], bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
                 
-        if d == len(mp.param['band']): # high-end band
-            X_wave[d], _ = librosa.load(
-                args.input[0], bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
-            y_wave[d], _ = librosa.load(
-                args.input[1], bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
-        else: # lower bands
-            X_wave[d] = librosa.resample(X_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
-            y_wave[d] = librosa.resample(y_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                if len(wave[d].shape) == 1: # mono to stereo
+                    wave[d] = np.array([wave[d], wave[d]])
+            else: # lower bands
+                wave[d] = librosa.resample(wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                       
+            spec[d] = wave_to_spectrogram(wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse'])
+            
+        specs[i] = combine_spectrograms(spec, mp)
         
-        X_wave[d], y_wave[d] = align_wave_head_and_tail(X_wave[d], y_wave[d])
-        
-        X_spec_s[d] = wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse'])
-        y_spec_s[d] = wave_to_spectrogram(y_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], mp.param['reverse']) 
-        
-        print('ok')
-        
-    del X_wave, y_wave
- 
-    X_spec_m = combine_spectrograms(X_spec_s, mp)
-    y_spec_m = combine_spectrograms(y_spec_s, mp)
-    
-    if y_spec_m.shape != X_spec_m.shape:
-        print('Warning: The combined spectrograms are different!')   
-        print('X_spec_m: ' + str(X_spec_m.shape))
-        print('y_spec_m: ' + str(y_spec_m.shape))
-
+    del wave
+   
     if args.algorithm == 'invert':
-        y_spec_m = reduce_vocal_aggressively(X_spec_m, y_spec_m, 0.2)
-        v_spec_m = X_spec_m - y_spec_m
-    if args.algorithm == 'invertB':
-        y_spec_m = reduce_vocal_aggressively(X_spec_m, y_spec_m, 0.2)
-        v_spec_m = X_spec_m - y_spec_m
-    if args.algorithm == 'min_mag':
-        v_spec_m = np.where(np.abs(y_spec_m) <= np.abs(X_spec_m), y_spec_m, X_spec_m)
-    if args.algorithm == 'max_mag':
-        v_spec_m = np.where(np.abs(y_spec_m) >= np.abs(X_spec_m), y_spec_m, X_spec_m)
+        specs[1] = reduce_vocal_aggressively(specs[0], specs[1], 0.2)
+        v_spec = specs[0] - specs[1]
 
-    X_mag = np.abs(X_spec_m)
-    y_mag = np.abs(y_spec_m)
-    v_mag = np.abs(v_spec_m)
+        if not args.vocals_only:
+            X_mag = np.abs(specs[0])
+            y_mag = np.abs(specs[1])
+            v_mag = np.abs(v_spec)
 
-    X_image = spectrogram_to_image(X_mag)
-    y_image = spectrogram_to_image(y_mag)
-    v_image = spectrogram_to_image(v_mag)
-    
-    if args.algorithm == 'invert':
-        cv2.imwrite('{}_X.png'.format(args.output_name), X_image)
-        cv2.imwrite('{}_y.png'.format(args.output_name), y_image)
-        cv2.imwrite('{}_v.png'.format(args.output_name), v_image)    
-        
-        sf.write('{}_X.wav'.format(args.output_name), cmb_spectrogram_to_wave(X_spec_m, mp), mp.param['sr'])
-        sf.write('{}_y.wav'.format(args.output_name), cmb_spectrogram_to_wave(y_spec_m, mp), mp.param['sr'])
-    
-    sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec_m, mp), mp.param['sr'])
+            X_image = spectrogram_to_image(X_mag)
+            y_image = spectrogram_to_image(y_mag)
+            v_image = spectrogram_to_image(v_mag)
 
+            cv2.imwrite('{}_X.png'.format(args.output_name), X_image)
+            cv2.imwrite('{}_y.png'.format(args.output_name), y_image)
+            cv2.imwrite('{}_v.png'.format(args.output_name), v_image)    
+                
+            sf.write('{}_X.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[0], mp), mp.param['sr'])
+            sf.write('{}_y.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[1], mp), mp.param['sr'])
+            
+        sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])    
+    else:    
+        sf.write(os.path.join('ensembled','{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(ensembling(args.algorithm, specs), mp), mp.param['sr'])
 
     #print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))

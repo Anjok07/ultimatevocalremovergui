@@ -41,8 +41,8 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 		- *none* - No processing (default)
 		- *bypass* - This copies the missing frequencies from the input.
 		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies. It will be removed in the final release.
-		- *mirroring* - This is a more advanced algorithm than correlation. It uses the high frequencies from the input and mirrored instrumental's frequencies.
-		- *mirroring2* - A more optimized version of the mirroring.
+		- *mirroring* - This algorithm is more advanced than *correlation*. It uses the high frequencies from the input and mirrored instrumental's frequencies.
+		- *mirroring2* - This version of mirroring is optimized for better performance.
 	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.0-1.0 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.1. For the vocal model specifically, the recommended value is 0.5-0.6.
 	- **--deepextraction** - This argument generates an additional instrumental output with deep artifact vocal removal. This option is experimental and is more suited for acoustic or other light types of tracks with stubborn vocals. Many others might sound bad.
 

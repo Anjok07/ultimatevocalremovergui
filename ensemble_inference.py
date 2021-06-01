@@ -220,7 +220,7 @@ def main():
         print('loading & stft of wave source...', end=' ')
         
         X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
-        basename = os.path.splitext(os.path.basename(args.input))[0]
+        basename = '"{}"'.format(os.path.splitext(os.path.basename(args.input))[0])
         bands_n = len(mp.param['band'])
                 
         for d in range(bands_n, 0, -1):        

@@ -98,7 +98,7 @@ Or if you wish to save all individual outputs generated in addition to the final
 python ensemble_inference.py -g 0 -s -i "INPUT"
 ```
 
-You can also specify the models you wish to ensemble. For the ensemble_inference script specifically, do not input the ".pth" extension within the command, only the name. Here is an example - 
+By default, 14 models will be ensembled. However, you can also specify the models you wish to ensemble. For the ensemble_inference script specifically, do not input the ".pth" extension within the command, only the name. Here is an example - 
 
 ```
 python ensemble_inference.py -g 0 -P "MODELNAME1" "MODELNAME2" "MODELNAME3" -i "INPUT"

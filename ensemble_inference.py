@@ -102,6 +102,7 @@ def main():
     p.add_argument('--output_image', '-I', action='store_true')
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
+    p.add_argument('--deepextraction', '-D', action='store_true')
     p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation', 'mirroring', 'mirroring2'], default='bypass')
     p.add_argument('--aggressiveness', '-A', type=float, default=0.05)
     p.add_argument('--savein', '-s', action='store_true')
@@ -116,19 +117,19 @@ def main():
 
     args = p.parse_args()
     
-####################################################-CLEAR-TEMP-FOLDER-########################################
+#CLEAR-TEMP-FOLDER
     dir = 'ensembled/temp'
     for file in os.scandir(dir):
         os.remove(file.path)
-####################################################-LOOPS-####################################################
 
+#LOOPS
     models = {
         'MGM-v5-4Band-44100-BETA[12]':
             {
                 'using_architecture': 'default',
                 'model_params': '4band_44100',
             },       
-        'HighPrecison_4band_[12]':
+        'HighPrecison_4band_[123456789]':
             {
                 'using_architecture': '123821KB',
                 'model_params': '4band_44100',
@@ -221,6 +222,7 @@ def main():
         
         X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
         basename = '"{}"'.format(os.path.splitext(os.path.basename(args.input))[0])
+        basenameb = '{}'.format(os.path.splitext(os.path.basename(args.input))[0])
         bands_n = len(mp.param['band'])
                 
         for d in range(bands_n, 0, -1):        
@@ -295,7 +297,7 @@ def main():
         #model_name = os.path.splitext(os.path.basename(c['model_location']))[0]
         sf.write(os.path.join('ensembled/temp', f"{ii+1}_{model_name}_{stems['inst']}.wav"), wave, mp.param['sr'])
         if args.savein:
-            sf.write(os.path.join('separated', f"{basename}_{model_name}_{stems['inst']}.wav"), wave, mp.param['sr'])
+            sf.write(os.path.join('separated', f"{basenameb}_{model_name}_{stems['inst']}.wav"), wave, mp.param['sr'])
 
         if True:
             print('inverse stft of {}...'.format(stems['vocals']), end=' ')
@@ -309,22 +311,22 @@ def main():
             print('done')
             sf.write(os.path.join('ensembled/temp', f"{ii+1}_{model_name}_{stems['vocals']}.wav"), wave, mp.param['sr'])
             if args.savein:
-                sf.write(os.path.join('separated', f"{basename}_{model_name}_{stems['vocals']}.wav"), wave, mp.param['sr'])
+                sf.write(os.path.join('separated', f"{basenameb}_{model_name}_{stems['vocals']}.wav"), wave, mp.param['sr'])
 
 
-        # if args.output_image:
-        #     with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
-        #         image = spec_utils.spectrogram_to_image(y_spec_m)
-        #         _, bin_image = cv2.imencode('.jpg', image)
-        #         bin_image.tofile(f)
-        #     with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
-        #         image = spec_utils.spectrogram_to_image(v_spec_m)
-        #         _, bin_image = cv2.imencode('.jpg', image)
-        #         bin_image.tofile(f)
+        if args.output_image:
+             with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
+                 image = spec_utils.spectrogram_to_image(y_spec_m)
+                 _, bin_image = cv2.imencode('.jpg', image)
+                 bin_image.tofile(f)
+             with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
+                 image = spec_utils.spectrogram_to_image(v_spec_m)
+                 _, bin_image = cv2.imencode('.jpg', image)
+                 bin_image.tofile(f)
 
         # print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
-#############################################-ENSEMBLING-BEGIN-################################################
+#ENSEMBLING-BEGIN
     
     def get_files(folder="", suffix=""):
         return [f"{folder}{i}" for i in os.listdir(folder) if i.endswith(suffix)]
@@ -347,6 +349,22 @@ def main():
     for i,e in tqdm(enumerate(ensambles), desc="Ensembling..."):
         os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {' '.join(e['files'])} -o {e['output']}")
      
+    if args.deepextraction:
+        def get_files(folder="", files=""):
+            return [f"{folder}{i}" for i in os.listdir(folder) if i.endswith(suffix)]
+    
+        deepext = [
+            {
+                'algorithm':'deep',
+                'model_params':'modelparams/1band_sr44100_hl512.json',
+                'file1':"ensembled/{}_Ensembled_Vocals.wav".format(basename),
+                'file2':"ensembled/{}_Ensembled_Instruments.wav".format(basename),
+                'output':'ensembled/{}_Ensembled_Deep_Extraction'.format(basename)
+            }
+        ]
+
+        for i,e in tqdm(enumerate(deepext), desc="Performing Deep Extraction..."):
+            os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {e['file1']} {e['file2']} -o {e['output']}")
      
     dir = 'ensembled/temp'
     for file in os.scandir(dir):

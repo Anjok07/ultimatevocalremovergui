@@ -134,6 +134,8 @@ def main():
     
     X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
     basename = os.path.splitext(os.path.basename(args.input))[0]
+    basenameb = '"{}"'.format(os.path.splitext(os.path.basename(args.input))[0])
+
     bands_n = len(mp.param['band'])
              
     for d in range(bands_n, 0, -1):        
@@ -204,41 +206,6 @@ def main():
     else:
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
     
-    if args.deepextraction:
-        print('done')
-        model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
-        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
-        sf.write(os.path.join('ensembled/temp', 'tempI.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
-
-        if True:
-            print('inverse stft of {}...'.format(stems['vocals']), end=' ')
-            #v_spec_m = X_spec_m - y_spec_m
-            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
-            print('done')
-            sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
-            sf.write(os.path.join('ensembled/temp', 'tempV.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
-
-        if args.output_image:
-            with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
-                image = spec_utils.spectrogram_to_image(y_spec_m)
-                _, bin_image = cv2.imencode('.jpg', image)
-                bin_image.tofile(f)
-            with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
-                image = spec_utils.spectrogram_to_image(v_spec_m)
-                _, bin_image = cv2.imencode('.jpg', image)
-                bin_image.tofile(f)
-
-        print('Performing Deep Extraction...')
-        os.system("python lib/spec_utils.py -a min_mag -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/tempV.wav -o ensembled/temp/difftemp")
-        os.system("python lib/spec_utils.py -a invert -v -m modelparams/1band_sr44100_hl512.json ensembled/temp/tempI.wav ensembled/temp/difftemp_v.wav -o ensembled/temp/difftemp")
-        os.rename('ensembled/temp/difftemp_v.wav', 'separated/{}_{}_DeepExtraction_Instruments.wav'.format(basename, model_name))
-        print('Complete!')
-        print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
-
-        dir = 'ensembled/temp'
-        for file in os.scandir(dir):
-            os.remove(file.path)
-    else:
         print('done')
         model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
         sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
@@ -265,11 +232,27 @@ def main():
                 _, bin_image = cv2.imencode('.jpg', image)
                 bin_image.tofile(f)
 
-        dir = 'ensembled/temp'
-        for file in os.scandir(dir):
-            os.remove(file.path)
+    if args.deepextraction:
 
-            print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+        deepext = [
+            {
+                'algorithm':'deep',
+                'model_params':'modelparams/1band_sr44100_hl512.json',
+                'file1':"separated/{}_{}_{}.wav".format(basenameb, model_name, stems['vocals'], mp.param['sr']),
+                'file2':"separated/{}_{}_{}.wav".format(basenameb, model_name, stems['inst'], mp.param['sr']),
+                'output':'separated/{}_{}_{}_Deep_Extraction'.format(basenameb, model_name, stems['inst'], mp.param['sr'])
+            }
+        ]
+
+        for i,e in tqdm(enumerate(deepext), desc="Performing Deep Extraction..."):
+            os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {e['file1']} {e['file2']} -o {e['output']}")
+     
+    dir = 'ensembled/temp'
+    for file in os.scandir(dir):
+        os.remove(file.path)
+    print('Complete!')
+
+    print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
 
 if __name__ == '__main__':

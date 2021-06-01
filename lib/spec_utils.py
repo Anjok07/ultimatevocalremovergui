@@ -368,7 +368,7 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'min_mag', 'max_mag'], default='min_mag')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'min_mag', 'max_mag', 'deep'], default='min_mag')
     p.add_argument('--model_params', '-m', type=str, default=os.path.join('modelparams', '1band_sr44100_hl512.json'))
     p.add_argument('--output_name', '-o', type=str, default='output')
     p.add_argument('--vocals_only', '-v', action='store_true')
@@ -405,7 +405,12 @@ if __name__ == "__main__":
         specs[i] = combine_spectrograms(spec, mp)
         
     del wave
-   
+
+    if args.algorithm == 'deep':
+        d_spec = np.where(np.abs(specs[0]) <= np.abs(spec[1]), specs[0], spec[1])
+        v_spec = d_spec - specs[1]
+        sf.write(os.path.join('{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])   
+        
     if args.algorithm == 'invert':
         specs[1] = reduce_vocal_aggressively(specs[0], specs[1], 0.2)
         v_spec = specs[0] - specs[1]
@@ -428,6 +433,7 @@ if __name__ == "__main__":
             
         sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])    
     else:    
-        sf.write(os.path.join('ensembled','{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(ensembling(args.algorithm, specs), mp), mp.param['sr'])
+        if not args.algorithm == 'deep':
+            sf.write(os.path.join('ensembled','{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(ensembling(args.algorithm, specs), mp), mp.param['sr'])
 
     #print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))

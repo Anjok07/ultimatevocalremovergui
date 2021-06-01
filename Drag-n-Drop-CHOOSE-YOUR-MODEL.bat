@@ -36,8 +36,7 @@ ECHO o. HighPrecison_4band_2
 ECHO p. NewLayer_4band_1.pth
 ECHO q. NewLayer_4band_2.pth
 ECHO r. NewLayer_4band_3.pth
-ECHO s. Ensemble 4Band Models (7 Models) - Final Outputs Save to Ensembled Folder!
-ECHO t. Ensemble All Models (12 Models) - Final Outputs Save to Ensembled Folder!
+ECHO s. Ensemble All Models (14 Models) - Final Outputs Save to Ensembled Folder!
 set choice=
 set /p choice=Type the letter associated with the option you choose and hit 'Enter': 
 if not '%choice%'=='' set choice=%choice:~0,1%
@@ -60,7 +59,6 @@ if '%choice%'=='p' goto model16
 if '%choice%'=='q' goto model17
 if '%choice%'=='r' goto model18
 if '%choice%'=='s' goto model19
-if '%choice%'=='t' goto model20
 ECHO "%choice%" is not valid, try again
 ECHO.
 goto start
@@ -536,43 +534,17 @@ ECHO.
 goto start
 :deep
 
-ECHO Ensemble All 4Band Models
+ECHO Ensemble All Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -D -t -i %1
+python ensemble_inference.py -g 0 -w 352 -s -D -t -i %1
 goto end
 :default
 
-ECHO Ensemble All 4Band Models
+ECHO Ensemble All Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -t -i %1
-goto end
-:model20
-set choice=
-set /p choice=Include Deep Vocal Extraction Instrumental? [Y/N]: 
-if not '%choice%'=='' set choice=%choice:~0,1%
-if '%choice%'=='Y' goto deep
-if '%choice%'=='y' goto deep
-if '%choice%'=='N' goto default
-if '%choice%'=='n' goto default
-if '%choice%'=='' goto default
-ECHO "%choice%" is not valid, try again
-ECHO.
-goto start
-:deep
-
-ECHO Ensemble All 44100-Models
-cd /d %~dp0
- 
-python ensemble_inference.py -g 0 -w 352 -D -t -i %1
-goto end
-:default
-
-ECHO Ensemble All 44100-Models
-cd /d %~dp0
- 
-python ensemble_inference.py -g 0 -w 352 -t -i %1
+python ensemble_inference.py -g 0 -w 352 -s -t -i %1
 goto end
 :end
 ECHO --------------------------------
@@ -601,8 +573,7 @@ ECHO o. HighPrecison_4band_2
 ECHO p. NewLayer_4band_1
 ECHO q. NewLayer_4band_2
 ECHO r. NewLayer_4band_3
-ECHO s. Ensemble 4Band Models (7 Models) - Final Outputs Save to Ensembled Folder!
-ECHO t. Ensemble All Models (12 Models) - Final Outputs Save to Ensembled Folder!
+ECHO s. Ensemble All Models (14 Models) - Final Outputs Save to Ensembled Folder!
 set choice=
 set /p choice=Type the letter associated with the option you choose and hit 'Enter': 
 if not '%choice%'=='' set choice=%choice:~0,1%
@@ -625,7 +596,6 @@ if '%choice%'=='p' goto model16
 if '%choice%'=='q' goto model17
 if '%choice%'=='r' goto model18
 if '%choice%'=='s' goto model19
-if '%choice%'=='t' goto model20
 ECHO "%choice%" is not valid, try again
 ECHO.
 goto start
@@ -1100,44 +1070,17 @@ ECHO "%choice%" is not valid, try again
 ECHO.
 goto start
 :deep
-
-ECHO Ensemble All 4Band Models
+ECHO Ensemble All Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -D -w 352 -D -i %1
+python ensemble_inference.py -g 0 -D -w 352 -D -s -i %1
 goto end
 :default
 
-ECHO Ensemble All 4Band Models
+ECHO Ensemble All Models
 cd /d %~dp0
  
-python 4Band_ens_inference.py -g 0 -w 352 -i %1
-goto end
-:model20
-set choice=
-set /p choice=Include Deep Vocal Extraction Instrumental? [Y/N]: 
-if not '%choice%'=='' set choice=%choice:~0,1%
-if '%choice%'=='Y' goto deep
-if '%choice%'=='y' goto deep
-if '%choice%'=='N' goto default
-if '%choice%'=='n' goto default
-if '%choice%'=='' goto default
-ECHO "%choice%" is not valid, try again
-ECHO.
-goto start
-:deep
-
-ECHO Ensemble All 44100-Models
-cd /d %~dp0
- 
-python ensemble_inference.py -g 0 -w 352 -D -i %1
-goto end
-:default
-
-ECHO Ensemble All 44100-Models
-cd /d %~dp0
- 
-python ensemble_inference.py -g 0 -w 352 -i %1
+python ensemble_inference.py -g 0 -s -w 352 -i %1
 goto end
 :end
 ECHO --------------------------------

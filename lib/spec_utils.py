@@ -327,8 +327,8 @@ def fft_hp_filter(spec, bin_start, bin_stop):
     spec[:, 0:bin_stop+1, :] *= 0
 
     return spec
-    
-    
+
+
 def mirroring(a, spec_m, input_high_end, mp):
     if 'mirroring' == a:
         mirror = np.flip(np.abs(spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :]), 1)
@@ -343,22 +343,22 @@ def mirroring(a, spec_m, input_high_end, mp):
         return np.where(np.abs(input_high_end) <= np.abs(mi), input_high_end, mi)
 
 
-def ensembling(a, specs):
+def ensembling(a, specs):   
     for i in range(1, len(specs)):
         if i == 1:
-            spec = specs[i-1]
-    
+            spec = specs[0]
+
         ln = min([spec.shape[2], specs[i].shape[2]])
         spec = spec[:,:,:ln]
         specs[i] = specs[i][:,:,:ln]
-        
+
         if 'min_mag' == a:
             spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)
         if 'max_mag' == a:
-            spec = np.where(np.abs(specs[i]) >= np.abs(spec), specs[i], spec)
+            spec = np.where(np.abs(specs[i]) >= np.abs(spec), specs[i], spec)  
 
     return spec
-    
+
 
 if __name__ == "__main__":
     import cv2
@@ -368,7 +368,7 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'min_mag', 'max_mag', 'deep'], default='min_mag')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invert_p', 'min_mag', 'max_mag', 'deep'], default='min_mag')
     p.add_argument('--model_params', '-m', type=str, default=os.path.join('modelparams', '1band_sr44100_hl512.json'))
     p.add_argument('--output_name', '-o', type=str, default='output')
     p.add_argument('--vocals_only', '-v', action='store_true')
@@ -377,19 +377,20 @@ if __name__ == "__main__":
   
     start_time = time.time()
     
-    if args.algorithm == 'invert' and len(args.input) != 2:
+    if args.algorithm.startswith('invert') and len(args.input) != 2:
         raise ValueError('There should be two input files.')    
     
-    if args.algorithm != 'invert' and len(args.input) < 2:
+    if not args.algorithm.startswith('invert') and len(args.input) < 2:
         raise ValueError('There must be at least two input files.')
     
     wave, specs = {}, {}
     mp = ModelParameters(args.model_params)
      
     for i in range(len(args.input)):    
+        spec = {}
+        
         for d in range(len(mp.param['band']), 0, -1):          
-            bp = mp.param['band'][d]
-            spec = {}
+            bp = mp.param['band'][d]            
             
             if d == len(mp.param['band']): # high-end band                
                 wave[d], _ = librosa.load(
@@ -411,25 +412,35 @@ if __name__ == "__main__":
         v_spec = d_spec - specs[1]
         sf.write(os.path.join('{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])   
         
-    if args.algorithm == 'invert':
-        specs[1] = reduce_vocal_aggressively(specs[0], specs[1], 0.2)
-        v_spec = specs[0] - specs[1]
-
-        if not args.vocals_only:
+    if args.algorithm.startswith('invert'):
+        ln = min([specs[0].shape[2], specs[1].shape[2]])
+        specs[0] = specs[0][:,:,:ln]
+        specs[1] = specs[1][:,:,:ln]
+        
+        if 'invert_p' == args.algorithm:
             X_mag = np.abs(specs[0])
-            y_mag = np.abs(specs[1])
-            v_mag = np.abs(v_spec)
+            y_mag = np.abs(specs[1])            
+            max_mag = np.where(X_mag >= y_mag, X_mag, y_mag)  
+            v_spec = specs[1] - max_mag * np.exp(1.j * np.angle(specs[0]))
+        else:
+            specs[1] = reduce_vocal_aggressively(specs[0], specs[1], 0.2)
+            v_spec = specs[0] - specs[1]
 
-            X_image = spectrogram_to_image(X_mag)
-            y_image = spectrogram_to_image(y_mag)
-            v_image = spectrogram_to_image(v_mag)
+            if not args.vocals_only:
+                X_mag = np.abs(specs[0])
+                y_mag = np.abs(specs[1])
+                v_mag = np.abs(v_spec)
 
-            cv2.imwrite('{}_X.png'.format(args.output_name), X_image)
-            cv2.imwrite('{}_y.png'.format(args.output_name), y_image)
-            cv2.imwrite('{}_v.png'.format(args.output_name), v_image)    
-                
-            sf.write('{}_X.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[0], mp), mp.param['sr'])
-            sf.write('{}_y.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[1], mp), mp.param['sr'])
+                X_image = spectrogram_to_image(X_mag)
+                y_image = spectrogram_to_image(y_mag)
+                v_image = spectrogram_to_image(v_mag)
+
+                cv2.imwrite('{}_X.png'.format(args.output_name), X_image)
+                cv2.imwrite('{}_y.png'.format(args.output_name), y_image)
+                cv2.imwrite('{}_v.png'.format(args.output_name), v_image)    
+                    
+                sf.write('{}_X.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[0], mp), mp.param['sr'])
+                sf.write('{}_y.wav'.format(args.output_name), cmb_spectrogram_to_wave(specs[1], mp), mp.param['sr'])
             
         sf.write('{}_v.wav'.format(args.output_name), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])    
     else:    

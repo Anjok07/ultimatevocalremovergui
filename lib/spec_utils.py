@@ -338,7 +338,7 @@ def mirroring(a, spec_m, input_high_end, mp):
         
     if 'mirroring2' == a:
         mirror = np.flip(np.abs(spec_m[:, mp.param['pre_filter_start']-10-input_high_end.shape[1]:mp.param['pre_filter_start']-10, :]), 1)
-        mi = np.multiply(mirror, input_high_end)
+        mi = np.multiply(mirror, input_high_end * 1.7)
         
         return np.where(np.abs(input_high_end) <= np.abs(mi), input_high_end, mi)
 

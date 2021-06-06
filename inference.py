@@ -206,31 +206,31 @@ def main():
     else:
         wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
     
+    print('done')
+    model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
+    sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
+
+    if True:
+        print('inverse stft of {}...'.format(stems['vocals']), end=' ')
+
+        if args.high_end_process.startswith('mirroring'):        
+            input_high_end_ = spec_utils.mirroring(args.high_end_process, v_spec_m, input_high_end, mp)
+
+            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)       
+        else:        
+            wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
         print('done')
-        model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
-        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
+        sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
 
-        if True:
-            print('inverse stft of {}...'.format(stems['vocals']), end=' ')
-
-            if args.high_end_process.startswith('mirroring'):        
-                input_high_end_ = spec_utils.mirroring(args.high_end_process, v_spec_m, input_high_end, mp)
-
-                wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)       
-            else:        
-                wave = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
-            print('done')
-            sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['vocals'])), wave, mp.param['sr'])
-
-        if args.output_image:
-            with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
-                image = spec_utils.spectrogram_to_image(y_spec_m)
-                _, bin_image = cv2.imencode('.jpg', image)
-                bin_image.tofile(f)
-            with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
-                image = spec_utils.spectrogram_to_image(v_spec_m)
-                _, bin_image = cv2.imencode('.jpg', image)
-                bin_image.tofile(f)
+    if args.output_image:
+        with open('{}_{}.jpg'.format(basename, stems['inst']), mode='wb') as f:
+            image = spec_utils.spectrogram_to_image(y_spec_m)
+            _, bin_image = cv2.imencode('.jpg', image)
+            bin_image.tofile(f)
+        with open('{}_{}.jpg'.format(basename, stems['vocals']), mode='wb') as f:
+            image = spec_utils.spectrogram_to_image(v_spec_m)
+            _, bin_image = cv2.imencode('.jpg', image)
+            bin_image.tofile(f)
 
     if args.deepextraction:
 

@@ -37,7 +37,7 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 - New format of spectrograms. Instead of a single spectrogram with a fixed FFT size, combined spectrograms are now used. This version combines several different types of spectrograms within specific frequency ranges. This approach allowed for a clearer view of the high frequencies and good resolutions at low frequencies, thus allowing for more targeted vocal removals.
 - The arguments --sr, --n_fft, --hop_length are removed. JSON files are now used instead.
 - The following new features were added
-	- **--high_end_process** - This argument restores the high frequencies of the instrumental (but not the vocals). It is intended for models with a narrow bandwidth, 16 kHz and below. The 5 choices for this argument are:
+	- **--high_end_process** - This argument restores the high frequencies of the output audio. It is intended for models with a narrow bandwidth, 16 kHz and below. The 5 choices for this argument are:
 		- *none* - No processing (default)
 		- *bypass* - This copies the missing frequencies from the input.
 		- *correlation* - This also copies missing frequencies from the input, however, the magnitude of the copied frequency will depend on the magnitude of the generated instrumental's high frequencies. It will be removed in the final release.

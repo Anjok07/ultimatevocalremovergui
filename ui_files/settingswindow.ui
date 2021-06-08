@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>910</width>
+    <width>1076</width>
     <height>451</height>
    </rect>
   </property>
@@ -234,7 +234,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -287,7 +287,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>717</width>
+               <width>876</width>
                <height>451</height>
               </rect>
              </property>
@@ -390,7 +390,7 @@
                       <property name="titleText" stdset="0">
                        <bool>true</bool>
                       </property>
-                      <layout class="QGridLayout" name="gridLayout" columnminimumwidth="0,167">
+                      <layout class="QGridLayout" name="gridLayout">
                        <property name="leftMargin">
                         <number>35</number>
                        </property>
@@ -409,6 +409,54 @@
                        <property name="verticalSpacing">
                         <number>10</number>
                        </property>
+                       <item row="2" column="1">
+                        <widget class="QCheckBox" name="checkBox_saveAllStacked">
+                         <property name="text">
+                          <string>Save All Stacked Outputs</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QCheckBox" name="checkBox_customParameters">
+                         <property name="text">
+                          <string>Custom Parameters</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="1">
+                        <widget class="QCheckBox" name="checkBox_stackOnly">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
+                         <property name="text">
+                          <string>Stack Conversion Only</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="4" column="0">
+                        <widget class="QCheckBox" name="checkBox_outputImage">
+                         <property name="toolTip">
+                          <string>Save spectogram of seperated music files</string>
+                         </property>
+                         <property name="text">
+                          <string>Output Image</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="0">
+                        <widget class="QCheckBox" name="checkBox_modelFolder">
+                         <property name="text">
+                          <string>Model Test Mode</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QCheckBox" name="checkBox_tta">
+                         <property name="text">
+                          <string>TTA</string>
+                         </property>
+                        </widget>
+                       </item>
                        <item row="0" column="1">
                         <widget class="QCheckBox" name="checkBox_postProcess">
                          <property name="text">
@@ -546,54 +594,6 @@
                            </widget>
                           </item>
                          </layout>
-                        </widget>
-                       </item>
-                       <item row="2" column="1">
-                        <widget class="QCheckBox" name="checkBox_saveAllStacked">
-                         <property name="text">
-                          <string>Save All Stacked Outputs</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="1">
-                        <widget class="QCheckBox" name="checkBox_stackOnly">
-                         <property name="enabled">
-                          <bool>true</bool>
-                         </property>
-                         <property name="text">
-                          <string>Stack Conversion Only</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
-                        <widget class="QCheckBox" name="checkBox_outputImage">
-                         <property name="toolTip">
-                          <string>Save spectogram of seperated music files</string>
-                         </property>
-                         <property name="text">
-                          <string>Output Image</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="0">
-                        <widget class="QCheckBox" name="checkBox_tta">
-                         <property name="text">
-                          <string>TTA</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="0">
-                        <widget class="QCheckBox" name="checkBox_modelFolder">
-                         <property name="text">
-                          <string>Model Test Mode</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="0">
-                        <widget class="QCheckBox" name="checkBox_customParameters">
-                         <property name="text">
-                          <string>Custom Parameters</string>
-                         </property>
                         </widget>
                        </item>
                       </layout>
@@ -1552,7 +1552,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>710</width>
+               <width>876</width>
                <height>451</height>
               </rect>
              </property>
@@ -1677,7 +1677,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>710</width>
+               <width>876</width>
                <height>451</height>
               </rect>
              </property>

@@ -77,6 +77,7 @@ class ResourcePaths:
     stackedDirName = STACKED_FOLDER_NAME
     tempDir = os.path.join(abs_path, USER_FOLDER, TEMP_MUSIC_FILES_FOLDER)
 
+
 class Logger(logging.Logger):
     """
     This code is a mess but it works
@@ -85,6 +86,10 @@ class Logger(logging.Logger):
 
     def __init__(self):
         super().__init__('mylogger')
+        # Create directory if not available
+        if not os.path.exists(ResourcePaths.logsDir):
+            os.makedirs(ResourcePaths.logsDir)
+
         # Base file path
         self.filePath = os.path.join(ResourcePaths.logsDir, 'logger.log')
         self.currentIndent = 0

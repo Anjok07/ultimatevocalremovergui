@@ -282,8 +282,6 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.frame_export.dragEnterEvent = self.frame_export_dragEnterEvent
             self.ui.frame_export.dropEvent = self.frame_export_dropEvent
             # -Main buttons-
-            # Main control
-            self.ui.pushButton_resetDefault.clicked.connect(self.pushButton_resetDefault_clicked)
             # Menu
             self.menu_group.buttonClicked.connect(lambda btn:
                                                   self.menu_loadPage(page_idx=self.menu_group.id(btn)))

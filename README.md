@@ -10,10 +10,11 @@
 
 This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). This version also comes with a total of 11 high performance models trained by me. You can find tsurumeso's original command line version [here](https://github.com/tsurumeso/vocal-remover). 
 
-- **Special Thanks**
-    - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the AI code. Thank you for the hard work and dedication you put into the AI application this GUI is built around!
-    - [aufr33](https://github.com/aufr33) - Model collaborator and fellow UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
-    - [DilanBoskan](https://github.com/DilanBoskan) - The main GUI code contributor. Thank you for helping bring this GUI to life! Your hard work and continued support is greatly appreciated.
+- **The Developers**
+    - [Anjok07](https://github.com/anjok07)- Model collaborator & UVR developer.
+    - [aufr33](https://github.com/aufr33) - Model collaborator & fellow UVR developer. This project wouldn't be what it is without your help, thank you for your continued support!
+    - [DilanBoskan](https://github.com/DilanBoskan) - The main UVR GUI code contributor. Thank you for helping bring the GUI to life! Your hard work and continued support is greatly appreciated.
+    - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the original AI code. Thank you for the hard work and dedication you put into the AI code UVR is built on!
 
 ## Installation
 

@@ -448,3 +448,15 @@ if __name__ == "__main__":
             sf.write(os.path.join('ensembled','{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(ensembling(args.algorithm, specs), mp), mp.param['sr'])
 
     #print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
+    
+    if args.algorithm == 'align':
+
+        trackalignment = [
+            {
+                'file1':'"{}"'.format(args.input[0]),
+                'file2':'"{}"'.format(args.input[1])
+            }
+        ]
+
+        for i,e in tqdm(enumerate(trackalignment), desc="Performing Alignment..."):
+            os.system(f"python lib/align_tracks.py {e['file1']} {e['file2']}")

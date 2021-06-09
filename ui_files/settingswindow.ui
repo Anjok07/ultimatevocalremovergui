@@ -522,6 +522,72 @@
                          </layout>
                         </widget>
                        </item>
+                       <item row="3" column="1">
+                        <widget class="QFrame" name="frame_10">
+                         <property name="frameShape">
+                          <enum>QFrame::NoFrame</enum>
+                         </property>
+                         <property name="frameShadow">
+                          <enum>QFrame::Raised</enum>
+                         </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_9">
+                          <property name="leftMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>0</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>0</number>
+                          </property>
+                          <item>
+                           <widget class="QComboBox" name="comboBox_highEndProcess">
+                            <property name="currentIndex">
+                             <number>4</number>
+                            </property>
+                            <item>
+                             <property name="text">
+                              <string>None</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Bypass</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Correlation</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Mirroring</string>
+                             </property>
+                            </item>
+                            <item>
+                             <property name="text">
+                              <string>Mirroring 2</string>
+                             </property>
+                            </item>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="label_8">
+                            <property name="enabled">
+                             <bool>true</bool>
+                            </property>
+                            <property name="text">
+                             <string>High End Processing</string>
+                            </property>
+                           </widget>
+                          </item>
+                         </layout>
+                        </widget>
+                       </item>
                       </layout>
                      </widget>
                     </item>
@@ -1039,8 +1105,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>630</width>
-               <height>510</height>
+               <width>53</width>
+               <height>35</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1164,8 +1230,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>630</width>
-               <height>510</height>
+               <width>600</width>
+               <height>342</height>
               </rect>
              </property>
              <property name="minimumSize">

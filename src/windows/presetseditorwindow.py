@@ -268,6 +268,9 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         presets = {}
         for idx in range(self.ui.listWidget_presets.count()):
             item = self.ui.listWidget_presets.item(idx)
+            data = item.data(Qt.UserRole)
+            if data is None:
+                continue
             presets[item.text()] = item.data(Qt.UserRole).copy()
 
         return presets

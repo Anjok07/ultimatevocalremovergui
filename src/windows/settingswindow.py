@@ -634,6 +634,7 @@ class SettingsManager:
             self.win.ui.comboBox_winSize,
             # SpinBox
             self.win.ui.doubleSpinBox_aggressiveness,
+            self.win.ui.comboBox_highEndProcess,
             # -Presets-
             # Combobox
             self.win.ui.comboBox_presets, ]

@@ -29,6 +29,7 @@ JSON_TO_NAME = OrderedDict(**{
     'multithreading': 'checkBox_multithreading',
     # Number
     'aggressiveness': 'doubleSpinBox_aggressiveness',
+    'highEndProcess': 'comboBox_highEndProcess',
     # -Models-
     'instrumentalModelName': 'comboBox_instrumental',
     'vocalModelName': 'comboBox_vocal',
@@ -61,6 +62,7 @@ DEFAULT_SETTINGS = {
     'checkBox_deepExtraction': converter.default_data['deepExtraction'],
     # Number
     'doubleSpinBox_aggressiveness': converter.default_data['aggressiveness'],
+    'comboBox_highEndProcess': converter.default_data['highEndProcess'],
     # -Models-
     'comboBox_instrumental': '',
     'comboBox_vocal': '',

@@ -6,11 +6,11 @@ default_param = {}
 default_param['bins'] = 768
 default_param['unstable_bins'] = 9 # training only
 default_param['reduction_bins'] = 762 # training only
-default_param['band'] = {}
-
 default_param['sr'] = 44100
 default_param['pre_filter_start'] = 757
 default_param['pre_filter_stop'] = 768
+default_param['band'] = {}
+
 
 default_param['band'][1] = {
     'sr': 11025,
@@ -47,11 +47,17 @@ class ModelParameters(object):
         if '.pth' == pathlib.Path(config_path).suffix:
             import zipfile
             
-            zip = zipfile.ZipFile(config_path, 'r')
-            self.param = json.loads(zip.read('param.json'), object_pairs_hook=int_keys)
+            with zipfile.ZipFile(config_path, 'r') as zip:
+                self.param = json.loads(zip.read('param.json'), object_pairs_hook=int_keys)
         elif '.json' == pathlib.Path(config_path).suffix:
             with open(config_path, 'r') as f:
                 self.param = json.loads(f.read(), object_pairs_hook=int_keys)
         else:
             self.param = default_param
+            
+        if not 'mid_side' in self.param:
+            self.param['mid_side'] = False
+        
+        if not 'reverse' in self.param:
+            self.param['reverse'] = False
         

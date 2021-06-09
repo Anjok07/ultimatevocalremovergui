@@ -234,6 +234,31 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout.addWidget(self.frame_9, 2, 1, 1, 1)
 
+        self.frame_10 = QFrame(self.groupBox_conversion)
+        self.frame_10.setObjectName(u"frame_10")
+        self.frame_10.setFrameShape(QFrame.NoFrame)
+        self.frame_10.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame_10)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.comboBox_highEndProcess = QComboBox(self.frame_10)
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.setObjectName(u"comboBox_highEndProcess")
+
+        self.horizontalLayout_9.addWidget(self.comboBox_highEndProcess)
+
+        self.label_8 = QLabel(self.frame_10)
+        self.label_8.setObjectName(u"label_8")
+        self.label_8.setEnabled(True)
+
+        self.horizontalLayout_9.addWidget(self.label_8)
+
+        self.gridLayout.addWidget(self.frame_10, 3, 1, 1, 1)
+
         self.horizontalLayout_4.addWidget(self.groupBox_conversion)
 
         self.frame_17 = QFrame(self.horizontalFrame_1)
@@ -424,7 +449,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 541, 510))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 35))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -459,7 +484,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 541, 510))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 53, 35))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -515,7 +540,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 510))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 600, 342))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -856,6 +881,7 @@ class Ui_SettingsWindow(object):
         self.retranslateUi(SettingsWindow)
 
         self.stackedWidget.setCurrentIndex(0)
+        self.comboBox_highEndProcess.setCurrentIndex(4)
         self.comboBox_winSize.setCurrentIndex(0)
         self.pushButton_english.setDefault(False)
         self.pushButton_german.setDefault(False)
@@ -894,6 +920,19 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Deep extraction", None))
         self.label_7.setText(QCoreApplication.translate(
             "SettingsWindow", u"Aggressiveness", None))
+        self.comboBox_highEndProcess.setItemText(
+            0, QCoreApplication.translate("SettingsWindow", u"None", None))
+        self.comboBox_highEndProcess.setItemText(
+            1, QCoreApplication.translate("SettingsWindow", u"Bypass", None))
+        self.comboBox_highEndProcess.setItemText(
+            2, QCoreApplication.translate("SettingsWindow", u"Correlation", None))
+        self.comboBox_highEndProcess.setItemText(
+            3, QCoreApplication.translate("SettingsWindow", u"Mirroring", None))
+        self.comboBox_highEndProcess.setItemText(
+            4, QCoreApplication.translate("SettingsWindow", u"Mirroring 2", None))
+
+        self.label_8.setText(QCoreApplication.translate(
+            "SettingsWindow", u"High End Processing", None))
         self.groupBox.setTitle(QCoreApplication.translate(
             "SettingsWindow", u"Presets ", None))
         self.pushButton_presetsEdit.setText(

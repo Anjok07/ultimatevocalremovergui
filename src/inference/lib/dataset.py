@@ -1,6 +1,8 @@
 import os
 import random
 
+import json
+import hashlib
 import numpy as np
 import torch
 import torch.utils.data
@@ -113,16 +115,16 @@ def make_padding(width, cropsize, offset):
     return left, right, roi_size
 
 
-def make_training_set(filelist, cropsize, patches, sr, hop_length, n_fft, offset):
+def make_training_set(filelist, cropsize, patches, mp, offset):
     len_dataset = patches * len(filelist)
 
     X_dataset = np.zeros(
-        (len_dataset, 2, n_fft // 2 + 1, cropsize), dtype=np.complex64)
+        (len_dataset, 2, mp.param['bins'] + 1, cropsize), dtype=np.complex64)
     y_dataset = np.zeros(
-        (len_dataset, 2, n_fft // 2 + 1, cropsize), dtype=np.complex64)
+        (len_dataset, 2, mp.param['bins'] + 1, cropsize), dtype=np.complex64)
 
     for i, (X_path, y_path) in enumerate(tqdm(filelist)):
-        X, y = spec_utils.cache_or_load(X_path, y_path, sr, hop_length, n_fft)
+        X, y = spec_utils.cache_or_load(X_path, y_path, mp)
         coef = np.max([np.abs(X).max(), np.abs(y).max()])
         X, y = X / coef, y / coef
 
@@ -140,15 +142,15 @@ def make_training_set(filelist, cropsize, patches, sr, hop_length, n_fft, offset
     return X_dataset, y_dataset
 
 
-def make_validation_set(filelist, cropsize, sr, hop_length, n_fft, offset):
+def make_validation_set(filelist, cropsize, mp, offset):
     patch_list = []
-    patch_dir = 'cs{}_sr{}_hl{}_nf{}_of{}'.format(cropsize, sr, hop_length, n_fft, offset)
+    patch_dir = 'cs{}_mph{}_of{}'.format(cropsize, hashlib.sha1(json.dumps(mp.param, sort_keys=True).encode('utf-8')).hexdigest(), offset)
     os.makedirs(patch_dir, exist_ok=True)
 
     for i, (X_path, y_path) in enumerate(tqdm(filelist)):
         basename = os.path.splitext(os.path.basename(X_path))[0]
 
-        X, y = spec_utils.cache_or_load(X_path, y_path, sr, hop_length, n_fft)
+        X, y = spec_utils.cache_or_load(X_path, y_path, mp)
         coef = np.max([np.abs(X).max(), np.abs(y).max()])
         X, y = X / coef, y / coef
 

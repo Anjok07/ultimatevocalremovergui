@@ -10,7 +10,6 @@ from PySide2.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import (ResourcePaths, Logger)
 from .inference import converter
-from .inference import converter_v4
 from . import constants as const
 # -Other-
 # Logging
@@ -185,12 +184,13 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['save_instrumentals'] = self.windows['settings'].ui.checkBox_autoSaveInstrumentals.isChecked()
         seperation_data['save_vocals'] = self.windows['settings'].ui.checkBox_autoSaveVocals.isChecked()
         # Combobox
-        seperation_data['instrumentalModel'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
-        seperation_data['vocalModel'] = ""
+        seperation_data['model'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
+        seperation_data['modelDataPath'] = r"D:\Dilan\GitHub\ultimatevocalremovergui\src\inference\modelparams\2band_48000.json"
         seperation_data['isVocal'] = False
         # Lineedit (Constants)
         seperation_data['window_size'] = int(self.windows['settings'].ui.comboBox_winSize.currentText())
         # Other
+        seperation_data['highEndProcess'] = self.windows['settings'].ui.comboBox_highEndProcess.currentText()
         seperation_data['aggressiveness'] = self.windows['settings'].ui.doubleSpinBox_aggressiveness.value()
         # -Complex variables (Difficult to extract)-
 
@@ -198,7 +198,7 @@ class CustomApplication(QtWidgets.QApplication):
             msg = (
                 'Extracted Keys do not equal keys set by default converter!\n'
                 f'\tExtracted Keys: {sorted(list(seperation_data.keys()))}\n'
-                f'\tShould be Keys: {sorted(list(converter_v4.default_data.keys()))}\n'
+                f'\tShould be Keys: {sorted(list(converter.default_data.keys()))}\n'
                 f'\tExtracted Values:\n\t{pprint.pformat(seperation_data)}'
             )
             self.logger.debug(msg)

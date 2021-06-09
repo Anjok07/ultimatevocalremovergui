@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 from torch import nn
 import torch.nn.functional as F
 
@@ -59,7 +60,7 @@ class CascadedASPPNet(nn.Module):
 
         self.offset = 128
 
-    def forward(self, x):
+    def forward(self, x, aggressiveness=None):
         mix = x.detach()
         x = x.clone()
 
@@ -82,7 +83,7 @@ class CascadedASPPNet(nn.Module):
             input=mask,
             pad=(0, 0, 0, self.output_bin - mask.size()[2]),
             mode='replicate')
-
+ 
         if self.training:
             aux1 = torch.sigmoid(self.aux1_out(aux1))
             aux1 = F.pad(
@@ -96,10 +97,14 @@ class CascadedASPPNet(nn.Module):
                 mode='replicate')
             return mask * mix, aux1 * mix, aux2 * mix
         else:
+            if aggressiveness:
+                mask[:, :, :aggressiveness['split_bin']] = torch.pow(mask[:, :, :aggressiveness['split_bin']], 1 + aggressiveness['value'] / 3)
+                mask[:, :, aggressiveness['split_bin']:] = torch.pow(mask[:, :, aggressiveness['split_bin']:], 1 + aggressiveness['value'])
+
             return mask * mix
 
-    def predict(self, x_mag):
-        h = self.forward(x_mag)
+    def predict(self, x_mag, aggressiveness=None):
+        h = self.forward(x_mag, aggressiveness)
 
         if self.offset > 0:
             h = h[:, :, :, self.offset:-self.offset]

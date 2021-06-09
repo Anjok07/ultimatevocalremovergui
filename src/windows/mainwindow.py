@@ -7,7 +7,7 @@ from PySide2.QtGui import Qt
 from PySide2 import QtMultimedia
 # -Root imports-
 from ..resources.resources_manager import (ResourcePaths)
-from ..inference import converter_v4
+from ..inference import converter
 from ..app import CustomApplication
 from .. import constants as const
 from .design import mainwindow_ui
@@ -495,7 +495,7 @@ class MainWindow(QtWidgets.QWidget):
         self.winTaskbar.setWindow(self.windowHandle())
         self.winTaskbar_progress = self.winTaskbar.progress()
         # Create instance
-        self.vocalRemoverRunnable = converter_v4.VocalRemoverWorker(logger=self.logger)
+        self.vocalRemoverRunnable = converter.VocalRemoverWorker(logger=self.logger)
         # Bind events
         self.vocalRemoverRunnable.signals.start.connect(self.seperation_start)
         self.vocalRemoverRunnable.signals.message.connect(self.seperation_write)

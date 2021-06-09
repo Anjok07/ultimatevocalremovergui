@@ -2,6 +2,9 @@
 * {
 	font: 10pt "Yu Gothic UI";	
 }
+*::disabled {
+	color: #888;
+}
 *[title="true"],
 QGroupBox {
 	font: 15pt "Yu Gothic UI";
@@ -94,6 +97,7 @@ QPushButton[seperate="true"]:pressed {
 	background-color: rgba(109, 213, 237, 30);
 }
 /* Music File Selection */
+/*
 QPushButton[musicSelect="true"] {
 	color:  rgb(160, 160, 160);
 	border-width: 3px;
@@ -119,7 +123,7 @@ QListWidget[musicSelect="true"]::item {
 }
 QScrollBar[musicSelect="true"] {
 	background-color: none;
-}
+}*/
 /* Command Line*/
 QTextBrowser {
 	border-left: 2px;
@@ -132,7 +136,7 @@ QLabel[audioPlayer="true"] {
 	color: rgba(160, 160, 160, 80);
 	border-width: 3px;
     border-style: dotted;
-    border-color: rgb(60, 60, 80);
+    border-color: #424242;
 	border-radius: 5px;
 }
 QPushButton[audioPlayer="true"] {

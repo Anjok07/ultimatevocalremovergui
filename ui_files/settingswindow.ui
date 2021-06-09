@@ -962,8 +962,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>541</width>
-               <height>510</height>
+               <width>53</width>
+               <height>35</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1039,7 +1039,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>541</width>
+               <width>630</width>
                <height>510</height>
               </rect>
              </property>
@@ -1164,7 +1164,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>600</width>
+               <width>630</width>
                <height>510</height>
               </rect>
              </property>

@@ -57,7 +57,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        #self.settings.clear()
+        # self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.themeManager = ThemeManager(self)

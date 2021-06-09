@@ -41,7 +41,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
         # -Other Variables-
-        self.suppress_settings_change_event = False
         self.menu_update_methods = {
             0: self.update_page_seperationSettings,
             1: self.update_page_shortcuts,
@@ -52,6 +51,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.exportDirectory = self.settings.value('user/exportDirectory',
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
+        self.search_for_preset = True
 
     # -Widget Binds-
     def pushButton_clearCommand_clicked(self):
@@ -125,12 +125,14 @@ class SettingsWindow(QtWidgets.QWidget):
         """
         Changed preset
         """
+        self.search_for_preset = False
         name = self.ui.comboBox_presets.currentText()
         settings = self.app.windows['presetsEditor'].get_settings(name)
         for json_key in list(settings.keys()):
             widget_objectName = const.JSON_TO_NAME[json_key]
             settings[widget_objectName] = settings.pop(json_key)
         self.settingsManager.set_settings(settings)
+        self.search_for_preset = True
 
     def frame_export_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         """
@@ -187,11 +189,22 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     def settings_changed(self):
-        if (self.ui.comboBox_presets.currentText() and
-                not self.suppress_settings_change_event):
-            self.ui.comboBox_presets.setCurrentText('')
+        if self.search_for_preset:
+            current_settings = self.settingsManager.get_settings(0)
+            presets: dict = self.app.windows['presetsEditor'].get_presets()
+
+            for preset_name, settings in presets.items():
+                for json_key, value in settings.items():
+                    if (current_settings[const.JSON_TO_NAME[json_key]] != value):
+                        break
+                else:
+                    self.ui.comboBox_presets.setCurrentText(preset_name)
+                    break
+            else:
+                self.ui.comboBox_presets.setCurrentIndex(0)
 
     # -Window Setup Methods-
+
     def setup_window(self):
         """
         Set up the window with binds, images, saved settings
@@ -272,7 +285,7 @@ class SettingsWindow(QtWidgets.QWidget):
                     if isinstance(widget, QtWidgets.QCheckBox):
                         widget.stateChanged.connect(self.settings_changed)
                     elif isinstance(widget, QtWidgets.QComboBox):
-                        widget.currentIndexChanged.connect(self.settings_changed)
+                        widget.currentTextChanged.connect(self.settings_changed)
                     elif isinstance(widget, QtWidgets.QLineEdit):
                         widget.textChanged.connect(self.settings_changed)
                     elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
@@ -323,6 +336,7 @@ class SettingsWindow(QtWidgets.QWidget):
             """
 
         # -Before setup-
+        self.search_for_preset = False
         # Load saved settings for widgets
         self.settingsManager.load_window()
         # Update available model lists
@@ -357,6 +371,8 @@ class SettingsWindow(QtWidgets.QWidget):
         # Load menu (Preferences)
         self.update_window()
         self.menu_loadPage(0, True)
+        self.search_for_preset = True
+        self.settings_changed()
         self.logger.indent_backwards()
 
     def load_window(self):
@@ -400,7 +416,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.ui.comboBox_presets.blockSignals(True)
         last_text = self.ui.comboBox_presets.currentText()
         self.ui.comboBox_presets.clear()
-        self.ui.comboBox_presets.addItem('')
+        self.ui.comboBox_presets.addItem('Custom')
         for idx in range(self.app.windows['presetsEditor'].ui.listWidget_presets.count()):
             # Loop through every preset in the list on the window
             # Get item by index
@@ -412,6 +428,7 @@ class SettingsWindow(QtWidgets.QWidget):
             if text == last_text:
                 self.ui.comboBox_presets.setCurrentText(text)
         self.ui.comboBox_presets.blockSignals(False)
+        self.settings_changed()
 
         self.logger.indent_backwards()
 
@@ -647,7 +664,7 @@ class SettingsManager:
         self.save_widgets[2] = customization_widgets
         self.save_widgets[3] = preferences_widgets
 
-    def get_settings(self, page_idx: Optional[int] = None) -> Dict[str, Union[bool, str]]:
+    def get_settings(self, page_idx: Optional[int] = None) -> Dict[str, Union[bool, str, float]]:
         """Obtain states of the widgets
 
         Args:
@@ -665,7 +682,7 @@ class SettingsManager:
             TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
 
         Returns:
-            Dict[str, Union[bool, str]]: Widget states
+            Dict[str, Union[bool, str, float]]: Widget states
                 Key - Widget object name
                 Value - State of the widget
         """
@@ -693,7 +710,7 @@ class SettingsManager:
 
         return settings
 
-    def set_settings(self, settings: Dict[str, Union[bool, str]]):
+    def set_settings(self, settings: Dict[str, Union[bool, str, float]]):
         """Update states of the widgets
 
         The given dict's key should be the widgets object name
@@ -714,12 +731,11 @@ class SettingsManager:
 
 
         Args:
-            settings (Dict[str, Union[bool, str]]): States of the widgets to update
+            settings (Dict[str, Union[bool, str, float]]): States of the widgets to update
 
         Raises:
             TypeError: Invalid widget type in the widgets (has to be either: QCheckBox, QRadioButton, QLineEdit or QComboBox)
         """
-        self.win.suppress_settings_change_event = True
         for widget_objectName, value in settings.items():
             # Get widget
             widget = self.win.findChild(QtCore.QObject, widget_objectName)
@@ -746,7 +762,6 @@ class SettingsManager:
                 widget.setValue(value)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
-        self.win.suppress_settings_change_event = False
         self.win.update_window()
 
     def load_window(self):
@@ -757,7 +772,6 @@ class SettingsManager:
         """
         # Before
         self.win.logger.info('Settings: Loading window')
-
         # -Load states-
         self.win.settings.beginGroup('settingswindow')
         for widget in self.get_widgets():
@@ -803,6 +817,7 @@ class SettingsManager:
                 widget.setValue(value)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
+
         self.win.settings.endGroup()
 
     def save_window(self):

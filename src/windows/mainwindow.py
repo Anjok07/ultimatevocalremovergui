@@ -74,173 +74,6 @@ class MainWindow(QtWidgets.QWidget):
         self.instrumentals_audioPlayer: AudioPlayer
         self.vocals_audioPlayer: AudioPlayer
         self.tempAudioFilePaths: Optional[Tuple[str, str]] = None
-    # -Initialization methods-
-
-    def setup_window(self):
-        """
-        Set up the window with binds, images, saved settings
-
-        (Only run right after window initialization of main and settings window)
-        """
-        def load_geometry():
-            """
-            Load the geometry of this window
-            """
-            # Window is centered on primary window
-            default_size = self.size()
-            default_pos = QtCore.QPoint()
-            default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
-            default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
-            # Get data
-            self.settings.beginGroup(self.__class__.__name__.lower())
-            size = self.settings.value('size',
-                                       default_size)
-            pos = self.settings.value('pos',
-                                      default_pos)
-            isMaximized = self.settings.value('isMaximized',
-                                              False,
-                                              type=bool)
-            self.settings.endGroup()
-            # Apply data
-            self.move(pos)
-            if isMaximized:
-                self.setWindowState(Qt.WindowMaximized)
-            else:
-                self.resize(size)
-
-        def load_images():
-            """
-            Load the images for this window and assign them to their widgets
-            """
-            # Settings button
-            self.settings_img = QtGui.QPixmap(ResourcePaths.images.settings)
-            self.ui.pushButton_settings.setIcon(self.settings_img)
-            self.ui.pushButton_settings.setIconSize(QtCore.QSize(25, 25))
-
-        def bind_widgets():
-            """
-            Bind the widgets here
-            """
-            # -Override binds-
-            # Music file drag & drop
-            self.ui.stackedWidget_musicFiles.dragEnterEvent = self.stackedWidget_musicFiles_dragEnterEvent
-            self.ui.stackedWidget_musicFiles.dropEvent = self.stackedWidget_musicFiles_dropEvent
-            self.ui.pushButton_musicFiles.clicked.connect(self.pushButton_musicFiles_clicked)
-            # -Pushbuttons-
-            self.ui.pushButton_settings.clicked.connect(self.pushButton_settings_clicked)
-            self.ui.pushButton_seperate.clicked.connect(self.pushButton_seperate_clicked)
-
-        def create_animation_objects():
-            """
-            Create the animation objects that are used
-            multiple times here
-            """
-            def style_progressbar():
-                """
-                Style pogressbar manually as when styled in Qt Designer
-                a bug occurs that prevents smooth animation of progressbar
-                """
-                self.ui.progressBar.setStyleSheet("""QProgressBar:horizontal {
-                    border: 0px solid gray;
-                }
-                QProgressBar::chunk {
-                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 rgba(33, 147, 176, 255), stop:1 rgba(109, 213, 237, 255));
-                    border-top-right-radius: 2px;
-                    border-bottom-right-radius: 2px;
-                } """)
-                self.seperation_update_progress(0)
-            # -Progress Bar-
-            self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
-                                                            parent=self)
-            # This is all to prevent the progressbar animation not working propertly
-            self.pbar_animation.setDuration(8)
-            self.pbar_animation.setStartValue(0)
-            self.pbar_animation.setEndValue(8)
-            self.pbar_animation.start()
-            self.pbar_animation.setDuration(500)
-            QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
-            # -Settings Icon-
-
-            def rotate_settings_icon():
-                rotation = self.settings_ani.currentValue()
-                t = QtGui.QTransform()
-                t = t.rotate(rotation)
-                new_pixmap = self.settings_img.transformed(t, QtCore.Qt.FastTransformation)
-                xoffset = (new_pixmap.width() - self.settings_img.width()) / 2
-                yoffset = (new_pixmap.height() - self.settings_img.height()) / 2
-                new_pixmap = new_pixmap.copy(xoffset, yoffset, self.settings_img.width(), self.settings_img.height())
-                self.ui.pushButton_settings.setIcon(new_pixmap)
-
-            self.settings_ani = QtCore.QVariantAnimation(self)
-            self.settings_ani.setDuration(1750)
-            self.settings_ani.setEasingCurve(QtCore.QEasingCurve.OutBack)
-            self.settings_ani.setStartValue(0.0)
-            self.settings_ani.setEndValue(-180.0)
-            self.settings_ani.valueChanged.connect(rotate_settings_icon)
-
-        # -Before setup-
-        self.logger.info('Main -> Setting up',
-                         indent_forwards=True)
-        # Load saved settings for widgets
-        self._load_data()
-        # Audio Players
-        self.instrumentals_audioPlayer = AudioPlayer(self.app,
-                                                     self.ui.pushButton_play_instrumentals,
-                                                     self.ui.horizontalSlider_instrumentals,
-                                                     self.ui.pushButton_menu_instrumentals)
-        self.vocals_audioPlayer = AudioPlayer(self.app,
-                                              self.ui.pushButton_play_vocals,
-                                              self.ui.horizontalSlider_vocals,
-                                              self.ui.pushButton_menu_vocals)
-        # Temp func
-        self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
-                                   os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
-        self._deactivate_audio_players()
-
-        # -Setup-
-        load_geometry()
-        load_images()
-        bind_widgets()
-        create_animation_objects()
-        self.show()
-
-        # -After setup-
-        # Create WinTaskbar
-        self.winTaskbar = QWinTaskbarButton(self)
-        self.winTaskbar.setWindow(self.windowHandle())
-        self.winTaskbar_progress = self.winTaskbar.progress()
-        # Create instance
-        self.vocalRemoverRunnable = converter_v4.VocalRemoverWorker(logger=self.logger)
-        # Bind events
-        self.vocalRemoverRunnable.signals.start.connect(self.seperation_start)
-        self.vocalRemoverRunnable.signals.message.connect(self.seperation_write)
-        self.vocalRemoverRunnable.signals.progress.connect(self.seperation_update_progress)
-        self.vocalRemoverRunnable.signals.error.connect(self.seperation_error)
-        self.vocalRemoverRunnable.signals.finished.connect(self.seperation_finish)
-        # Late update
-        self.update_window()
-        self.logger.indent_backwards()
-
-    def _load_data(self, default: bool = False):
-        """
-        Load the data for this window
-
-        (Only run right after window initialization or to reset settings)
-
-        Parameters:
-            default(bool):
-                Reset to the default settings
-        """
-        self.settings.beginGroup('mainwindow')
-        if default:
-            # Delete settings group
-            self.settings.remove('mainwindow')
-
-        # -Load Settings-
-        # None
-
-        # -Done-
-        self.settings.endGroup()
 
     # -Widget Binds-
     def pushButton_settings_clicked(self):
@@ -269,26 +102,33 @@ class MainWindow(QtWidgets.QWidget):
         # Start seperation
         self.app.threadpool.start(self.vocalRemoverRunnable)
 
-    def pushButton_musicFiles_clicked(self):
+    def pushButton_delete_clicked(self):
         """
-        Open music file selection dialog
+        Delete selected presets after asking for
+        confirmation
         """
-        self.logger.info('Selecting Music Files...',
-                         indent_forwards=True)
-        paths = QtWidgets.QFileDialog.getOpenFileNames(parent=self,
-                                                       caption='Select Music Files',
-                                                       dir=self.inputsDirectory,
-                                                       )[0]
-
-        if not paths:
-            # No files specified
-            self.logger.info('No files selected!',)
-            self.logger.indent_backwards()
+        selected_items = self.ui.listWidget_musicFiles.selectedItems()
+        if not len(selected_items):
             return
 
-        self.inputsDirectory = os.path.dirname(paths[0])
-        self.add_to_input_paths(paths)
-        self.logger.indent_backwards()
+        # Some paths already selected
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle(self.tr('Confirmation'))
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
+        msg.setText(f'You will remove {len(selected_items)} items. Do you wish to continue?')
+        msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+        msg.setWindowFlag(Qt.WindowStaysOnTopHint)
+        val = msg.exec_()
+
+        if val == QtWidgets.QMessageBox.No:
+            # Cancel
+            return
+
+        removed_rows = [self.ui.listWidget_musicFiles.row(item) for item in selected_items]
+        self.inputPaths = [path for row, path in enumerate(self.inputPaths) if not row in removed_rows]
+
+        # -Update settings window-
+        self.update_window()
 
     def stackedWidget_musicFiles_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         """
@@ -315,6 +155,31 @@ class MainWindow(QtWidgets.QWidget):
                 inputPaths.append(path)
 
         self.add_to_input_paths(inputPaths)
+        self.logger.indent_backwards()
+
+    def listWidget_musicFiles_itemDoubleClicked(self, item):
+        path = item.data(Qt.UserRole)
+        subprocess.Popen(r'explorer /select,"{0}"'.format(path.replace("/", "\\")))
+
+    def chooseMusicFiles(self):
+        """
+        Open music file selection dialog
+        """
+        self.logger.info('Selecting Music Files...',
+                         indent_forwards=True)
+        paths = QtWidgets.QFileDialog.getOpenFileNames(parent=self,
+                                                       caption='Select Music Files',
+                                                       dir=self.inputsDirectory,
+                                                       )[0]
+
+        if not paths:
+            # No files specified
+            self.logger.info('No files selected!',)
+            self.logger.indent_backwards()
+            return
+
+        self.inputsDirectory = os.path.dirname(paths[0])
+        self.add_to_input_paths(paths)
         self.logger.indent_backwards()
 
     def add_to_input_paths(self, paths: list):
@@ -491,6 +356,177 @@ class MainWindow(QtWidgets.QWidget):
         self.instrumentals_audioPlayer.setMedia(QtMultimedia.QMediaContent())
         self.vocals_audioPlayer.setMedia(QtMultimedia.QMediaContent())
 
+    # -Initialization methods-
+    def setup_window(self):
+        """
+        Set up the window with binds, images, saved settings
+
+        (Only run right after window initialization of main and settings window)
+        """
+        def load_geometry():
+            """
+            Load the geometry of this window
+            """
+            # Window is centered on primary window
+            default_size = self.size()
+            default_pos = QtCore.QPoint()
+            default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
+            default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
+            # Get data
+            self.settings.beginGroup(self.__class__.__name__.lower())
+            size = self.settings.value('size',
+                                       default_size)
+            pos = self.settings.value('pos',
+                                      default_pos)
+            isMaximized = self.settings.value('isMaximized',
+                                              False,
+                                              type=bool)
+            self.settings.endGroup()
+            # Apply data
+            self.move(pos)
+            if isMaximized:
+                self.setWindowState(Qt.WindowMaximized)
+            else:
+                self.resize(size)
+
+        def load_images():
+            """
+            Load the images for this window and assign them to their widgets
+            """
+            # Settings button
+            self.settings_img = QtGui.QPixmap(ResourcePaths.images.settings)
+            self.ui.pushButton_settings.setIcon(self.settings_img)
+            self.ui.pushButton_settings.setIconSize(QtCore.QSize(25, 25))
+
+        def bind_widgets():
+            """
+            Bind the widgets here
+            """
+            # -Override binds-
+            # Music file drag & drop
+            self.ui.stackedWidget_musicFiles.dragEnterEvent = self.stackedWidget_musicFiles_dragEnterEvent
+            self.ui.stackedWidget_musicFiles.dropEvent = self.stackedWidget_musicFiles_dropEvent
+            # -Pushbuttons-
+            self.ui.pushButton_musicFiles.clicked.connect(self.chooseMusicFiles)
+            self.ui.pushButton_settings.clicked.connect(self.pushButton_settings_clicked)
+            self.ui.pushButton_seperate.clicked.connect(self.pushButton_seperate_clicked)
+            self.ui.pushButton_add.clicked.connect(self.chooseMusicFiles)
+            self.ui.pushButton_delete.clicked.connect(self.pushButton_delete_clicked)
+            # -ListWidget-
+            self.ui.listWidget_musicFiles.itemDoubleClicked.connect(self.listWidget_musicFiles_itemDoubleClicked)
+
+        def create_animation_objects():
+            """
+            Create the animation objects that are used
+            multiple times here
+            """
+            def style_progressbar():
+                """
+                Style pogressbar manually as when styled in Qt Designer
+                a bug occurs that prevents smooth animation of progressbar
+                """
+                self.ui.progressBar.setStyleSheet("""QProgressBar:horizontal {
+                    border: 0px solid gray;
+                }
+                QProgressBar::chunk {
+                    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.0795455 #368ADD, stop:1 #2180DF);
+                    border-top-right-radius: 2px;
+                    border-bottom-right-radius: 2px;
+                } """)
+                self.seperation_update_progress(0)
+            # -Progress Bar-
+            self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
+                                                            parent=self)
+            # This is all to prevent the progressbar animation not working propertly
+            self.pbar_animation.setDuration(8)
+            self.pbar_animation.setStartValue(0)
+            self.pbar_animation.setEndValue(8)
+            self.pbar_animation.start()
+            self.pbar_animation.setDuration(500)
+            QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
+            # -Settings Icon-
+
+            def rotate_settings_icon():
+                rotation = self.settings_ani.currentValue()
+                t = QtGui.QTransform()
+                t = t.rotate(rotation)
+                new_pixmap = self.settings_img.transformed(t, QtCore.Qt.FastTransformation)
+                xoffset = (new_pixmap.width() - self.settings_img.width()) / 2
+                yoffset = (new_pixmap.height() - self.settings_img.height()) / 2
+                new_pixmap = new_pixmap.copy(xoffset, yoffset, self.settings_img.width(), self.settings_img.height())
+                self.ui.pushButton_settings.setIcon(new_pixmap)
+
+            self.settings_ani = QtCore.QVariantAnimation(self)
+            self.settings_ani.setDuration(1750)
+            self.settings_ani.setEasingCurve(QtCore.QEasingCurve.OutBack)
+            self.settings_ani.setStartValue(0.0)
+            self.settings_ani.setEndValue(-180.0)
+            self.settings_ani.valueChanged.connect(rotate_settings_icon)
+
+        # -Before setup-
+        self.logger.info('Main -> Setting up',
+                         indent_forwards=True)
+        # Load saved settings for widgets
+        self._load_data()
+        # Audio Players
+        self.instrumentals_audioPlayer = AudioPlayer(self.app,
+                                                     self.ui.pushButton_play_instrumentals,
+                                                     self.ui.horizontalSlider_instrumentals,
+                                                     self.ui.pushButton_menu_instrumentals)
+        self.vocals_audioPlayer = AudioPlayer(self.app,
+                                              self.ui.pushButton_play_vocals,
+                                              self.ui.horizontalSlider_vocals,
+                                              self.ui.pushButton_menu_vocals)
+        # Temp func
+        self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
+                                   os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
+        self._deactivate_audio_players()
+
+        # -Setup-
+        load_geometry()
+        load_images()
+        bind_widgets()
+        create_animation_objects()
+        self.show()
+
+        # -After setup-
+        # Create WinTaskbar
+        self.winTaskbar = QWinTaskbarButton(self)
+        self.winTaskbar.setWindow(self.windowHandle())
+        self.winTaskbar_progress = self.winTaskbar.progress()
+        # Create instance
+        self.vocalRemoverRunnable = converter_v4.VocalRemoverWorker(logger=self.logger)
+        # Bind events
+        self.vocalRemoverRunnable.signals.start.connect(self.seperation_start)
+        self.vocalRemoverRunnable.signals.message.connect(self.seperation_write)
+        self.vocalRemoverRunnable.signals.progress.connect(self.seperation_update_progress)
+        self.vocalRemoverRunnable.signals.error.connect(self.seperation_error)
+        self.vocalRemoverRunnable.signals.finished.connect(self.seperation_finish)
+        # Late update
+        self.update_window()
+        self.logger.indent_backwards()
+
+    def _load_data(self, default: bool = False):
+        """
+        Load the data for this window
+
+        (Only run right after window initialization or to reset settings)
+
+        Parameters:
+            default(bool):
+                Reset to the default settings
+        """
+        self.settings.beginGroup('mainwindow')
+        if default:
+            # Delete settings group
+            self.settings.remove('mainwindow')
+
+        # -Load Settings-
+        # None
+
+        # -Done-
+        self.settings.endGroup()
+
     # -Other Methods-
     def update_window(self):
         """
@@ -519,9 +555,9 @@ class MainWindow(QtWidgets.QWidget):
         """
         self.ui.listWidget_musicFiles.clear()
         for path in self.inputPaths:
-            item = QCustomListWidget()
-            item.setTextUp(path)
+            item = QCustomListWidget(full_path=path)
             widgetItem = QtWidgets.QListWidgetItem()
+            widgetItem.setData(Qt.UserRole, path)
             widgetItem.setSizeHint(item.sizeHint())
             self.ui.listWidget_musicFiles.addItem(widgetItem)
             self.ui.listWidget_musicFiles.setItemWidget(widgetItem, item)
@@ -567,7 +603,7 @@ class MainWindow(QtWidgets.QWidget):
 
 
 class QCustomListWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, full_path: str, parent=None):
         super(QCustomListWidget, self).__init__(parent)
         self.textUpQLabel = QtWidgets.QLabel()
         self.allQHBoxLayout = QtWidgets.QHBoxLayout()
@@ -582,6 +618,8 @@ class QCustomListWidget(QtWidgets.QWidget):
             font-size: 15px;
             background-color: none;
         ''')
+        self.full_path = full_path
+        self.setTextUp(os.path.basename(self.full_path))
 
     def setTextUp(self, text):
         self.textUpQLabel.setText(text)

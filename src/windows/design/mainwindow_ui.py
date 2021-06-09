@@ -17,13 +17,13 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(911, 559)
+        MainWindow.resize(947, 559)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"")
         self.horizontalLayout_2 = QHBoxLayout(MainWindow)
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
-        self.horizontalLayout_2.setContentsMargins(0, 0, 5, 0)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.frame_5 = QFrame(MainWindow)
         self.frame_5.setObjectName(u"frame_5")
         self.frame_5.setMinimumSize(QSize(650, 0))
@@ -87,10 +87,9 @@ class Ui_MainWindow(object):
         self.stackedWidget_musicFiles.addWidget(self.page_select)
         self.page_display = QWidget()
         self.page_display.setObjectName(u"page_display")
-        self.verticalLayout_4 = QVBoxLayout(self.page_display)
-        self.verticalLayout_4.setSpacing(0)
-        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_5 = QHBoxLayout(self.page_display)
+        self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
+        self.horizontalLayout_5.setContentsMargins(0, 0, 0, 0)
         self.listWidget_musicFiles = QListWidget(self.page_display)
         self.listWidget_musicFiles.setObjectName(u"listWidget_musicFiles")
         sizePolicy3 = QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
@@ -99,7 +98,6 @@ class Ui_MainWindow(object):
         sizePolicy3.setHeightForWidth(
             self.listWidget_musicFiles.sizePolicy().hasHeightForWidth())
         self.listWidget_musicFiles.setSizePolicy(sizePolicy3)
-        self.listWidget_musicFiles.setMaximumSize(QSize(16777215, 16777215))
         self.listWidget_musicFiles.setFrameShape(QFrame.NoFrame)
         self.listWidget_musicFiles.setLineWidth(0)
         self.listWidget_musicFiles.setHorizontalScrollBarPolicy(
@@ -108,11 +106,39 @@ class Ui_MainWindow(object):
             QAbstractItemView.NoEditTriggers)
         self.listWidget_musicFiles.setAlternatingRowColors(True)
         self.listWidget_musicFiles.setSelectionMode(
-            QAbstractItemView.NoSelection)
+            QAbstractItemView.ExtendedSelection)
         self.listWidget_musicFiles.setWordWrap(True)
         self.listWidget_musicFiles.setProperty("musicSelect", True)
 
-        self.verticalLayout_4.addWidget(self.listWidget_musicFiles)
+        self.horizontalLayout_5.addWidget(self.listWidget_musicFiles)
+
+        self.frame_7 = QFrame(self.page_display)
+        self.frame_7.setObjectName(u"frame_7")
+        self.frame_7.setMaximumSize(QSize(35, 16777215))
+        self.frame_7.setFrameShape(QFrame.NoFrame)
+        self.frame_7.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_4 = QVBoxLayout(self.frame_7)
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
+        self.verticalLayout_4.setContentsMargins(0, 0, 0, 0)
+        self.pushButton_add = QPushButton(self.frame_7)
+        self.pushButton_add.setObjectName(u"pushButton_add")
+        self.pushButton_add.setMinimumSize(QSize(35, 35))
+        self.pushButton_add.setMaximumSize(QSize(35, 35))
+        self.pushButton_add.setCursor(QCursor(Qt.PointingHandCursor))
+        self.pushButton_add.setText(u"+")
+
+        self.verticalLayout_4.addWidget(self.pushButton_add)
+
+        self.pushButton_delete = QPushButton(self.frame_7)
+        self.pushButton_delete.setObjectName(u"pushButton_delete")
+        self.pushButton_delete.setMinimumSize(QSize(35, 35))
+        self.pushButton_delete.setMaximumSize(QSize(35, 35))
+        self.pushButton_delete.setCursor(QCursor(Qt.PointingHandCursor))
+        self.pushButton_delete.setText(u"-")
+
+        self.verticalLayout_4.addWidget(self.pushButton_delete)
+
+        self.horizontalLayout_5.addWidget(self.frame_7, 0, Qt.AlignTop)
 
         self.stackedWidget_musicFiles.addWidget(self.page_display)
 
@@ -306,6 +332,7 @@ class Ui_MainWindow(object):
         self.pushButton_seperate.setObjectName(u"pushButton_seperate")
         self.pushButton_seperate.setMinimumSize(QSize(160, 0))
         self.pushButton_seperate.setMaximumSize(QSize(16777215, 50))
+        self.pushButton_seperate.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_seperate.setStyleSheet(u"border-top-right-radius: 0px;\n"
                                                "border-bottom-right-radius: 0px;")
         self.pushButton_seperate.setProperty("seperate", True)
@@ -317,6 +344,7 @@ class Ui_MainWindow(object):
         self.pushButton_settings.setObjectName(u"pushButton_settings")
         self.pushButton_settings.setMinimumSize(QSize(50, 50))
         self.pushButton_settings.setMaximumSize(QSize(50, 50))
+        self.pushButton_settings.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_settings.setStyleSheet(u"border-left: none;\n"
                                                "border-top-left-radius: 0px;\n"
                                                "border-bottom-left-radius: 0px;")
@@ -393,11 +421,10 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.textBrowser_command)
 
         self.horizontalLayout_2.setStretch(0, 3)
-        self.horizontalLayout_2.setStretch(1, 2)
 
         self.retranslateUi(MainWindow)
 
-        self.stackedWidget_musicFiles.setCurrentIndex(0)
+        self.stackedWidget_musicFiles.setCurrentIndex(1)
         self.stackedWidget_vocals.setCurrentIndex(0)
         self.stackedWidget_instrumentals.setCurrentIndex(0)
 

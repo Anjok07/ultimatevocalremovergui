@@ -157,6 +157,9 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         confirmation
         """
         selected_items = self.ui.listWidget_presets.selectedItems()
+        if not len(selected_items):
+            return
+
         # Some paths already selected
         msg = QtWidgets.QMessageBox()
         msg.setWindowTitle(self.tr('Confirmation'))
@@ -170,7 +173,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             # Cancel
             return
 
-        for item in self.ui.listWidget_presets.selectedItems():
+        for item in selected_items:
             row = self.ui.listWidget_presets.row(item)
             self.ui.listWidget_presets.takeItem(row)
 
@@ -265,7 +268,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         presets = {}
         for idx in range(self.ui.listWidget_presets.count()):
             item = self.ui.listWidget_presets.item(idx)
-            presets[item.text()] = item.data(Qt.UserRole)
+            presets[item.text()] = item.data(Qt.UserRole).copy()
 
         return presets
 
@@ -277,6 +280,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         if name in presets:
             return presets[name]
         else:
+            self.logger.warning(f'No preset with name: "{name}" Available preset names: "{presets.keys()}"')
             return {}
 
     # -Overriden methods-

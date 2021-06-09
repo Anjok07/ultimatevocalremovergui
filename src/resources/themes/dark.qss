@@ -2,6 +2,9 @@
 * {
 	font: 10pt "Yu Gothic UI";	
 }
+*::disabled {
+	color: #888;
+}
 *[title="true"],
 QGroupBox {
 	font: 15pt "Yu Gothic UI";
@@ -50,11 +53,11 @@ QRadioButton[menu="true"]::indicator::hover {
 }
 QRadioButton[menu="true"]::checked,
 QRadioButton[menu="true"]::indicator::checked {
-   border-left: 5px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.505682 rgba(0, 120, 212, 255), stop:1 rgba(255, 255, 255, 0));
+   border-left: 5px solid qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0.505682 #368ADD, stop:1 rgba(255, 255, 255, 0));
 }
 /* Command clear */
 QPushButton[clear="true"] {
-	border: 2px solid rgb(109, 213, 237);
+	border: 2px solid #368ADD;
 	border-radius: 5px;
 	color: #FFF;
 }
@@ -71,7 +74,7 @@ QPushButton[language="true"] {
 	border: none;
 }
 QPushButton[language="true"]:checked {
-	border: 3px solid rgb(109, 213, 237);
+	border: 3px solid #368ADD;
 }
 /* Export */
 QLabel[path="true"] {
@@ -83,8 +86,8 @@ QLabel[path="true"] {
 QPushButton[seperate="true"] {
 	border-width: 2px;
 	border-style: solid;
-	border-radius: 15px;
-	border-color: rgb(109, 213, 237);
+	border-radius: 7px;
+	border-color: #368ADD;
 	background-color: rgba(109, 213, 237, 4);
 }
 QPushButton[seperate="true"]:hover {
@@ -98,33 +101,37 @@ QPushButton[musicSelect="true"] {
 	color:  rgb(160, 160, 160);
 	border-width: 3px;
     border-style: dotted;
-    border-color: rgb(160, 160, 160);
+    background-color: #2d2d2d;
+    border-color: #424242;
 	border-radius: 5px;
 }
-/* QPushButton[musicSelect="true"]:hover {
-	background-color: rgb(2, 24, 53);
+QPushButton[musicSelect="true"]:hover {
+	background-color: #333333;
 }
 QPushButton[musicSelect="true"]:pressed {
-	background-color: rgb(1, 24, 61);
-} */
+	background-color: #404040;
+}
+
 QListWidget[musicSelect="true"] {
 	font-size: 13pt;
-	background-color: rgb(12, 23, 40);
-	alternate-background-color: rgb(2, 18, 40);
+	background-color: #303030;
+	alternate-background-color: #424242;
 	outline: none;
+	border-radius: 5px;
 }
 QListWidget[musicSelect="true"]::item {
 	outline: none;
 	border: none;
+	border-radius: 5px;
 }
-QScrollBar[musicSelect="true"] {
-	background-color: none;
+QListWidget[musicSelect="true"]::item:selected {
+    background-color: #368ADD;
 }
 /* Command Line*/
 QTextBrowser {
 	border-left: 2px;
 	border-style: solid;
-	border-color: rgb(109, 213, 237);
+	border-color: #368ADD;
 	font: 8pt "Courier";
 }
 /* Audio Player */
@@ -132,7 +139,7 @@ QLabel[audioPlayer="true"] {
 	color: rgba(160, 160, 160, 80);
 	border-width: 3px;
     border-style: dotted;
-    border-color: rgb(60, 60, 80);
+    border-color: #424242;
 	border-radius: 5px;
 }
 QPushButton[audioPlayer="true"] {
@@ -145,8 +152,8 @@ QSlider[audioPlayer="true"]::groove:horizontal {
 }
 
 QSlider[audioPlayer="true"]::handle:horizontal { 
-	background-color: rgb(109, 213, 237); 
-	border: 2px solid rgb(109, 213, 237); 
+	background-color: #368ADD; 
+	border: 2px solid #368ADD; 
 	width: 10px; 
 	margin-top: -5px; 
 	margin-bottom: -5px; 

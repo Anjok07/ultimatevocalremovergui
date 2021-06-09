@@ -5,4 +5,5 @@ developer_notes.txt
 languages
 # Do not include model files and logs
 src/resources/user/models/**/*.pth
+src/resources/models/**/*.pth
 src/resources/user/logs/*.log

@@ -9,6 +9,7 @@ from PySide2 import QtGui
 from PySide2.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import (ResourcePaths, Logger)
+from .inference import converter
 from .inference import converter_v4
 from . import constants as const
 # -Other-
@@ -56,7 +57,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        # self.settings.clear()
+        #self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.themeManager = ThemeManager(self)
@@ -134,9 +135,6 @@ class CustomApplication(QtWidgets.QApplication):
         theme = self.settings.value('user/theme',
                                     const.DEFAULT_SETTINGS['theme'])
         self.themeManager.load_theme(theme)
-        # Raise main window
-        self.windows['main'].activateWindow()
-        self.windows['main'].raise_()
 
     @ staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):
@@ -181,40 +179,22 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['postProcess'] = self.windows['settings'].ui.checkBox_postProcess.isChecked()
         seperation_data['tta'] = self.windows['settings'].ui.checkBox_tta.isChecked()
         seperation_data['outputImage'] = self.windows['settings'].ui.checkBox_outputImage.isChecked()
-        seperation_data['stackOnly'] = self.windows['settings'].ui.checkBox_stackOnly.isChecked()
-        seperation_data['saveAllStacked'] = self.windows['settings'].ui.checkBox_saveAllStacked.isChecked()
         seperation_data['modelFolder'] = self.windows['settings'].ui.checkBox_modelFolder.isChecked()
-        seperation_data['customParameters'] = self.windows['settings'].ui.checkBox_customParameters.isChecked()
-        seperation_data['multithreading'] = self.windows['settings'].ui.checkBox_multiThreading.isChecked()
+        seperation_data['deepExtraction'] = self.windows['settings'].ui.checkBox_deepExtraction.isChecked()
+        seperation_data['multithreading'] = self.windows['settings'].ui.checkBox_multithreading.isChecked()
         seperation_data['save_instrumentals'] = self.windows['settings'].ui.checkBox_autoSaveInstrumentals.isChecked()
         seperation_data['save_vocals'] = self.windows['settings'].ui.checkBox_autoSaveVocals.isChecked()
         # Combobox
-        seperation_data['useModel'] = 'instrumental'
         seperation_data['instrumentalModel'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
         seperation_data['vocalModel'] = ""
-        seperation_data['stackModel'] = self.windows['settings'].ui.comboBox_stacked.currentData()
+        seperation_data['isVocal'] = False
         # Lineedit (Constants)
-        seperation_data['sr'] = int(self.windows['settings'].ui.lineEdit_sr.text())
-        seperation_data['hop_length'] = int(self.windows['settings'].ui.lineEdit_hopLength.text())
         seperation_data['window_size'] = int(self.windows['settings'].ui.comboBox_winSize.currentText())
-        seperation_data['n_fft'] = int(self.windows['settings'].ui.lineEdit_nfft.text())
-        seperation_data['sr_stacked'] = int(self.windows['settings'].ui.lineEdit_sr_stacked.text())
-        seperation_data['hop_length_stacked'] = int(self.windows['settings'].ui.lineEdit_hopLength_stacked.text())
-        seperation_data['window_size_stacked'] = int(self.windows['settings'].ui.comboBox_winSize_stacked.currentText())
-        seperation_data['n_fft_stacked'] = int(self.windows['settings'].ui.lineEdit_nfft_stacked.text())
+        # Other
+        seperation_data['aggressiveness'] = self.windows['settings'].ui.doubleSpinBox_aggressiveness.value()
         # -Complex variables (Difficult to extract)-
-        # Stack passes
-        stackpasses = 0
-        if self.windows['settings'].ui.checkBox_stackPasses.isChecked():
-            # Stack passes checkbox is checked so extract number from combobox
-            stackpasses = int(self.windows['settings'].ui.comboBox_stackPasses.currentText())
-        seperation_data['stackPasses'] = stackpasses
-        # Resolution Type
-        resType = self.windows['settings'].ui.comboBox_resType.currentText()
-        resType = resType.lower().replace(' ', '_')
-        seperation_data['resType'] = resType
 
-        if set(seperation_data.keys()) != set(converter_v4.default_data.keys()):
+        if set(seperation_data.keys()) != set(converter.default_data.keys()):
             msg = (
                 'Extracted Keys do not equal keys set by default converter!\n'
                 f'\tExtracted Keys: {sorted(list(seperation_data.keys()))}\n'

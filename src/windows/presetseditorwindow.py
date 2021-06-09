@@ -61,13 +61,16 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             default_pos = QtCore.QPoint()
             default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
             default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
-            # Get geometry
-            size = self.settings.value('presetseditorwindow/size',
+            # Get data
+            self.settings.beginGroup(self.__class__.__name__.lower())
+            size = self.settings.value('size',
                                        default_size)
-            pos = self.settings.value('presetseditorwindow/pos',
+            pos = self.settings.value('pos',
                                       default_pos)
-            self.resize(size)
+            self.settings.endGroup()
+            # Apply data
             self.move(pos)
+            self.resize(size)
 
         def load_images():
             """
@@ -126,14 +129,16 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.ui.listWidget_presets.insertItem(0, item)
         # -Obtain data-
         if settings is None:
+            settings = OrderedDict()
+            # Get current settings
             settingsManager = self.app.settingsWindow.settingsManager
-            # Get current
-            settings = settingsManager.get_settings(page_idx=0)
-            del settings['comboBox_presets']
+            widget_settings = settingsManager.get_settings(page_idx=0)
+            del widget_settings['comboBox_presets']
+
             name_to_json = {v: k for k, v in const.JSON_TO_NAME.items()}  # Invert dict
-            for widget_objectName in list(settings.keys()):
+            for widget_objectName in list(widget_settings.keys()):
                 json_key = name_to_json[widget_objectName]
-                settings[json_key] = settings.pop(widget_objectName)
+                settings[json_key] = widget_settings[widget_objectName]
         if label is None:
             # Generate generic name for preset
             i = self.ui.listWidget_presets.count() + 1
@@ -280,12 +285,12 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         Catch close event of this window to save data
         """
         # -Save the geometry for this window-
-        self.settings.setValue('presetseditorwindow/size',
+        self.settings.beginGroup(self.__class__.__name__.lower())
+        self.settings.setValue('size',
                                self.size())
-        self.settings.setValue('presetseditorwindow/pos',
+        self.settings.setValue('pos',
                                self.pos())
-        # Commit Save
-        self.settings.sync()
+        self.settings.endGroup()
         # -Close window-
         event.accept()
 

@@ -22,6 +22,7 @@ try:
 except ImportError:
     QWinTaskbarButton = const.QWinTaskbar_PLACEHOLDER
 
+
 def dict_to_HTMLtable(x: dict, header: str) -> str:
     """
     Convert a 1D-dictionary into an HTML table
@@ -90,13 +91,22 @@ class MainWindow(QtWidgets.QWidget):
             default_pos = QtCore.QPoint()
             default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
             default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
-            # Get geometry
-            size = self.settings.value('mainwindow/size',
+            # Get data
+            self.settings.beginGroup(self.__class__.__name__.lower())
+            size = self.settings.value('size',
                                        default_size)
-            pos = self.settings.value('mainwindow/pos',
+            pos = self.settings.value('pos',
                                       default_pos)
-            self.resize(size)
+            isMaximized = self.settings.value('isMaximized',
+                                              False,
+                                              type=bool)
+            self.settings.endGroup()
+            # Apply data
             self.move(pos)
+            if isMaximized:
+                self.setWindowState(Qt.WindowMaximized)
+            else:
+                self.resize(size)
 
         def load_images():
             """
@@ -535,10 +545,14 @@ class MainWindow(QtWidgets.QWidget):
         Catch close event of this window to save data
         """
         # -Save the geometry for this window-
-        self.settings.setValue('mainwindow/size',
+        self.settings.beginGroup(self.__class__.__name__.lower())
+        self.settings.setValue('size',
                                self.size())
-        self.settings.setValue('mainwindow/pos',
+        self.settings.setValue('pos',
                                self.pos())
+        self.settings.setValue('isMaximized',
+                               self.isMaximized())
+        self.settings.endGroup()
         # Commit Save
         self.settings.sync()
         # -Close all windows-

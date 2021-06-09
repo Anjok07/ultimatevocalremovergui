@@ -28,7 +28,7 @@ LOGS_FOLDER = 'logs'
 MODELS_FOLDER = 'models'
 THEMES_FOLDER = 'themes'
 INSTRUMENTAL_FOLDER_NAME = 'Main Models'
-STACKED_FOLDER_NAME = 'Stacked Models'
+VOCAL_FOLDER_NAME = 'Vocal Models'
 TEMP_MUSIC_FILES_FOLDER = 'tmp'
 
 
@@ -70,11 +70,13 @@ class ResourcePaths:
             light = f.read()
 
     localizationDir = os.path.join(abs_path, TRANSLATIONS_FOLDER)
+    instrumentalModelsDir = os.path.join(abs_path, MODELS_FOLDER, INSTRUMENTAL_FOLDER_NAME)
+    vocalModelsDir = os.path.join(abs_path, MODELS_FOLDER, VOCAL_FOLDER_NAME)
     # -User Folder-
     logsDir = os.path.join(abs_path, USER_FOLDER, LOGS_FOLDER)
     modelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER)
-    instrumentalDirName = INSTRUMENTAL_FOLDER_NAME
-    stackedDirName = STACKED_FOLDER_NAME
+    customInstrumentalModelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER, INSTRUMENTAL_FOLDER_NAME)
+    customVocalModelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER, VOCAL_FOLDER_NAME)
     tempDir = os.path.join(abs_path, USER_FOLDER, TEMP_MUSIC_FILES_FOLDER)
 
 

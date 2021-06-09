@@ -53,8 +53,6 @@ class SettingsWindow(QtWidgets.QWidget):
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
 
-        # self.get_model_id(r"B:\boska\Documents\Dilan\GitHub\ultimatevocalremovergui\src\resources\user\models\v4\Main Models\multifft_bv_agr2.pth")
-
     # -Widget Binds-
     def pushButton_clearCommand_clicked(self):
         """
@@ -212,13 +210,16 @@ class SettingsWindow(QtWidgets.QWidget):
             default_pos = QtCore.QPoint()
             default_pos.setX((self.app.primaryScreen().size().width() / 2) - default_size.width() / 2)
             default_pos.setY((self.app.primaryScreen().size().height() / 2) - default_size.height() / 2)
-            # Get geometry
-            size = self.settings.value('settingswindow/size',
+            # Get data
+            self.settings.beginGroup(self.__class__.__name__.lower())
+            size = self.settings.value('size',
                                        default_size)
-            pos = self.settings.value('settingswindow/pos',
+            pos = self.settings.value('pos',
                                       default_pos)
-            self.resize(size)
+            self.settings.endGroup()
+            # Apply data
             self.move(pos)
+            self.resize(size)
 
         def load_images():
             """
@@ -274,6 +275,9 @@ class SettingsWindow(QtWidgets.QWidget):
                         widget.currentIndexChanged.connect(self.settings_changed)
                     elif isinstance(widget, QtWidgets.QLineEdit):
                         widget.textChanged.connect(self.settings_changed)
+                    elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
+                            isinstance(widget, QtWidgets.QSpinBox)):
+                        widget.valueChanged.connect(self.settings_changed)
                     else:
                         raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
 
@@ -287,14 +291,9 @@ class SettingsWindow(QtWidgets.QWidget):
                                                   self.menu_loadPage(page_idx=self.menu_group.id(btn)))
             # -Seperation Settings Page-
             self.ui.pushButton_presetsEdit.clicked.connect(self.pushButton_presetsEdit_clicked)
-            # Checkboxes
-            self.ui.checkBox_stackPasses.stateChanged.connect(self.update_page_seperationSettings)
-            self.ui.checkBox_stackOnly.stateChanged.connect(self.update_page_seperationSettings)
-            self.ui.checkBox_customParameters.stateChanged.connect(self.update_page_seperationSettings)
             # Comboboxes
             self.ui.comboBox_instrumental.currentIndexChanged.connect(self.update_page_seperationSettings)
-            self.ui.comboBox_stacked.currentIndexChanged.connect(self.update_page_seperationSettings)
-            self.ui.comboBox_engine.currentIndexChanged.connect(self._update_selectable_models)
+            self.ui.comboBox_vocal.currentIndexChanged.connect(self.update_page_seperationSettings)
             self.ui.comboBox_presets.currentIndexChanged.connect(self.comboBox_presets_currentIndexChanged)
             # -Preferences Page-
             # Language
@@ -395,136 +394,8 @@ class SettingsWindow(QtWidgets.QWidget):
         Update values and states of all widgets in the
         seperation settings page
         """
-        def subgroup_model_update_constants(model_basename: str, widgets: Dict[str, QtWidgets.QLineEdit]):
-            """
-            Update values and states of the constant widgets
-            in the model subgroup
-            """
-            def extract_constants() -> Dict[str, int]:
-                """
-                Extract SR, HOP_LENGTH, WINDOW_SIZE and NFFT
-                from the model's name
-                """
-                text_parts = model_basename.split('_')[1:]
-                model_values = {}
-
-                for text_part in text_parts:
-                    if 'sr' in text_part:
-                        text_part = text_part.replace('sr', '')
-                        if text_part.isdecimal():
-                            try:
-                                model_values['sr'] = int(text_part)
-                                continue
-                            except ValueError:
-                                # Cannot convert string to int
-                                pass
-                    if 'hl' in text_part:
-                        text_part = text_part.replace('hl', '')
-                        if text_part.isdecimal():
-                            try:
-                                model_values['hop_length'] = int(text_part)
-                                continue
-                            except ValueError:
-                                # Cannot convert string to int
-                                pass
-                    if 'w' in text_part:
-                        text_part = text_part.replace('w', '')
-                        if text_part.isdecimal():
-                            try:
-                                model_values['window_size'] = int(text_part)
-                                continue
-                            except ValueError:
-                                # Cannot convert string to int
-                                pass
-                    if 'nf' in text_part:
-                        text_part = text_part.replace('nf', '')
-                        if text_part.isdecimal():
-                            try:
-                                model_values['n_fft'] = int(text_part)
-                                continue
-                            except ValueError:
-                                # Cannot convert string to int
-                                pass
-                return model_values
-
-            if self.ui.checkBox_customParameters.isChecked():
-                # Manually types constants
-                for widget in widgets.values():
-                    # Enable all widgets
-                    widget.setEnabled(True)
-                return
-
-            constants = extract_constants()
-            for key, widget in widgets.items():
-                # Enable all widgets
-                if not key in constants.keys():
-                    # Model did not contain this constant
-                    # so make enable the entry
-                    widget.setEnabled(True)
-                    continue
-                widget.setEnabled(False)
-                widget.setText(str(constants[key]))
-
         self.logger.info('Updating: "Seperation Settings" page',
                          indent_forwards=True)
-        # -Conversion Subgroup-
-        # Stack Passes
-        if self.ui.checkBox_stackPasses.isChecked():
-            self.ui.comboBox_stackPasses.setVisible(True)
-            self.ui.checkBox_saveAllStacked.setVisible(True)
-            self.ui.checkBox_stackOnly.setVisible(True)
-        else:
-            self.ui.comboBox_stackPasses.setVisible(False)
-            self.ui.checkBox_saveAllStacked.setVisible(False)
-            self.ui.checkBox_saveAllStacked.setChecked(False)
-            self.ui.checkBox_stackOnly.setVisible(False)
-            self.ui.checkBox_stackOnly.setChecked(False)
-
-        # -Models Subgroup-
-        # Get selected models
-        instrumental_model = self.ui.comboBox_instrumental.currentText()
-        instrumental_widgets = {'sr': self.ui.lineEdit_sr,
-                                'hop_length': self.ui.lineEdit_hopLength,
-                                'window_size': self.ui.comboBox_winSize.lineEdit(),
-                                'n_fft': self.ui.lineEdit_nfft, }
-        stacked_model = self.ui.comboBox_stacked.currentText()
-        stacked_widgets = {'sr': self.ui.lineEdit_sr_stacked,
-                           'hop_length': self.ui.lineEdit_hopLength_stacked,
-                           'window_size': self.ui.comboBox_winSize_stacked.lineEdit(),
-                           'n_fft': self.ui.lineEdit_nfft_stacked, }
-
-        if not self.ui.checkBox_stackOnly.isChecked():
-            # Show widgets
-            self.ui.frame_instrumentalComboBox.setVisible(True)
-            self.ui.comboBox_winSize.setVisible(True)
-            for widget in instrumental_widgets.values():
-                widget.setVisible(True)
-            # Update entries
-            subgroup_model_update_constants(model_basename=instrumental_model,
-                                            widgets=instrumental_widgets)
-        else:
-            # Hide widgets
-            self.ui.frame_instrumentalComboBox.setVisible(False)
-            self.ui.comboBox_winSize.setVisible(False)
-            for widget in instrumental_widgets.values():
-                widget.setVisible(False)
-
-        if self.ui.checkBox_stackPasses.isChecked():
-            # Show widgets
-            self.ui.frame_stackComboBox.setVisible(True)
-            self.ui.comboBox_winSize_stacked.setVisible(True)
-            for widget in stacked_widgets.values():
-                widget.setVisible(True)
-            # Update entries
-            subgroup_model_update_constants(model_basename=stacked_model,
-                                            widgets=stacked_widgets)
-        else:
-            # Hide widgets
-            self.ui.frame_stackComboBox.setVisible(False)
-            self.ui.comboBox_winSize_stacked.setVisible(False)
-            for widget in stacked_widgets.values():
-                widget.setVisible(False)
-
         # -Presets subgroup-
         self.ui.comboBox_presets.blockSignals(True)
         last_text = self.ui.comboBox_presets.currentText()
@@ -570,17 +441,11 @@ class SettingsWindow(QtWidgets.QWidget):
                     # QComboBox, so reselect
                     widget.setCurrentIndex(index)
 
-        # Get selected engine
-        engine = self.ui.comboBox_engine.currentText()
-        # Generate paths
-        instrumental_folder = os.path.join(ResourcePaths.modelsDir, engine, ResourcePaths.instrumentalDirName)
-        stacked_folder = os.path.join(ResourcePaths.modelsDir, engine, ResourcePaths.stackedDirName)
-
         # Fill Comboboxes
         fill_model_comboBox(widget=self.ui.comboBox_instrumental,
-                            folder=instrumental_folder)
-        fill_model_comboBox(widget=self.ui.comboBox_stacked,
-                            folder=stacked_folder)
+                            folder=ResourcePaths.instrumentalModelsDir)
+        fill_model_comboBox(widget=self.ui.comboBox_vocal,
+                            folder=ResourcePaths.vocalModelsDir)
 
     # Shortcuts Page
     def update_page_shortcuts(self):
@@ -628,19 +493,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     # -Other-
-    def get_model_id(self, model_path: str):
-        """
-        Get the models id
-
-        If no id has been found return the filename
-        """
-        print(model_path)
-        model_params = ModelParameters(model_path)
-        print(model_params.param['id'])
-        model_name = os.path.splitext(os.path.basename(model_path))[0]
-
-        return model_name
-
     def menu_loadPage(self, page_idx: int, force: bool = False):
         """Load the given menu page by index
 
@@ -687,19 +539,6 @@ class SettingsWindow(QtWidgets.QWidget):
             self.logger.indent_backwards()
             return
 
-        # if not self.ui.checkBox_disableAnimations.isChecked():
-        #     # Animations enabled
-        #     self.pages_ani.start()
-        #     try:
-        #         # Disconnect last menu_loadPage
-        #         self.pageSwitchTimer.timeout.disconnect()
-        #     except RuntimeError:
-        #         # No signal to disconnect
-        #         pass
-        #     # On half of whole aniamtion load new window
-        #     self.pageSwitchTimer.timeout.connect(menu_loadPage)
-        #     self.pageSwitchTimer.start()
-        # else:
         menu_loadPage()
 
         self.logger.indent_backwards()
@@ -708,10 +547,12 @@ class SettingsWindow(QtWidgets.QWidget):
     def closeEvent(self, event: QtCore.QEvent):
         """Catch close event of this window to save data"""
         # -Save the geometry for this window-
-        self.settings.setValue('settingswindow/size',
+        self.settings.beginGroup(self.__class__.__name__.lower())
+        self.settings.setValue('size',
                                self.size())
-        self.settings.setValue('settingswindow/pos',
+        self.settings.setValue('pos',
                                self.pos())
+        self.settings.endGroup()
         # Commit Save
         self.settings.sync()
         # -Close Window-
@@ -766,31 +607,16 @@ class SettingsManager:
             self.win.ui.checkBox_gpuConversion,
             self.win.ui.checkBox_tta,
             self.win.ui.checkBox_modelFolder,
-            self.win.ui.checkBox_customParameters,
             self.win.ui.checkBox_outputImage,
             self.win.ui.checkBox_postProcess,
-            self.win.ui.checkBox_stackPasses,
-            self.win.ui.checkBox_saveAllStacked,
-            self.win.ui.checkBox_stackOnly,
-            # Combobox
-            self.win.ui.comboBox_stackPasses,
+            self.win.ui.checkBox_deepExtraction,
             # -Models-
             # Combobox
             self.win.ui.comboBox_instrumental,
+            self.win.ui.comboBox_vocal,
             self.win.ui.comboBox_winSize,
-            self.win.ui.comboBox_winSize_stacked,
-            self.win.ui.comboBox_stacked,
-            # Lineedit
-            self.win.ui.lineEdit_sr,
-            self.win.ui.lineEdit_sr_stacked,
-            self.win.ui.lineEdit_hopLength,
-            self.win.ui.lineEdit_hopLength_stacked,
-            self.win.ui.lineEdit_nfft,
-            self.win.ui.lineEdit_nfft_stacked,
-            # -Engine-
-            # Combobox
-            self.win.ui.comboBox_resType,
-            self.win.ui.comboBox_engine,
+            # SpinBox
+            self.win.ui.doubleSpinBox_aggressiveness,
             # -Presets-
             # Combobox
             self.win.ui.comboBox_presets, ]
@@ -807,7 +633,7 @@ class SettingsManager:
             self.win.ui.checkBox_settingsStartup,
             self.win.ui.checkBox_disableAnimations,
             self.win.ui.checkBox_disableShortcuts,
-            self.win.ui.checkBox_multiThreading,
+            self.win.ui.checkBox_multithreading,
             # Combobox
             self.win.ui.comboBox_command,
             # -Export Settings-
@@ -856,6 +682,9 @@ class SettingsManager:
                 value = widget.text()
             elif isinstance(widget, QtWidgets.QComboBox):
                 value = widget.currentText()
+            elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
+                    isinstance(widget, QtWidgets.QSpinBox)):
+                value = widget.value()
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
 
@@ -912,6 +741,9 @@ class SettingsManager:
                         if item == value:
                             # Both have the same text
                             widget.setCurrentIndex(i)
+            elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
+                    isinstance(widget, QtWidgets.QSpinBox)):
+                widget.setValue(value)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
         self.win.suppress_settings_change_event = False
@@ -963,6 +795,12 @@ class SettingsManager:
                         if item == value:
                             # Both have the same text
                             widget.setCurrentIndex(i)
+            elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
+                    isinstance(widget, QtWidgets.QSpinBox)):
+                value = self.win.settings.value(widget_objectName,
+                                                defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
+                                                type=float)
+                widget.setValue(value)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
         self.win.settings.endGroup()
@@ -994,6 +832,9 @@ class SettingsManager:
                 value = widget.text()
             elif isinstance(widget, QtWidgets.QComboBox):
                 value = widget.currentText()
+            elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
+                    isinstance(widget, QtWidgets.QSpinBox)):
+                value = widget.value()
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
             # Save value

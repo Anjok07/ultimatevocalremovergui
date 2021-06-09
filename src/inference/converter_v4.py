@@ -16,9 +16,9 @@ import numpy as np
 import soundfile as sf
 import torch
 # -Root imports-
-from .lib.lib_v4 import dataset
-from .lib.lib_v4 import nets
-from .lib.lib_v4 import spec_utils
+from .lib import dataset
+from .lib import nets
+from .lib import spec_utils
 from ..resources.resources_manager import (ResourcePaths, Logger)
 # -Other-
 import traceback

@@ -5,10 +5,11 @@ Store Appliation info and default data
 # -GUI-
 from PySide2 import QtCore
 # -Root imports-
-from .inference import converter_v4
+from .inference import converter
 from collections import OrderedDict
 
-__is_light_theme = bool(QtCore.QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QtCore.QSettings.NativeFormat).value("AppsUseLightTheme"))
+__is_light_theme = bool(QtCore.QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+                        QtCore.QSettings.NativeFormat).value("AppsUseLightTheme"))
 
 VERSION = "0.0.5"
 APPLICATION_SHORTNAME = 'UVR'
@@ -23,31 +24,15 @@ JSON_TO_NAME = OrderedDict(**{
     'postProcess': 'checkBox_postProcess',
     'tta': 'checkBox_tta',
     'outputImage': 'checkBox_outputImage',
-    'useStackPasses': 'checkBox_stackPasses',
-    'stackOnly': 'checkBox_stackOnly',
-    'saveAllStacked': 'checkBox_saveAllStacked',
     'modelFolder': 'checkBox_modelFolder',
-    'customParameters': 'checkBox_customParameters',
-    # Combobox
-    'stackPassesNum': 'comboBox_stackPasses',
-    # -Engine-
-    'aiEngine': 'comboBox_engine',
-    'resolutionType': 'comboBox_resType',
+    'deepExtraction': 'checkBox_deepExtraction',
+    'multithreading': 'checkBox_multithreading',
+    # Number
+    'aggressiveness': 'doubleSpinBox_aggressiveness',
     # -Models-
     'instrumentalModelName': 'comboBox_instrumental',
-    'stackedModelName': 'comboBox_stacked',
-    # Sampling Rate (SR)
-    'sr': 'lineEdit_sr',
-    'srStacked': 'lineEdit_sr_stacked',
-    # Hop Length
-    'hopLength': 'lineEdit_hopLength',
-    'hopLengthStacked': 'lineEdit_hopLength_stacked',
-    # Window size
+    'vocalModelName': 'comboBox_vocal',
     'windowSize': 'comboBox_winSize',
-    'windowSizeStacked': 'comboBox_winSize_stacked',
-    # NFFT
-    'nfft': 'lineEdit_nfft',
-    'nfftStacked': 'lineEdit_nfft_stacked',
 })
 
 DEFAULT_SETTINGS = {
@@ -68,35 +53,18 @@ DEFAULT_SETTINGS = {
     # --Settings window -> Seperation Settings--
     # -Conversion-
     # Boolean
-    'checkBox_gpuConversion': converter_v4.default_data['gpuConversion'],
-    'checkBox_postProcess': converter_v4.default_data['postProcess'],
-    'checkBox_tta': converter_v4.default_data['tta'],
-    'checkBox_outputImage': converter_v4.default_data['outputImage'],
-    'checkBox_stackOnly': converter_v4.default_data['stackOnly'],
-    'checkBox_saveAllStacked': converter_v4.default_data['saveAllStacked'],
-    'checkBox_modelFolder': converter_v4.default_data['modelFolder'],
-    'checkBox_customParameters': converter_v4.default_data['customParameters'],
-    'checkBox_stackPasses': True,
-    # Combobox
-    'comboBox_stackPasses': 1,
-    # -Engine-
-    'comboBox_engine': 'v4',
-    'comboBox_resType': 'Kaiser Fast',
+    'checkBox_gpuConversion': converter.default_data['gpuConversion'],
+    'checkBox_postProcess': converter.default_data['postProcess'],
+    'checkBox_tta': converter.default_data['tta'],
+    'checkBox_outputImage': converter.default_data['outputImage'],
+    'checkBox_modelFolder': converter.default_data['modelFolder'],
+    'checkBox_deepExtraction': converter.default_data['deepExtraction'],
+    # Number
+    'doubleSpinBox_aggressiveness': converter.default_data['aggressiveness'],
     # -Models-
     'comboBox_instrumental': '',
-    'comboBox_stacked': '',
-    # Sampling Rate (SR)
-    'lineEdit_sr': converter_v4.default_data['sr'],
-    'lineEdit_sr_stacked': converter_v4.default_data['sr'],
-    # Hop Length
-    'lineEdit_hopLength': converter_v4.default_data['hop_length'],
-    'lineEdit_hopLength_stacked': converter_v4.default_data['hop_length'],
-    # Window size
-    'comboBox_winSize': converter_v4.default_data['window_size'],
-    'comboBox_winSize_stacked': converter_v4.default_data['window_size'],
-    # NFFT
-    'lineEdit_nfft': converter_v4.default_data['n_fft'],
-    'lineEdit_nfft_stacked': converter_v4.default_data['n_fft'],
+    'comboBox_vocal': '',
+    'comboBox_winSize': converter.default_data['window_size'],
     # -Presets-
     'comboBox_presets': '',
     # --Settings window -> Customization--
@@ -116,12 +84,13 @@ DEFAULT_SETTINGS = {
     # Disable Shortcuts
     'checkBox_disableShortcuts': False,
     # Process multiple files at once
-    'checkBox_multiThreading': False,
+    'checkBox_multithreading': False,
     # -Export Settings-
     # Autosave Instrumentals/Vocals
     'checkBox_autoSaveInstrumentals': True,
     'checkBox_autoSaveVocals': True,
 }
+
 
 class QWinTaskbar_PLACEHOLDER:
     def __init__(self, parent):

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1076</width>
-    <height>451</height>
+    <width>830</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -287,8 +287,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>876</width>
-               <height>451</height>
+               <width>630</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -409,31 +409,7 @@
                        <property name="verticalSpacing">
                         <number>10</number>
                        </property>
-                       <item row="2" column="1">
-                        <widget class="QCheckBox" name="checkBox_saveAllStacked">
-                         <property name="text">
-                          <string>Save All Stacked Outputs</string>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="3" column="0">
-                        <widget class="QCheckBox" name="checkBox_customParameters">
-                         <property name="text">
-                          <string>Custom Parameters</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="3" column="1">
-                        <widget class="QCheckBox" name="checkBox_stackOnly">
-                         <property name="enabled">
-                          <bool>true</bool>
-                         </property>
-                         <property name="text">
-                          <string>Stack Conversion Only</string>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
                         <widget class="QCheckBox" name="checkBox_outputImage">
                          <property name="toolTip">
                           <string>Save spectogram of seperated music files</string>
@@ -471,27 +447,25 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="1" column="1" alignment="Qt::AlignLeft">
-                        <widget class="QFrame" name="frame_10">
-                         <property name="minimumSize">
-                          <size>
-                           <width>135</width>
-                           <height>21</height>
-                          </size>
+                       <item row="1" column="1">
+                        <widget class="QCheckBox" name="checkBox_deepExtraction">
+                         <property name="enabled">
+                          <bool>true</bool>
                          </property>
+                         <property name="text">
+                          <string>Deep extraction</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="1">
+                        <widget class="QFrame" name="frame_9">
                          <property name="frameShape">
                           <enum>QFrame::NoFrame</enum>
                          </property>
                          <property name="frameShadow">
-                          <enum>QFrame::Plain</enum>
+                          <enum>QFrame::Raised</enum>
                          </property>
-                         <property name="lineWidth">
-                          <number>0</number>
-                         </property>
-                         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,0">
-                          <property name="spacing">
-                           <number>3</number>
-                          </property>
+                         <layout class="QHBoxLayout" name="horizontalLayout_3">
                           <property name="leftMargin">
                            <number>0</number>
                           </property>
@@ -504,93 +478,45 @@
                           <property name="bottomMargin">
                            <number>0</number>
                           </property>
-                          <item alignment="Qt::AlignLeft">
-                           <widget class="QCheckBox" name="checkBox_stackPasses">
-                            <property name="maximumSize">
-                             <size>
-                              <width>16777215</width>
-                              <height>16777215</height>
-                             </size>
-                            </property>
-                            <property name="text">
-                             <string>Stack Passes</string>
-                            </property>
-                           </widget>
-                          </item>
                           <item>
-                           <widget class="QComboBox" name="comboBox_stackPasses">
-                            <property name="sizePolicy">
-                             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                              <horstretch>0</horstretch>
-                              <verstretch>0</verstretch>
-                             </sizepolicy>
+                           <widget class="QDoubleSpinBox" name="doubleSpinBox_aggressiveness">
+                            <property name="enabled">
+                             <bool>true</bool>
                             </property>
                             <property name="minimumSize">
                              <size>
-                              <width>0</width>
+                              <width>50</width>
                               <height>0</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
-                              <width>45</width>
-                              <height>21</height>
+                              <width>50</width>
+                              <height>16777215</height>
                              </size>
                             </property>
-                            <property name="currentText">
-                             <string notr="true">1</string>
+                            <property name="minimum">
+                             <double>-0.100000000000000</double>
                             </property>
-                            <property name="maxVisibleItems">
-                             <number>4</number>
+                            <property name="maximum">
+                             <double>0.100000000000000</double>
                             </property>
-                            <property name="sizeAdjustPolicy">
-                             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                            <property name="singleStep">
+                             <double>0.010000000000000</double>
                             </property>
-                            <item>
-                             <property name="text">
-                              <string notr="true">1</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">2</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">3</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">4</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">5</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">6</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">7</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">8</string>
-                             </property>
-                            </item>
-                            <item>
-                             <property name="text">
-                              <string notr="true">9</string>
-                             </property>
-                            </item>
+                            <property name="value">
+                             <double>0.020000000000000</double>
+                            </property>
+                           </widget>
+                          </item>
+                          <item>
+                           <widget class="QLabel" name="label_7">
+                            <property name="enabled">
+                             <bool>true</bool>
+                            </property>
+                            <property name="text">
+                             <string>Aggressiveness</string>
+                            </property>
                            </widget>
                           </item>
                          </layout>
@@ -623,164 +549,6 @@
                        <property name="bottomMargin">
                         <number>0</number>
                        </property>
-                       <item>
-                        <widget class="QGroupBox" name="groupBox_2">
-                         <property name="title">
-                          <string>Engine </string>
-                         </property>
-                         <property name="flat">
-                          <bool>true</bool>
-                         </property>
-                         <property name="titleText" stdset="0">
-                          <bool>true</bool>
-                         </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_8">
-                          <property name="spacing">
-                           <number>10</number>
-                          </property>
-                          <property name="leftMargin">
-                           <number>35</number>
-                          </property>
-                          <property name="topMargin">
-                           <number>10</number>
-                          </property>
-                          <property name="rightMargin">
-                           <number>30</number>
-                          </property>
-                          <property name="bottomMargin">
-                           <number>10</number>
-                          </property>
-                          <item alignment="Qt::AlignTop">
-                           <widget class="QFrame" name="frame_12">
-                            <property name="frameShape">
-                             <enum>QFrame::NoFrame</enum>
-                            </property>
-                            <property name="frameShadow">
-                             <enum>QFrame::Raised</enum>
-                            </property>
-                            <layout class="QGridLayout" name="gridLayout_6" columnminimumwidth="92,92">
-                             <property name="leftMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="topMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="rightMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="bottomMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="horizontalSpacing">
-                              <number>20</number>
-                             </property>
-                             <property name="verticalSpacing">
-                              <number>15</number>
-                             </property>
-                             <item row="0" column="0">
-                              <widget class="QLabel" name="label_engine">
-                               <property name="sizePolicy">
-                                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                                 <horstretch>0</horstretch>
-                                 <verstretch>0</verstretch>
-                                </sizepolicy>
-                               </property>
-                               <property name="minimumSize">
-                                <size>
-                                 <width>0</width>
-                                 <height>0</height>
-                                </size>
-                               </property>
-                               <property name="text">
-                                <string>AI Engine</string>
-                               </property>
-                               <property name="alignment">
-                                <set>Qt::AlignCenter</set>
-                               </property>
-                               <property name="indent">
-                                <number>10</number>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="1" column="0">
-                              <widget class="QComboBox" name="comboBox_engine">
-                               <property name="enabled">
-                                <bool>true</bool>
-                               </property>
-                               <property name="minimumSize">
-                                <size>
-                                 <width>0</width>
-                                 <height>25</height>
-                                </size>
-                               </property>
-                               <property name="sizeAdjustPolicy">
-                                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-                               </property>
-                               <item>
-                                <property name="text">
-                                 <string notr="true">v4</string>
-                                </property>
-                               </item>
-                               <item>
-                                <property name="text">
-                                 <string>v5</string>
-                                </property>
-                               </item>
-                              </widget>
-                             </item>
-                             <item row="1" column="1">
-                              <widget class="QComboBox" name="comboBox_resType">
-                               <property name="minimumSize">
-                                <size>
-                                 <width>0</width>
-                                 <height>25</height>
-                                </size>
-                               </property>
-                               <property name="sizeAdjustPolicy">
-                                <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-                               </property>
-                               <item>
-                                <property name="text">
-                                 <string notr="true">Kaiser Fast</string>
-                                </property>
-                               </item>
-                               <item>
-                                <property name="text">
-                                 <string notr="true">Kaiser Best</string>
-                                </property>
-                               </item>
-                               <item>
-                                <property name="text">
-                                 <string notr="true">Scipy</string>
-                                </property>
-                               </item>
-                              </widget>
-                             </item>
-                             <item row="0" column="1">
-                              <widget class="QLabel" name="label_resType">
-                               <property name="sizePolicy">
-                                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                                 <horstretch>0</horstretch>
-                                 <verstretch>0</verstretch>
-                                </sizepolicy>
-                               </property>
-                               <property name="text">
-                                <string>Resolution Type</string>
-                               </property>
-                               <property name="alignment">
-                                <set>Qt::AlignCenter</set>
-                               </property>
-                               <property name="indent">
-                                <number>10</number>
-                               </property>
-                              </widget>
-                             </item>
-                            </layout>
-                           </widget>
-                          </item>
-                         </layout>
-                        </widget>
-                       </item>
                        <item>
                         <widget class="QGroupBox" name="groupBox">
                          <property name="title">
@@ -991,165 +759,14 @@
                       <property name="lineWidth">
                        <number>0</number>
                       </property>
-                      <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,0,0">
+                      <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,0">
                        <property name="topMargin">
                         <number>5</number>
                        </property>
                        <property name="bottomMargin">
                         <number>3</number>
                        </property>
-                       <item row="2" column="2">
-                        <widget class="QComboBox" name="comboBox_winSize_stacked">
-                         <property name="minimumSize">
-                          <size>
-                           <width>0</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="editable">
-                          <bool>true</bool>
-                         </property>
-                         <property name="currentText">
-                          <string notr="true">272</string>
-                         </property>
-                         <property name="currentIndex">
-                          <number>0</number>
-                         </property>
-                         <property name="canEdit" stdset="0">
-                          <bool>true</bool>
-                         </property>
-                         <item>
-                          <property name="text">
-                           <string notr="true">272</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string notr="true">320</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string notr="true">512</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string notr="true">1024</string>
-                          </property>
-                         </item>
-                        </widget>
-                       </item>
-                       <item row="1" column="1">
-                        <widget class="QLabel" name="label_hopLength">
-                         <property name="minimumSize">
-                          <size>
-                           <width>80</width>
-                           <height>0</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>80</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>Hop Length</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="2">
-                        <widget class="QLineEdit" name="lineEdit_hopLength_stacked">
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">1024</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                         <property name="dragEnabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="readOnly">
-                          <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="4" column="2">
-                        <widget class="QLineEdit" name="lineEdit_nfft_stacked">
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">2048</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                         <property name="dragEnabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="readOnly">
-                          <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="0" column="1">
-                        <widget class="QLabel" name="label_sr">
-                         <property name="minimumSize">
-                          <size>
-                           <width>80</width>
-                           <height>0</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>80</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="toolTip">
-                          <string>Sampling Rate</string>
-                         </property>
-                         <property name="text">
-                          <string>SR</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="1">
                         <widget class="QLabel" name="label_winSize">
                          <property name="minimumSize">
                           <size>
@@ -1171,110 +788,7 @@
                          </property>
                         </widget>
                        </item>
-                       <item row="4" column="1">
-                        <widget class="QLabel" name="label_nfft">
-                         <property name="minimumSize">
-                          <size>
-                           <width>80</width>
-                           <height>0</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>80</width>
-                           <height>16777215</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string>N_FFT</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="0" column="2">
-                        <widget class="QLineEdit" name="lineEdit_sr_stacked">
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">44100</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                         <property name="dragEnabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="readOnly">
-                          <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
                        <item row="0" column="0">
-                        <widget class="QLineEdit" name="lineEdit_sr">
-                         <property name="enabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">44100</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                         <property name="dragEnabled">
-                          <bool>false</bool>
-                         </property>
-                         <property name="readOnly">
-                          <bool>false</bool>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="1" column="0">
-                        <widget class="QLineEdit" name="lineEdit_hopLength">
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">1024</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
-                        </widget>
-                       </item>
-                       <item row="2" column="0">
                         <widget class="QComboBox" name="comboBox_winSize">
                          <property name="minimumSize">
                           <size>
@@ -1292,7 +806,7 @@
                           <bool>true</bool>
                          </property>
                          <property name="currentText">
-                          <string notr="true">272</string>
+                          <string notr="true">352</string>
                          </property>
                          <property name="currentIndex">
                           <number>0</number>
@@ -1302,12 +816,7 @@
                          </property>
                          <item>
                           <property name="text">
-                           <string notr="true">272</string>
-                          </property>
-                         </item>
-                         <item>
-                          <property name="text">
-                           <string notr="true">320</string>
+                           <string notr="true">352</string>
                           </property>
                          </item>
                          <item>
@@ -1320,28 +829,6 @@
                            <string notr="true">1024</string>
                           </property>
                          </item>
-                        </widget>
-                       </item>
-                       <item row="4" column="0">
-                        <widget class="QLineEdit" name="lineEdit_nfft">
-                         <property name="minimumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="maximumSize">
-                          <size>
-                           <width>60</width>
-                           <height>25</height>
-                          </size>
-                         </property>
-                         <property name="text">
-                          <string notr="true">2048</string>
-                         </property>
-                         <property name="alignment">
-                          <set>Qt::AlignCenter</set>
-                         </property>
                         </widget>
                        </item>
                       </layout>
@@ -1386,7 +873,7 @@
                           </size>
                          </property>
                          <property name="text">
-                          <string>Stacked Model</string>
+                          <string>Vocal Model</string>
                          </property>
                          <property name="alignment">
                           <set>Qt::AlignCenter</set>
@@ -1394,7 +881,7 @@
                         </widget>
                        </item>
                        <item>
-                        <widget class="QComboBox" name="comboBox_stacked">
+                        <widget class="QComboBox" name="comboBox_vocal">
                          <property name="enabled">
                           <bool>true</bool>
                          </property>
@@ -1475,8 +962,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>710</width>
-               <height>451</height>
+               <width>541</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1552,8 +1039,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>876</width>
-               <height>451</height>
+               <width>541</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1677,8 +1164,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>876</width>
-               <height>451</height>
+               <width>600</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1991,7 +1478,7 @@
                               </widget>
                              </item>
                              <item row="5" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_multiThreading">
+                              <widget class="QCheckBox" name="checkBox_multithreading">
                                <property name="enabled">
                                 <bool>false</bool>
                                </property>

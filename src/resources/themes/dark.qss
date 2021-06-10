@@ -5,8 +5,7 @@
 *::disabled {
 	color: #888;
 }
-*[title="true"],
-QGroupBox {
+*[title="true"] {
 	font: 15pt "Yu Gothic UI";
 }
 QLineEdit,

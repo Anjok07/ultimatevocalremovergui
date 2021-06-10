@@ -477,7 +477,7 @@ class MainWindow(QtWidgets.QWidget):
         # Temp func
         self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
                                    os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
-        self._activate_audio_players()
+        self._deactivate_audio_players()
         # Create WinTaskbar
         self.winTaskbar = QWinTaskbarButton(self)
         self.winTaskbar.setWindow(self.windowHandle())

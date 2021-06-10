@@ -1,6 +1,6 @@
 ---
 name: Installation Problem
-about: Create a report to help us improve
+about: Create a report to help us identify your problem with the installation
 title: "[INSTALLATION PROBLEM]"
 labels: ''
 assignees: ''

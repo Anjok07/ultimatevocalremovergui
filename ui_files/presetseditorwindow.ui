@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
-    <height>400</height>
+    <width>322</width>
+    <height>403</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,9 +47,6 @@
    </item>
    <item>
     <widget class="QListWidget" name="listWidget_presets">
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
@@ -62,8 +59,14 @@
      <property name="showDropIndicator" stdset="0">
       <bool>true</bool>
      </property>
+     <property name="dragEnabled">
+      <bool>false</bool>
+     </property>
      <property name="defaultDropAction">
-      <enum>Qt::TargetMoveAction</enum>
+      <enum>Qt::MoveAction</enum>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
      </property>
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>

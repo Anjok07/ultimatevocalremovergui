@@ -132,6 +132,19 @@ QListWidget[musicSelect="true"]::item {
 QListWidget[musicSelect="true"]::item:selected {
     background-color: #368ADD;
 }
+QListWidget#listWidget_presets {
+	color: #EEE;
+	background-color: #303030;
+	alternate-background-color: #424242;
+	outline: none;
+}
+QListWidget#listWidget_presets::item {
+	outline: none;
+	border: none;
+}
+QListWidget#listWidget_presets::item:selected {
+    background-color: #368ADD;
+}
 /* Command Line*/
 QTextBrowser {
 	font: 8pt "Courier";

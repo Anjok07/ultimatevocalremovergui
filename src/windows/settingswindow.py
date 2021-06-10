@@ -125,10 +125,16 @@ class SettingsWindow(QtWidgets.QWidget):
     def comboBox_presets_currentIndexChanged(self):
         """
         Changed preset
+
+        Note:
+            If empty dict is returned by get_settings
+            (happens when name does not exist) no settings will
+            be changed
         """
         self.search_for_preset = False
         name = self.ui.comboBox_presets.currentText()
         settings = self.app.windows['presetsEditor'].get_settings(name)
+
         for json_key in list(settings.keys()):
             widget_objectName = const.JSON_TO_NAME[json_key]
             settings[widget_objectName] = settings.pop(json_key)
@@ -195,6 +201,9 @@ class SettingsWindow(QtWidgets.QWidget):
             presets: dict = self.app.windows['presetsEditor'].get_presets()
 
             for preset_name, settings in presets.items():
+                if not settings:
+                    # Empty dict
+                    continue
                 for json_key, value in settings.items():
                     widget_object_name = const.JSON_TO_NAME[json_key]
 
@@ -202,7 +211,7 @@ class SettingsWindow(QtWidgets.QWidget):
                         # CUDA not available, should not change the preset though
                         continue
 
-                    if (current_settings[widget_object_name] != value):
+                    if (str(current_settings[widget_object_name]) != str(value)):
                         break
                 else:
                     self.ui.comboBox_presets.setCurrentText(preset_name)
@@ -361,10 +370,9 @@ class SettingsWindow(QtWidgets.QWidget):
         # -Before setup-
         self.search_for_preset = False
         # Load saved settings for widgets
-        self.settingsManager.load_window()
+        self.load_window()
         # Update available model lists
         self._update_selectable_models()
-        setup_menu()
         # Open settings window on startup
         open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
@@ -374,6 +382,7 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
 
         # -Setup-
+        setup_menu()
         load_geometry()
         load_images()
         bind_widgets()
@@ -388,7 +397,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.update_window()
         self.menu_loadPage(0, True)
         self.search_for_preset = True
-        self.settings_changed()
         self.logger.indent_backwards()
 
     def load_window(self):
@@ -429,21 +437,23 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.info('Updating: "Seperation Settings" page',
                          indent_forwards=True)
         # -Presets subgroup-
+        mainWindowPresetWidget = self.app.windows['main'].ui.comboBox_presets
         self.ui.comboBox_presets.blockSignals(True)
+        mainWindowPresetWidget.blockSignals(True)
         last_text = self.ui.comboBox_presets.currentText()
         self.ui.comboBox_presets.clear()
+        mainWindowPresetWidget.clear()
         self.ui.comboBox_presets.addItem('Custom')
-        for idx in range(self.app.windows['presetsEditor'].ui.listWidget_presets.count()):
-            # Loop through every preset in the list on the window
-            # Get item by index
-            item = self.app.windows['presetsEditor'].ui.listWidget_presets.item(idx)
-            # Get text
-            text = item.text()
+        mainWindowPresetWidget.addItem('Custom')
+        for preset_name in self.app.windows['presetsEditor'].get_presets().keys():
             # Add text to combobox
-            self.ui.comboBox_presets.addItem(text)
-            if text == last_text:
-                self.ui.comboBox_presets.setCurrentText(text)
+            self.ui.comboBox_presets.addItem(preset_name)
+            mainWindowPresetWidget.addItem(preset_name)
+            if preset_name == last_text:
+                self.ui.comboBox_presets.setCurrentText(preset_name)
+                mainWindowPresetWidget.setCurrentText(preset_name)
         self.ui.comboBox_presets.blockSignals(False)
+        mainWindowPresetWidget.blockSignals(False)
         self.settings_changed()
 
         self.logger.indent_backwards()
@@ -766,7 +776,7 @@ class SettingsManager:
             elif isinstance(widget, QtWidgets.QComboBox):
                 if widget.isEditable():
                     # Allows self-typing
-                    widget.setCurrentText(value)
+                    widget.setCurrentText(str(value))
                 else:
                     # Only allows a list to choose from
                     all_items = [widget.itemText(i) for i in range(widget.count())]

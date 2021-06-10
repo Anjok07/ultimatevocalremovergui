@@ -26,7 +26,6 @@ JSON_TO_NAME = OrderedDict(**{
     'outputImage': 'checkBox_outputImage',
     'modelFolder': 'checkBox_modelFolder',
     'deepExtraction': 'checkBox_deepExtraction',
-    'multithreading': 'checkBox_multithreading',
     # Number
     'aggressiveness': 'doubleSpinBox_aggressiveness',
     'highEndProcess': 'comboBox_highEndProcess',
@@ -35,7 +34,6 @@ JSON_TO_NAME = OrderedDict(**{
     'vocalModelName': 'comboBox_vocal',
     'windowSize': 'comboBox_winSize',
 })
-
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
     'inputPaths': [],
@@ -46,7 +44,42 @@ DEFAULT_SETTINGS = {
     # Language in format {language}_{country} (Default: system language)
     'language': QtCore.QLocale.system().name(),
     # Presets for seperations
-    'presets': {},
+    'presets': [
+        ['ALL', {
+            # -Conversion-
+            # Boolean
+            'gpuConversion': True,
+            'postProcess': True,
+            'tta': True,
+            'outputImage': True,
+            'modelFolder': True,
+            'deepExtraction': True,
+            # Number
+            'aggressiveness': 0.1,
+            'highEndProcess': 'Bypass',
+            # -Models-
+            # 'instrumentalModelName': 'comboBox_instrumental',
+            # 'vocalModelName': 'comboBox_vocal',
+            'windowSize': 1024,
+        }],
+        ['NONE', {
+            # -Conversion-
+            # Boolean
+            'gpuConversion': False,
+            'postProcess': False,
+            'tta': False,
+            'outputImage': False,
+            'modelFolder': False,
+            'deepExtraction': False,
+            # Number
+            'aggressiveness': -0.1,
+            'highEndProcess': 'Mirroring',
+            # -Models-
+            # 'instrumentalModelName': 'comboBox_instrumental',
+            # 'vocalModelName': 'comboBox_vocal',
+            'windowSize': 352,
+        }]
+    ],
     # Presets save directory (Default: desktop)
     'presets_saveDir': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
     # Presets load directory (Default: desktop)

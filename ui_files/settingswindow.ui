@@ -234,7 +234,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>3</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -485,13 +485,13 @@
                             </property>
                             <property name="minimumSize">
                              <size>
-                              <width>50</width>
+                              <width>55</width>
                               <height>0</height>
                              </size>
                             </property>
                             <property name="maximumSize">
                              <size>
-                              <width>50</width>
+                              <width>55</width>
                               <height>16777215</height>
                              </size>
                             </property>
@@ -1028,8 +1028,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
-               <height>35</height>
+               <width>630</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1105,8 +1105,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
-               <height>35</height>
+               <width>630</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="styleSheet">
@@ -1413,7 +1413,7 @@
                            </layout>
                           </item>
                           <item>
-                           <widget class="QFrame" name="">
+                           <widget class="QFrame" name="frame_other">
                             <property name="settingsContent" stdset="0">
                              <bool>true</bool>
                             </property>
@@ -1703,7 +1703,7 @@
                            </layout>
                           </item>
                           <item>
-                           <widget class="QFrame" name="">
+                           <widget class="QFrame" name="frame_export_2">
                             <property name="settingsContent" stdset="0">
                              <bool>true</bool>
                             </property>

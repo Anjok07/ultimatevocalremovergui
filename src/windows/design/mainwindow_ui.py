@@ -144,14 +144,42 @@ class Ui_MainWindow(object):
 
         self.verticalLayout.addWidget(self.stackedWidget_musicFiles)
 
-        self.label_arrow = QLabel(self.frame_2)
+        self.frame_8 = QFrame(self.frame_2)
+        self.frame_8.setObjectName(u"frame_8")
+        self.frame_8.setMinimumSize(QSize(0, 50))
+        self.frame_8.setFrameShape(QFrame.NoFrame)
+        self.frame_8.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_6 = QHBoxLayout(self.frame_8)
+        self.horizontalLayout_6.setSpacing(10)
+        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
+        self.horizontalLayout_6.setContentsMargins(145, 0, 0, 0)
+        self.label_arrow = QLabel(self.frame_8)
         self.label_arrow.setObjectName(u"label_arrow")
         self.label_arrow.setMaximumSize(QSize(16777215, 60))
-        self.label_arrow.setStyleSheet(u"font-size: 40px;")
+        self.label_arrow.setStyleSheet(u"font-size: 45px;")
         self.label_arrow.setText(u"\u2193")
         self.label_arrow.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout.addWidget(self.label_arrow)
+        self.horizontalLayout_6.addWidget(self.label_arrow)
+
+        self.frame_9 = QFrame(self.frame_8)
+        self.frame_9.setObjectName(u"frame_9")
+        self.frame_9.setFrameShape(QFrame.NoFrame)
+        self.frame_9.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_10 = QVBoxLayout(self.frame_9)
+        self.verticalLayout_10.setSpacing(0)
+        self.verticalLayout_10.setObjectName(u"verticalLayout_10")
+        self.verticalLayout_10.setContentsMargins(0, 5, 0, 0)
+        self.comboBox_presets = QComboBox(self.frame_9)
+        self.comboBox_presets.setObjectName(u"comboBox_presets")
+        self.comboBox_presets.setMinimumSize(QSize(135, 25))
+        self.comboBox_presets.setMaximumSize(QSize(135, 16777215))
+
+        self.verticalLayout_10.addWidget(self.comboBox_presets)
+
+        self.horizontalLayout_6.addWidget(self.frame_9)
+
+        self.verticalLayout.addWidget(self.frame_8, 0, Qt.AlignHCenter)
 
         self.frame_3 = QFrame(self.frame_2)
         self.frame_3.setObjectName(u"frame_3")

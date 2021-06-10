@@ -217,8 +217,8 @@ class Ui_SettingsWindow(object):
         self.doubleSpinBox_aggressiveness.setObjectName(
             u"doubleSpinBox_aggressiveness")
         self.doubleSpinBox_aggressiveness.setEnabled(True)
-        self.doubleSpinBox_aggressiveness.setMinimumSize(QSize(50, 0))
-        self.doubleSpinBox_aggressiveness.setMaximumSize(QSize(50, 16777215))
+        self.doubleSpinBox_aggressiveness.setMinimumSize(QSize(55, 0))
+        self.doubleSpinBox_aggressiveness.setMaximumSize(QSize(55, 16777215))
         self.doubleSpinBox_aggressiveness.setMinimum(-0.100000000000000)
         self.doubleSpinBox_aggressiveness.setMaximum(0.100000000000000)
         self.doubleSpinBox_aggressiveness.setSingleStep(0.010000000000000)
@@ -449,7 +449,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 35))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 630, 510))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -484,7 +484,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 53, 35))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 630, 510))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -610,14 +610,14 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_23.addLayout(self.horizontalLayout_14)
 
-        self.frame1 = QFrame(self.frame_template)
-        self.frame1.setObjectName(u"frame1")
-        self.frame1.setProperty("settingsContent", True)
-        self.gridLayout_14 = QGridLayout(self.frame1)
+        self.frame_other = QFrame(self.frame_template)
+        self.frame_other.setObjectName(u"frame_other")
+        self.frame_other.setProperty("settingsContent", True)
+        self.gridLayout_14 = QGridLayout(self.frame_other)
         self.gridLayout_14.setObjectName(u"gridLayout_14")
         self.gridLayout_14.setHorizontalSpacing(10)
         self.gridLayout_14.setContentsMargins(35, 10, 30, 10)
-        self.frame_8 = QFrame(self.frame1)
+        self.frame_8 = QFrame(self.frame_other)
         self.frame_8.setObjectName(u"frame_8")
         self.frame_8.setFrameShape(QFrame.NoFrame)
         self.frame_8.setFrameShadow(QFrame.Raised)
@@ -665,7 +665,7 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_14.addWidget(self.frame_8, 1, 0, 1, 1)
 
-        self.horizontalFrame = QFrame(self.frame1)
+        self.horizontalFrame = QFrame(self.frame_other)
         self.horizontalFrame.setObjectName(u"horizontalFrame")
         self.horizontalFrame.setLineWidth(0)
         self.formLayout_4 = QFormLayout(self.horizontalFrame)
@@ -714,7 +714,7 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_14.setRowStretch(0, 1)
 
-        self.verticalLayout_23.addWidget(self.frame1)
+        self.verticalLayout_23.addWidget(self.frame_other)
 
         self.verticalLayout_20.addWidget(self.frame_template)
 
@@ -754,14 +754,14 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout_17.addLayout(self.horizontalLayout_7)
 
-        self.frame2 = QFrame(self.frame_export)
-        self.frame2.setObjectName(u"frame2")
-        self.frame2.setProperty("settingsContent", True)
-        self.gridLayout_10 = QGridLayout(self.frame2)
+        self.frame_export_2 = QFrame(self.frame_export)
+        self.frame_export_2.setObjectName(u"frame_export_2")
+        self.frame_export_2.setProperty("settingsContent", True)
+        self.gridLayout_10 = QGridLayout(self.frame_export_2)
         self.gridLayout_10.setObjectName(u"gridLayout_10")
         self.gridLayout_10.setHorizontalSpacing(10)
         self.gridLayout_10.setContentsMargins(35, 10, 30, 10)
-        self.pushButton_exportDirectory = QPushButton(self.frame2)
+        self.pushButton_exportDirectory = QPushButton(self.frame_export_2)
         self.pushButton_exportDirectory.setObjectName(
             u"pushButton_exportDirectory")
         self.pushButton_exportDirectory.setMinimumSize(QSize(18, 18))
@@ -774,7 +774,7 @@ class Ui_SettingsWindow(object):
         self.gridLayout_10.addWidget(
             self.pushButton_exportDirectory, 0, 1, 1, 1)
 
-        self.label_3 = QLabel(self.frame2)
+        self.label_3 = QLabel(self.frame_export_2)
         self.label_3.setObjectName(u"label_3")
         sizePolicy4.setHeightForWidth(
             self.label_3.sizePolicy().hasHeightForWidth())
@@ -785,26 +785,26 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_10.addWidget(self.label_3, 0, 0, 1, 1)
 
-        self.label_autoSave = QLabel(self.frame2)
+        self.label_autoSave = QLabel(self.frame_export_2)
         self.label_autoSave.setObjectName(u"label_autoSave")
         self.label_autoSave.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
 
         self.gridLayout_10.addWidget(self.label_autoSave, 1, 0, 1, 2)
 
-        self.checkBox_autoSaveInstrumentals = QCheckBox(self.frame2)
+        self.checkBox_autoSaveInstrumentals = QCheckBox(self.frame_export_2)
         self.checkBox_autoSaveInstrumentals.setObjectName(
             u"checkBox_autoSaveInstrumentals")
 
         self.gridLayout_10.addWidget(
             self.checkBox_autoSaveInstrumentals, 1, 2, 1, 1)
 
-        self.checkBox_autoSaveVocals = QCheckBox(self.frame2)
+        self.checkBox_autoSaveVocals = QCheckBox(self.frame_export_2)
         self.checkBox_autoSaveVocals.setObjectName(u"checkBox_autoSaveVocals")
 
         self.gridLayout_10.addWidget(self.checkBox_autoSaveVocals, 1, 3, 1, 1)
 
-        self.label_exportDirectory = QLabel(self.frame2)
+        self.label_exportDirectory = QLabel(self.frame_export_2)
         self.label_exportDirectory.setObjectName(u"label_exportDirectory")
         sizePolicy2.setHeightForWidth(
             self.label_exportDirectory.sizePolicy().hasHeightForWidth())
@@ -824,7 +824,7 @@ class Ui_SettingsWindow(object):
         self.gridLayout_10.setRowStretch(0, 1)
         self.gridLayout_10.setRowStretch(1, 1)
 
-        self.verticalLayout_17.addWidget(self.frame2)
+        self.verticalLayout_17.addWidget(self.frame_export_2)
 
         self.verticalLayout_20.addWidget(self.frame_export)
 
@@ -960,7 +960,7 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
         self.comboBox_highEndProcess.setCurrentIndex(4)
         self.comboBox_winSize.setCurrentIndex(0)
         self.pushButton_german.setDefault(False)

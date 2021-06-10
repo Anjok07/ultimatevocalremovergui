@@ -306,23 +306,99 @@
            </widget>
           </widget>
          </item>
-         <item>
-          <widget class="QLabel" name="label_arrow">
-           <property name="maximumSize">
+         <item alignment="Qt::AlignHCenter">
+          <widget class="QFrame" name="frame_8">
+           <property name="minimumSize">
             <size>
-             <width>16777215</width>
-             <height>60</height>
+             <width>0</width>
+             <height>50</height>
             </size>
            </property>
-           <property name="styleSheet">
-            <string notr="true">font-size: 40px;</string>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
            </property>
-           <property name="text">
-            <string notr="true">↓</string>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0">
+            <property name="spacing">
+             <number>10</number>
+            </property>
+            <property name="leftMargin">
+             <number>145</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="label_arrow">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>60</height>
+               </size>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font-size: 45px;</string>
+              </property>
+              <property name="text">
+               <string notr="true">↓</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_9">
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_10">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>5</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
+               <item>
+                <widget class="QComboBox" name="comboBox_presets">
+                 <property name="minimumSize">
+                  <size>
+                   <width>135</width>
+                   <height>25</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>135</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
          <item>

@@ -17,7 +17,7 @@ class Ui_PresetsEditor(object):
     def setupUi(self, PresetsEditor):
         if not PresetsEditor.objectName():
             PresetsEditor.setObjectName(u"PresetsEditor")
-        PresetsEditor.resize(342, 400)
+        PresetsEditor.resize(322, 403)
         PresetsEditor.setStyleSheet(u"")
         self.verticalLayout = QVBoxLayout(PresetsEditor)
         self.verticalLayout.setSpacing(15)
@@ -32,13 +32,14 @@ class Ui_PresetsEditor(object):
 
         self.listWidget_presets = QListWidget(PresetsEditor)
         self.listWidget_presets.setObjectName(u"listWidget_presets")
-        self.listWidget_presets.setStyleSheet(u"")
         self.listWidget_presets.setFrameShape(QFrame.StyledPanel)
         self.listWidget_presets.setEditTriggers(
             QAbstractItemView.DoubleClicked)
         self.listWidget_presets.setTabKeyNavigation(False)
         self.listWidget_presets.setProperty("showDropIndicator", True)
-        self.listWidget_presets.setDefaultDropAction(Qt.TargetMoveAction)
+        self.listWidget_presets.setDragEnabled(False)
+        self.listWidget_presets.setDefaultDropAction(Qt.MoveAction)
+        self.listWidget_presets.setAlternatingRowColors(True)
         self.listWidget_presets.setSelectionMode(
             QAbstractItemView.ExtendedSelection)
         self.listWidget_presets.setMovement(QListView.Free)

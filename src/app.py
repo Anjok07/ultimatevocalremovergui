@@ -56,7 +56,7 @@ class CustomApplication(QtWidgets.QApplication):
         # -Create Managers-
         self.logger = Logger()
         self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        # self.settings.clear()
+        #self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.themeManager = ThemeManager(self)
@@ -228,7 +228,7 @@ class CustomApplication(QtWidgets.QApplication):
             self.settings.setValue('user/inputsDirectory',
                                    self.windows['main'].inputsDirectory)
             self.settings.setValue('user/presets',
-                                   self.windows['presetsEditor'].get_presets())
+                                   list(self.windows['presetsEditor'].get_presets().items()))
             self.settings.setValue('user/presets_loadDir',
                                    self.windows['presetsEditor'].presets_loadDir)
             self.settings.setValue('user/presets_saveDir',

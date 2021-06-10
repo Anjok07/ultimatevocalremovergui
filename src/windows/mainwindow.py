@@ -414,6 +414,8 @@ class MainWindow(QtWidgets.QWidget):
             self.ui.pushButton_delete.clicked.connect(self.pushButton_delete_clicked)
             # -ListWidget-
             self.ui.listWidget_musicFiles.itemDoubleClicked.connect(self.listWidget_musicFiles_itemDoubleClicked)
+            self.ui.comboBox_presets.currentIndexChanged.connect(
+                lambda idx: self.app.windows['settings'].ui.comboBox_presets.setCurrentIndex(idx))
 
         def create_animation_objects():
             """
@@ -672,7 +674,7 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         self.wig_slider.mouseDoubleClickEvent = self.event_sliderMouseDoubleClickEvent
         # Context menu
         self.wig_menu_contextMenu = QtWidgets.QMenu(self.wig_menu)
-        #self.wig_menu_contextMenu.setStyleSheet('* {background-color: #2d2d2d; color: #CCC; font-size: 12px;}')
+        # self.wig_menu_contextMenu.setStyleSheet('* {background-color: #2d2d2d; color: #CCC; font-size: 12px;}')
         self.wig_menu_contextMenu.addAction('Save', self._wig_menu_save)
         self.wig_menu.customContextMenuRequested.connect(self._wig_menu_contextMenuRequested)
         # Also emit customContextMenuRequested when button is left-clicked

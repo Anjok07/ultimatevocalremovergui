@@ -39,7 +39,8 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         # -Other Variables-
         # Independent data
         self.presets_saveDir: str = self.settings.value('user/presets_saveDir',
-                                                        const.DEFAULT_SETTINGS['presets_saveDir'])
+                                                        const.DEFAULT_SETTINGS['presets_saveDir'],
+                                                        type=str)
         self.presets_loadDir: str = self.settings.value('user/presets_loadDir',
                                                         const.DEFAULT_SETTINGS['presets_loadDir'],
                                                         type=str)
@@ -89,6 +90,8 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             """
             self.ui.listWidget_presets.itemChanged.connect(
                 lambda: self.app.settingsWindow.update_page_seperationSettings())
+            self.ui.listWidget_presets.model().rowsMoved.connect(
+                lambda: self.app.settingsWindow.update_page_seperationSettings())
             self.ui.pushButton_add.clicked.connect(self.pushButton_add_clicked)
             self.ui.pushButton_delete.clicked.connect(self.pushButton_delete_clicked)
             self.ui.pushButton_export.clicked.connect(self.pushButton_export_clicked)
@@ -99,13 +102,13 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             Fill the main table in the window
             """
             self.ui.listWidget_presets.clear()
-            presets = self.settings.value('user/presets',
-                                          const.DEFAULT_SETTINGS['presets'])
-            for label, settings in presets.items():
-                self.pushButton_add_clicked(label,
-                                            settings)
+            presets_list = self.settings.value('user/presets',
+                                               const.DEFAULT_SETTINGS['presets'])
+            for label, settings in reversed(presets_list):
+                self.add_item(label, settings)
 
         # -Before setup-
+        self.ui.listWidget_presets.clear()
 
         # -Setup-
         load_geometry()
@@ -117,17 +120,20 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         # Late update
         self.update_window()
 
+        last_selected_preset = self.settings.value('settingswindow/comboBox_presets',
+                                                   const.DEFAULT_SETTINGS['comboBox_presets'],
+                                                   type=str)
+
+        self.app.windows['settings'].update_page_seperationSettings()
+        self.app.windows['settings'].ui.comboBox_presets.setCurrentText(last_selected_preset)
+        self.app.windows['settings'].comboBox_presets_currentIndexChanged()
+
     # -Widget Binds-
     def pushButton_add_clicked(self, label: Optional[str] = None, settings: Optional[dict] = None):
         """
         Add current settings as a preset
         """
-        # -Create item-
-        item = QtWidgets.QListWidgetItem('')
-        item.setFlags(item.flags() | Qt.ItemIsEditable)
-        # Insert item at top and enter edit mode
-        self.ui.listWidget_presets.insertItem(0, item)
-        # -Obtain data-
+        # -Get values-
         if settings is None:
             settings = OrderedDict()
             # Get current settings
@@ -143,11 +149,9 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             # Generate generic name for preset
             i = self.ui.listWidget_presets.count() + 1
             label = f'Preset {i}'
-            # Set into edit mode
-            self.ui.listWidget_presets.editItem(item)
-        # -Set data-
-        item.setText(label)
-        item.setData(Qt.UserRole, settings.copy())
+
+        # -Add item-
+        self.add_item(label, settings)
         # -Update settings window-
         self.app.settingsWindow.update_page_seperationSettings()
 
@@ -246,6 +250,21 @@ class PresetsEditorWindow(QtWidgets.QWidget):
 
         self.logger.indent_backwards()
 
+    def add_item(self, label: str, settings: dict, edit: bool = False):
+        """
+        Add current settings as a preset
+        """
+        # -Create item-
+        item = QtWidgets.QListWidgetItem('')
+        item.setFlags(item.flags() | Qt.ItemIsEditable)
+        self.ui.listWidget_presets.insertItem(0, item)
+        if edit:
+            # Set into edit mode
+            self.ui.listWidget_presets.editItem(item)
+        # -Set data-
+        item.setText(label)
+        item.setData(Qt.UserRole, settings.copy())
+
     # -Other Methods-
     def update_window(self):
         """
@@ -259,13 +278,13 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         Save states of the widgets in this window
         """
 
-    def get_presets(self) -> dict:
+    def get_presets(self) -> OrderedDict:
         """
         Obtain the presets from the window
 
         (Used for saving)
         """
-        presets = {}
+        presets = OrderedDict()
         for idx in range(self.ui.listWidget_presets.count()):
             item = self.ui.listWidget_presets.item(idx)
             data = item.data(Qt.UserRole)

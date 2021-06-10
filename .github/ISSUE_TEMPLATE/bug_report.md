@@ -2,7 +2,7 @@
 name: Bug report
 about: Report a bug or a feature that is not working how you expect it to
 title: ''
-labels: ''
+labels: 'Type: Bug'
 assignees: ''
 
 ---
@@ -19,12 +19,10 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+If applicable, add screenshots to help explain your problem and annotate the images.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
 
 **Additional context**
 Add any other context about the problem here.

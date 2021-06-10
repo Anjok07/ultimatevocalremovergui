@@ -42,6 +42,11 @@ QRadioButton[menu="true"]::indicator {
 QFrame[menu="true"] {
 	background-color: rgb(31, 31, 31);
 }
+QFrame[settingsContent="true"] {
+	background-color: #2A2A2A;
+	border: 1px solid #3b3b3b;
+	border-radius: 5px;
+}
 QRadioButton[menu="true"]::unchecked, 
 QRadioButton[menu="true"]::indicator::unchecked {
 	background-color: rgb(31, 31, 31);
@@ -129,10 +134,9 @@ QListWidget[musicSelect="true"]::item:selected {
 }
 /* Command Line*/
 QTextBrowser {
-	border-left: 2px;
-	border-style: solid;
-	border-color: #368ADD;
 	font: 8pt "Courier";
+	color: #EEE;
+	background-color: #2d2d2d;
 }
 /* Audio Player */
 QLabel[audioPlayer="true"] {

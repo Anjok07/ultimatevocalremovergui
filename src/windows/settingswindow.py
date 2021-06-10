@@ -13,6 +13,7 @@ from .design import settingswindow_ui
 # -Other-
 import datetime as dt
 from collections import OrderedDict
+import torch
 # System
 import os
 # Code annotation
@@ -52,6 +53,7 @@ class SettingsWindow(QtWidgets.QWidget):
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
         self.search_for_preset = True
+        self.CUDA_AVAILABLE = torch.cuda.is_available()
 
     # -Widget Binds-
     def pushButton_clearCommand_clicked(self):
@@ -86,7 +88,7 @@ class SettingsWindow(QtWidgets.QWidget):
             return
         # Update export path value
         self.logger.info(repr(path))
-        self.exportDirectory = path
+        self.exportDirectory = path.replace('/', '\\')
         self.update_page_preferences()
 
         self.logger.indent_backwards()
@@ -118,7 +120,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.info('Changing Command mode...',
                          indent_forwards=True)
         self.update_page_preferences()
-        self.pushButton_clearCommand_clicked()
         self.logger.indent_backwards()
 
     def comboBox_presets_currentIndexChanged(self):
@@ -195,13 +196,22 @@ class SettingsWindow(QtWidgets.QWidget):
 
             for preset_name, settings in presets.items():
                 for json_key, value in settings.items():
-                    if (current_settings[const.JSON_TO_NAME[json_key]] != value):
+                    widget_object_name = const.JSON_TO_NAME[json_key]
+
+                    if not self.CUDA_AVAILABLE and widget_object_name == "checkBox_gpuConversion":
+                        # CUDA not available, should not change the preset though
+                        continue
+
+                    if (current_settings[widget_object_name] != value):
                         break
                 else:
                     self.ui.comboBox_presets.setCurrentText(preset_name)
                     break
             else:
                 self.ui.comboBox_presets.setCurrentIndex(0)
+
+        if not self.CUDA_AVAILABLE:
+            self.ui.checkBox_gpuConversion.setChecked(False)
 
     # -Window Setup Methods-
 
@@ -335,27 +345,33 @@ class SettingsWindow(QtWidgets.QWidget):
             multiple times here
             """
 
+        def setup_menu():
+            """Setup the menu group"""
+            # Connect button group for menu together
+            self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
+            self.menu_group.addButton(self.ui.radioButton_separationSettings,
+                                      id=0)
+            self.menu_group.addButton(self.ui.radioButton_shortcuts,
+                                      id=1)
+            self.menu_group.addButton(self.ui.radioButton_customization,
+                                      id=2)
+            self.menu_group.addButton(self.ui.radioButton_preferences,
+                                      id=3)
+
         # -Before setup-
         self.search_for_preset = False
         # Load saved settings for widgets
         self.settingsManager.load_window()
         # Update available model lists
         self._update_selectable_models()
-        # Update available model lists
-        # Connect button group for menu together
-        self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
-        self.menu_group.addButton(self.ui.radioButton_separationSettings,
-                                  id=0)
-        self.menu_group.addButton(self.ui.radioButton_shortcuts,
-                                  id=1)
-        self.menu_group.addButton(self.ui.radioButton_customization,
-                                  id=2)
-        self.menu_group.addButton(self.ui.radioButton_preferences,
-                                  id=3)
+        setup_menu()
         # Open settings window on startup
         open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
                                             bool)
+        if not self.CUDA_AVAILABLE:
+            self.ui.checkBox_gpuConversion.setEnabled(False)
+            self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
 
         # -Setup-
         load_geometry()
@@ -500,13 +516,13 @@ class SettingsWindow(QtWidgets.QWidget):
 
         if not index:
             # Hide Textbrowser
-            self.app.windows['main'].ui.textBrowser_command.setVisible(False)
+            self.app.windows['main'].ui.dockWidget.setVisible(False)
         else:
             # Show Textbrowser
-            self.app.windows['main'].ui.textBrowser_command.setVisible(True)
+            self.app.windows['main'].ui.dockWidget.setVisible(True)
 
         # -Export Directory-
-        self.ui.label_exportDirectory.setText(self.exportDirectory)
+        self.ui.label_exportDirectory.setText(self.exportDirectory.replace('\\', '/'))
         self.logger.indent_backwards()
 
     # -Other-

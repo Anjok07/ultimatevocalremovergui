@@ -234,7 +234,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>3</number>
         </property>
         <widget class="QWidget" name="page_seperationSettings">
          <property name="styleSheet">
@@ -1230,8 +1230,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>600</width>
-               <height>342</height>
+               <width>630</width>
+               <height>510</height>
               </rect>
              </property>
              <property name="minimumSize">
@@ -1293,7 +1293,7 @@
                    <property name="frameShadow">
                     <enum>QFrame::Raised</enum>
                    </property>
-                   <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,2">
+                   <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0">
                     <property name="spacing">
                      <number>45</number>
                     </property>
@@ -1340,68 +1340,101 @@
                         <number>0</number>
                        </property>
                        <item>
-                        <widget class="QGroupBox" name="groupBox_6">
+                        <widget class="QFrame" name="frame_template">
                          <property name="minimumSize">
                           <size>
                            <width>0</width>
-                           <height>0</height>
+                           <height>104</height>
                           </size>
                          </property>
-                         <property name="title">
-                          <string>Settings </string>
-                         </property>
-                         <property name="flat">
+                         <property name="acceptDrops">
                           <bool>true</bool>
                          </property>
-                         <layout class="QVBoxLayout" name="verticalLayout_13">
+                         <layout class="QVBoxLayout" name="verticalLayout_23">
                           <property name="spacing">
                            <number>10</number>
                           </property>
                           <property name="leftMargin">
-                           <number>35</number>
+                           <number>0</number>
                           </property>
                           <property name="topMargin">
-                           <number>10</number>
+                           <number>0</number>
                           </property>
                           <property name="rightMargin">
-                           <number>30</number>
+                           <number>0</number>
                           </property>
                           <property name="bottomMargin">
-                           <number>10</number>
+                           <number>0</number>
                           </property>
                           <item>
-                           <widget class="QFrame" name="horizontalFrame">
-                            <property name="lineWidth">
-                             <number>0</number>
+                           <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,1,0">
+                            <property name="rightMargin">
+                             <number>10</number>
                             </property>
-                            <layout class="QFormLayout" name="formLayout_4">
+                            <item>
+                             <widget class="QLabel" name="label_13">
+                              <property name="text">
+                               <string>Settings</string>
+                              </property>
+                              <property name="title" stdset="0">
+                               <bool>true</bool>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QFrame" name="frame_19">
+                              <property name="styleSheet">
+                               <string notr="true">color: #999;</string>
+                              </property>
+                              <property name="frameShape">
+                               <enum>QFrame::HLine</enum>
+                              </property>
+                              <property name="frameShadow">
+                               <enum>QFrame::Plain</enum>
+                              </property>
+                             </widget>
+                            </item>
+                            <item>
+                             <widget class="QPushButton" name="pushButton_5">
+                              <property name="maximumSize">
+                               <size>
+                                <width>30</width>
+                                <height>30</height>
+                               </size>
+                              </property>
+                              <property name="cursor">
+                               <cursorShape>PointingHandCursor</cursorShape>
+                              </property>
+                              <property name="text">
+                               <string>i</string>
+                              </property>
+                             </widget>
+                            </item>
+                           </layout>
+                          </item>
+                          <item>
+                           <widget class="QFrame" name="">
+                            <property name="settingsContent" stdset="0">
+                             <bool>true</bool>
+                            </property>
+                            <layout class="QGridLayout" name="gridLayout_14" rowstretch="1,0">
                              <property name="leftMargin">
-                              <number>0</number>
+                              <number>35</number>
                              </property>
                              <property name="topMargin">
-                              <number>0</number>
+                              <number>10</number>
                              </property>
                              <property name="rightMargin">
-                              <number>0</number>
+                              <number>30</number>
                              </property>
                              <property name="bottomMargin">
-                              <number>0</number>
+                              <number>10</number>
                              </property>
-                             <item row="0" column="0">
-                              <widget class="QLabel" name="label">
-                               <property name="minimumSize">
-                                <size>
-                                 <width>100</width>
-                                 <height>0</height>
-                                </size>
-                               </property>
-                               <property name="text">
-                                <string>Command Line</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="0" column="1">
-                              <widget class="QFrame" name="frame_11">
+                             <property name="horizontalSpacing">
+                              <number>10</number>
+                             </property>
+                             <item row="1" column="0">
+                              <widget class="QFrame" name="frame_8">
                                <property name="frameShape">
                                 <enum>QFrame::NoFrame</enum>
                                </property>
@@ -1411,7 +1444,82 @@
                                <property name="lineWidth">
                                 <number>0</number>
                                </property>
-                               <layout class="QHBoxLayout" name="horizontalLayout_5">
+                               <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0">
+                                <property name="leftMargin">
+                                 <number>0</number>
+                                </property>
+                                <property name="topMargin">
+                                 <number>5</number>
+                                </property>
+                                <property name="rightMargin">
+                                 <number>0</number>
+                                </property>
+                                <property name="bottomMargin">
+                                 <number>0</number>
+                                </property>
+                                <property name="horizontalSpacing">
+                                 <number>0</number>
+                                </property>
+                                <property name="verticalSpacing">
+                                 <number>10</number>
+                                </property>
+                                <item row="4" column="0">
+                                 <widget class="QCheckBox" name="checkBox_disableAnimations">
+                                  <property name="text">
+                                   <string>Disable Animations</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="4" column="1">
+                                 <widget class="QCheckBox" name="checkBox_disableShortcuts">
+                                  <property name="text">
+                                   <string>Disable Shortcuts</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="1" column="0" colspan="2">
+                                 <widget class="QCheckBox" name="checkBox_notifyUpdates">
+                                  <property name="text">
+                                   <string>Notify me of application updates</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="0" column="0" colspan="2">
+                                 <widget class="QCheckBox" name="checkBox_notifiyOnFinish">
+                                  <property name="text">
+                                   <string>Notify me on finish of separation</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="2" column="0" colspan="2">
+                                 <widget class="QCheckBox" name="checkBox_settingsStartup">
+                                  <property name="text">
+                                   <string>Open Settings on application startup</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item row="5" column="0" colspan="2">
+                                 <widget class="QCheckBox" name="checkBox_multithreading">
+                                  <property name="enabled">
+                                   <bool>false</bool>
+                                  </property>
+                                  <property name="toolTip">
+                                   <string>Process multiple files simultaneously</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>Multithreading (experimental)</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                               </layout>
+                              </widget>
+                             </item>
+                             <item row="0" column="0">
+                              <widget class="QFrame" name="horizontalFrame">
+                               <property name="lineWidth">
+                                <number>0</number>
+                               </property>
+                               <layout class="QFormLayout" name="formLayout_4">
                                 <property name="leftMargin">
                                  <number>0</number>
                                 </property>
@@ -1424,136 +1532,95 @@
                                 <property name="bottomMargin">
                                  <number>0</number>
                                 </property>
-                                <item>
-                                 <widget class="QComboBox" name="comboBox_command">
+                                <item row="0" column="0">
+                                 <widget class="QLabel" name="label">
                                   <property name="minimumSize">
                                    <size>
-                                    <width>0</width>
-                                    <height>25</height>
-                                   </size>
-                                  </property>
-                                  <item>
-                                   <property name="text">
-                                    <string>Off</string>
-                                   </property>
-                                  </item>
-                                  <item>
-                                   <property name="text">
-                                    <string>On</string>
-                                   </property>
-                                  </item>
-                                 </widget>
-                                </item>
-                                <item>
-                                 <widget class="QPushButton" name="pushButton_clearCommand">
-                                  <property name="sizePolicy">
-                                   <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
-                                    <horstretch>0</horstretch>
-                                    <verstretch>0</verstretch>
-                                   </sizepolicy>
-                                  </property>
-                                  <property name="minimumSize">
-                                   <size>
-                                    <width>50</width>
+                                    <width>100</width>
                                     <height>0</height>
                                    </size>
                                   </property>
-                                  <property name="cursor">
-                                   <cursorShape>PointingHandCursor</cursorShape>
-                                  </property>
                                   <property name="text">
-                                   <string>Clear</string>
-                                  </property>
-                                  <property name="flat">
-                                   <bool>true</bool>
-                                  </property>
-                                  <property name="clear" stdset="0">
-                                   <bool>true</bool>
+                                   <string>Command Line</string>
                                   </property>
                                  </widget>
                                 </item>
+                                <item row="0" column="1">
+                                 <widget class="QFrame" name="frame_11">
+                                  <property name="frameShape">
+                                   <enum>QFrame::NoFrame</enum>
+                                  </property>
+                                  <property name="frameShadow">
+                                   <enum>QFrame::Raised</enum>
+                                  </property>
+                                  <property name="lineWidth">
+                                   <number>0</number>
+                                  </property>
+                                  <layout class="QHBoxLayout" name="horizontalLayout_5">
+                                   <property name="leftMargin">
+                                    <number>0</number>
+                                   </property>
+                                   <property name="topMargin">
+                                    <number>0</number>
+                                   </property>
+                                   <property name="rightMargin">
+                                    <number>0</number>
+                                   </property>
+                                   <property name="bottomMargin">
+                                    <number>0</number>
+                                   </property>
+                                   <item>
+                                    <widget class="QComboBox" name="comboBox_command">
+                                     <property name="minimumSize">
+                                      <size>
+                                       <width>0</width>
+                                       <height>25</height>
+                                      </size>
+                                     </property>
+                                     <item>
+                                      <property name="text">
+                                       <string>Off</string>
+                                      </property>
+                                     </item>
+                                     <item>
+                                      <property name="text">
+                                       <string>On</string>
+                                      </property>
+                                     </item>
+                                    </widget>
+                                   </item>
+                                   <item>
+                                    <widget class="QPushButton" name="pushButton_clearCommand">
+                                     <property name="sizePolicy">
+                                      <sizepolicy hsizetype="Maximum" vsizetype="Minimum">
+                                       <horstretch>0</horstretch>
+                                       <verstretch>0</verstretch>
+                                      </sizepolicy>
+                                     </property>
+                                     <property name="minimumSize">
+                                      <size>
+                                       <width>50</width>
+                                       <height>0</height>
+                                      </size>
+                                     </property>
+                                     <property name="cursor">
+                                      <cursorShape>PointingHandCursor</cursorShape>
+                                     </property>
+                                     <property name="text">
+                                      <string>Clear</string>
+                                     </property>
+                                     <property name="flat">
+                                      <bool>true</bool>
+                                     </property>
+                                     <property name="clear" stdset="0">
+                                      <bool>true</bool>
+                                     </property>
+                                    </widget>
+                                   </item>
+                                  </layout>
+                                 </widget>
+                                </item>
                                </layout>
-                              </widget>
-                             </item>
-                            </layout>
-                           </widget>
-                          </item>
-                          <item>
-                           <widget class="QFrame" name="frame_8">
-                            <property name="frameShape">
-                             <enum>QFrame::NoFrame</enum>
-                            </property>
-                            <property name="frameShadow">
-                             <enum>QFrame::Raised</enum>
-                            </property>
-                            <property name="lineWidth">
-                             <number>0</number>
-                            </property>
-                            <layout class="QGridLayout" name="gridLayout_4" columnstretch="0,0">
-                             <property name="leftMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="topMargin">
-                              <number>5</number>
-                             </property>
-                             <property name="rightMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="bottomMargin">
-                              <number>0</number>
-                             </property>
-                             <property name="horizontalSpacing">
-                              <number>0</number>
-                             </property>
-                             <property name="verticalSpacing">
-                              <number>10</number>
-                             </property>
-                             <item row="4" column="0">
-                              <widget class="QCheckBox" name="checkBox_disableAnimations">
-                               <property name="text">
-                                <string>Disable Animations</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="4" column="1">
-                              <widget class="QCheckBox" name="checkBox_disableShortcuts">
-                               <property name="text">
-                                <string>Disable Shortcuts</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="1" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_notifyUpdates">
-                               <property name="text">
-                                <string>Notify me of application updates</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="0" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_notifiyOnFinish">
-                               <property name="text">
-                                <string>Notify me on finish of separation</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="2" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_settingsStartup">
-                               <property name="text">
-                                <string>Open Settings on application startup</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item row="5" column="0" colspan="2">
-                              <widget class="QCheckBox" name="checkBox_multithreading">
-                               <property name="enabled">
-                                <bool>false</bool>
-                               </property>
-                               <property name="toolTip">
-                                <string>Process multiple files simultaneously</string>
-                               </property>
-                               <property name="text">
-                                <string>Multithreading (experimental)</string>
-                               </property>
                               </widget>
                              </item>
                             </layout>
@@ -1606,6 +1673,9 @@
                             </item>
                             <item>
                              <widget class="QFrame" name="frame_7">
+                              <property name="styleSheet">
+                               <string notr="true">color: #999;</string>
+                              </property>
                               <property name="frameShape">
                                <enum>QFrame::HLine</enum>
                               </property>
@@ -1633,131 +1703,136 @@
                            </layout>
                           </item>
                           <item>
-                           <layout class="QGridLayout" name="gridLayout_10" rowstretch="1,1">
-                            <property name="leftMargin">
-                             <number>35</number>
+                           <widget class="QFrame" name="">
+                            <property name="settingsContent" stdset="0">
+                             <bool>true</bool>
                             </property>
-                            <property name="topMargin">
-                             <number>10</number>
-                            </property>
-                            <property name="rightMargin">
-                             <number>30</number>
-                            </property>
-                            <property name="bottomMargin">
-                             <number>10</number>
-                            </property>
-                            <property name="horizontalSpacing">
-                             <number>10</number>
-                            </property>
-                            <item row="0" column="1">
-                             <widget class="QPushButton" name="pushButton_exportDirectory">
-                              <property name="minimumSize">
-                               <size>
-                                <width>18</width>
-                                <height>18</height>
-                               </size>
-                              </property>
-                              <property name="maximumSize">
-                               <size>
-                                <width>18</width>
-                                <height>18</height>
-                               </size>
-                              </property>
-                              <property name="cursor">
-                               <cursorShape>PointingHandCursor</cursorShape>
-                              </property>
-                              <property name="text">
-                               <string/>
-                              </property>
-                              <property name="flat">
-                               <bool>true</bool>
-                              </property>
-                              <property name="export" stdset="0">
-                               <bool>true</bool>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="0" column="0">
-                             <widget class="QLabel" name="label_3">
-                              <property name="sizePolicy">
-                               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                               </sizepolicy>
-                              </property>
-                              <property name="minimumSize">
-                               <size>
-                                <width>110</width>
-                                <height>0</height>
-                               </size>
-                              </property>
-                              <property name="text">
-                               <string>Export Directory:</string>
-                              </property>
-                              <property name="alignment">
-                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="1" column="0" colspan="2">
-                             <widget class="QLabel" name="label_autoSave">
-                              <property name="text">
-                               <string>Automatically Save:</string>
-                              </property>
-                              <property name="alignment">
-                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="1" column="2">
-                             <widget class="QCheckBox" name="checkBox_autoSaveInstrumentals">
-                              <property name="text">
-                               <string>Instrumental</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="1" column="3">
-                             <widget class="QCheckBox" name="checkBox_autoSaveVocals">
-                              <property name="text">
-                               <string>Vocals</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="0" column="2" colspan="2">
-                             <widget class="QLabel" name="label_exportDirectory">
-                              <property name="sizePolicy">
-                               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                               </sizepolicy>
-                              </property>
-                              <property name="lineWidth">
-                               <number>0</number>
-                              </property>
-                              <property name="text">
-                               <string notr="true">B:/Downloads</string>
-                              </property>
-                              <property name="textFormat">
-                               <enum>Qt::AutoText</enum>
-                              </property>
-                              <property name="scaledContents">
-                               <bool>true</bool>
-                              </property>
-                              <property name="alignment">
-                               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-                              </property>
-                              <property name="wordWrap">
-                               <bool>true</bool>
-                              </property>
-                              <property name="indent">
-                               <number>1</number>
-                              </property>
-                              <property name="path" stdset="0">
-                               <bool>true</bool>
-                              </property>
-                             </widget>
-                            </item>
-                           </layout>
+                            <layout class="QGridLayout" name="gridLayout_10" rowstretch="1,1">
+                             <property name="leftMargin">
+                              <number>35</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>10</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>30</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>10</number>
+                             </property>
+                             <property name="horizontalSpacing">
+                              <number>10</number>
+                             </property>
+                             <item row="0" column="1">
+                              <widget class="QPushButton" name="pushButton_exportDirectory">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>18</width>
+                                 <height>18</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>18</width>
+                                 <height>18</height>
+                                </size>
+                               </property>
+                               <property name="cursor">
+                                <cursorShape>PointingHandCursor</cursorShape>
+                               </property>
+                               <property name="text">
+                                <string/>
+                               </property>
+                               <property name="flat">
+                                <bool>true</bool>
+                               </property>
+                               <property name="export" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="0">
+                              <widget class="QLabel" name="label_3">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="minimumSize">
+                                <size>
+                                 <width>110</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string>Export Directory:</string>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0" colspan="2">
+                              <widget class="QLabel" name="label_autoSave">
+                               <property name="text">
+                                <string>Automatically Save:</string>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="2">
+                              <widget class="QCheckBox" name="checkBox_autoSaveInstrumentals">
+                               <property name="text">
+                                <string>Instrumental</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="3">
+                              <widget class="QCheckBox" name="checkBox_autoSaveVocals">
+                               <property name="text">
+                                <string>Vocals</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="2" colspan="2">
+                              <widget class="QLabel" name="label_exportDirectory">
+                               <property name="sizePolicy">
+                                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                                </sizepolicy>
+                               </property>
+                               <property name="lineWidth">
+                                <number>0</number>
+                               </property>
+                               <property name="text">
+                                <string notr="true">B:/Downloads</string>
+                               </property>
+                               <property name="textFormat">
+                                <enum>Qt::AutoText</enum>
+                               </property>
+                               <property name="scaledContents">
+                                <bool>true</bool>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                               </property>
+                               <property name="wordWrap">
+                                <bool>true</bool>
+                               </property>
+                               <property name="indent">
+                                <number>1</number>
+                               </property>
+                               <property name="path" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
                           </item>
                          </layout>
                         </widget>
@@ -1766,209 +1841,288 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QGroupBox" name="groupBox_4">
-                      <property name="sizePolicy">
-                       <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                       </sizepolicy>
-                      </property>
+                     <widget class="QFrame" name="frame_template_2">
                       <property name="minimumSize">
                        <size>
                         <width>0</width>
-                        <height>0</height>
+                        <height>104</height>
                        </size>
                       </property>
-                      <property name="title">
-                       <string>Language </string>
-                      </property>
-                      <property name="flat">
+                      <property name="acceptDrops">
                        <bool>true</bool>
                       </property>
-                      <layout class="QGridLayout" name="gridLayout_2">
+                      <layout class="QVBoxLayout" name="verticalLayout_24" stretch="0,1">
+                       <property name="spacing">
+                        <number>10</number>
+                       </property>
                        <property name="leftMargin">
-                        <number>35</number>
+                        <number>0</number>
                        </property>
                        <property name="topMargin">
-                        <number>10</number>
+                        <number>0</number>
                        </property>
                        <property name="rightMargin">
-                        <number>30</number>
+                        <number>0</number>
                        </property>
                        <property name="bottomMargin">
-                        <number>10</number>
+                        <number>0</number>
                        </property>
-                       <item row="0" column="1" alignment="Qt::AlignTop">
-                        <widget class="QFrame" name="frame_languages">
-                         <property name="frameShape">
-                          <enum>QFrame::NoFrame</enum>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="0,1,0">
+                         <property name="rightMargin">
+                          <number>10</number>
                          </property>
-                         <property name="frameShadow">
-                          <enum>QFrame::Raised</enum>
+                         <item>
+                          <widget class="QLabel" name="label_14">
+                           <property name="text">
+                            <string>Language</string>
+                           </property>
+                           <property name="title" stdset="0">
+                            <bool>true</bool>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFrame" name="frame_20">
+                           <property name="styleSheet">
+                            <string notr="true">color: #999;</string>
+                           </property>
+                           <property name="frameShape">
+                            <enum>QFrame::HLine</enum>
+                           </property>
+                           <property name="frameShadow">
+                            <enum>QFrame::Plain</enum>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QPushButton" name="pushButton_6">
+                           <property name="maximumSize">
+                            <size>
+                             <width>30</width>
+                             <height>30</height>
+                            </size>
+                           </property>
+                           <property name="cursor">
+                            <cursorShape>PointingHandCursor</cursorShape>
+                           </property>
+                           <property name="text">
+                            <string>i</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QFrame" name="frame_13">
+                         <property name="settingsContent" stdset="0">
+                          <bool>true</bool>
                          </property>
-                         <property name="lineWidth">
-                          <number>0</number>
-                         </property>
-                         <layout class="QGridLayout" name="gridLayout_3">
-                          <item row="0" column="0">
-                           <widget class="QPushButton" name="pushButton_english">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
+                         <layout class="QGridLayout" name="gridLayout_15" rowstretch="0">
+                          <property name="leftMargin">
+                           <number>35</number>
+                          </property>
+                          <property name="topMargin">
+                           <number>10</number>
+                          </property>
+                          <property name="rightMargin">
+                           <number>30</number>
+                          </property>
+                          <property name="bottomMargin">
+                           <number>10</number>
+                          </property>
+                          <property name="horizontalSpacing">
+                           <number>10</number>
+                          </property>
+                          <item row="0" column="0" alignment="Qt::AlignTop">
+                           <widget class="QFrame" name="frame_languages">
+                            <property name="frameShape">
+                             <enum>QFrame::NoFrame</enum>
                             </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
                             </property>
-                            <property name="toolTip">
-                             <string>English</string>
+                            <property name="lineWidth">
+                             <number>0</number>
                             </property>
-                            <property name="text">
-                             <string notr="true"/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="checked">
-                             <bool>false</bool>
-                            </property>
-                            <property name="default">
-                             <bool>false</bool>
-                            </property>
-                            <property name="flat">
-                             <bool>false</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QPushButton" name="pushButton_filipino">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="toolTip">
-                             <string>Filipino</string>
-                            </property>
-                            <property name="text">
-                             <string/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="1">
-                           <widget class="QPushButton" name="pushButton_german">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="toolTip">
-                             <string>German</string>
-                            </property>
-                            <property name="text">
-                             <string notr="true"/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="checked">
-                             <bool>false</bool>
-                            </property>
-                            <property name="default">
-                             <bool>false</bool>
-                            </property>
-                            <property name="flat">
-                             <bool>false</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="1">
-                           <widget class="QPushButton" name="pushButton_japanese">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="toolTip">
-                             <string>Japanese</string>
-                            </property>
-                            <property name="toolTipDuration">
-                             <number>-1</number>
-                            </property>
-                            <property name="text">
-                             <string/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="2" column="0">
-                           <widget class="QPushButton" name="pushButton_turkish">
-                            <property name="minimumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="maximumSize">
-                             <size>
-                              <width>80</width>
-                              <height>49</height>
-                             </size>
-                            </property>
-                            <property name="text">
-                             <string/>
-                            </property>
-                            <property name="checkable">
-                             <bool>true</bool>
-                            </property>
-                            <property name="flat">
-                             <bool>true</bool>
-                            </property>
-                            <property name="language" stdset="0">
-                             <bool>true</bool>
-                            </property>
+                            <layout class="QGridLayout" name="gridLayout_3">
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="horizontalSpacing">
+                              <number>6</number>
+                             </property>
+                             <item row="0" column="1">
+                              <widget class="QPushButton" name="pushButton_german">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="toolTip">
+                                <string>German</string>
+                               </property>
+                               <property name="text">
+                                <string notr="true"/>
+                               </property>
+                               <property name="checkable">
+                                <bool>true</bool>
+                               </property>
+                               <property name="checked">
+                                <bool>false</bool>
+                               </property>
+                               <property name="default">
+                                <bool>false</bool>
+                               </property>
+                               <property name="flat">
+                                <bool>false</bool>
+                               </property>
+                               <property name="language" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="0">
+                              <widget class="QPushButton" name="pushButton_english">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="toolTip">
+                                <string>English</string>
+                               </property>
+                               <property name="text">
+                                <string notr="true"/>
+                               </property>
+                               <property name="checkable">
+                                <bool>true</bool>
+                               </property>
+                               <property name="checked">
+                                <bool>false</bool>
+                               </property>
+                               <property name="default">
+                                <bool>false</bool>
+                               </property>
+                               <property name="flat">
+                                <bool>false</bool>
+                               </property>
+                               <property name="language" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="1">
+                              <widget class="QPushButton" name="pushButton_japanese">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="toolTip">
+                                <string>Japanese</string>
+                               </property>
+                               <property name="toolTipDuration">
+                                <number>-1</number>
+                               </property>
+                               <property name="text">
+                                <string/>
+                               </property>
+                               <property name="checkable">
+                                <bool>true</bool>
+                               </property>
+                               <property name="language" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0">
+                              <widget class="QPushButton" name="pushButton_filipino">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="toolTip">
+                                <string>Filipino</string>
+                               </property>
+                               <property name="text">
+                                <string/>
+                               </property>
+                               <property name="checkable">
+                                <bool>true</bool>
+                               </property>
+                               <property name="language" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="2" column="0">
+                              <widget class="QPushButton" name="pushButton_turkish">
+                               <property name="minimumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>80</width>
+                                 <height>49</height>
+                                </size>
+                               </property>
+                               <property name="text">
+                                <string/>
+                               </property>
+                               <property name="checkable">
+                                <bool>true</bool>
+                               </property>
+                               <property name="flat">
+                                <bool>true</bool>
+                               </property>
+                               <property name="language" stdset="0">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
                            </widget>
                           </item>
                          </layout>

@@ -175,6 +175,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.label_vocalsFile = QLabel(self.page_3)
         self.label_vocalsFile.setObjectName(u"label_vocalsFile")
+        self.label_vocalsFile.setLineWidth(0)
         self.label_vocalsFile.setAlignment(Qt.AlignCenter)
         self.label_vocalsFile.setProperty("audioPlayer", True)
         self.label_vocalsFile.setProperty("title", True)
@@ -190,8 +191,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
         self.frame_4 = QFrame(self.page_4)
         self.frame_4.setObjectName(u"frame_4")
-        self.frame_4.setFrameShape(QFrame.StyledPanel)
-        self.frame_4.setFrameShadow(QFrame.Raised)
+        self.frame_4.setFrameShape(QFrame.NoFrame)
+        self.frame_4.setFrameShadow(QFrame.Plain)
+        self.frame_4.setLineWidth(0)
         self.horizontalLayout_3 = QHBoxLayout(self.frame_4)
         self.horizontalLayout_3.setSpacing(15)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
@@ -254,8 +256,9 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
         self.frame_6 = QFrame(self.page_2)
         self.frame_6.setObjectName(u"frame_6")
-        self.frame_6.setFrameShape(QFrame.StyledPanel)
-        self.frame_6.setFrameShadow(QFrame.Raised)
+        self.frame_6.setFrameShape(QFrame.NoFrame)
+        self.frame_6.setFrameShadow(QFrame.Plain)
+        self.frame_6.setLineWidth(0)
         self.horizontalLayout_4 = QHBoxLayout(self.frame_6)
         self.horizontalLayout_4.setSpacing(15)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
@@ -372,8 +375,8 @@ class Ui_MainWindow(object):
                                        "}\n"
                                        "QProgressBar::chunk {\n"
                                        "}")
-        self.progressBar.setMaximum(200)
-        self.progressBar.setValue(200)
+        self.progressBar.setMaximum(100)
+        self.progressBar.setValue(0)
         self.progressBar.setTextVisible(False)
         self.progressBar.setTextDirection(QProgressBar.TopToBottom)
         self.progressBar.setFormat(u"")
@@ -382,7 +385,17 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_2.addWidget(self.frame_5)
 
-        self.textBrowser_command = QTextBrowser(MainWindow)
+        self.dockWidget = QDockWidget(MainWindow)
+        self.dockWidget.setObjectName(u"dockWidget")
+        self.dockWidget.setFloating(True)
+        self.dockWidget.setFeatures(QDockWidget.DockWidgetMovable)
+        self.dockWidgetContents = QWidget()
+        self.dockWidgetContents.setObjectName(u"dockWidgetContents")
+        self.verticalLayout_9 = QVBoxLayout(self.dockWidgetContents)
+        self.verticalLayout_9.setSpacing(0)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.textBrowser_command = QTextBrowser(self.dockWidgetContents)
         self.textBrowser_command.setObjectName(u"textBrowser_command")
         sizePolicy6 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Expanding)
         sizePolicy6.setHorizontalStretch(0)
@@ -418,15 +431,19 @@ class Ui_MainWindow(object):
                                          "<td>\n"
                                          "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:'Courier'; font-size:8pt;\">value    </span></p></td></tr></table></body></html>")
 
-        self.horizontalLayout_2.addWidget(self.textBrowser_command)
+        self.verticalLayout_9.addWidget(self.textBrowser_command)
+
+        self.dockWidget.setWidget(self.dockWidgetContents)
+
+        self.horizontalLayout_2.addWidget(self.dockWidget)
 
         self.horizontalLayout_2.setStretch(0, 3)
 
         self.retranslateUi(MainWindow)
 
         self.stackedWidget_musicFiles.setCurrentIndex(1)
-        self.stackedWidget_vocals.setCurrentIndex(0)
-        self.stackedWidget_instrumentals.setCurrentIndex(0)
+        self.stackedWidget_vocals.setCurrentIndex(1)
+        self.stackedWidget_instrumentals.setCurrentIndex(1)
 
         QMetaObject.connectSlotsByName(MainWindow)
     # setupUi
@@ -450,4 +467,6 @@ class Ui_MainWindow(object):
             QCoreApplication.translate("MainWindow", u"Vocals", None))
         self.pushButton_seperate.setText(
             QCoreApplication.translate("MainWindow", u" Separate", None))
+        self.dockWidget.setWindowTitle(
+            QCoreApplication.translate("MainWindow", u"Command", None))
     # retranslateUi

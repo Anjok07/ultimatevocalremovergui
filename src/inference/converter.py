@@ -91,8 +91,8 @@ class VocalRemover:
             'X_phase': None,
             'y_spec_m': None,
             'v_spec_m': None,
-            'wave_instrumental': None,
-            'wave_vocal': None,
+            'wave_instrumentals': None,
+            'wave_vocals': None,
         }
         # Needed for embedded audio player (GUI)
         self.latest_instrumental_path: str
@@ -140,20 +140,19 @@ class VocalRemover:
             """
             Get export path and text, whic hwill be appended on the music files name
             """
+            folder_path = self.seperation_data['export_path']
             file_add_on = ''
+
             if self.seperation_data['modelFolder']:
                 # Model Test Mode selected
-                file_add_on += os.path.splitext(os.path.basename(self.seperation_data['model']))[0]
+                model_name = os.path.splitext(os.path.basename(self.seperation_data['model']))[0]
                 # Generate paths
-                folder_path = os.path.join(self.seperation_data['export_path'], file_add_on)
-                file_add_on = f'_{file_add_on}'
-
+                folder_path = os.path.join(self.seperation_data['export_path'], model_name)
+                file_add_on = f'_{model_name}'
+                print(folder_path)
                 if not os.path.isdir(folder_path):
                     # Folder does not exist
                     os.mkdir(folder_path)
-            else:
-                # Not Model Test Mode selected
-                folder_path = self.seperation_data['export_path']
 
             return folder_path, file_add_on
 
@@ -304,7 +303,7 @@ class VocalRemover:
                          self.general_data['model_parameters']['pre_filter_start'])
                     input_high_end = X_spec_s[d][:, bp['n_fft']//2-input_high_end_h:bp['n_fft']//2, :]
 
-            X_spec_m = spec_utils.combine_spectrograms(X_spec_s, self.general_data['modelParameters'])
+            X_spec_m = spec_utils.combine_spectrograms(X_spec_s, self.general_data['model_parameters'])
 
             del X_wave, X_spec_s
         except audioread.NoBackendError:
@@ -326,13 +325,11 @@ class VocalRemover:
             return X_mag, X_phase
 
         def execute(X_mag_pad, roi_size, n_window, progrs_info: str = ''):
-            self.model.eval()
+            self.general_data['model'].eval()
             with torch.no_grad():
                 preds = []
-                bar_format = '{desc}    |{bar}{r_bar}'
-                pbar = tqdm(range(n_window), bar_format=bar_format)
 
-                for progrs, i in enumerate(pbar):
+                for progrs, i in enumerate(range(n_window)):
                     # Progress management
                     if progrs_info == '1/2':
                         progres_step = 0.1 + 0.35 * (progrs / n_window)
@@ -438,8 +435,8 @@ class VocalRemover:
 
         # -Instrumental-
         if self.seperation_data['highEndProcess'] == 'bypass':
-            wave = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
-                                                      self.file_data['input_high_end_h'], self.file_data['input_high_end'])
+            wave_instrumentals = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
+                                                                    self.file_data['input_high_end_h'], self.file_data['input_high_end'])
         elif self.seperation_data['highEndProcess'] == 'correlation':
             print('Deprecated: correlation will be removed in the final release. Please use the mirroring instead.')
 
@@ -453,16 +450,16 @@ class VocalRemover:
                         self.file_data['input_high_end'][c, :, i] = np.true_divide(self.file_data['input_high_end'][c, :, i], abs(
                             X_mag_max) / min(abs(y_mag * 4), abs(X_mag_max)))
 
-            wave_instrumental = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
-                                                                   self.file_data['input_high_end_h'], self.file_data['input_high_end'])
+            wave_instrumentals = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
+                                                                    self.file_data['input_high_end_h'], self.file_data['input_high_end'])
         elif self.seperation_data['highEndProcess'].startswith('mirroring'):
             self.file_data['input_high_end'] = spec_utils.mirroring(self.seperation_data['highEndProcess'], y_spec_m,
-                                                                    self.file_data['input_high_end'], self.file_data['model_parameters'])
+                                                                    self.file_data['input_high_end'], self.general_data['model_parameters'])
 
-            wave_instrumental = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
-                                                                   self.file_data['input_high_end_h'], self.file_data['input_high_end'])
+            wave_instrumentals = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'],
+                                                                    self.file_data['input_high_end_h'], self.file_data['input_high_end'])
         else:
-            wave_instrumental = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'])
+            wave_instrumentals = spec_utils.cmb_spectrogram_to_wave(y_spec_m, self.general_data['model_parameters'])
         # -Vocal-
         if self.seperation_data['highEndProcess'].startswith('mirroring'):
             self.file_data['input_high_end'] = spec_utils.mirroring(self.seperation_data['highEndProcess'], v_spec_m,
@@ -477,8 +474,8 @@ class VocalRemover:
         self.file_data['v_spec_m'] = v_spec_m
 
         if (self.seperation_data['isVocal']):
-            wave_instrumental, wave_vocals = wave_vocals, wave_instrumental
-        self.file_data['wave_instrumental'] = wave_instrumental
+            wave_instrumentals, wave_vocals = wave_vocals, wave_instrumentals
+        self.file_data['wave_instrumentals'] = wave_instrumentals
         self.file_data['wave_vocals'] = wave_vocals
 
     def _save_files(self):
@@ -499,11 +496,11 @@ class VocalRemover:
         # Instrumental
         if self.seperation_data['save_instrumentals']:
             sf.write(self.latest_instrumental_path,
-                     self.file_data['wav_instrument'], self.general_data['model_parameters']['sr'])
+                     self.file_data['wave_instrumentals'], self.general_data['model_parameters']['sr'])
         # Vocal
         if self.seperation_data['save_vocals']:
             sf.write(self.latest_vocal_path,
-                     self.file_data['wav_vocals'], self.general_data['model_parameters']['sr'])
+                     self.file_data['wave_vocals'], self.general_data['model_parameters']['sr'])
 
     def _save_mask(self):
         """
@@ -528,7 +525,7 @@ class VocalRemover:
             self.file_data['progress_step'] = progress_step
         try:
             base = (100 / self.general_data['total_files'])
-            progress = base * (self.file_data['file_num'] - 1) + self.file_data['progress_step']
+            progress = base * (self.file_data['file_num'] - 1) + (self.file_data['progress_step'] * 100)
         except TypeError:
             # One data point not specified yet
             progress = 0
@@ -589,9 +586,9 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
             self.logger.info(msg='----- The seperation has started! -----')
             try:
                 self.seperate_files()
-            except RuntimeError:
+            except RuntimeError as e:
                 # Application was forcefully closed
-                print('Application forcefully closed')
+                print('Application forcefully closed', e.args)
                 return
         except Exception as e:
             self.logger.exception(msg='An Exception has occurred!')
@@ -620,8 +617,7 @@ class VocalRemoverWorker(VocalRemover, QtCore.QRunnable):
         Also save files in temp location for in GUI audio playback
         """
         super()._save_files()
-        if self.file_data['loop_num'] == (self.general_data['total_loops'] - 1):  # Last loop
-            sf.write(os.path.join(ResourcePaths.tempDir, self.latest_instrumental_path),
-                     self.file_data['wav_instrument'].T, self.file_data['sampling_rate'])
-            sf.write(os.path.join(ResourcePaths.tempDir, self.latest_vocal_path),
-                     self.file_data['wav_vocals'].T, self.file_data['sampling_rate'])
+        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_instrumental_path),
+                 self.file_data['wave_instrumentals'], self.general_data['model_parameters']['sr'])
+        sf.write(os.path.join(ResourcePaths.tempDir, self.latest_vocal_path),
+                 self.file_data['wave_vocals'], self.general_data['model_parameters']['sr'])

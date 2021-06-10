@@ -255,7 +255,7 @@ class MainWindow(QtWidgets.QWidget):
         self.pbar_animation.stop()
         self.pbar_animation.setStartValue(cur_progress)
         # Given progress is (0-100) but (0-200) is needed
-        self.pbar_animation.setEndValue(progress * 2)
+        self.pbar_animation.setEndValue(progress)
         self.pbar_animation.start()
         self.winTaskbar_progress.setValue(progress)
 
@@ -433,17 +433,12 @@ class MainWindow(QtWidgets.QWidget):
                     border-top-right-radius: 2px;
                     border-bottom-right-radius: 2px;
                 } """)
-                self.seperation_update_progress(0)
+
             # -Progress Bar-
             self.pbar_animation = QtCore.QPropertyAnimation(self.ui.progressBar, b"value",
                                                             parent=self)
-            # This is all to prevent the progressbar animation not working propertly
-            self.pbar_animation.setDuration(8)
-            self.pbar_animation.setStartValue(0)
-            self.pbar_animation.setEndValue(8)
-            self.pbar_animation.start()
-            self.pbar_animation.setDuration(500)
-            QtCore.QTimer.singleShot(1000, lambda: style_progressbar())
+            self.pbar_animation.setDuration(1000)
+            style_progressbar()
             # -Settings Icon-
 
             def rotate_settings_icon():
@@ -480,7 +475,11 @@ class MainWindow(QtWidgets.QWidget):
         # Temp func
         self.tempAudioFilePaths = [os.path.join(ResourcePaths.tempDir, 'temp_instrumentals.wav'),
                                    os.path.join(ResourcePaths.tempDir, 'temp_vocals.wav')]
-        self._deactivate_audio_players()
+        self._activate_audio_players()
+        # Create WinTaskbar
+        self.winTaskbar = QWinTaskbarButton(self)
+        self.winTaskbar.setWindow(self.windowHandle())
+        self.winTaskbar_progress = self.winTaskbar.progress()
 
         # -Setup-
         load_geometry()
@@ -490,10 +489,6 @@ class MainWindow(QtWidgets.QWidget):
         self.show()
 
         # -After setup-
-        # Create WinTaskbar
-        self.winTaskbar = QWinTaskbarButton(self)
-        self.winTaskbar.setWindow(self.windowHandle())
-        self.winTaskbar_progress = self.winTaskbar.progress()
         # Create instance
         self.vocalRemoverRunnable = converter.VocalRemoverWorker(logger=self.logger)
         # Bind events
@@ -677,7 +672,7 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         self.wig_slider.mouseDoubleClickEvent = self.event_sliderMouseDoubleClickEvent
         # Context menu
         self.wig_menu_contextMenu = QtWidgets.QMenu(self.wig_menu)
-        self.wig_menu_contextMenu.setStyleSheet('* {background-color: none; color: #000; font-size: 12px;}')
+        #self.wig_menu_contextMenu.setStyleSheet('* {background-color: #2d2d2d; color: #CCC; font-size: 12px;}')
         self.wig_menu_contextMenu.addAction('Save', self._wig_menu_save)
         self.wig_menu.customContextMenuRequested.connect(self._wig_menu_contextMenuRequested)
         # Also emit customContextMenuRequested when button is left-clicked

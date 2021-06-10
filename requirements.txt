@@ -1,9 +1,12 @@
 Pillow
 tqdm==4.45.0
-librosa==0.7.2
+librosa==0.8.0
 opencv-python
 numba==0.48.0
 numpy==1.19.3
 PySide2==5.15.2
+torchaudio==0.8.1
+scipy==1.6.3
+samplerate==1.0.0
 SoundFile
 soundstretch

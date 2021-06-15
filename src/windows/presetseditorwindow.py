@@ -33,7 +33,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.app = app
         self.logger = app.logger
-        self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
+        self.settings = self.app.settings
         self.setWindowModality(Qt.WindowModality.ApplicationModal)
 
         # -Other Variables-
@@ -139,6 +139,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
             # Get current settings
             settingsManager = self.app.settingsWindow.settingsManager
             widget_settings = settingsManager.get_settings(page_idx=0)
+            del widget_settings['checkBox_gpuConversion']
             del widget_settings['comboBox_presets']
 
             name_to_json = {v: k for k, v in const.JSON_TO_NAME.items()}  # Invert dict

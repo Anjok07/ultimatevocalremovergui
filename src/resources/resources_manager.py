@@ -78,6 +78,7 @@ class ResourcePaths:
     customInstrumentalModelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER, INSTRUMENTAL_FOLDER_NAME)
     customVocalModelsDir = os.path.join(abs_path, USER_FOLDER, MODELS_FOLDER, VOCAL_FOLDER_NAME)
     tempDir = os.path.join(abs_path, USER_FOLDER, TEMP_MUSIC_FILES_FOLDER)
+    settingsIniFile = os.path.join(abs_path, USER_FOLDER, 'settings.ini')
 
 
 class Logger(logging.Logger):

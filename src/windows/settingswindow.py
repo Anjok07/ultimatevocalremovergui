@@ -15,6 +15,7 @@ import datetime as dt
 from collections import OrderedDict
 import torch
 # System
+import hashlib
 import os
 # Code annotation
 from typing import (Dict, Union, Optional)
@@ -37,7 +38,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.app = app
         self.logger = app.logger
-        self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
+        self.settings = self.app.settings
         self.settingsManager = SettingsManager(win=self)
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.settings))
 
@@ -53,7 +54,6 @@ class SettingsWindow(QtWidgets.QWidget):
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
                                                    type=str)
         self.search_for_preset = True
-        self.CUDA_AVAILABLE = torch.cuda.is_available()
 
     # -Widget Binds-
     def pushButton_clearCommand_clicked(self):
@@ -207,10 +207,6 @@ class SettingsWindow(QtWidgets.QWidget):
                 for json_key, value in settings.items():
                     widget_object_name = const.JSON_TO_NAME[json_key]
 
-                    if not self.CUDA_AVAILABLE and widget_object_name == "checkBox_gpuConversion":
-                        # CUDA not available, should not change the preset though
-                        continue
-
                     if (str(current_settings[widget_object_name]) != str(value)):
                         break
                 else:
@@ -218,9 +214,6 @@ class SettingsWindow(QtWidgets.QWidget):
                     break
             else:
                 self.ui.comboBox_presets.setCurrentIndex(0)
-
-        if not self.CUDA_AVAILABLE:
-            self.ui.checkBox_gpuConversion.setChecked(False)
 
     # -Window Setup Methods-
 
@@ -377,7 +370,7 @@ class SettingsWindow(QtWidgets.QWidget):
         open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
                                             bool)
-        if not self.CUDA_AVAILABLE:
+        if not const.CUDA_AVAILABLE:
             self.ui.checkBox_gpuConversion.setEnabled(False)
             self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
 
@@ -445,7 +438,7 @@ class SettingsWindow(QtWidgets.QWidget):
         mainWindowPresetWidget.clear()
         self.ui.comboBox_presets.addItem('Custom')
         mainWindowPresetWidget.addItem('Custom')
-        for preset_name in self.app.windows['presetsEditor'].get_presets().keys():
+        for i, preset_name in enumerate(self.app.windows['presetsEditor'].get_presets().keys()):
             # Add text to combobox
             self.ui.comboBox_presets.addItem(preset_name)
             mainWindowPresetWidget.addItem(preset_name)
@@ -463,6 +456,19 @@ class SettingsWindow(QtWidgets.QWidget):
         Update the list of models to select from in the
         seperation settings page based on the selected AI Engine
         """
+        def get_model_id(path: str) -> str:
+            buffer_size = 65536
+            sha1 = hashlib.sha1()
+
+            with open(path, 'rb') as f:
+                while True:
+                    data = f.read(buffer_size)
+                    if not data:
+                        break
+                    sha1.update(data)
+
+            return sha1.hexdigest()
+
         def fill_model_comboBox(widget: QtWidgets.QComboBox, folder: str):
             """
             Fill the combobox for the model
@@ -475,10 +481,15 @@ class SettingsWindow(QtWidgets.QWidget):
                     continue
                 # Get data
                 full_path = os.path.join(folder, f)
+                model_id = get_model_id(full_path)
+                print(model_id)
                 model_name = os.path.splitext(os.path.basename(f))[0]
                 # Add item to combobox
                 widget.addItem(model_name,
-                               full_path)
+                               {
+                                   'path': full_path,
+                                   'id': model_id
+                               })
                 if model_name == currently_selected_model_name:
                     # This model was selected before clearing the
                     # QComboBox, so reselect

@@ -7,6 +7,7 @@ from PySide2 import QtCore
 # -Root imports-
 from .inference import converter
 from collections import OrderedDict
+import torch
 
 __is_light_theme = bool(QtCore.QSettings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
                         QtCore.QSettings.NativeFormat).value("AppsUseLightTheme"))
@@ -20,7 +21,6 @@ APPLICATION_NAME = 'Ultimate Vocal Remover'
 JSON_TO_NAME = OrderedDict(**{
     # -Conversion-
     # Boolean
-    'gpuConversion': 'checkBox_gpuConversion',
     'postProcess': 'checkBox_postProcess',
     'tta': 'checkBox_tta',
     'outputImage': 'checkBox_outputImage',
@@ -34,6 +34,7 @@ JSON_TO_NAME = OrderedDict(**{
     'vocalModelName': 'comboBox_vocal',
     'windowSize': 'comboBox_winSize',
 })
+CUDA_AVAILABLE = torch.cuda.is_available()
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
     'inputPaths': [],
@@ -48,7 +49,6 @@ DEFAULT_SETTINGS = {
         ['ALL', {
             # -Conversion-
             # Boolean
-            'gpuConversion': True,
             'postProcess': True,
             'tta': True,
             'outputImage': True,
@@ -58,14 +58,11 @@ DEFAULT_SETTINGS = {
             'aggressiveness': 0.1,
             'highEndProcess': 'Bypass',
             # -Models-
-            # 'instrumentalModelName': 'comboBox_instrumental',
-            # 'vocalModelName': 'comboBox_vocal',
             'windowSize': 1024,
         }],
         ['NONE', {
             # -Conversion-
             # Boolean
-            'gpuConversion': False,
             'postProcess': False,
             'tta': False,
             'outputImage': False,
@@ -75,8 +72,6 @@ DEFAULT_SETTINGS = {
             'aggressiveness': -0.1,
             'highEndProcess': 'Mirroring',
             # -Models-
-            # 'instrumentalModelName': 'comboBox_instrumental',
-            # 'vocalModelName': 'comboBox_vocal',
             'windowSize': 352,
         }]
     ],
@@ -87,7 +82,7 @@ DEFAULT_SETTINGS = {
     # --Settings window -> Seperation Settings--
     # -Conversion-
     # Boolean
-    'checkBox_gpuConversion': converter.default_data['gpuConversion'],
+    'checkBox_gpuConversion': CUDA_AVAILABLE,
     'checkBox_postProcess': converter.default_data['postProcess'],
     'checkBox_tta': converter.default_data['tta'],
     'checkBox_outputImage': converter.default_data['outputImage'],

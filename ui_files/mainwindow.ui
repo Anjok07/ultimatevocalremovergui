@@ -393,6 +393,14 @@
                    <height>16777215</height>
                   </size>
                  </property>
+                 <property name="styleSheet">
+                  <string notr="true">QComboBox::down-arrow {
+	image: none;
+}
+QComboBox::drop-down {
+	border-width: 0px;
+}</string>
+                 </property>
                 </widget>
                </item>
               </layout>

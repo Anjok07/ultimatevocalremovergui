@@ -60,13 +60,14 @@ class MainWindow(QtWidgets.QWidget):
         self.ui.setupUi(self)
         self.app = app
         self.logger = app.logger
-        self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
+        self.settings = self.app.settings
         self.setWindowIcon(QtGui.QIcon(ResourcePaths.images.icon))
 
         # -Other Variables-
         # Independent data
         self.inputPaths: list = self.settings.value('user/inputPaths',
-                                                    const.DEFAULT_SETTINGS['inputPaths'])
+                                                    const.DEFAULT_SETTINGS['inputPaths'],
+                                                    type=list)
         self.inputsDirectory: str = self.settings.value('user/inputsDirectory',
                                                         const.DEFAULT_SETTINGS['inputsDirectory'],
                                                         type=str)

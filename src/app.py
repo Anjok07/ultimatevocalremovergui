@@ -55,8 +55,8 @@ class CustomApplication(QtWidgets.QApplication):
 
         # -Create Managers-
         self.logger = Logger()
-        self.settings = QtCore.QSettings(const.APPLICATION_SHORTNAME, const.APPLICATION_NAME)
-        #self.settings.clear()
+        self.settings = QtCore.QSettings(ResourcePaths.settingsIniFile, QtCore.QSettings.Format.IniFormat)
+        # self.settings.clear()
         self.resources = ResourcePaths()
         self.translator = Translator(self)
         self.themeManager = ThemeManager(self)
@@ -105,7 +105,6 @@ class CustomApplication(QtWidgets.QApplication):
                 for combobox in window.findChildren(QtWidgets.QComboBox):
                     # Monkeypatch showPopup function
                     combobox.showPopup = lambda wig=combobox, func=combobox.showPopup: self.improved_combobox_showPopup(wig, func)  # nopep8
-
                     if combobox.isEditable():
                         # Align editable comboboxes to center
                         combobox.lineEdit().setAlignment(Qt.AlignCenter)
@@ -184,7 +183,7 @@ class CustomApplication(QtWidgets.QApplication):
         seperation_data['save_instrumentals'] = self.windows['settings'].ui.checkBox_autoSaveInstrumentals.isChecked()
         seperation_data['save_vocals'] = self.windows['settings'].ui.checkBox_autoSaveVocals.isChecked()
         # Combobox
-        seperation_data['model'] = self.windows['settings'].ui.comboBox_instrumental.currentData()
+        seperation_data['model'] = self.windows['settings'].ui.comboBox_instrumental.currentData()['path']
         seperation_data['modelDataPath'] = r"D:\Dilan\GitHub\ultimatevocalremovergui\src\inference\modelparams\2band_48000.json"
         seperation_data['isVocal'] = False
         # Lineedit (Constants)

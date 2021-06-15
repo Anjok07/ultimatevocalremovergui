@@ -1,5 +1,6 @@
 # pylint: disable=no-name-in-module, import-error
 # -GUI-
+from logging import INFO
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -9,6 +10,7 @@ from ..inference.lib.model_param_init import ModelParameters
 from ..resources.resources_manager import ResourcePaths
 from ..app import CustomApplication
 from .. import constants as const
+from .. import infos as INFOS
 from .design import settingswindow_ui
 # -Other-
 import datetime as dt
@@ -215,6 +217,20 @@ class SettingsWindow(QtWidgets.QWidget):
             else:
                 self.ui.comboBox_presets.setCurrentIndex(0)
 
+    def show_info(self, title: str, text: str):
+        """Show info to user with QMessageBox
+
+        Args:
+            title (str): Title of Message
+            text (str): Content of Message
+        """
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
+        msg.setText(text)
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
+
     # -Window Setup Methods-
 
     def setup_window(self):
@@ -338,6 +354,8 @@ class SettingsWindow(QtWidgets.QWidget):
 
             self.ui.radioButton_lightTheme.clicked.connect(lambda: self.app.themeManager.load_theme('light'))
             self.ui.radioButton_darkTheme.clicked.connect(lambda: self.app.themeManager.load_theme('dark'))
+
+            self.ui.info_conversion.clicked.connect(lambda: self.show_info(INFOS.CONVERTER_TITLE, INFOS.CONVERTER_TEXT))
 
             bind_settings_changed()
 

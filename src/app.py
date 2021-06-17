@@ -133,6 +133,9 @@ class CustomApplication(QtWidgets.QApplication):
         theme = self.settings.value('user/theme',
                                     const.DEFAULT_SETTINGS['theme'])
         self.themeManager.load_theme(theme)
+        
+        with open(os.path.join(os.getcwd(), '..', 'startup', 'run.txt'), 'w') as f:
+            f.write('1')
 
     @ staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):

@@ -97,7 +97,7 @@ def main():
     p.add_argument('--gpu', '-g', type=int, default=-1)
     p.add_argument('--pretrained_model', '-P', type=str, default='models/baseline.pth')
     p.add_argument('--input', '-i', required=True)
-    p.add_argument('--nn_architecture', '-n', type=str, choices=['default', '33966KB', '123821KB', '129605KB'], default='default')
+    p.add_argument('--nn_architecture', '-n', type=str, choices=['default', '33966KB', '123821KB', '129605KB', '537238KB'], default='default')
     p.add_argument('--model_params', '-m', type=str, default='')
     p.add_argument('--window_size', '-w', type=int, default=512)
     p.add_argument('--output_image', '-I', action='store_true')

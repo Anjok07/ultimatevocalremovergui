@@ -129,7 +129,7 @@ def main():
                 'using_architecture': 'default',
                 'model_params': '4band_44100',
             },       
-        'HighPrecison_4band_[123456789]':
+        'HighPrecison_4band_[1-9]':
             {
                 'using_architecture': '123821KB',
                 'model_params': '4band_44100',

@@ -175,7 +175,7 @@ def main():
                 'model_params': '2band_48000',
                 'is_vocal_model': 'true'
             },
-        'HP2-4BAND-3090_4band_[123456789]':
+        'HP2-4BAND-3090_4band_[1-9]':
             {
                 'using_architecture': '537238KB',
                 'model_params': '4band_44100'

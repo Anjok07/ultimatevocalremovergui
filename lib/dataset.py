@@ -85,7 +85,7 @@ def augment(X, y, reduction_rate, reduction_mask, mixup_rate, mixup_alpha, mp):
         if np.random.uniform() < reduction_rate:
             y[idx] = spec_utils.reduce_vocal_aggressively(X[idx], y[idx], reduction_mask)
         
-        if not any([mp.param["mid_side"], mp.param["mid_side_b"], mp.param["mid_side_c"]]):
+        if not any([mp.param["mid_side"], mp.param["mid_side_b"], mp.param["mid_side_b2"]]):
             if np.random.uniform() < 0.5:
                 # swap channel
                 X[idx] = X[idx, ::-1]

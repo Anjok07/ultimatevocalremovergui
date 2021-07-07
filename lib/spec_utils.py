@@ -34,10 +34,16 @@ def wave_to_spectrogram(wave, hop_length, n_fft, mp, multithreading):
         wave_right = np.flip(np.asfortranarray(wave[1]))
     elif mp.param['mid_side_b']:
         wave_left = np.asfortranarray(np.add(wave[0], wave[1] * .5))
-        wave_right = np.asfortranarray(np.subtract(wave[1], wave[0] * .5))
+        wave_right = np.asfortranarray(np.subtract(wave[1], wave[0] * .5))    
+    elif mp.param['mid_side_b2']:
+        wave_left = np.asfortranarray(np.add(wave[1], wave[0] * .5))
+        wave_right = np.asfortranarray(np.subtract(wave[0], wave[1] * .5))
     elif mp.param['mid_side']:
         wave_left = np.asfortranarray(np.add(wave[0], wave[1]) / 2)
-        wave_right = np.asfortranarray(np.subtract(wave[0], wave[1]))
+        wave_right = np.asfortranarray(np.subtract(wave[0], wave[1]))    
+    elif mp.param['stereo_w']:
+        wave_left = np.asfortranarray(np.subtract(wave[0], wave[1] * .25))
+        wave_right = np.asfortranarray(np.subtract(wave[1], wave[0] * .25))
     else:
         wave_left = np.asfortranarray(wave[0])
         wave_right = np.asfortranarray(wave[1])
@@ -242,9 +248,13 @@ def spectrogram_to_wave(spec, hop_length, mp, multithreading):
     if mp.param['reverse']:
         return np.asfortranarray([np.flip(wave_left), np.flip(wave_right)])
     elif mp.param['mid_side_b']:
-        return np.asfortranarray([np.subtract(wave_left / 1.25, .4 * wave_right), np.add(wave_right / 1.25, .4 * wave_left)])    
+        return np.asfortranarray([np.subtract(wave_left / 1.25, .4 * wave_right), np.add(wave_right / 1.25, .4 * wave_left)])       
+    elif mp.param['mid_side_b2']:
+        return np.asfortranarray([np.add(wave_right / 1.25, .4 * wave_left), np.subtract(wave_left / 1.25, .4 * wave_right)])    
     elif mp.param['mid_side']:
         return np.asfortranarray([np.add(wave_left, wave_right / 2), np.subtract(wave_left, wave_right / 2)])
+    elif mp.param['stereo_w']:
+        return np.asfortranarray([np.add(wave_left, wave_right * .25) / 0.9375, np.add(wave_right, wave_left * .25) / 0.9375])
     else:
         return np.asfortranarray([wave_left, wave_right])
 

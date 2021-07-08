@@ -89,13 +89,19 @@ def augment(X, y, reduction_rate, reduction_mask, mixup_rate, mixup_alpha, mp):
             if np.random.uniform() < 0.5:
                 # swap channel
                 X[idx] = X[idx, ::-1]
-                y[idx] = y[idx, ::-1]
-                    
+                y[idx] = y[idx, ::-1]          
+                
             if np.random.uniform() < 0.02:
                 # mono
                 X[idx] = X[idx].mean(axis=0, keepdims=True)
                 y[idx] = y[idx].mean(axis=0, keepdims=True)
                 
+            if np.random.uniform() < 0.02:
+                # delay / echo
+                d = np.random.randint(1, 10, size=2)
+                v = X[idx] - y[idx]
+                X[idx, 0, :, d[0]:] += v[0, :, :-d[0]] * random.uniform(0.1, 0.3)
+                X[idx, 1, :, d[1]:] += v[1, :, :-d[1]] * random.uniform(0.1, 0.3)                
         if np.random.uniform() < 0.02:
             # inst
             X[idx] = y[idx]

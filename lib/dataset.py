@@ -100,8 +100,8 @@ def augment(X, y, reduction_rate, reduction_mask, mixup_rate, mixup_alpha, mp):
                 # delay / echo
                 d = np.random.randint(1, 10, size=2)
                 v = X[idx] - y[idx]
-                X[idx, 0, :, d[0]:] += v[0, :, :-d[0]] * random.uniform(0.1, 0.3)
-                X[idx, 1, :, d[1]:] += v[1, :, :-d[1]] * random.uniform(0.1, 0.3)                
+                X[idx, 0, :, d[0]:] += v[0, :, :-d[0]] * np.random.uniform(0.1, 0.3)
+                X[idx, 1, :, d[1]:] += v[1, :, :-d[1]] * np.random.uniform(0.1, 0.3)                
         if np.random.uniform() < 0.02:
             # inst
             X[idx] = y[idx]

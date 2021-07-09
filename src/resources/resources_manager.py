@@ -52,14 +52,6 @@ class ResourcePaths:
         upload = os.path.join(abs_path, IMAGE_FOLDER, 'upload.png')
         download = os.path.join(abs_path, IMAGE_FOLDER, 'download.png')
 
-        class flags:
-            _FLAG_FOLDER = 'flags'
-            english = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'english.png')
-            german = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'german.png')
-            japanese = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'japan.png')
-            filipino = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'filipino.png')
-            turkish = os.path.join(abs_path, IMAGE_FOLDER, _FLAG_FOLDER, 'turkish.png')
-
     class themes:
         dark_path = os.path.join(abs_path, THEMES_FOLDER, 'dark.qss')
         light_path = os.path.join(abs_path, THEMES_FOLDER, 'light.qss')

@@ -6,6 +6,7 @@ Store Appliation info and default data
 from PySide2 import QtCore
 # -Root imports-
 from .inference import converter
+from .translator import Translator
 from collections import OrderedDict
 import torch
 
@@ -43,7 +44,7 @@ DEFAULT_SETTINGS = {
     # Export path (Default: desktop)
     'exportDirectory': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
     # Language in format {language}_{country} (Default: system language)
-    'language': QtCore.QLocale.system().name(),
+    'language': Translator.SUPPORTED_LANGUAGES[QtCore.QLocale.system().language().name.decode('utf-8')],
     # Presets for seperations
     'presets': [
         ['ALL', {

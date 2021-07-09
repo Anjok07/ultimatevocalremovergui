@@ -146,9 +146,12 @@ QListWidget#listWidget_presets::item:selected {
 }
 /* Command Line*/
 QTextBrowser {
+	border: none;
+	background-color: #2d2d2d;
+}
+QTextBrowser#textBrowser_command {
 	font: 8pt "Courier";
 	color: #EEE;
-	background-color: #2d2d2d;
 }
 /* Audio Player */
 QLabel[audioPlayer="true"] {

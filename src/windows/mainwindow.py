@@ -578,6 +578,8 @@ class MainWindow(QtWidgets.QWidget):
         """
         Catch close event of this window to save data
         """
+        # -Close all windows-
+        self.app.closeAllWindows()
         # -Save the geometry for this window-
         self.settings.beginGroup(self.__class__.__name__.lower())
         self.settings.setValue('size',
@@ -589,8 +591,6 @@ class MainWindow(QtWidgets.QWidget):
         self.settings.endGroup()
         # Commit Save
         self.settings.sync()
-        # -Close all windows-
-        self.app.closeAllWindows()
 
     def update_translation(self):
         """

@@ -10,6 +10,7 @@ from PySide2.QtGui import Qt
 # -Root imports-
 from .resources.resources_manager import (ResourcePaths, Logger)
 from .inference import converter
+from .translator import Translator
 from . import constants as const
 # -Other-
 # Logging
@@ -63,12 +64,13 @@ class CustomApplication(QtWidgets.QApplication):
         self.threadpool = QtCore.QThreadPool(self)
         # -Load Windows-
         # Workaround for circular dependency
-        from .windows import (mainwindow, settingswindow, presetseditorwindow)
+        from .windows import (mainwindow, settingswindow, presetseditorwindow, infowindow)
         # Collection of windows
         self.windows: Dict[str, QtWidgets.QWidget] = {
             'main': mainwindow.MainWindow(self),
             'settings': settingswindow.SettingsWindow(self),
             'presetsEditor': presetseditorwindow.PresetsEditorWindow(self),
+            'info': infowindow.InfoWindow(self),
         }
         self.mainWindow = self.windows['main']
         self.settingsWindow = self.windows['settings']
@@ -126,9 +128,9 @@ class CustomApplication(QtWidgets.QApplication):
 
         # -After-
         # Load language
-        language = QtCore.QLocale(self.settings.value('user/language',
-                                                      const.DEFAULT_SETTINGS['language'])).language()
-        self.translator.load_language(language)
+        lang_code = self.settings.value('user/language',
+                                        const.DEFAULT_SETTINGS['language'])
+        self.translator.load_language(self.translator.LANGUAGES[lang_code])  # nopep8
         # Load Theme
         theme = self.settings.value('user/theme',
                                     const.DEFAULT_SETTINGS['theme'])
@@ -221,7 +223,7 @@ class CustomApplication(QtWidgets.QApplication):
             self.settings.setValue('user/exportDirectory',
                                    self.windows['settings'].exportDirectory)
             self.settings.setValue('user/language',
-                                   self.translator.loaded_language)
+                                   self.translator.loaded_language.code)
             self.settings.setValue('user/inputPaths',
                                    self.windows['main'].inputPaths)
             self.settings.setValue('user/inputsDirectory',
@@ -264,78 +266,6 @@ class CustomApplication(QtWidgets.QApplication):
         self.settings.sync()
         self.logger.indent_backwards()
         self.logger.info('--- Done! ---')
-
-
-class Translator:
-    """Localizer for the application
-
-    Manages the languages for the applications
-
-    Args:
-        loaded_language (str):
-            Currently loaded language in the application. To change, run method load_language.
-    """
-
-    def __init__(self, app: CustomApplication):
-        self.app = app
-        self.logger = app.logger
-        self.loaded_language: str
-        self._translator = QtCore.QTranslator(self.app)
-
-    def load_language(self, language: QtCore.QLocale.Language = QtCore.QLocale.English) -> bool:
-        """Load a language on the application
-
-        Note:
-            language arg info:
-                If the language given is not supported, a warning message will be reported to the logger
-                and the language will be set to english
-
-        Args:
-            language (QtCore.QLocale.Language, optional): Language to load. Defaults to English.
-
-        Returns:
-            bool: Whether the applications language was successfully changed to the given language
-        """
-        language_str = QtCore.QLocale.languageToString(language).lower()
-        self.logger.info(f'Translating to "{language_str.capitalize()}"...',
-                         indent_forwards=True)
-        # Get path where translation file should be
-        translation_path = os.path.join(self.app.resources.localizationDir, f'{language_str}.qm')
-        if (not os.path.isfile(translation_path) and
-                language != QtCore.QLocale.English):
-            # Translation file does not exist
-            # Load default language (english)
-            self.logger.warning(f'Translation file does not exist! Switching to English. Language: {language_str}')
-            self.logger.indent_backwards()
-            self.load_language()
-            return False
-        # get language name to later store in settings
-        self.loaded_language = QtCore.QLocale(language).name()
-        # Load language
-        if language == QtCore.QLocale.English:
-            # English is base language so remove translator
-            self.app.removeTranslator(self._translator)
-        else:
-            self._translator.load(translation_path)
-            self.app.installTranslator(self._translator)
-
-        # -Windows are initialized-
-        # Update translation on all windows
-        for window in self.app.windows.values():
-            window.update_translation()
-        # Update settings window
-        for button in self.app.windows['settings'].ui.frame_languages.findChildren(QtWidgets.QPushButton):
-            language_str = QtCore.QLocale.languageToString(language).lower()
-            button_name = f'pushButton_{language_str}'
-            if button.objectName() == button_name:
-                # Language found
-                button.setChecked(True)
-            else:
-                # Not selected language
-                button.setChecked(False)
-
-        self.logger.indent_backwards()
-        return True
 
 
 class ThemeManager:

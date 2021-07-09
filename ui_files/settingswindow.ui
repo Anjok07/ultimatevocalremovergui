@@ -287,8 +287,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>677</width>
-               <height>504</height>
+               <width>566</width>
+               <height>248</height>
               </rect>
              </property>
              <property name="sizePolicy">
@@ -761,7 +761,7 @@
                          <property name="settingsContent" stdset="0">
                           <bool>true</bool>
                          </property>
-                         <layout class="QGridLayout" name="gridLayout_17" rowstretch="0,0">
+                         <layout class="QGridLayout" name="gridLayout_17" rowstretch="0">
                           <property name="leftMargin">
                            <number>20</number>
                           </property>
@@ -1253,7 +1253,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
+               <width>98</width>
                <height>35</height>
               </rect>
              </property>
@@ -1330,7 +1330,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>53</width>
+               <width>98</width>
                <height>35</height>
               </rect>
              </property>
@@ -1979,7 +1979,7 @@
                              <property name="bottomMargin">
                               <number>10</number>
                              </property>
-                             <property name="horizontalSpacing">
+                             <property name="spacing">
                               <number>10</number>
                              </property>
                              <item row="0" column="1">
@@ -2198,7 +2198,7 @@
                               <number>6</number>
                              </property>
                              <item row="0" column="1">
-                              <widget class="QPushButton" name="pushButton_german">
+                              <widget class="QPushButton" name="pushButton_de">
                                <property name="minimumSize">
                                 <size>
                                  <width>80</width>
@@ -2235,7 +2235,7 @@
                               </widget>
                              </item>
                              <item row="0" column="0">
-                              <widget class="QPushButton" name="pushButton_english">
+                              <widget class="QPushButton" name="pushButton_en">
                                <property name="minimumSize">
                                 <size>
                                  <width>80</width>
@@ -2272,7 +2272,7 @@
                               </widget>
                              </item>
                              <item row="1" column="1">
-                              <widget class="QPushButton" name="pushButton_japanese">
+                              <widget class="QPushButton" name="pushButton_ja">
                                <property name="minimumSize">
                                 <size>
                                  <width>80</width>
@@ -2303,7 +2303,7 @@
                               </widget>
                              </item>
                              <item row="1" column="0">
-                              <widget class="QPushButton" name="pushButton_filipino">
+                              <widget class="QPushButton" name="pushButton_fil">
                                <property name="minimumSize">
                                 <size>
                                  <width>80</width>
@@ -2331,7 +2331,7 @@
                               </widget>
                              </item>
                              <item row="2" column="0">
-                              <widget class="QPushButton" name="pushButton_turkish">
+                              <widget class="QPushButton" name="pushButton_tr">
                                <property name="minimumSize">
                                 <size>
                                  <width>80</width>
@@ -2344,6 +2344,9 @@
                                  <height>49</height>
                                 </size>
                                </property>
+                               <property name="toolTip">
+                                <string>Turkish</string>
+                               </property>
                                <property name="text">
                                 <string/>
                                </property>
@@ -2351,7 +2354,7 @@
                                 <bool>true</bool>
                                </property>
                                <property name="flat">
-                                <bool>true</bool>
+                                <bool>false</bool>
                                </property>
                                <property name="language" stdset="0">
                                 <bool>true</bool>

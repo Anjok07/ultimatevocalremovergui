@@ -5,19 +5,6 @@ import torch.nn.functional as F
 from . import spec_utils
 
 
-model_size_converter = {
-    '33966KB': {
-
-    },
-    '123821KB': {
-
-    },
-    '129605KB': {
-
-    }
-}
-
-
 class Conv2DBNActiv(nn.Module):
 
     def __init__(self, nin, nout, ksize=3, stride=1, pad=1, dilation=1, activ=nn.ReLU):

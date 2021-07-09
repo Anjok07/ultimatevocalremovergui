@@ -10,12 +10,11 @@ from ..inference.lib.model_param_init import ModelParameters
 from ..resources.resources_manager import ResourcePaths
 from ..app import CustomApplication
 from .. import constants as const
-from .. import infos as INFOS
 from .design import settingswindow_ui
+from .infowindow import InfoWindow
 # -Other-
 import datetime as dt
 from collections import OrderedDict
-import torch
 # System
 import hashlib
 import os
@@ -224,12 +223,9 @@ class SettingsWindow(QtWidgets.QWidget):
             title (str): Title of Message
             text (str): Content of Message
         """
-        msg = QtWidgets.QMessageBox()
-        msg.setWindowTitle(title)
-        msg.setIcon(QtWidgets.QMessageBox.Icon.Information)
-        msg.setText(text)
-        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-        msg.exec_()
+        self.app.windows['info'].setWindowTitle(title)
+        self.app.windows['info'].set_text(text)
+        self.app.windows['info'].show()
 
     # -Window Setup Methods-
 
@@ -269,12 +265,12 @@ class SettingsWindow(QtWidgets.QWidget):
             # Flag images
             for button in self.ui.frame_languages.findChildren(QtWidgets.QPushButton):
                 # Loop through every button in the languages frame
-                language = button.objectName().split('_')[1]
+                lang_code = button.objectName().split('_')[1]
                 button.setText('')
 
                 # -Prepare rounded image-
                 # Load original image
-                img_path = getattr(ResourcePaths.images.flags, language)
+                img_path = self.app.translator.LANGUAGES[lang_code].flag_path
                 origin_img = QtGui.QPixmap(img_path)
                 origin_img = origin_img.scaled(button.width(), button.height(),
                                                mode=Qt.TransformationMode.SmoothTransformation)
@@ -341,9 +337,9 @@ class SettingsWindow(QtWidgets.QWidget):
             for button in self.ui.frame_languages.findChildren(QtWidgets.QPushButton):
                 # Loop through every button in the languages frame
                 # Get capitalized language from button name
-                language_str = button.objectName().split('_')[1].capitalize()
+                lang_code = button.objectName().split('_')[1]
                 # Get language as QtCore.QLocale.Language
-                language: QtCore.QLocale.Language = getattr(QtCore.QLocale, language_str)
+                language = self.app.translator.LANGUAGES[lang_code]
                 # Call load language on button click
                 button.clicked.connect(lambda *args, lan=language: self.app.translator.load_language(lan))
             # Pushbuttons
@@ -355,7 +351,8 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.radioButton_lightTheme.clicked.connect(lambda: self.app.themeManager.load_theme('light'))
             self.ui.radioButton_darkTheme.clicked.connect(lambda: self.app.themeManager.load_theme('dark'))
 
-            self.ui.info_conversion.clicked.connect(lambda: self.show_info(INFOS.CONVERTER_TITLE, INFOS.CONVERTER_TEXT))
+            self.ui.info_conversion.clicked.connect(lambda: self.show_info(self.tr("Conversion Info"),
+                                                                           self.app.translator.loaded_language.settings_conversion))
 
             bind_settings_changed()
 
@@ -618,6 +615,10 @@ class SettingsWindow(QtWidgets.QWidget):
     # -Overriden methods-
     def closeEvent(self, event: QtCore.QEvent):
         """Catch close event of this window to save data"""
+        # -Close Window-
+        # Hide the presets editor window (child window)
+        self.app.presetsEditorWindow.hide()
+        event.accept()
         # -Save the geometry for this window-
         self.settings.beginGroup(self.__class__.__name__.lower())
         self.settings.setValue('size',
@@ -627,10 +628,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.settings.endGroup()
         # Commit Save
         self.settings.sync()
-        # -Close Window-
-        # Hide the presets editor window (child window)
-        self.app.presetsEditorWindow.hide()
-        event.accept()
 
     def update_translation(self):
         """Update translation of this window"""

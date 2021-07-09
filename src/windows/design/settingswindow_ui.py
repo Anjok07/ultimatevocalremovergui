@@ -132,7 +132,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 677, 504))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 566, 248))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -553,7 +553,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 53, 35))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 35))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -588,7 +588,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 53, 35))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 98, 35))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -866,8 +866,8 @@ class Ui_SettingsWindow(object):
         self.frame_export_2.setObjectName(u"frame_export_2")
         self.frame_export_2.setProperty("settingsContent", True)
         self.gridLayout_10 = QGridLayout(self.frame_export_2)
+        self.gridLayout_10.setSpacing(10)
         self.gridLayout_10.setObjectName(u"gridLayout_10")
-        self.gridLayout_10.setHorizontalSpacing(10)
         self.gridLayout_10.setContentsMargins(35, 10, 30, 10)
         self.pushButton_exportDirectory = QPushButton(self.frame_export_2)
         self.pushButton_exportDirectory.setObjectName(
@@ -976,58 +976,58 @@ class Ui_SettingsWindow(object):
         self.gridLayout_3.setObjectName(u"gridLayout_3")
         self.gridLayout_3.setHorizontalSpacing(6)
         self.gridLayout_3.setContentsMargins(0, 0, 0, 0)
-        self.pushButton_german = QPushButton(self.frame_languages)
-        self.pushButton_german.setObjectName(u"pushButton_german")
-        self.pushButton_german.setMinimumSize(QSize(80, 49))
-        self.pushButton_german.setMaximumSize(QSize(80, 49))
-        self.pushButton_german.setText(u"")
-        self.pushButton_german.setCheckable(True)
-        self.pushButton_german.setChecked(False)
-        self.pushButton_german.setFlat(False)
-        self.pushButton_german.setProperty("language", True)
+        self.pushButton_de = QPushButton(self.frame_languages)
+        self.pushButton_de.setObjectName(u"pushButton_de")
+        self.pushButton_de.setMinimumSize(QSize(80, 49))
+        self.pushButton_de.setMaximumSize(QSize(80, 49))
+        self.pushButton_de.setText(u"")
+        self.pushButton_de.setCheckable(True)
+        self.pushButton_de.setChecked(False)
+        self.pushButton_de.setFlat(False)
+        self.pushButton_de.setProperty("language", True)
 
-        self.gridLayout_3.addWidget(self.pushButton_german, 0, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_de, 0, 1, 1, 1)
 
-        self.pushButton_english = QPushButton(self.frame_languages)
-        self.pushButton_english.setObjectName(u"pushButton_english")
-        self.pushButton_english.setMinimumSize(QSize(80, 49))
-        self.pushButton_english.setMaximumSize(QSize(80, 49))
-        self.pushButton_english.setText(u"")
-        self.pushButton_english.setCheckable(True)
-        self.pushButton_english.setChecked(False)
-        self.pushButton_english.setFlat(False)
-        self.pushButton_english.setProperty("language", True)
+        self.pushButton_en = QPushButton(self.frame_languages)
+        self.pushButton_en.setObjectName(u"pushButton_en")
+        self.pushButton_en.setMinimumSize(QSize(80, 49))
+        self.pushButton_en.setMaximumSize(QSize(80, 49))
+        self.pushButton_en.setText(u"")
+        self.pushButton_en.setCheckable(True)
+        self.pushButton_en.setChecked(False)
+        self.pushButton_en.setFlat(False)
+        self.pushButton_en.setProperty("language", True)
 
-        self.gridLayout_3.addWidget(self.pushButton_english, 0, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_en, 0, 0, 1, 1)
 
-        self.pushButton_japanese = QPushButton(self.frame_languages)
-        self.pushButton_japanese.setObjectName(u"pushButton_japanese")
-        self.pushButton_japanese.setMinimumSize(QSize(80, 49))
-        self.pushButton_japanese.setMaximumSize(QSize(80, 49))
-        self.pushButton_japanese.setToolTipDuration(-1)
-        self.pushButton_japanese.setCheckable(True)
-        self.pushButton_japanese.setProperty("language", True)
+        self.pushButton_ja = QPushButton(self.frame_languages)
+        self.pushButton_ja.setObjectName(u"pushButton_ja")
+        self.pushButton_ja.setMinimumSize(QSize(80, 49))
+        self.pushButton_ja.setMaximumSize(QSize(80, 49))
+        self.pushButton_ja.setToolTipDuration(-1)
+        self.pushButton_ja.setCheckable(True)
+        self.pushButton_ja.setProperty("language", True)
 
-        self.gridLayout_3.addWidget(self.pushButton_japanese, 1, 1, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_ja, 1, 1, 1, 1)
 
-        self.pushButton_filipino = QPushButton(self.frame_languages)
-        self.pushButton_filipino.setObjectName(u"pushButton_filipino")
-        self.pushButton_filipino.setMinimumSize(QSize(80, 49))
-        self.pushButton_filipino.setMaximumSize(QSize(80, 49))
-        self.pushButton_filipino.setCheckable(True)
-        self.pushButton_filipino.setProperty("language", True)
+        self.pushButton_fil = QPushButton(self.frame_languages)
+        self.pushButton_fil.setObjectName(u"pushButton_fil")
+        self.pushButton_fil.setMinimumSize(QSize(80, 49))
+        self.pushButton_fil.setMaximumSize(QSize(80, 49))
+        self.pushButton_fil.setCheckable(True)
+        self.pushButton_fil.setProperty("language", True)
 
-        self.gridLayout_3.addWidget(self.pushButton_filipino, 1, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_fil, 1, 0, 1, 1)
 
-        self.pushButton_turkish = QPushButton(self.frame_languages)
-        self.pushButton_turkish.setObjectName(u"pushButton_turkish")
-        self.pushButton_turkish.setMinimumSize(QSize(80, 49))
-        self.pushButton_turkish.setMaximumSize(QSize(80, 49))
-        self.pushButton_turkish.setCheckable(True)
-        self.pushButton_turkish.setFlat(True)
-        self.pushButton_turkish.setProperty("language", True)
+        self.pushButton_tr = QPushButton(self.frame_languages)
+        self.pushButton_tr.setObjectName(u"pushButton_tr")
+        self.pushButton_tr.setMinimumSize(QSize(80, 49))
+        self.pushButton_tr.setMaximumSize(QSize(80, 49))
+        self.pushButton_tr.setCheckable(True)
+        self.pushButton_tr.setFlat(False)
+        self.pushButton_tr.setProperty("language", True)
 
-        self.gridLayout_3.addWidget(self.pushButton_turkish, 2, 0, 1, 1)
+        self.gridLayout_3.addWidget(self.pushButton_tr, 2, 0, 1, 1)
 
         self.gridLayout_15.addWidget(
             self.frame_languages, 0, 0, 1, 1, Qt.AlignTop)
@@ -1059,8 +1059,8 @@ class Ui_SettingsWindow(object):
         self.stackedWidget.setCurrentIndex(3)
         self.comboBox_highEndProcess.setCurrentIndex(4)
         self.comboBox_winSize.setCurrentIndex(0)
-        self.pushButton_german.setDefault(False)
-        self.pushButton_english.setDefault(False)
+        self.pushButton_de.setDefault(False)
+        self.pushButton_en.setDefault(False)
 
         QMetaObject.connectSlotsByName(SettingsWindow)
     # setupUi
@@ -1179,22 +1179,26 @@ class Ui_SettingsWindow(object):
         self.label_14.setText(QCoreApplication.translate(
             "SettingsWindow", u"Language", None))
 # if QT_CONFIG(tooltip)
-        self.pushButton_german.setToolTip(
+        self.pushButton_de.setToolTip(
             QCoreApplication.translate("SettingsWindow", u"German", None))
 #endif // QT_CONFIG(tooltip)
 # if QT_CONFIG(tooltip)
-        self.pushButton_english.setToolTip(
+        self.pushButton_en.setToolTip(
             QCoreApplication.translate("SettingsWindow", u"English", None))
 #endif // QT_CONFIG(tooltip)
 # if QT_CONFIG(tooltip)
-        self.pushButton_japanese.setToolTip(
-            QCoreApplication.translate("SettingsWindow", u"Japanese", None))
+        self.pushButton_ja.setToolTip(QCoreApplication.translate(
+            "SettingsWindow", u"Japanese", None))
 #endif // QT_CONFIG(tooltip)
-        self.pushButton_japanese.setText("")
+        self.pushButton_ja.setText("")
 # if QT_CONFIG(tooltip)
-        self.pushButton_filipino.setToolTip(
+        self.pushButton_fil.setToolTip(
             QCoreApplication.translate("SettingsWindow", u"Filipino", None))
 #endif // QT_CONFIG(tooltip)
-        self.pushButton_filipino.setText("")
-        self.pushButton_turkish.setText("")
+        self.pushButton_fil.setText("")
+# if QT_CONFIG(tooltip)
+        self.pushButton_tr.setToolTip(
+            QCoreApplication.translate("SettingsWindow", u"Turkish", None))
+#endif // QT_CONFIG(tooltip)
+        self.pushButton_tr.setText("")
     # retranslateUi

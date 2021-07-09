@@ -3,7 +3,7 @@ $PYDir = ".\windows\design"
 $TS_Dir = "..\languages"
 $QM_Dir = ".\resources\translations"
 $PY_Dir = ".\windows"
-$Languages = "german", "japanese", "filipino", "russian"
+$Languages = "en", "de", "ja", "fil", "ru", "tr"
 Set-Location $(Split-Path -Path $MyInvocation.MyCommand.Path)
 # Get Files
 $FileNames = New-Object Collections.Generic.List[String]
@@ -46,10 +46,15 @@ for () {
             $files += "$UIDir\$basename.ui "
             $files += "$PY_Dir\$basename.py "
         }
-    
+
         Foreach ($language in $Languages) {
             cmd.exe /c "pyside2-lupdate -noobsolete $files -ts $TS_Dir/$language.qt.ts"
-            cmd.exe /c "lrelease -silent -removeidentical $TS_Dir/$language.qt.ts -qm $QM_Dir/$language.qm"
+            New-Item -ItemType Directory -Force -Path $QM_Dir/$language | Out-Null
+            New-Item -ItemType Directory -Force -Path $QM_Dir/$language/infos | Out-Null
+            if ($language -ne "en") {
+                Copy-Item -Path "$QM_Dir/en/infos/*" -Destination "$QM_Dir/$language/infos" -PassThru
+            }
+            cmd.exe /c "lrelease -silent -removeidentical $TS_Dir/$language.qt.ts -qm $QM_Dir/$language/$language.qm"
         }
         $ChangedFiles.Clear()
         Write-Output "Done!"

@@ -167,7 +167,7 @@ class PresetsEditorWindow(QtWidgets.QWidget):
 
         # Some paths already selected
         msg = QtWidgets.QMessageBox()
-        msg.setWindowTitle(self.tr('Confirmation'))
+        msg.setWindowTitle(self.tr('Test', 'Confirmation', 'A'))
         msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
         msg.setText(f'You will delete {len(selected_items)} items. Do you wish to continue?')
         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
@@ -311,6 +311,8 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         """
         Catch close event of this window to save data
         """
+        # -Close window-
+        event.accept()
         # -Save the geometry for this window-
         self.settings.beginGroup(self.__class__.__name__.lower())
         self.settings.setValue('size',
@@ -318,8 +320,6 @@ class PresetsEditorWindow(QtWidgets.QWidget):
         self.settings.setValue('pos',
                                self.pos())
         self.settings.endGroup()
-        # -Close window-
-        event.accept()
 
     def update_translation(self):
         """

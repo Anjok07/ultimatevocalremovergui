@@ -66,12 +66,14 @@ class Ui_SettingsWindow(object):
 
         self.verticalLayout.addWidget(self.radioButton_separationSettings)
 
-        self.radioButton_shortcuts = QRadioButton(self.frame_settingsSelection)
-        self.radioButton_shortcuts.setObjectName(u"radioButton_shortcuts")
-        self.radioButton_shortcuts.setMinimumSize(QSize(0, 40))
-        self.radioButton_shortcuts.setProperty("menu", True)
+        self.radioButton_customModels = QRadioButton(
+            self.frame_settingsSelection)
+        self.radioButton_customModels.setObjectName(
+            u"radioButton_customModels")
+        self.radioButton_customModels.setMinimumSize(QSize(0, 40))
+        self.radioButton_customModels.setProperty("menu", True)
 
-        self.verticalLayout.addWidget(self.radioButton_shortcuts)
+        self.verticalLayout.addWidget(self.radioButton_customModels)
 
         self.radioButton_customization = QRadioButton(
             self.frame_settingsSelection)
@@ -132,7 +134,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 566, 248))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 656, 551))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -146,9 +148,12 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_5.setContentsMargins(0, 25, 35, 0)
         self.frame_3 = QFrame(self.scrollAreaWidgetContents_2)
         self.frame_3.setObjectName(u"frame_3")
-        sizePolicy2.setHeightForWidth(
+        sizePolicy3 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy3.setHorizontalStretch(0)
+        sizePolicy3.setVerticalStretch(0)
+        sizePolicy3.setHeightForWidth(
             self.frame_3.sizePolicy().hasHeightForWidth())
-        self.frame_3.setSizePolicy(sizePolicy2)
+        self.frame_3.setSizePolicy(sizePolicy3)
         self.frame_3.setFrameShape(QFrame.NoFrame)
         self.frame_3.setFrameShadow(QFrame.Raised)
         self.frame_3.setLineWidth(0)
@@ -175,6 +180,7 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_16.setContentsMargins(-1, -1, 8, -1)
         self.label_15 = QLabel(self.frame_template_3)
         self.label_15.setObjectName(u"label_15")
+        self.label_15.setMinimumSize(QSize(0, 33))
         self.label_15.setIndent(10)
         self.label_15.setProperty("title", True)
 
@@ -191,6 +197,7 @@ class Ui_SettingsWindow(object):
         self.info_conversion.setMinimumSize(QSize(28, 28))
         self.info_conversion.setMaximumSize(QSize(28, 28))
         self.info_conversion.setCursor(QCursor(Qt.PointingHandCursor))
+        self.info_conversion.setText(u"i")
 
         self.verticalLayout_21.addWidget(self.info_conversion)
 
@@ -310,6 +317,7 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_17.setContentsMargins(-1, -1, 8, -1)
         self.label_16 = QLabel(self.frame_template_4)
         self.label_16.setObjectName(u"label_16")
+        self.label_16.setMinimumSize(QSize(0, 33))
         self.label_16.setIndent(10)
         self.label_16.setProperty("title", True)
 
@@ -326,6 +334,7 @@ class Ui_SettingsWindow(object):
         self.info_presets.setMinimumSize(QSize(28, 28))
         self.info_presets.setMaximumSize(QSize(28, 28))
         self.info_presets.setCursor(QCursor(Qt.PointingHandCursor))
+        self.info_presets.setText(u"i")
 
         self.verticalLayout_22.addWidget(self.info_presets)
 
@@ -344,12 +353,12 @@ class Ui_SettingsWindow(object):
         self.gridLayout_17.setContentsMargins(20, 15, 20, 10)
         self.pushButton_presetsEdit = QPushButton(self.frame_18)
         self.pushButton_presetsEdit.setObjectName(u"pushButton_presetsEdit")
-        sizePolicy3 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
-        sizePolicy3.setHorizontalStretch(0)
-        sizePolicy3.setVerticalStretch(0)
-        sizePolicy3.setHeightForWidth(
+        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(
             self.pushButton_presetsEdit.sizePolicy().hasHeightForWidth())
-        self.pushButton_presetsEdit.setSizePolicy(sizePolicy3)
+        self.pushButton_presetsEdit.setSizePolicy(sizePolicy4)
         self.pushButton_presetsEdit.setMinimumSize(QSize(65, 27))
         self.pushButton_presetsEdit.setMaximumSize(QSize(16777215, 16777215))
         self.pushButton_presetsEdit.setCursor(QCursor(Qt.PointingHandCursor))
@@ -385,14 +394,31 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_27.setObjectName(u"verticalLayout_27")
         self.verticalLayout_27.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_18 = QHBoxLayout()
+        self.horizontalLayout_18.setSpacing(15)
         self.horizontalLayout_18.setObjectName(u"horizontalLayout_18")
         self.horizontalLayout_18.setContentsMargins(-1, -1, 8, -1)
         self.label_17 = QLabel(self.frame_template_5)
         self.label_17.setObjectName(u"label_17")
+        self.label_17.setMinimumSize(QSize(0, 33))
         self.label_17.setIndent(10)
         self.label_17.setProperty("title", True)
 
         self.horizontalLayout_18.addWidget(self.label_17)
+
+        self.frame_7 = QFrame(self.frame_template_5)
+        self.frame_7.setObjectName(u"frame_7")
+        self.frame_7.setFrameShape(QFrame.NoFrame)
+        self.frame_7.setFrameShadow(QFrame.Raised)
+        self.verticalLayout_19 = QVBoxLayout(self.frame_7)
+        self.verticalLayout_19.setSpacing(0)
+        self.verticalLayout_19.setObjectName(u"verticalLayout_19")
+        self.verticalLayout_19.setContentsMargins(0, 10, 0, 0)
+        self.checkBox_ensemble = QCheckBox(self.frame_7)
+        self.checkBox_ensemble.setObjectName(u"checkBox_ensemble")
+
+        self.verticalLayout_19.addWidget(self.checkBox_ensemble)
+
+        self.horizontalLayout_18.addWidget(self.frame_7)
 
         self.verticalFrame_6 = QFrame(self.frame_template_5)
         self.verticalFrame_6.setObjectName(u"verticalFrame_6")
@@ -405,23 +431,29 @@ class Ui_SettingsWindow(object):
         self.info_models.setMinimumSize(QSize(28, 28))
         self.info_models.setMaximumSize(QSize(28, 28))
         self.info_models.setCursor(QCursor(Qt.PointingHandCursor))
+        self.info_models.setText(u"i")
 
         self.verticalLayout_28.addWidget(self.info_models)
 
         self.horizontalLayout_18.addWidget(self.verticalFrame_6)
 
-        self.horizontalLayout_18.setStretch(0, 1)
+        self.horizontalLayout_18.setStretch(1, 1)
 
         self.verticalLayout_27.addLayout(self.horizontalLayout_18)
 
-        self.frame_17 = QFrame(self.frame_template_5)
-        self.frame_17.setObjectName(u"frame_17")
-        self.frame_17.setProperty("settingsContent", True)
-        self.gridLayout_18 = QGridLayout(self.frame_17)
+        self.models_stackedWidget = QStackedWidget(self.frame_template_5)
+        self.models_stackedWidget.setObjectName(u"models_stackedWidget")
+        self.models_stackedWidget.setMinimumSize(QSize(0, 150))
+        self.models_stackedWidget.setProperty("settingsContent", True)
+        self.models_stackedWidget_page_1 = QWidget()
+        self.models_stackedWidget_page_1.setObjectName(
+            u"models_stackedWidget_page_1")
+        self.gridLayout_18 = QGridLayout(self.models_stackedWidget_page_1)
         self.gridLayout_18.setObjectName(u"gridLayout_18")
         self.gridLayout_18.setHorizontalSpacing(10)
         self.gridLayout_18.setContentsMargins(20, 15, 20, 10)
-        self.frame_instrumentalComboBox = QFrame(self.frame_17)
+        self.frame_instrumentalComboBox = QFrame(
+            self.models_stackedWidget_page_1)
         self.frame_instrumentalComboBox.setObjectName(
             u"frame_instrumentalComboBox")
         self.frame_instrumentalComboBox.setFrameShape(QFrame.NoFrame)
@@ -453,14 +485,14 @@ class Ui_SettingsWindow(object):
         self.gridLayout_18.addWidget(
             self.frame_instrumentalComboBox, 0, 0, 1, 1)
 
-        self.frame_constants = QFrame(self.frame_17)
+        self.frame_constants = QFrame(self.models_stackedWidget_page_1)
         self.frame_constants.setObjectName(u"frame_constants")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(
+        sizePolicy5 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(
             self.frame_constants.sizePolicy().hasHeightForWidth())
-        self.frame_constants.setSizePolicy(sizePolicy4)
+        self.frame_constants.setSizePolicy(sizePolicy5)
         self.frame_constants.setMinimumSize(QSize(0, 0))
         self.frame_constants.setMaximumSize(QSize(230, 140))
         self.frame_constants.setFrameShape(QFrame.NoFrame)
@@ -494,7 +526,7 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_18.addWidget(self.frame_constants, 0, 1, 1, 1)
 
-        self.frame_stackComboBox = QFrame(self.frame_17)
+        self.frame_stackComboBox = QFrame(self.models_stackedWidget_page_1)
         self.frame_stackComboBox.setObjectName(u"frame_stackComboBox")
         self.frame_stackComboBox.setFrameShape(QFrame.NoFrame)
         self.frame_stackComboBox.setFrameShadow(QFrame.Raised)
@@ -525,9 +557,41 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_18.addWidget(self.frame_stackComboBox, 0, 2, 1, 1)
 
-        self.verticalLayout_27.addWidget(self.frame_17)
+        self.models_stackedWidget.addWidget(self.models_stackedWidget_page_1)
+        self.models_stackedWidget_page_2 = QWidget()
+        self.models_stackedWidget_page_2.setObjectName(
+            u"models_stackedWidget_page_2")
+        self.gridLayout = QGridLayout(self.models_stackedWidget_page_2)
+        self.gridLayout.setObjectName(u"gridLayout")
+        self.frame_12 = QFrame(self.models_stackedWidget_page_2)
+        self.frame_12.setObjectName(u"frame_12")
+        self.frame_12.setFrameShape(QFrame.NoFrame)
+        self.frame_12.setFrameShadow(QFrame.Raised)
+        self.label_9 = QLabel(self.frame_12)
+        self.label_9.setObjectName(u"label_9")
+        self.label_9.setGeometry(QRect(350, 30, 151, 31))
+        self.treeWidget = QTreeWidget(self.frame_12)
+        __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
+        __qtreewidgetitem1 = QTreeWidgetItem(__qtreewidgetitem)
+        __qtreewidgetitem1.setCheckState(0, Qt.Checked)
+        __qtreewidgetitem2 = QTreeWidgetItem(__qtreewidgetitem)
+        __qtreewidgetitem2.setCheckState(0, Qt.Unchecked)
+        __qtreewidgetitem3 = QTreeWidgetItem(self.treeWidget)
+        __qtreewidgetitem4 = QTreeWidgetItem(__qtreewidgetitem3)
+        __qtreewidgetitem4.setCheckState(0, Qt.Unchecked)
+        __qtreewidgetitem5 = QTreeWidgetItem(__qtreewidgetitem3)
+        __qtreewidgetitem5.setCheckState(0, Qt.Unchecked)
+        QTreeWidgetItem(self.treeWidget)
+        self.treeWidget.setObjectName(u"treeWidget")
+        self.treeWidget.setGeometry(QRect(40, 0, 256, 192))
+        self.treeWidget.setStyleSheet(u"")
+        self.treeWidget.header().setVisible(False)
 
-        self.verticalLayout_27.setStretch(1, 1)
+        self.gridLayout.addWidget(self.frame_12, 0, 0, 1, 1)
+
+        self.models_stackedWidget.addWidget(self.models_stackedWidget_page_2)
+
+        self.verticalLayout_27.addWidget(self.models_stackedWidget)
 
         self.verticalLayout_6.addWidget(self.frame_template_5)
 
@@ -553,7 +617,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 98, 35))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 656, 551))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -588,7 +652,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 98, 35))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 656, 551))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -655,12 +719,18 @@ class Ui_SettingsWindow(object):
         self.verticalLayout_16.setContentsMargins(0, 25, 35, 0)
         self.frame_4 = QFrame(self.scrollAreaWidgetContents_5)
         self.frame_4.setObjectName(u"frame_4")
+        sizePolicy6 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+        sizePolicy6.setHorizontalStretch(0)
+        sizePolicy6.setVerticalStretch(0)
+        sizePolicy6.setHeightForWidth(
+            self.frame_4.sizePolicy().hasHeightForWidth())
+        self.frame_4.setSizePolicy(sizePolicy6)
         self.frame_4.setFrameShape(QFrame.NoFrame)
         self.frame_4.setFrameShadow(QFrame.Raised)
         self.frame_4.setLineWidth(0)
-        self.gridLayout_7 = QGridLayout(self.frame_4)
-        self.gridLayout_7.setObjectName(u"gridLayout_7")
-        self.gridLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_9 = QVBoxLayout(self.frame_4)
+        self.verticalLayout_9.setObjectName(u"verticalLayout_9")
+        self.verticalLayout_9.setContentsMargins(0, 0, 0, 0)
         self.frame_5 = QFrame(self.frame_4)
         self.frame_5.setObjectName(u"frame_5")
         self.frame_5.setFrameShape(QFrame.NoFrame)
@@ -691,6 +761,7 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_14.setContentsMargins(-1, -1, 8, -1)
         self.label_13 = QLabel(self.frame_template)
         self.label_13.setObjectName(u"label_13")
+        self.label_13.setMinimumSize(QSize(0, 33))
         self.label_13.setIndent(10)
         self.label_13.setProperty("title", True)
 
@@ -707,6 +778,7 @@ class Ui_SettingsWindow(object):
         self.info_settings.setMinimumSize(QSize(28, 28))
         self.info_settings.setMaximumSize(QSize(28, 28))
         self.info_settings.setCursor(QCursor(Qt.PointingHandCursor))
+        self.info_settings.setText(u"i")
 
         self.verticalLayout_13.addWidget(self.info_settings)
 
@@ -733,18 +805,17 @@ class Ui_SettingsWindow(object):
         self.gridLayout_4.setHorizontalSpacing(0)
         self.gridLayout_4.setVerticalSpacing(10)
         self.gridLayout_4.setContentsMargins(0, 5, 0, 0)
-        self.checkBox_disableAnimations = QCheckBox(self.frame_8)
-        self.checkBox_disableAnimations.setObjectName(
-            u"checkBox_disableAnimations")
+        self.checkBox_enableAnimations = QCheckBox(self.frame_8)
+        self.checkBox_enableAnimations.setObjectName(
+            u"checkBox_enableAnimations")
 
-        self.gridLayout_4.addWidget(
-            self.checkBox_disableAnimations, 4, 0, 1, 1)
+        self.gridLayout_4.addWidget(self.checkBox_enableAnimations, 4, 0, 1, 1)
 
-        self.checkBox_disableShortcuts = QCheckBox(self.frame_8)
-        self.checkBox_disableShortcuts.setObjectName(
-            u"checkBox_disableShortcuts")
+        self.checkBox_showInfoButtons = QCheckBox(self.frame_8)
+        self.checkBox_showInfoButtons.setObjectName(
+            u"checkBox_showInfoButtons")
 
-        self.gridLayout_4.addWidget(self.checkBox_disableShortcuts, 4, 1, 1, 1)
+        self.gridLayout_4.addWidget(self.checkBox_showInfoButtons, 4, 1, 1, 1)
 
         self.checkBox_notifyUpdates = QCheckBox(self.frame_8)
         self.checkBox_notifyUpdates.setObjectName(u"checkBox_notifyUpdates")
@@ -801,12 +872,12 @@ class Ui_SettingsWindow(object):
 
         self.pushButton_clearCommand = QPushButton(self.frame_11)
         self.pushButton_clearCommand.setObjectName(u"pushButton_clearCommand")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(
+        sizePolicy7 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Minimum)
+        sizePolicy7.setHorizontalStretch(0)
+        sizePolicy7.setVerticalStretch(0)
+        sizePolicy7.setHeightForWidth(
             self.pushButton_clearCommand.sizePolicy().hasHeightForWidth())
-        self.pushButton_clearCommand.setSizePolicy(sizePolicy5)
+        self.pushButton_clearCommand.setSizePolicy(sizePolicy7)
         self.pushButton_clearCommand.setMinimumSize(QSize(50, 0))
         self.pushButton_clearCommand.setCursor(QCursor(Qt.PointingHandCursor))
         self.pushButton_clearCommand.setFlat(True)
@@ -837,6 +908,7 @@ class Ui_SettingsWindow(object):
         self.horizontalLayout_7.setContentsMargins(-1, -1, 8, -1)
         self.label_5 = QLabel(self.frame_export)
         self.label_5.setObjectName(u"label_5")
+        self.label_5.setMinimumSize(QSize(0, 33))
         self.label_5.setIndent(10)
         self.label_5.setProperty("title", True)
 
@@ -853,6 +925,7 @@ class Ui_SettingsWindow(object):
         self.info_export.setMinimumSize(QSize(28, 28))
         self.info_export.setMaximumSize(QSize(28, 28))
         self.info_export.setCursor(QCursor(Qt.PointingHandCursor))
+        self.info_export.setText(u"i")
 
         self.verticalLayout_8.addWidget(self.info_export)
 
@@ -884,9 +957,9 @@ class Ui_SettingsWindow(object):
 
         self.label_3 = QLabel(self.frame_export_2)
         self.label_3.setObjectName(u"label_3")
-        sizePolicy4.setHeightForWidth(
+        sizePolicy5.setHeightForWidth(
             self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy4)
+        self.label_3.setSizePolicy(sizePolicy5)
         self.label_3.setMinimumSize(QSize(110, 0))
         self.label_3.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
@@ -1040,7 +1113,7 @@ class Ui_SettingsWindow(object):
 
         self.horizontalLayout_6.setStretch(0, 1)
 
-        self.gridLayout_7.addWidget(self.frame_5, 0, 0, 1, 1)
+        self.verticalLayout_9.addWidget(self.frame_5)
 
         self.verticalLayout_16.addWidget(self.frame_4, 0, Qt.AlignTop)
 
@@ -1056,8 +1129,9 @@ class Ui_SettingsWindow(object):
 
         self.retranslateUi(SettingsWindow)
 
-        self.stackedWidget.setCurrentIndex(3)
+        self.stackedWidget.setCurrentIndex(0)
         self.comboBox_highEndProcess.setCurrentIndex(4)
+        self.models_stackedWidget.setCurrentIndex(1)
         self.comboBox_winSize.setCurrentIndex(0)
         self.pushButton_de.setDefault(False)
         self.pushButton_en.setDefault(False)
@@ -1070,16 +1144,14 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Settings", None))
         self.radioButton_separationSettings.setText(
             QCoreApplication.translate("SettingsWindow", u"Separation Settings", None))
-        self.radioButton_shortcuts.setText(
-            QCoreApplication.translate("SettingsWindow", u"Shortcuts", None))
+        self.radioButton_customModels.setText(
+            QCoreApplication.translate("SettingsWindow", u"Custom Models", None))
         self.radioButton_customization.setText(
             QCoreApplication.translate("SettingsWindow", u"Customization", None))
         self.radioButton_preferences.setText(
             QCoreApplication.translate("SettingsWindow", u"Preferences", None))
         self.label_15.setText(QCoreApplication.translate(
             "SettingsWindow", u"Conversion", None))
-        self.info_conversion.setText(
-            QCoreApplication.translate("SettingsWindow", u"i", None))
         self.comboBox_highEndProcess.setItemText(
             0, QCoreApplication.translate("SettingsWindow", u"None", None))
         self.comboBox_highEndProcess.setItemText(
@@ -1113,14 +1185,12 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Deep extraction", None))
         self.label_16.setText(QCoreApplication.translate(
             "SettingsWindow", u"Presets", None))
-        self.info_presets.setText(
-            QCoreApplication.translate("SettingsWindow", u"i", None))
         self.pushButton_presetsEdit.setText(
             QCoreApplication.translate("SettingsWindow", u"Edit", None))
         self.label_17.setText(QCoreApplication.translate(
             "SettingsWindow", u"Models", None))
-        self.info_models.setText(
-            QCoreApplication.translate("SettingsWindow", u"i", None))
+        self.checkBox_ensemble.setText(
+            QCoreApplication.translate("SettingsWindow", u"Ensemble", None))
         self.label_2.setText(QCoreApplication.translate(
             "SettingsWindow", u"Instrumental Model", None))
         self.label_winSize.setText(QCoreApplication.translate(
@@ -1128,6 +1198,37 @@ class Ui_SettingsWindow(object):
 
         self.label_4.setText(QCoreApplication.translate(
             "SettingsWindow", u"Vocal Model", None))
+        self.label_9.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Ensemble Page", None))
+        ___qtreewidgetitem = self.treeWidget.headerItem()
+        ___qtreewidgetitem.setText(
+            0, QCoreApplication.translate("SettingsWindow", u"1", None))
+
+        __sortingEnabled = self.treeWidget.isSortingEnabled()
+        self.treeWidget.setSortingEnabled(False)
+        ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
+        ___qtreewidgetitem1.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Instrumental", None))
+        ___qtreewidgetitem2 = ___qtreewidgetitem1.child(0)
+        ___qtreewidgetitem2.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Model 1", None))
+        ___qtreewidgetitem3 = ___qtreewidgetitem1.child(1)
+        ___qtreewidgetitem3.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Model 2", None))
+        ___qtreewidgetitem4 = self.treeWidget.topLevelItem(1)
+        ___qtreewidgetitem4.setText(
+            0, QCoreApplication.translate("SettingsWindow", u"Vocal", None))
+        ___qtreewidgetitem5 = ___qtreewidgetitem4.child(0)
+        ___qtreewidgetitem5.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Vocal Model 1", None))
+        ___qtreewidgetitem6 = ___qtreewidgetitem4.child(1)
+        ___qtreewidgetitem6.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Vocal Model 2", None))
+        ___qtreewidgetitem7 = self.treeWidget.topLevelItem(2)
+        ___qtreewidgetitem7.setText(0, QCoreApplication.translate(
+            "SettingsWindow", u"Custom", None))
+        self.treeWidget.setSortingEnabled(__sortingEnabled)
+
         self.label_6.setText(QCoreApplication.translate(
             "SettingsWindow", u"Themes", None))
         self.radioButton_darkTheme.setText(
@@ -1136,12 +1237,10 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Light", None))
         self.label_13.setText(QCoreApplication.translate(
             "SettingsWindow", u"Settings", None))
-        self.info_settings.setText(
-            QCoreApplication.translate("SettingsWindow", u"i", None))
-        self.checkBox_disableAnimations.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Disable Animations", None))
-        self.checkBox_disableShortcuts.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Disable Shortcuts", None))
+        self.checkBox_enableAnimations.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Enable Animations", None))
+        self.checkBox_showInfoButtons.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Show Info Buttons", None))
         self.checkBox_notifyUpdates.setText(QCoreApplication.translate(
             "SettingsWindow", u"Notify me of application updates", None))
         self.checkBox_notifiyOnFinish.setText(QCoreApplication.translate(
@@ -1165,8 +1264,6 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Clear", None))
         self.label_5.setText(QCoreApplication.translate(
             "SettingsWindow", u"Export Settings", None))
-        self.info_export.setText(
-            QCoreApplication.translate("SettingsWindow", u"i", None))
         self.pushButton_exportDirectory.setText("")
         self.label_3.setText(QCoreApplication.translate(
             "SettingsWindow", u"Export Directory:", None))

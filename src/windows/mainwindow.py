@@ -82,7 +82,7 @@ class MainWindow(QtWidgets.QWidget):
         Open the settings window
         """
         self.logger.info('Opening settings window...')
-        if not self.app.windows['settings'].ui.checkBox_disableAnimations.isChecked():
+        if self.app.settingsWindow.ui.checkBox_enableAnimations.isChecked():
             # Animations enabled
             self.settings_ani.start()
         # Reshow window
@@ -589,8 +589,6 @@ class MainWindow(QtWidgets.QWidget):
         self.settings.setValue('isMaximized',
                                self.isMaximized())
         self.settings.endGroup()
-        # Commit Save
-        self.settings.sync()
 
     def update_translation(self):
         """
@@ -686,7 +684,7 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         """
         Resume playing the song and send gif to pause image
         """
-        if not self.app.windows['settings'].ui.checkBox_disableAnimations.isChecked():
+        if self.app.settingsWindow.ui.checkBox_enableAnimations.isChecked():
             # Enabled Animations
             # Start gif
             self.playpause_gif.setPaused(False)
@@ -700,7 +698,7 @@ class AudioPlayer(QtMultimedia.QMediaPlayer):
         """
         Pause output and update image to play
         """
-        if not self.app.windows['settings'].ui.checkBox_disableAnimations.isChecked():
+        if self.app.settingsWindow.ui.checkBox_enableAnimations.isChecked():
             # Enabled Animations
             # Start gif
             self.playpause_gif.setPaused(False)

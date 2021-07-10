@@ -41,7 +41,7 @@ QRadioButton[menu="true"]::indicator {
 QFrame[menu="true"] {
 	background-color: rgb(31, 31, 31);
 }
-QFrame[settingsContent="true"] {
+*[settingsContent="true"] {
 	background-color: #2A2A2A;
 	border: 1px solid #3b3b3b;
 	border-radius: 5px;

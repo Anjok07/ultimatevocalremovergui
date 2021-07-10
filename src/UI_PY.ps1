@@ -52,7 +52,7 @@ for () {
             New-Item -ItemType Directory -Force -Path $QM_Dir/$language | Out-Null
             New-Item -ItemType Directory -Force -Path $QM_Dir/$language/infos | Out-Null
             if ($language -ne "en") {
-                Copy-Item -Path "$QM_Dir/en/infos/*" -Destination "$QM_Dir/$language/infos" -PassThru
+                Copy-Item -Path "$QM_Dir/en/infos/*" -Destination "$QM_Dir/$language/infos" -PassThru | Out-Null
             }
             cmd.exe /c "lrelease -silent -removeidentical $TS_Dir/$language.qt.ts -qm $QM_Dir/$language/$language.qm"
         }

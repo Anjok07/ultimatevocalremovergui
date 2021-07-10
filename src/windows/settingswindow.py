@@ -15,6 +15,7 @@ from .infowindow import InfoWindow
 # -Other-
 import datetime as dt
 from collections import OrderedDict
+import torch
 # System
 import hashlib
 import os
@@ -26,7 +27,7 @@ class SettingsWindow(QtWidgets.QWidget):
     """
     Settings window for UVR, available sections are:
         - Seperation Settings: Modify settings, like model and ai engine for the seperation of audio files
-        - Shortcuts: Set shortcuts to quickly change settings or select other music files/new export directory
+        - Custom Models: Implement custom models
         - Customization: Select from different themes for the application
         - Preferences: Change personalised settings like language, export directory,
                        and whether to show the command line
@@ -46,7 +47,7 @@ class SettingsWindow(QtWidgets.QWidget):
         # -Other Variables-
         self.menu_update_methods = {
             0: self.update_page_seperationSettings,
-            1: self.update_page_shortcuts,
+            1: self.update_page_customModels,
             2: self.update_page_customization,
             3: self.update_page_preferences,
         }
@@ -142,6 +143,21 @@ class SettingsWindow(QtWidgets.QWidget):
         self.settingsManager.set_settings(settings)
         self.search_for_preset = True
 
+    def checkbox_showInfoButtons_toggled(self):
+        """Show or hide info buttons based on checkbox state"""
+        info_buttons = filter(lambda btn: "info" in btn.objectName().lower(),
+                              self.findChildren(QtWidgets.QPushButton))
+        show_buttons = self.ui.checkBox_showInfoButtons.isChecked()
+        for btn in info_buttons:
+            btn.setVisible(show_buttons)
+
+    def checkbox_ensemble_toggled(self):
+        """Switch to normal or ensemble page in the models section"""
+        if self.ui.checkBox_ensemble.isChecked():
+            self.ui.models_stackedWidget.setCurrentIndex(1)
+        else:
+            self.ui.models_stackedWidget.setCurrentIndex(0)
+
     def frame_export_dragEnterEvent(self, event: QtGui.QDragEnterEvent):
         """
         Check whether the files the user is dragging over the widget
@@ -197,6 +213,8 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.indent_backwards()
 
     def settings_changed(self):
+        # Searches for matching presets and changes the currently selected
+        # preset with the matched one if a preset was found
         if self.search_for_preset:
             current_settings = self.settingsManager.get_settings(0)
             presets: dict = self.app.windows['presetsEditor'].get_presets()
@@ -215,17 +233,6 @@ class SettingsWindow(QtWidgets.QWidget):
                     break
             else:
                 self.ui.comboBox_presets.setCurrentIndex(0)
-
-    def show_info(self, title: str, text: str):
-        """Show info to user with QMessageBox
-
-        Args:
-            title (str): Title of Message
-            text (str): Content of Message
-        """
-        self.app.windows['info'].setWindowTitle(title)
-        self.app.windows['info'].set_text(text)
-        self.app.windows['info'].show()
 
     # -Window Setup Methods-
 
@@ -332,6 +339,10 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.comboBox_instrumental.currentIndexChanged.connect(self.update_page_seperationSettings)
             self.ui.comboBox_vocal.currentIndexChanged.connect(self.update_page_seperationSettings)
             self.ui.comboBox_presets.currentIndexChanged.connect(self.comboBox_presets_currentIndexChanged)
+            self.ui.checkBox_ensemble.toggled.connect(self.checkbox_ensemble_toggled)
+            # -Customization Page-
+            self.ui.radioButton_lightTheme.clicked.connect(lambda: self.app.themeManager.load_theme('light'))
+            self.ui.radioButton_darkTheme.clicked.connect(lambda: self.app.themeManager.load_theme('dark'))
             # -Preferences Page-
             # Language
             for button in self.ui.frame_languages.findChildren(QtWidgets.QPushButton):
@@ -347,12 +358,8 @@ class SettingsWindow(QtWidgets.QWidget):
             self.ui.pushButton_clearCommand.clicked.connect(self.pushButton_clearCommand_clicked)
             # Comboboxes
             self.ui.comboBox_command.currentIndexChanged.connect(self.comboBox_command_currentIndexChanged)
-
-            self.ui.radioButton_lightTheme.clicked.connect(lambda: self.app.themeManager.load_theme('light'))
-            self.ui.radioButton_darkTheme.clicked.connect(lambda: self.app.themeManager.load_theme('dark'))
-
-            self.ui.info_conversion.clicked.connect(lambda: self.show_info(self.tr("Conversion Info"),
-                                                                           self.app.translator.loaded_language.settings_conversion))
+            # Checkboxes
+            self.ui.checkBox_showInfoButtons.toggled.connect(self.checkbox_showInfoButtons_toggled)
 
             bind_settings_changed()
 
@@ -368,7 +375,7 @@ class SettingsWindow(QtWidgets.QWidget):
             self.menu_group = QtWidgets.QButtonGroup(self)  # Menu group
             self.menu_group.addButton(self.ui.radioButton_separationSettings,
                                       id=0)
-            self.menu_group.addButton(self.ui.radioButton_shortcuts,
+            self.menu_group.addButton(self.ui.radioButton_customModels,
                                       id=1)
             self.menu_group.addButton(self.ui.radioButton_customization,
                                       id=2)
@@ -377,17 +384,14 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # -Before setup-
         self.search_for_preset = False
-        # Load saved settings for widgets
-        self.load_window()
         # Update available model lists
         self._update_selectable_models()
         # Open settings window on startup
         open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
                                             bool)
-        if not const.CUDA_AVAILABLE:
-            self.ui.checkBox_gpuConversion.setEnabled(False)
-            self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
+        # Load saved settings for widgets
+        self.load_window()
 
         # -Setup-
         setup_menu()
@@ -399,12 +403,18 @@ class SettingsWindow(QtWidgets.QWidget):
             self.app.windows['main'].pushButton_settings_clicked()
 
         # -After setup-
-        # Clear command
+        # Commands for update
         self.pushButton_clearCommand_clicked()
+        self.checkbox_showInfoButtons_toggled()
+        self.checkbox_ensemble_toggled()
         # Load menu (Preferences)
         self.update_window()
         self.menu_loadPage(0, True)
         self.search_for_preset = True
+        if not torch.cuda.is_available():
+            self.ui.checkBox_gpuConversion.setEnabled(False)
+            self.ui.checkBox_gpuConversion.setChecked(False)
+            self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
         self.logger.indent_backwards()
 
     def load_window(self):
@@ -431,7 +441,7 @@ class SettingsWindow(QtWidgets.QWidget):
         self.logger.info('Updating settings window...',
                          indent_forwards=True)
         self.update_page_seperationSettings()
-        self.update_page_shortcuts()
+        self.update_page_customModels()
         self.update_page_customization()
         self.update_page_preferences()
         self.logger.indent_backwards()
@@ -442,27 +452,30 @@ class SettingsWindow(QtWidgets.QWidget):
         Update values and states of all widgets in the
         seperation settings page
         """
+        def refill_presets_combobox():
+            mainWindowPresetWidget = self.app.windows['main'].ui.comboBox_presets
+            self.ui.comboBox_presets.blockSignals(True)
+            mainWindowPresetWidget.blockSignals(True)
+            last_text = self.ui.comboBox_presets.currentText()
+            self.ui.comboBox_presets.clear()
+            mainWindowPresetWidget.clear()
+            self.ui.comboBox_presets.addItem('Custom')
+            mainWindowPresetWidget.addItem('Custom')
+            for i, preset_name in enumerate(self.app.windows['presetsEditor'].get_presets().keys()):
+                # Add text to combobox
+                self.ui.comboBox_presets.addItem(preset_name)
+                mainWindowPresetWidget.addItem(preset_name)
+                if preset_name == last_text:
+                    self.ui.comboBox_presets.setCurrentText(preset_name)
+                    mainWindowPresetWidget.setCurrentText(preset_name)
+            self.ui.comboBox_presets.blockSignals(False)
+            mainWindowPresetWidget.blockSignals(False)
+            self.settings_changed()
+
         self.logger.info('Updating: "Seperation Settings" page',
                          indent_forwards=True)
         # -Presets subgroup-
-        mainWindowPresetWidget = self.app.windows['main'].ui.comboBox_presets
-        self.ui.comboBox_presets.blockSignals(True)
-        mainWindowPresetWidget.blockSignals(True)
-        last_text = self.ui.comboBox_presets.currentText()
-        self.ui.comboBox_presets.clear()
-        mainWindowPresetWidget.clear()
-        self.ui.comboBox_presets.addItem('Custom')
-        mainWindowPresetWidget.addItem('Custom')
-        for i, preset_name in enumerate(self.app.windows['presetsEditor'].get_presets().keys()):
-            # Add text to combobox
-            self.ui.comboBox_presets.addItem(preset_name)
-            mainWindowPresetWidget.addItem(preset_name)
-            if preset_name == last_text:
-                self.ui.comboBox_presets.setCurrentText(preset_name)
-                mainWindowPresetWidget.setCurrentText(preset_name)
-        self.ui.comboBox_presets.blockSignals(False)
-        mainWindowPresetWidget.blockSignals(False)
-        self.settings_changed()
+        refill_presets_combobox()
 
         self.logger.indent_backwards()
 
@@ -497,7 +510,6 @@ class SettingsWindow(QtWidgets.QWidget):
                 # Get data
                 full_path = os.path.join(folder, f)
                 model_id = get_model_id(full_path)
-                print(model_id)
                 model_name = os.path.splitext(os.path.basename(f))[0]
                 # Add item to combobox
                 widget.addItem(model_name,
@@ -516,13 +528,13 @@ class SettingsWindow(QtWidgets.QWidget):
         fill_model_comboBox(widget=self.ui.comboBox_vocal,
                             folder=ResourcePaths.vocalModelsDir)
 
-    # Shortcuts Page
-    def update_page_shortcuts(self):
+    # Custom Models Page
+    def update_page_customModels(self):
         """
         Update values and states of all widgets in the
-        shortcuts page
+        custom models page
         """
-        self.logger.info('Updating: "Shortcuts" page',
+        self.logger.info('Updating: "Custom Models" page',
                          indent_forwards=True)
         self.logger.indent_backwards()
 
@@ -577,7 +589,7 @@ class SettingsWindow(QtWidgets.QWidget):
                 Which page to load.
 
                 0 - Seperation Settings Page
-                1 - Shortcuts Page
+                1 - Custom Models Page
                 2 - Customization Page
                 3 - Preferences Page
             force (bool):
@@ -626,8 +638,6 @@ class SettingsWindow(QtWidgets.QWidget):
         self.settings.setValue('pos',
                                self.pos())
         self.settings.endGroup()
-        # Commit Save
-        self.settings.sync()
 
     def update_translation(self):
         """Update translation of this window"""
@@ -680,6 +690,8 @@ class SettingsManager:
             self.win.ui.checkBox_postProcess,
             self.win.ui.checkBox_deepExtraction,
             # -Models-
+            # Checkbox
+            self.win.ui.checkBox_ensemble,
             # Combobox
             self.win.ui.comboBox_instrumental,
             self.win.ui.comboBox_vocal,
@@ -690,7 +702,7 @@ class SettingsManager:
             # -Presets-
             # Combobox
             self.win.ui.comboBox_presets, ]
-        shortcuts_widgets = []
+        customModels_widgets = []
         customization_widgets = [
             # self.win.ui.radioButton_lightTheme,
             # self.win.ui.radioButton_darkTheme,
@@ -701,8 +713,8 @@ class SettingsManager:
             self.win.ui.checkBox_notifiyOnFinish,
             self.win.ui.checkBox_notifyUpdates,
             self.win.ui.checkBox_settingsStartup,
-            self.win.ui.checkBox_disableAnimations,
-            self.win.ui.checkBox_disableShortcuts,
+            self.win.ui.checkBox_enableAnimations,
+            self.win.ui.checkBox_showInfoButtons,
             self.win.ui.checkBox_multithreading,
             # Combobox
             self.win.ui.comboBox_command,
@@ -713,7 +725,7 @@ class SettingsManager:
 
         # Assign to save_widgets
         self.save_widgets[0] = seperation_settings_widgets
-        self.save_widgets[1] = shortcuts_widgets
+        self.save_widgets[1] = customModels_widgets
         self.save_widgets[2] = customization_widgets
         self.save_widgets[3] = preferences_widgets
 
@@ -726,7 +738,7 @@ class SettingsManager:
                 Defaults to None.
 
                 0 - Seperation Settings Page
-                1 - Shortcuts Page
+                1 - Custom Models Page
                 2 - Customization Page
                 3 - Preferences Page
                 None - All widgets
@@ -919,7 +931,7 @@ class SettingsManager:
                 Defaults to None.
 
                 0 - Seperation Settings Page
-                1 - Shortcuts Page
+                1 - Custom Models Page
                 2 - Customization Page
                 3 - Preferences Page
                 None - All widgets

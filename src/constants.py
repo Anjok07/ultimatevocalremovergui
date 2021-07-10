@@ -35,7 +35,6 @@ JSON_TO_NAME = OrderedDict(**{
     'vocalModelName': 'comboBox_vocal',
     'windowSize': 'comboBox_winSize',
 })
-CUDA_AVAILABLE = torch.cuda.is_available()
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
     'inputPaths': [],
@@ -83,7 +82,7 @@ DEFAULT_SETTINGS = {
     # --Settings window -> Seperation Settings--
     # -Conversion-
     # Boolean
-    'checkBox_gpuConversion': CUDA_AVAILABLE,
+    'checkBox_gpuConversion': torch.cuda.is_available(),
     'checkBox_postProcess': converter.default_data['postProcess'],
     'checkBox_tta': converter.default_data['tta'],
     'checkBox_outputImage': converter.default_data['outputImage'],
@@ -93,6 +92,7 @@ DEFAULT_SETTINGS = {
     'doubleSpinBox_aggressiveness': converter.default_data['aggressiveness'],
     'comboBox_highEndProcess': converter.default_data['highEndProcess'],
     # -Models-
+    'checkBox_ensemble': False,
     'comboBox_instrumental': '',
     'comboBox_vocal': '',
     'comboBox_winSize': converter.default_data['window_size'],
@@ -111,11 +111,11 @@ DEFAULT_SETTINGS = {
     # Open settings on startup
     'checkBox_settingsStartup': False,
     # Disable animations
-    'checkBox_disableAnimations': False,
+    'checkBox_enableAnimations': True,
     # Disable Shortcuts
-    'checkBox_disableShortcuts': False,
+    'checkBox_showInfoButtons': True,
     # Process multiple files at once
-    'checkBox_multithreading': False,
+    'checkBox_multithreading': converter.default_data['multithreading'],
     # -Export Settings-
     # Autosave Instrumentals/Vocals
     'checkBox_autoSaveInstrumentals': True,

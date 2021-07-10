@@ -17,7 +17,8 @@ class Ui_InfoWindow(object):
     def setupUi(self, InfoWindow):
         if not InfoWindow.objectName():
             InfoWindow.setObjectName(u"InfoWindow")
-        InfoWindow.resize(450, 357)
+        InfoWindow.resize(563, 562)
+        InfoWindow.setWindowTitle(u"Info Window")
         self.verticalLayout = QVBoxLayout(InfoWindow)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -43,6 +44,5 @@ class Ui_InfoWindow(object):
     # setupUi
 
     def retranslateUi(self, InfoWindow):
-        InfoWindow.setWindowTitle(
-            QCoreApplication.translate("InfoWindow", u"Form", None))
+        pass
     # retranslateUi

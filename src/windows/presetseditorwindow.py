@@ -167,9 +167,10 @@ class PresetsEditorWindow(QtWidgets.QWidget):
 
         # Some paths already selected
         msg = QtWidgets.QMessageBox()
-        msg.setWindowTitle(self.tr('Test', 'Confirmation', 'A'))
+        msg.setWindowTitle(QtCore.QCoreApplication.translate('MessageBox', 'Confirmation'))
         msg.setIcon(QtWidgets.QMessageBox.Icon.Warning)
-        msg.setText(f'You will delete {len(selected_items)} items. Do you wish to continue?')
+        msg.setText(QtCore.QCoreApplication.translate('MessageBox',
+                                                      'You will delete %n items. Do you wish to continue?').replace("%n", str(len(selected_items))))
         msg.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         msg.setWindowFlag(Qt.WindowStaysOnTopHint)
         val = msg.exec_()

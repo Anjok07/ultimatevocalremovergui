@@ -72,9 +72,10 @@ class CustomApplication(QtWidgets.QApplication):
             'presetsEditor': presetseditorwindow.PresetsEditorWindow(self),
             'info': infowindow.InfoWindow(self),
         }
-        self.mainWindow = self.windows['main']
-        self.settingsWindow = self.windows['settings']
-        self.presetsEditorWindow = self.windows['presetsEditor']
+        self.mainWindow: mainwindow.MainWindow = self.windows['main']
+        self.settingsWindow: settingswindow.SettingsWindow = self.windows['settings']
+        self.presetsEditorWindow: presetseditorwindow.PresetsEditorWindow = self.windows['presetsEditor']
+        self.infoWindow: infowindow.InfoWindow = self.windows['info']
 
         self.logger.info('--- Setting up application ---',
                          indent_forwards=True)
@@ -119,12 +120,26 @@ class CustomApplication(QtWidgets.QApplication):
             for widget in self.windows['settings'].ui.frame_constants.findChildren(QtWidgets.QLineEdit):
                 widget.setValidator(validator)
 
+        def bind_info_boxes():
+            def show_info(title: str, text: str):
+                """Show info to user with QMessageBox
+
+                Args:
+                    title (str): Title of Message
+                    text (str): Content of Message
+                """
+                self.infoWindow.update_info(title, text)
+                self.infoWindow.show()
+
+            self.settingsWindow.ui.info_conversion.clicked.connect(lambda: show_info(self.tr("Conversion Info"),
+                                                                                     self.translator.loaded_language.settings_conversion))
         # -Before-
 
         # -Setup-
         setup_windows()
         improve_comboboxes()
         assign_lineEdit_validators()
+        bind_info_boxes()
 
         # -After-
         # Load language
@@ -139,7 +154,7 @@ class CustomApplication(QtWidgets.QApplication):
         # with open(os.path.join(os.getcwd(), '..', 'startup', 'run.txt'), 'w') as f:
         #     f.write('1')
 
-    @ staticmethod
+    @staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):
         """Extend functionality for the QComboBox.showPopup function
 

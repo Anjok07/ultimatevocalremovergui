@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>947</width>
+    <width>906</width>
     <height>559</height>
    </rect>
   </property>
@@ -394,12 +394,7 @@
                   </size>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">QComboBox::down-arrow {
-	image: none;
-}
-QComboBox::drop-down {
-	border-width: 0px;
-}</string>
+                  <string notr="true"/>
                  </property>
                 </widget>
                </item>

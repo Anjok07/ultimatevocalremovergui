@@ -17,7 +17,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(947, 559)
+        MainWindow.resize(906, 559)
         MainWindow.setMinimumSize(QSize(0, 0))
         MainWindow.setStyleSheet(u"")
         self.horizontalLayout_2 = QHBoxLayout(MainWindow)
@@ -174,12 +174,7 @@ class Ui_MainWindow(object):
         self.comboBox_presets.setObjectName(u"comboBox_presets")
         self.comboBox_presets.setMinimumSize(QSize(135, 25))
         self.comboBox_presets.setMaximumSize(QSize(135, 16777215))
-        self.comboBox_presets.setStyleSheet(u"QComboBox::down-arrow {\n"
-                                            "	image: none;\n"
-                                            "}\n"
-                                            "QComboBox::drop-down {\n"
-                                            "	border-width: 0px;\n"
-                                            "}")
+        self.comboBox_presets.setStyleSheet(u"")
 
         self.verticalLayout_10.addWidget(self.comboBox_presets)
 

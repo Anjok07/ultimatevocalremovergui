@@ -110,7 +110,8 @@ class InfoWindow(QtWidgets.QWidget):
         Save states of the widgets in this window
         """
 
-    def set_text(self, text: str):
+    def update_info(self, title: str, text: str):
+        self.setWindowTitle(title)
         self.ui.textEdit.setMarkdown(text)
 
     # -Overriden methods-
@@ -129,8 +130,6 @@ class InfoWindow(QtWidgets.QWidget):
         self.settings.setValue('isMaximized',
                                self.isMaximized())
         self.settings.endGroup()
-        # Commit Save
-        self.settings.sync()
 
     def update_translation(self):
         """

@@ -43,7 +43,7 @@ DEFAULT_SETTINGS = {
     # Export path (Default: desktop)
     'exportDirectory': QtCore.QStandardPaths.writableLocation(QtCore.QStandardPaths.DesktopLocation),
     # Language in format {language}_{country} (Default: system language)
-    'language': Translator.SUPPORTED_LANGUAGES[QtCore.QLocale.system().language().name.decode('utf-8')],
+    'language': Translator.SUPPORTED_LANGUAGES[QtCore.QLocale.system().language().name.decode('utf-8').lower()],
     # Presets for seperations
     'presets': [
         ['ALL', {

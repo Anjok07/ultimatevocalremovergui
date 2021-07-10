@@ -18,7 +18,7 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(856, 551)
+        SettingsWindow.resize(941, 551)
         SettingsWindow.setStyleSheet(u"")
         self.horizontalLayout = QHBoxLayout(SettingsWindow)
         self.horizontalLayout.setSpacing(0)
@@ -134,7 +134,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 656, 551))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 741, 551))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -213,31 +213,38 @@ class Ui_SettingsWindow(object):
         self.gridLayout_16 = QGridLayout(self.frame_16)
         self.gridLayout_16.setObjectName(u"gridLayout_16")
         self.gridLayout_16.setHorizontalSpacing(10)
+        self.gridLayout_16.setVerticalSpacing(7)
         self.gridLayout_16.setContentsMargins(20, 15, 20, 15)
-        self.frame_10 = QFrame(self.frame_16)
-        self.frame_10.setObjectName(u"frame_10")
-        self.frame_10.setFrameShape(QFrame.NoFrame)
-        self.frame_10.setFrameShadow(QFrame.Raised)
-        self.horizontalLayout_9 = QHBoxLayout(self.frame_10)
-        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
-        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
-        self.comboBox_highEndProcess = QComboBox(self.frame_10)
-        self.comboBox_highEndProcess.addItem("")
-        self.comboBox_highEndProcess.addItem("")
-        self.comboBox_highEndProcess.addItem("")
-        self.comboBox_highEndProcess.addItem("")
-        self.comboBox_highEndProcess.addItem("")
-        self.comboBox_highEndProcess.setObjectName(u"comboBox_highEndProcess")
+        self.checkBox_gpuConversion = QCheckBox(self.frame_16)
+        self.checkBox_gpuConversion.setObjectName(u"checkBox_gpuConversion")
 
-        self.horizontalLayout_9.addWidget(self.comboBox_highEndProcess)
+        self.gridLayout_16.addWidget(self.checkBox_gpuConversion, 0, 0, 1, 1)
 
-        self.label_8 = QLabel(self.frame_10)
-        self.label_8.setObjectName(u"label_8")
-        self.label_8.setEnabled(True)
+        self.checkBox_tta = QCheckBox(self.frame_16)
+        self.checkBox_tta.setObjectName(u"checkBox_tta")
 
-        self.horizontalLayout_9.addWidget(self.label_8)
+        self.gridLayout_16.addWidget(self.checkBox_tta, 2, 0, 1, 1)
 
-        self.gridLayout_16.addWidget(self.frame_10, 3, 1, 1, 1)
+        self.checkBox_postProcess = QCheckBox(self.frame_16)
+        self.checkBox_postProcess.setObjectName(u"checkBox_postProcess")
+
+        self.gridLayout_16.addWidget(self.checkBox_postProcess, 0, 1, 1, 1)
+
+        self.checkBox_deepExtraction = QCheckBox(self.frame_16)
+        self.checkBox_deepExtraction.setObjectName(u"checkBox_deepExtraction")
+        self.checkBox_deepExtraction.setEnabled(True)
+
+        self.gridLayout_16.addWidget(self.checkBox_deepExtraction, 2, 1, 1, 1)
+
+        self.checkBox_modelFolder = QCheckBox(self.frame_16)
+        self.checkBox_modelFolder.setObjectName(u"checkBox_modelFolder")
+
+        self.gridLayout_16.addWidget(self.checkBox_modelFolder, 3, 0, 1, 1)
+
+        self.checkBox_outputImage = QCheckBox(self.frame_16)
+        self.checkBox_outputImage.setObjectName(u"checkBox_outputImage")
+
+        self.gridLayout_16.addWidget(self.checkBox_outputImage, 3, 1, 1, 1)
 
         self.frame_9 = QFrame(self.frame_16)
         self.frame_9.setObjectName(u"frame_9")
@@ -265,38 +272,73 @@ class Ui_SettingsWindow(object):
 
         self.horizontalLayout_3.addWidget(self.label_7)
 
-        self.gridLayout_16.addWidget(self.frame_9, 2, 1, 1, 1)
+        self.gridLayout_16.addWidget(self.frame_9, 0, 2, 1, 1)
 
-        self.checkBox_outputImage = QCheckBox(self.frame_16)
-        self.checkBox_outputImage.setObjectName(u"checkBox_outputImage")
+        self.frame_10 = QFrame(self.frame_16)
+        self.frame_10.setObjectName(u"frame_10")
+        self.frame_10.setFrameShape(QFrame.NoFrame)
+        self.frame_10.setFrameShadow(QFrame.Raised)
+        self.horizontalLayout_9 = QHBoxLayout(self.frame_10)
+        self.horizontalLayout_9.setObjectName(u"horizontalLayout_9")
+        self.horizontalLayout_9.setContentsMargins(0, 0, 0, 0)
+        self.comboBox_highEndProcess = QComboBox(self.frame_10)
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.addItem("")
+        self.comboBox_highEndProcess.setObjectName(u"comboBox_highEndProcess")
 
-        self.gridLayout_16.addWidget(self.checkBox_outputImage, 3, 0, 1, 1)
+        self.horizontalLayout_9.addWidget(self.comboBox_highEndProcess)
 
-        self.checkBox_gpuConversion = QCheckBox(self.frame_16)
-        self.checkBox_gpuConversion.setObjectName(u"checkBox_gpuConversion")
+        self.label_8 = QLabel(self.frame_10)
+        self.label_8.setObjectName(u"label_8")
+        self.label_8.setEnabled(True)
 
-        self.gridLayout_16.addWidget(self.checkBox_gpuConversion, 0, 0, 1, 1)
+        self.horizontalLayout_9.addWidget(self.label_8)
 
-        self.checkBox_tta = QCheckBox(self.frame_16)
-        self.checkBox_tta.setObjectName(u"checkBox_tta")
+        self.gridLayout_16.addWidget(self.frame_10, 3, 2, 1, 1)
 
-        self.gridLayout_16.addWidget(self.checkBox_tta, 1, 0, 1, 1)
+        self.frame_constants = QFrame(self.frame_16)
+        self.frame_constants.setObjectName(u"frame_constants")
+        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
+        sizePolicy4.setHorizontalStretch(0)
+        sizePolicy4.setVerticalStretch(0)
+        sizePolicy4.setHeightForWidth(
+            self.frame_constants.sizePolicy().hasHeightForWidth())
+        self.frame_constants.setSizePolicy(sizePolicy4)
+        self.frame_constants.setMinimumSize(QSize(0, 0))
+        self.frame_constants.setMaximumSize(QSize(230, 140))
+        self.frame_constants.setFrameShape(QFrame.NoFrame)
+        self.frame_constants.setFrameShadow(QFrame.Raised)
+        self.frame_constants.setLineWidth(0)
+        self.horizontalLayout_2 = QHBoxLayout(self.frame_constants)
+        self.horizontalLayout_2.setObjectName(u"horizontalLayout_2")
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.comboBox_winSize = QComboBox(self.frame_constants)
+        self.comboBox_winSize.addItem(u"352")
+        self.comboBox_winSize.addItem(u"512")
+        self.comboBox_winSize.addItem(u"1024")
+        self.comboBox_winSize.setObjectName(u"comboBox_winSize")
+        self.comboBox_winSize.setMinimumSize(QSize(55, 0))
+        self.comboBox_winSize.setMaximumSize(QSize(55, 25))
+        self.comboBox_winSize.setEditable(True)
+        self.comboBox_winSize.setCurrentText(u"352")
+        self.comboBox_winSize.setProperty("canEdit", True)
 
-        self.checkBox_modelFolder = QCheckBox(self.frame_16)
-        self.checkBox_modelFolder.setObjectName(u"checkBox_modelFolder")
+        self.horizontalLayout_2.addWidget(
+            self.comboBox_winSize, 0, Qt.AlignLeft)
 
-        self.gridLayout_16.addWidget(self.checkBox_modelFolder, 2, 0, 1, 1)
+        self.label_winSize = QLabel(self.frame_constants)
+        self.label_winSize.setObjectName(u"label_winSize")
+        self.label_winSize.setAlignment(
+            Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
 
-        self.checkBox_postProcess = QCheckBox(self.frame_16)
-        self.checkBox_postProcess.setObjectName(u"checkBox_postProcess")
+        self.horizontalLayout_2.addWidget(self.label_winSize)
 
-        self.gridLayout_16.addWidget(self.checkBox_postProcess, 0, 1, 1, 1)
+        self.horizontalLayout_2.setStretch(1, 1)
 
-        self.checkBox_deepExtraction = QCheckBox(self.frame_16)
-        self.checkBox_deepExtraction.setObjectName(u"checkBox_deepExtraction")
-        self.checkBox_deepExtraction.setEnabled(True)
-
-        self.gridLayout_16.addWidget(self.checkBox_deepExtraction, 1, 1, 1, 1)
+        self.gridLayout_16.addWidget(self.frame_constants, 2, 2, 1, 1)
 
         self.verticalLayout_25.addWidget(self.frame_16)
 
@@ -307,6 +349,7 @@ class Ui_SettingsWindow(object):
         self.frame_template_4 = QFrame(self.horizontalFrame_1)
         self.frame_template_4.setObjectName(u"frame_template_4")
         self.frame_template_4.setMinimumSize(QSize(0, 104))
+        self.frame_template_4.setMaximumSize(QSize(230, 16777215))
         self.frame_template_4.setAcceptDrops(True)
         self.verticalLayout_26 = QVBoxLayout(self.frame_template_4)
         self.verticalLayout_26.setSpacing(7)
@@ -347,32 +390,35 @@ class Ui_SettingsWindow(object):
         self.frame_18 = QFrame(self.frame_template_4)
         self.frame_18.setObjectName(u"frame_18")
         self.frame_18.setProperty("settingsContent", True)
-        self.gridLayout_17 = QGridLayout(self.frame_18)
-        self.gridLayout_17.setObjectName(u"gridLayout_17")
-        self.gridLayout_17.setHorizontalSpacing(10)
-        self.gridLayout_17.setContentsMargins(20, 15, 20, 10)
-        self.pushButton_presetsEdit = QPushButton(self.frame_18)
-        self.pushButton_presetsEdit.setObjectName(u"pushButton_presetsEdit")
-        sizePolicy4 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
-        sizePolicy4.setHorizontalStretch(0)
-        sizePolicy4.setVerticalStretch(0)
-        sizePolicy4.setHeightForWidth(
-            self.pushButton_presetsEdit.sizePolicy().hasHeightForWidth())
-        self.pushButton_presetsEdit.setSizePolicy(sizePolicy4)
-        self.pushButton_presetsEdit.setMinimumSize(QSize(65, 27))
-        self.pushButton_presetsEdit.setMaximumSize(QSize(16777215, 16777215))
-        self.pushButton_presetsEdit.setCursor(QCursor(Qt.PointingHandCursor))
-
-        self.gridLayout_17.addWidget(self.pushButton_presetsEdit, 0, 1, 1, 1)
-
+        self.verticalLayout_29 = QVBoxLayout(self.frame_18)
+        self.verticalLayout_29.setObjectName(u"verticalLayout_29")
+        self.verticalLayout_29.setContentsMargins(20, 15, 20, 10)
         self.comboBox_presets = QComboBox(self.frame_18)
         self.comboBox_presets.setObjectName(u"comboBox_presets")
+        sizePolicy1.setHeightForWidth(
+            self.comboBox_presets.sizePolicy().hasHeightForWidth())
+        self.comboBox_presets.setSizePolicy(sizePolicy1)
         self.comboBox_presets.setMinimumSize(QSize(0, 25))
         self.comboBox_presets.setSizeAdjustPolicy(
             QComboBox.AdjustToMinimumContentsLength)
         self.comboBox_presets.setModelColumn(0)
 
-        self.gridLayout_17.addWidget(self.comboBox_presets, 0, 0, 1, 1)
+        self.verticalLayout_29.addWidget(self.comboBox_presets)
+
+        self.pushButton_presetsEdit = QPushButton(self.frame_18)
+        self.pushButton_presetsEdit.setObjectName(u"pushButton_presetsEdit")
+        sizePolicy5 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
+        sizePolicy5.setHorizontalStretch(0)
+        sizePolicy5.setVerticalStretch(0)
+        sizePolicy5.setHeightForWidth(
+            self.pushButton_presetsEdit.sizePolicy().hasHeightForWidth())
+        self.pushButton_presetsEdit.setSizePolicy(sizePolicy5)
+        self.pushButton_presetsEdit.setMinimumSize(QSize(65, 27))
+        self.pushButton_presetsEdit.setMaximumSize(QSize(16777215, 16777215))
+        self.pushButton_presetsEdit.setCursor(QCursor(Qt.PointingHandCursor))
+
+        self.verticalLayout_29.addWidget(
+            self.pushButton_presetsEdit, 0, Qt.AlignHCenter)
 
         self.verticalLayout_26.addWidget(self.frame_18)
 
@@ -380,7 +426,7 @@ class Ui_SettingsWindow(object):
 
         self.horizontalLayout_4.addWidget(self.frame_template_4)
 
-        self.horizontalLayout_4.setStretch(0, 3)
+        self.horizontalLayout_4.setStretch(0, 5)
         self.horizontalLayout_4.setStretch(1, 2)
 
         self.verticalLayout_6.addWidget(self.horizontalFrame_1)
@@ -484,47 +530,6 @@ class Ui_SettingsWindow(object):
 
         self.gridLayout_18.addWidget(
             self.frame_instrumentalComboBox, 0, 0, 1, 1)
-
-        self.frame_constants = QFrame(self.models_stackedWidget_page_1)
-        self.frame_constants.setObjectName(u"frame_constants")
-        sizePolicy5 = QSizePolicy(QSizePolicy.Maximum, QSizePolicy.Preferred)
-        sizePolicy5.setHorizontalStretch(0)
-        sizePolicy5.setVerticalStretch(0)
-        sizePolicy5.setHeightForWidth(
-            self.frame_constants.sizePolicy().hasHeightForWidth())
-        self.frame_constants.setSizePolicy(sizePolicy5)
-        self.frame_constants.setMinimumSize(QSize(0, 0))
-        self.frame_constants.setMaximumSize(QSize(230, 140))
-        self.frame_constants.setFrameShape(QFrame.NoFrame)
-        self.frame_constants.setFrameShadow(QFrame.Raised)
-        self.frame_constants.setLineWidth(0)
-        self.gridLayout_5 = QGridLayout(self.frame_constants)
-        self.gridLayout_5.setObjectName(u"gridLayout_5")
-        self.gridLayout_5.setContentsMargins(-1, 5, -1, 3)
-        self.label_winSize = QLabel(self.frame_constants)
-        self.label_winSize.setObjectName(u"label_winSize")
-        self.label_winSize.setMinimumSize(QSize(80, 0))
-        self.label_winSize.setMaximumSize(QSize(80, 16777215))
-        self.label_winSize.setAlignment(Qt.AlignCenter)
-
-        self.gridLayout_5.addWidget(self.label_winSize, 0, 1, 1, 1)
-
-        self.comboBox_winSize = QComboBox(self.frame_constants)
-        self.comboBox_winSize.addItem(u"352")
-        self.comboBox_winSize.addItem(u"512")
-        self.comboBox_winSize.addItem(u"1024")
-        self.comboBox_winSize.setObjectName(u"comboBox_winSize")
-        self.comboBox_winSize.setMinimumSize(QSize(0, 25))
-        self.comboBox_winSize.setMaximumSize(QSize(60, 25))
-        self.comboBox_winSize.setEditable(True)
-        self.comboBox_winSize.setCurrentText(u"352")
-        self.comboBox_winSize.setProperty("canEdit", True)
-
-        self.gridLayout_5.addWidget(self.comboBox_winSize, 0, 0, 1, 1)
-
-        self.gridLayout_5.setColumnStretch(0, 1)
-
-        self.gridLayout_18.addWidget(self.frame_constants, 0, 1, 1, 1)
 
         self.frame_stackComboBox = QFrame(self.models_stackedWidget_page_1)
         self.frame_stackComboBox.setObjectName(u"frame_stackComboBox")
@@ -957,9 +962,9 @@ class Ui_SettingsWindow(object):
 
         self.label_3 = QLabel(self.frame_export_2)
         self.label_3.setObjectName(u"label_3")
-        sizePolicy5.setHeightForWidth(
+        sizePolicy4.setHeightForWidth(
             self.label_3.sizePolicy().hasHeightForWidth())
-        self.label_3.setSizePolicy(sizePolicy5)
+        self.label_3.setSizePolicy(sizePolicy4)
         self.label_3.setMinimumSize(QSize(110, 0))
         self.label_3.setAlignment(
             Qt.AlignLeading | Qt.AlignLeft | Qt.AlignVCenter)
@@ -1131,8 +1136,8 @@ class Ui_SettingsWindow(object):
 
         self.stackedWidget.setCurrentIndex(0)
         self.comboBox_highEndProcess.setCurrentIndex(4)
-        self.models_stackedWidget.setCurrentIndex(1)
         self.comboBox_winSize.setCurrentIndex(0)
+        self.models_stackedWidget.setCurrentIndex(0)
         self.pushButton_de.setDefault(False)
         self.pushButton_en.setDefault(False)
 
@@ -1152,6 +1157,24 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Preferences", None))
         self.label_15.setText(QCoreApplication.translate(
             "SettingsWindow", u"Conversion", None))
+        self.checkBox_gpuConversion.setText(QCoreApplication.translate(
+            "SettingsWindow", u"GPU Conversion", None))
+        self.checkBox_tta.setText(
+            QCoreApplication.translate("SettingsWindow", u"TTA", None))
+        self.checkBox_postProcess.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Post-Process", None))
+        self.checkBox_deepExtraction.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Deep extraction", None))
+        self.checkBox_modelFolder.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Model Test Mode", None))
+# if QT_CONFIG(tooltip)
+        self.checkBox_outputImage.setToolTip(QCoreApplication.translate(
+            "SettingsWindow", u"Save spectogram of seperated music files", None))
+#endif // QT_CONFIG(tooltip)
+        self.checkBox_outputImage.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Output Image", None))
+        self.label_7.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Aggressiveness", None))
         self.comboBox_highEndProcess.setItemText(
             0, QCoreApplication.translate("SettingsWindow", u"None", None))
         self.comboBox_highEndProcess.setItemText(
@@ -1165,24 +1188,9 @@ class Ui_SettingsWindow(object):
 
         self.label_8.setText(QCoreApplication.translate(
             "SettingsWindow", u"High End Processing", None))
-        self.label_7.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Aggressiveness", None))
-# if QT_CONFIG(tooltip)
-        self.checkBox_outputImage.setToolTip(QCoreApplication.translate(
-            "SettingsWindow", u"Save spectogram of seperated music files", None))
-#endif // QT_CONFIG(tooltip)
-        self.checkBox_outputImage.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Output Image", None))
-        self.checkBox_gpuConversion.setText(QCoreApplication.translate(
-            "SettingsWindow", u"GPU Conversion", None))
-        self.checkBox_tta.setText(
-            QCoreApplication.translate("SettingsWindow", u"TTA", None))
-        self.checkBox_modelFolder.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Model Test Mode", None))
-        self.checkBox_postProcess.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Post-Process", None))
-        self.checkBox_deepExtraction.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Deep extraction", None))
+
+        self.label_winSize.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Window Size", None))
         self.label_16.setText(QCoreApplication.translate(
             "SettingsWindow", u"Presets", None))
         self.pushButton_presetsEdit.setText(
@@ -1193,9 +1201,6 @@ class Ui_SettingsWindow(object):
             QCoreApplication.translate("SettingsWindow", u"Ensemble", None))
         self.label_2.setText(QCoreApplication.translate(
             "SettingsWindow", u"Instrumental Model", None))
-        self.label_winSize.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Window Size", None))
-
         self.label_4.setText(QCoreApplication.translate(
             "SettingsWindow", u"Vocal Model", None))
         self.label_9.setText(QCoreApplication.translate(

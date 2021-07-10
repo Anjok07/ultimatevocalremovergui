@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>856</width>
+    <width>941</width>
     <height>551</height>
    </rect>
   </property>
@@ -287,7 +287,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>656</width>
+               <width>741</width>
                <height>551</height>
               </rect>
              </property>
@@ -354,7 +354,7 @@
                  </property>
                  <item>
                   <widget class="QFrame" name="horizontalFrame_1">
-                   <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="3,2">
+                   <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="5,2">
                     <property name="spacing">
                      <number>45</number>
                     </property>
@@ -471,7 +471,7 @@
                          <property name="settingsContent" stdset="0">
                           <bool>true</bool>
                          </property>
-                         <layout class="QGridLayout" name="gridLayout_16" rowstretch="0,0,0,0">
+                         <layout class="QGridLayout" name="gridLayout_16" rowstretch="0,0,0,0,0">
                           <property name="leftMargin">
                            <number>20</number>
                           </property>
@@ -487,7 +487,123 @@
                           <property name="horizontalSpacing">
                            <number>10</number>
                           </property>
+                          <property name="verticalSpacing">
+                           <number>7</number>
+                          </property>
+                          <item row="0" column="0">
+                           <widget class="QCheckBox" name="checkBox_gpuConversion">
+                            <property name="text">
+                             <string>GPU Conversion</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="2" column="0">
+                           <widget class="QCheckBox" name="checkBox_tta">
+                            <property name="text">
+                             <string>TTA</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="1">
+                           <widget class="QCheckBox" name="checkBox_postProcess">
+                            <property name="text">
+                             <string>Post-Process</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="2" column="1">
+                           <widget class="QCheckBox" name="checkBox_deepExtraction">
+                            <property name="enabled">
+                             <bool>true</bool>
+                            </property>
+                            <property name="text">
+                             <string>Deep extraction</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="0">
+                           <widget class="QCheckBox" name="checkBox_modelFolder">
+                            <property name="text">
+                             <string>Model Test Mode</string>
+                            </property>
+                           </widget>
+                          </item>
                           <item row="3" column="1">
+                           <widget class="QCheckBox" name="checkBox_outputImage">
+                            <property name="toolTip">
+                             <string>Save spectogram of seperated music files</string>
+                            </property>
+                            <property name="text">
+                             <string>Output Image</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="0" column="2">
+                           <widget class="QFrame" name="frame_9">
+                            <property name="frameShape">
+                             <enum>QFrame::NoFrame</enum>
+                            </property>
+                            <property name="frameShadow">
+                             <enum>QFrame::Raised</enum>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_3">
+                             <property name="leftMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="topMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="rightMargin">
+                              <number>0</number>
+                             </property>
+                             <property name="bottomMargin">
+                              <number>0</number>
+                             </property>
+                             <item>
+                              <widget class="QDoubleSpinBox" name="doubleSpinBox_aggressiveness">
+                               <property name="enabled">
+                                <bool>true</bool>
+                               </property>
+                               <property name="minimumSize">
+                                <size>
+                                 <width>55</width>
+                                 <height>0</height>
+                                </size>
+                               </property>
+                               <property name="maximumSize">
+                                <size>
+                                 <width>55</width>
+                                 <height>16777215</height>
+                                </size>
+                               </property>
+                               <property name="minimum">
+                                <double>-0.100000000000000</double>
+                               </property>
+                               <property name="maximum">
+                                <double>0.100000000000000</double>
+                               </property>
+                               <property name="singleStep">
+                                <double>0.010000000000000</double>
+                               </property>
+                               <property name="value">
+                                <double>0.020000000000000</double>
+                               </property>
+                              </widget>
+                             </item>
+                             <item>
+                              <widget class="QLabel" name="label_7">
+                               <property name="enabled">
+                                <bool>true</bool>
+                               </property>
+                               <property name="text">
+                                <string>Aggressiveness</string>
+                               </property>
+                              </widget>
+                             </item>
+                            </layout>
+                           </widget>
+                          </item>
+                          <item row="3" column="2">
                            <widget class="QFrame" name="frame_10">
                             <property name="frameShape">
                              <enum>QFrame::NoFrame</enum>
@@ -553,15 +669,36 @@
                             </layout>
                            </widget>
                           </item>
-                          <item row="2" column="1">
-                           <widget class="QFrame" name="frame_9">
+                          <item row="2" column="2">
+                           <widget class="QFrame" name="frame_constants">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>0</height>
+                             </size>
+                            </property>
+                            <property name="maximumSize">
+                             <size>
+                              <width>230</width>
+                              <height>140</height>
+                             </size>
+                            </property>
                             <property name="frameShape">
                              <enum>QFrame::NoFrame</enum>
                             </property>
                             <property name="frameShadow">
                              <enum>QFrame::Raised</enum>
                             </property>
-                            <layout class="QHBoxLayout" name="horizontalLayout_3">
+                            <property name="lineWidth">
+                             <number>0</number>
+                            </property>
+                            <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1">
                              <property name="leftMargin">
                               <number>0</number>
                              </property>
@@ -574,11 +711,8 @@
                              <property name="bottomMargin">
                               <number>0</number>
                              </property>
-                             <item>
-                              <widget class="QDoubleSpinBox" name="doubleSpinBox_aggressiveness">
-                               <property name="enabled">
-                                <bool>true</bool>
-                               </property>
+                             <item alignment="Qt::AlignLeft">
+                              <widget class="QComboBox" name="comboBox_winSize">
                                <property name="minimumSize">
                                 <size>
                                  <width>55</width>
@@ -588,82 +722,49 @@
                                <property name="maximumSize">
                                 <size>
                                  <width>55</width>
-                                 <height>16777215</height>
+                                 <height>25</height>
                                 </size>
                                </property>
-                               <property name="minimum">
-                                <double>-0.100000000000000</double>
+                               <property name="editable">
+                                <bool>true</bool>
                                </property>
-                               <property name="maximum">
-                                <double>0.100000000000000</double>
+                               <property name="currentText">
+                                <string notr="true">352</string>
                                </property>
-                               <property name="singleStep">
-                                <double>0.010000000000000</double>
+                               <property name="currentIndex">
+                                <number>0</number>
                                </property>
-                               <property name="value">
-                                <double>0.020000000000000</double>
+                               <property name="canEdit" stdset="0">
+                                <bool>true</bool>
                                </property>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">352</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">512</string>
+                                </property>
+                               </item>
+                               <item>
+                                <property name="text">
+                                 <string notr="true">1024</string>
+                                </property>
+                               </item>
                               </widget>
                              </item>
                              <item>
-                              <widget class="QLabel" name="label_7">
-                               <property name="enabled">
-                                <bool>true</bool>
-                               </property>
+                              <widget class="QLabel" name="label_winSize">
                                <property name="text">
-                                <string>Aggressiveness</string>
+                                <string>Window Size</string>
+                               </property>
+                               <property name="alignment">
+                                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
                                </property>
                               </widget>
                              </item>
                             </layout>
-                           </widget>
-                          </item>
-                          <item row="3" column="0">
-                           <widget class="QCheckBox" name="checkBox_outputImage">
-                            <property name="toolTip">
-                             <string>Save spectogram of seperated music files</string>
-                            </property>
-                            <property name="text">
-                             <string>Output Image</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="0">
-                           <widget class="QCheckBox" name="checkBox_gpuConversion">
-                            <property name="text">
-                             <string>GPU Conversion</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QCheckBox" name="checkBox_tta">
-                            <property name="text">
-                             <string>TTA</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="2" column="0">
-                           <widget class="QCheckBox" name="checkBox_modelFolder">
-                            <property name="text">
-                             <string>Model Test Mode</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="1">
-                           <widget class="QCheckBox" name="checkBox_postProcess">
-                            <property name="text">
-                             <string>Post-Process</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="1">
-                           <widget class="QCheckBox" name="checkBox_deepExtraction">
-                            <property name="enabled">
-                             <bool>true</bool>
-                            </property>
-                            <property name="text">
-                             <string>Deep extraction</string>
-                            </property>
                            </widget>
                           </item>
                          </layout>
@@ -678,6 +779,12 @@
                        <size>
                         <width>0</width>
                         <height>104</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>230</width>
+                        <height>16777215</height>
                        </size>
                       </property>
                       <property name="acceptDrops">
@@ -773,7 +880,7 @@
                          <property name="settingsContent" stdset="0">
                           <bool>true</bool>
                          </property>
-                         <layout class="QGridLayout" name="gridLayout_17" rowstretch="0">
+                         <layout class="QVBoxLayout" name="verticalLayout_29">
                           <property name="leftMargin">
                            <number>20</number>
                           </property>
@@ -786,10 +893,29 @@
                           <property name="bottomMargin">
                            <number>10</number>
                           </property>
-                          <property name="horizontalSpacing">
-                           <number>10</number>
-                          </property>
-                          <item row="0" column="1">
+                          <item>
+                           <widget class="QComboBox" name="comboBox_presets">
+                            <property name="sizePolicy">
+                             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                              <horstretch>0</horstretch>
+                              <verstretch>0</verstretch>
+                             </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                             <size>
+                              <width>0</width>
+                              <height>25</height>
+                             </size>
+                            </property>
+                            <property name="sizeAdjustPolicy">
+                             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+                            </property>
+                            <property name="modelColumn">
+                             <number>0</number>
+                            </property>
+                           </widget>
+                          </item>
+                          <item alignment="Qt::AlignHCenter">
                            <widget class="QPushButton" name="pushButton_presetsEdit">
                             <property name="sizePolicy">
                              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -814,22 +940,6 @@
                             </property>
                             <property name="text">
                              <string>Edit</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="0">
-                           <widget class="QComboBox" name="comboBox_presets">
-                            <property name="minimumSize">
-                             <size>
-                              <width>0</width>
-                              <height>25</height>
-                             </size>
-                            </property>
-                            <property name="sizeAdjustPolicy">
-                             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
-                            </property>
-                            <property name="modelColumn">
-                             <number>0</number>
                             </property>
                            </widget>
                           </item>
@@ -984,7 +1094,7 @@
                        </size>
                       </property>
                       <property name="currentIndex">
-                       <number>1</number>
+                       <number>0</number>
                       </property>
                       <property name="settingsContent" stdset="0">
                        <bool>true</bool>
@@ -1078,110 +1188,6 @@
                              <property name="sizeAdjustPolicy">
                               <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
                              </property>
-                            </widget>
-                           </item>
-                          </layout>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QFrame" name="frame_constants">
-                          <property name="sizePolicy">
-                           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
-                            <horstretch>0</horstretch>
-                            <verstretch>0</verstretch>
-                           </sizepolicy>
-                          </property>
-                          <property name="minimumSize">
-                           <size>
-                            <width>0</width>
-                            <height>0</height>
-                           </size>
-                          </property>
-                          <property name="maximumSize">
-                           <size>
-                            <width>230</width>
-                            <height>140</height>
-                           </size>
-                          </property>
-                          <property name="frameShape">
-                           <enum>QFrame::NoFrame</enum>
-                          </property>
-                          <property name="frameShadow">
-                           <enum>QFrame::Raised</enum>
-                          </property>
-                          <property name="lineWidth">
-                           <number>0</number>
-                          </property>
-                          <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,0">
-                           <property name="topMargin">
-                            <number>5</number>
-                           </property>
-                           <property name="bottomMargin">
-                            <number>3</number>
-                           </property>
-                           <item row="0" column="1">
-                            <widget class="QLabel" name="label_winSize">
-                             <property name="minimumSize">
-                              <size>
-                               <width>80</width>
-                               <height>0</height>
-                              </size>
-                             </property>
-                             <property name="maximumSize">
-                              <size>
-                               <width>80</width>
-                               <height>16777215</height>
-                              </size>
-                             </property>
-                             <property name="text">
-                              <string>Window Size</string>
-                             </property>
-                             <property name="alignment">
-                              <set>Qt::AlignCenter</set>
-                             </property>
-                            </widget>
-                           </item>
-                           <item row="0" column="0">
-                            <widget class="QComboBox" name="comboBox_winSize">
-                             <property name="minimumSize">
-                              <size>
-                               <width>0</width>
-                               <height>25</height>
-                              </size>
-                             </property>
-                             <property name="maximumSize">
-                              <size>
-                               <width>60</width>
-                               <height>25</height>
-                              </size>
-                             </property>
-                             <property name="editable">
-                              <bool>true</bool>
-                             </property>
-                             <property name="currentText">
-                              <string notr="true">352</string>
-                             </property>
-                             <property name="currentIndex">
-                              <number>0</number>
-                             </property>
-                             <property name="canEdit" stdset="0">
-                              <bool>true</bool>
-                             </property>
-                             <item>
-                              <property name="text">
-                               <string notr="true">352</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string notr="true">512</string>
-                              </property>
-                             </item>
-                             <item>
-                              <property name="text">
-                               <string notr="true">1024</string>
-                              </property>
-                             </item>
                             </widget>
                            </item>
                           </layout>

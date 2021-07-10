@@ -689,16 +689,17 @@ class SettingsManager:
             self.win.ui.checkBox_outputImage,
             self.win.ui.checkBox_postProcess,
             self.win.ui.checkBox_deepExtraction,
+            # Combobox
+            self.win.ui.comboBox_winSize,
+            self.win.ui.comboBox_highEndProcess,
+            # SpinBox
+            self.win.ui.doubleSpinBox_aggressiveness,
             # -Models-
             # Checkbox
             self.win.ui.checkBox_ensemble,
             # Combobox
             self.win.ui.comboBox_instrumental,
             self.win.ui.comboBox_vocal,
-            self.win.ui.comboBox_winSize,
-            # SpinBox
-            self.win.ui.doubleSpinBox_aggressiveness,
-            self.win.ui.comboBox_highEndProcess,
             # -Presets-
             # Combobox
             self.win.ui.comboBox_presets, ]

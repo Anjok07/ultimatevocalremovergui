@@ -133,6 +133,7 @@ class CustomApplication(QtWidgets.QApplication):
 
             self.settingsWindow.ui.info_conversion.clicked.connect(lambda: show_info(self.tr("Conversion Info"),
                                                                                      self.translator.loaded_language.settings_conversion))
+
         # -Before-
 
         # -Setup-
@@ -150,9 +151,17 @@ class CustomApplication(QtWidgets.QApplication):
         theme = self.settings.value('user/theme',
                                     const.DEFAULT_SETTINGS['theme'])
         self.themeManager.load_theme(theme)
-
+        # Check for first startup
+        if not self.settings.allKeys():
+            self.first_startup()
         # with open(os.path.join(os.getcwd(), '..', 'startup', 'run.txt'), 'w') as f:
         #     f.write('1')
+
+    def first_startup(self):
+        """
+        First time user started the application or he reset the app.
+        """
+        print("FIRST STARTUP")
 
     @staticmethod
     def improved_combobox_showPopup(widget: QtWidgets.QComboBox, showPopup: QtWidgets.QComboBox.showPopup):

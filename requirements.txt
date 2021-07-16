@@ -2,8 +2,8 @@ Pillow
 tqdm==4.45.0
 librosa==0.8.0
 opencv-python
-numba==0.48.0
 numpy==1.19.3
+numba
 SoundFile
 soundstretch
 samplerate

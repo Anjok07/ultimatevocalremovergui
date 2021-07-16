@@ -16,7 +16,7 @@ This application is a heavily modified version of the vocal remover AI created a
 
 Please run the requirements command even if you have v4 installed!
 
-Recommended way is to create venv and install all requirements to it. Don't forget to activate it using the second command before using.
+Recommended way is to create venv and install all requirements to it. Don't forget to activate with second command before using the next time.
 
 ```
 python3 -m venv venv

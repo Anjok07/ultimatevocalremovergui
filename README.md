@@ -49,36 +49,20 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 
 ### Models Included
 
-All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5! You can download the model pack [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.0)
+All of the models included in the release were trained on large datasets containing diverse sets of music genres. These are all beta models that may or may not make it into the final release. We are working to have even better models in the final release of v5! You can download the latest model pack [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.2)
 
 **Please Note:** These models are *not* compatible with the v4 GUI! The GUI for v5 is still under development.
 
 Here's a list of the models included within the v5 beta package -
 
 - **V5 Beta Models**
-    - **2band_32000 Models**
-        - **MGM-v5-2Band-32000-BETA1.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-2Band-32000-BETA2.pth** - This model does very well on lower frequencies. Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-KAROKEE-32000-BETA1.pth** - Model by aufr33. This model focuses on removing main vocals only, leaving the BV vocals mostly intact. Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-KAROKEE-32000-BETA2-AGR.pth** - Model by aufr33. This model focuses a bit more on removing vocals from lower frequencies.Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-Vocal_2Band-32000-BETA1.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-        - **MGM-v5-Vocal_2Band-32000-BETA2.pth** - This is a model that provides cleaner vocal stems! Frequency cut-off is 16000 Hz. Must be used with **2band_32000.json** file!
-    - **3band_44100 Models**
-        - **MGM-v5-3Band-44100-BETA.pth** - This model does well removing vocals within the mid-rang frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100.json** file!
-    - **3band_44100_mid Models**
-        - **MGM-v5-MIDSIDE-44100-BETA1.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100_mid.json** file!
-        - **MGM-v5-MIDSIDE-44100-BETA2.pth** - This model does well removing vocals within the mid-range frequencies. Frequency cut-off is 18000 Hz. Must be used with **3band_44100_mid.json** file!
-    - **4band_44100**
-        - **MGM-v5-4Band-44100-BETA1.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
-        - **MGM-v5-4Band-44100-BETA2.pth** - This model does very well on lower-mid range frequencies. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file!
-        - **HighPrecison_4band_1.pth** - This is a higher performance model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 123821KB' within the inference command to run this model!
-        - **HighPrecison_4band_2.pth** - This is a higher performance model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 123821KB' within the inference command to run this model!
-        - **NewLayer_4band_1.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
-        - **NewLayer_4band_2.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
-        - **NewLayer_4band_3.pth** - This model uses a different architecture. Frequency cut-off is 20000 Hz. Must be used with **4band_44100.json** file! Please include '-n 129605KB' within the inference command to run this model!
-    - **2band_44100_lofi**
-        - **LOFI_2band-1_33966KB.pth** - This model uses a different architecture. Frequency cut-off is 14000 Hz. Must be used with **2band_44100_lofi.json** file! Please include '-n 33966KB' within the inference command to run this model!
-        - **LOFI_2band-2_33966KB.pth** - This model uses a different architecture. Frequency cut-off is 14000 Hz. Must be used with **2band_44100_lofi.json** file! Please include '-n 33966KB' within the inference command to run this model!
+    - **Newest 4band_44100 HP Models - Download [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.2)**
+      - **HP_4BAND_3090** - This model was trained with a bigger dataset and optimized training parameters. The model weighs 121MB's due to increased capacity.
+      - **HP2-4BAND-3090_4band_1** - This model was trained with a bigger dataset and optimized training parameters. The model weighs 524MB's due to increased capacity. Conversions will take longer with this capacity type.
+      - **HP2-4BAND-3090_4band_2** - A lightly fine-tuned version of "HP2-4BAND-3090_4band_1". The model weighs 524MB's due to increased capacity. Conversions will take longer with this capacity type.
+      - **Vocal_HP_4BAND_3090** - This is a new HP vocal model. The model weighs 121MB's due to increased capacity.
+      - **Vocal_HP_4BAND_3090_AGG** - This is a more aggressive version of the "Vocal_HP_4BAND_3090" vocal model. The model weighs 121MB's due to increased capacity.
+    - **A link and descriptions of the older beta models can be found [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.1)**
 
 ### Inference Command Structure
 
@@ -131,7 +115,14 @@ To automate the ensembling process, please use the 'Ensemble-Outputs.bat' script
 ### Windows Batch Files
 
 We included the following Windows batch files to help automate commands:
+
+- Select-Models-HP-Only.bat
+ 	- This batch script is for the models provided [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.2) only!
+	- Simply drag the audio file you wish to convert into the 'Select-Models-HP-Only.bat.bat' file provided. 
+	- From there you will be asked if you want TTA enabled, then prompted to type the letter associated with the model you wish to run and hit "enter". 
+
 - Drag-n-Drop-CHOOSE-YOUR-MODEL.bat
+ 	- This batch script is for the models provided [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.1) only!
 	- Simply drag the audio file you wish to convert into the 'Drag-n-Drop-CHOOSE-YOUR-MODEL.bat' file provided. 
 	- From there you will be asked if you want TTA enabled, then prompted to type the letter associated with the model you wish to run and hit "enter". 
 	- Once you hit enter, you will be asked fs you want an additional "deep extraction" instrumental output in addition to the 2 to be provided.

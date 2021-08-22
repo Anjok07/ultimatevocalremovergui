@@ -105,8 +105,9 @@ def main():
     p.add_argument('--postprocess', '-p', action='store_true')
     p.add_argument('--is_vocal_model', '-vm', action='store_true')
     p.add_argument('--tta', '-t', action='store_true')
-    p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation', 'mirroring', 'mirroring2'], default='none')
+    p.add_argument('--high_end_process', '-H', type=str, choices=['none', 'bypass', 'correlation', 'mirroring', 'mirroring2'], default='mirroring')
     p.add_argument('--aggressiveness', '-A', type=float, default=0.07)
+    p.add_argument('--no_vocals', '-nv', action='store_true')
     args = p.parse_args()
     
     nets = importlib.import_module('lib.nets' + f'_{args.nn_architecture}'.replace('_default', ''), package=None)
@@ -210,7 +211,7 @@ def main():
     model_name = os.path.splitext(os.path.basename(args.pretrained_model))[0]
     sf.write(os.path.join('separated', '{}_{}_{}.wav'.format(basename, model_name, stems['inst'])), wave, mp.param['sr'])
 
-    if True:
+    if not args.no_vocals:
         print('inverse stft of {}...'.format(stems['vocals']), end=' ')
 
         if args.high_end_process.startswith('mirroring'):        

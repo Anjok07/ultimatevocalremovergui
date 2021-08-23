@@ -39,7 +39,7 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 - The arguments --sr, --n_fft, --hop_length are removed. JSON files are now used instead.
 - The following new features were added
 	- **--high_end_process** - This argument restores the high-end frequencies of the output audio. In order to optimize performance, some models have bandwidths below 20 kHz. This argument allows you to choose one of 5 post-processing options:
-		- *mirroring* -  This is the default value. This algorithm uses the high-end frequencies from the input and mirrored outout's frequencies.
+		- *mirroring* -  This is the default value. This algorithm uses the high-end frequencies from the input and mirrored output's frequencies.
 		- *mirroring2* - This version of mirroring is optimized for better performance.
 		- *bypass* - This copies the missing frequencies from the input without any modification.
 		- *none* - No processing.

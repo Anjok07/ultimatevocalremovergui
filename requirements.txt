@@ -6,3 +6,4 @@ numba==0.48.0
 numpy==1.19.3
 SoundFile
 soundstretch
+torch==1.9.0

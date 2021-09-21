@@ -334,7 +334,8 @@ def main():
                  _, bin_image = cv2.imencode('.jpg', image)
                  bin_image.tofile(f)
 
-        torch.cuda.empty_cache()
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
 
         # print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 

@@ -56,7 +56,7 @@ All of the models included in the release were trained on large datasets contain
 Here's a list of the models included within the v5 beta package -
 
 - **V5 Beta Models**
-    - **Newest 4band_44100 HP Models - Download [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.2)**
+    - **Newest 4band_44100 HP Models - Download [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/5.0.2)**. Must be used with 4band_44100.json file!
       - **HP_4BAND_3090** - This model was trained with a bigger dataset and optimized training parameters. The model weighs 121MB's due to increased capacity.
       - **HP2-4BAND-3090_4band_1** - This model was trained with a bigger dataset and optimized training parameters. The model weighs 524MB's due to increased capacity. Conversions will take longer with this capacity type.
       - **HP2-4BAND-3090_4band_2** - A lightly fine-tuned version of "HP2-4BAND-3090_4band_1". The model weighs 524MB's due to increased capacity. Conversions will take longer with this capacity type.
@@ -66,9 +66,9 @@ Here's a list of the models included within the v5 beta package -
 
 ### Inference Command Structure
 
-The following example shows how to run a model from the "2band_32000 Models" section above.
+The following example shows how to run the HP_4BAND_3090 model -
 ```
-python inference.py -g 0 -m modelparams/2band_32000.json -P models/MGM-v5-2Band-32000-BETA1.pth -i "INPUT"
+python inference.py -g 0 -m modelparams/4band_44100.json -P models/HP_4BAND_3090.pth -i "INPUT"
 ```
 
 The following examples show how to run the ensemble model scripts -

@@ -38,14 +38,14 @@ Please note, this version is based on vocal-remover 4.0.0 of tsurumeso's origina
 - New format of spectrograms. Instead of a single spectrogram with a fixed FFT size, combined spectrograms are now used. This version combines several different types of spectrograms within specific frequency ranges. This approach allowed for a clearer view of the high frequencies and good resolutions at low frequencies, thus allowing for more targeted vocal removals.
 - The arguments --sr, --n_fft, --hop_length are removed. JSON files are now used instead.
 - The following new features were added
-	- **--high_end_process** - This argument restores the high-end frequencies of the output audio. In order to optimize performance, some models have bandwidths below 20 kHz. This argument allows you to choose one of 5 post-processing options:
+	- **--high_end_process** - This argument restores the high-end frequencies of the output audio. In order to optimize performance, some models have bandwidths below 20 kHz. This argument allows you to choose one of 4 post-processing options:
 		- *mirroring* -  This is the default value. This algorithm uses the high-end frequencies from the input and mirrored output's frequencies.
 		- *mirroring2* - This version of mirroring is optimized for better performance.
 		- *bypass* - This copies the missing frequencies from the input without any modification.
 		- *none* - No processing.
-		- *correlation* - Obsolete. It will be removed in the final release.
 	- **--aggressiveness** - This argument allows you to set how strong the vocal removal will be. The range is 0.0-1.0 The higher the value, the more the vocals will be removed. Please note, the highest value can result in muddy sounding instrumentals depending on the track being converted, so this isn't always recommended. The default is 0.1. For the vocal model specifically, the recommended value is 0.5-0.6.
 	- **--deepextraction** - This argument generates an additional instrumental output with deep artifact vocal removal. This option is experimental and is more suited for acoustic or other light types of tracks with stubborn vocals. Many others might sound bad.
+	- **--chunks** - Split the input file into chunks to reduce RAM consumption.
 
 ### Models Included
 

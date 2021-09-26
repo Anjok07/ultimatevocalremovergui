@@ -79,37 +79,64 @@ def train_val_split(dataset_dir, split_mode, val_rate, val_filelist):
     return train_filelist, val_filelist
 
 
-def augment(X, y, reduction_rate, reduction_mask, mixup_rate, mixup_alpha, mp):
+def augment(X, y, reduction_rate, reduction_mask, mixup_rate, mixup_alpha, mp, augment_path, is_karokee, is_vocal):
     perm = np.random.permutation(len(X))
     for i, idx in enumerate(tqdm(perm)):
         if np.random.uniform() < reduction_rate:
             y[idx] = spec_utils.reduce_vocal_aggressively(X[idx], y[idx], reduction_mask)
         
-        if not any([mp.param["mid_side"], mp.param["mid_side_b"], mp.param["mid_side_b2"]]):
-            if np.random.uniform() < 0.5:
-                # swap channel
-                X[idx] = X[idx, ::-1]
-                y[idx] = y[idx, ::-1]          
+        if np.random.uniform() < 0.5:
+            # swap channel
+            X[idx] = X[idx, ::-1]
+            y[idx] = y[idx, ::-1]
+            
+        #if np.random.uniform() < 0.01:
+            # vocal samples mixing
+        #    spec_from_file(os.path.join(augment_path, random.choice(os.listdir(augment_path))), mp)
                 
-            if np.random.uniform() < 0.02:
-                # mono
-                X[idx] = X[idx].mean(axis=0, keepdims=True)
-                y[idx] = y[idx].mean(axis=0, keepdims=True)
-                
-            if np.random.uniform() < 0.02:
-                # delay / echo
-                d = np.random.randint(1, 10, size=2)
-                v = X[idx] - y[idx]
-                X[idx, 0, :, d[0]:] += v[0, :, :-d[0]] * np.random.uniform(0.1, 0.3)
-                X[idx, 1, :, d[1]:] += v[1, :, :-d[1]] * np.random.uniform(0.1, 0.3)                
         if np.random.uniform() < 0.02:
+            # mono
+            X[idx] = X[idx].mean(axis=0, keepdims=True)
+            y[idx] = y[idx].mean(axis=0, keepdims=True)
+                
+        if np.random.uniform() < 0.02:
+            # vocal echo
+            d = np.random.randint(1, 10, size=2)
+            v = X[idx] - y[idx]
+            X[idx, 0, :, d[0]:] += v[0, :, :-d[0]] * np.random.uniform(0.1, 0.3)
+            X[idx, 1, :, d[1]:] += v[1, :, :-d[1]] * np.random.uniform(0.1, 0.3)
+            
+        if np.random.uniform() < 0.02:
+            # vocal panning
+            if is_karokee:
+                pan = np.random.uniform() * 0.1
+            else:
+                pan = np.random.uniform() * 0.5
+                
+            v = (X[idx] - y[idx]) * (1 + pan / 2)
+            v[np.random.randint(0, 2)] *= (1 - pan)
+            X[idx] = y[idx] + v
+                
+        if np.random.uniform() < 0.02 and not is_karokee:
             # inst
             X[idx] = y[idx]
-
+        
+        if is_vocal: # mix & inst -> mix & vocals
+            y[idx] = X[idx] - y[idx]
+        
+        offset = 0
+        
         if np.random.uniform() < mixup_rate and i < len(perm) - 1:
             lam = np.random.beta(mixup_alpha, mixup_alpha)
             X[idx] = lam * X[idx] + (1 - lam) * X[perm[i + 1]]
             y[idx] = lam * y[idx] + (1 - lam) * y[perm[i + 1]]
+        
+        for d in range(1, len(mp.param['band']) + 1):
+            bp = mp.param['band'][d]
+            h = bp['crop_stop'] - bp['crop_start']
+            X[idx][:, offset:offset+h, :] = spec_utils.convert_channels(X[idx][:, offset:offset+h, :], mp, d)
+            y[idx][:, offset:offset+h, :] = spec_utils.convert_channels(y[idx][:, offset:offset+h, :], mp, d)
+            offset += h
 
     return X, y
 

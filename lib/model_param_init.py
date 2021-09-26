@@ -55,6 +55,7 @@ class ModelParameters(object):
         else:
             self.param = default_param
             
-        for k in ['mid_side', 'mid_side_b', 'mid_side_b2', 'stereo_w', 'reverse']:
+        for k in ['mid_side', 'mid_side_b', 'mid_side_b2', 'stereo_w', 'stereo_n', 'reverse']:
             if not k in self.param:
                 self.param[k] = False
+                

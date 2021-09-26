@@ -1,9 +1,9 @@
 import torch
-import numpy as np
 from torch import nn
 import torch.nn.functional as F
 
 from lib import layers_537238KB as layers
+from lib import spec_utils
 
 
 class BaseASPPNet(nn.Module):
@@ -60,7 +60,7 @@ class CascadedASPPNet(nn.Module):
 
         self.offset = 128
 
-    def forward(self, x, aggressiveness=None):
+    def forward(self, x, params={}):
         mix = x.detach()
         x = x.clone()
 
@@ -97,14 +97,13 @@ class CascadedASPPNet(nn.Module):
                 mode='replicate')
             return mask * mix, aux1 * mix, aux2 * mix
         else:
-            if aggressiveness:
-                mask[:, :, :aggressiveness['split_bin']] = torch.pow(mask[:, :, :aggressiveness['split_bin']], 1 + aggressiveness['value'] / 3)
-                mask[:, :, aggressiveness['split_bin']:] = torch.pow(mask[:, :, aggressiveness['split_bin']:], 1 + aggressiveness['value'])
+            if params.get('is_vocal_model'):
+                return (1.0 - spec_utils.adjust_aggr(mask, params)) * mix  
+                
+            return spec_utils.adjust_aggr(mask, params) * mix
 
-            return mask * mix
-
-    def predict(self, x_mag, aggressiveness=None):
-        h = self.forward(x_mag, aggressiveness)
+    def predict(self, x_mag, params={}):
+        h = self.forward(x_mag, params)
 
         if self.offset > 0:
             h = h[:, :, :, self.offset:-self.offset]

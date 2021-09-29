@@ -529,7 +529,7 @@ if __name__ == "__main__":
     specs[0], specs[1] = trim_specs(specs[0], specs[1])
     
     if args.algorithm == 'deep':
-        d_spec = np.where(np.abs(specs[0]) <= np.abs(spec[1]), specs[0], spec[1])
+        d_spec = np.where(np.abs(specs[0]) <= np.abs(specs[1]), specs[0], specs[1])
         v_spec = d_spec - specs[1]
         sf.write(os.path.join('{}.wav'.format(args.output_name)), cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])   
         

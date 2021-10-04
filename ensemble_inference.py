@@ -173,7 +173,7 @@ def main():
         os.system('python inference.py -mt -g {} -m {} -P {} -A {} -w {} {} {} -o {} -i "{}"'.format(
                 args.gpu,
                 os.path.join('modelparams', c['model_params']) + '.json',
-                os.path.join('models','release','models', model_name + '.pth'),
+                os.path.join('models', model_name + '.pth'),
                 args.aggressiveness,
                 args.window_size,
                 ('', '-p')[args.postprocess],

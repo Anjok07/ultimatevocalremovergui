@@ -117,12 +117,12 @@ def main():
     p.add_argument('--chunks', '-c', type=int, default=1, help='Split the input file into chunks to reduce RAM consumption.')
     p.add_argument('--model_test_mode', '-mt', action='store_true', help='Include the model name in the output file name.')
     p.add_argument('--normalize', action='store_true')
+    p.add_argument('--output_dir', '-o', type=str, default='separated')
     args = p.parse_args()
     
-    separated_dir = 'separated'
-    ensembled_dir = 'ensembled/temp'
-    for file in os.scandir(ensembled_dir):
-        os.remove(file.path)
+    #ensembled_dir = 'ensembled/temp'
+    #for file in os.scandir(ensembled_dir):
+    #    os.remove(file.path)
     
     if 'auto' == args.nn_architecture:
         model_size = math.ceil(os.stat(args.pretrained_model).st_size / 1024)
@@ -263,7 +263,7 @@ def main():
         if input_is_mono:
             wave = wave.mean(axis=1, keepdims=True)
         
-        fn = os.path.join(separated_dir, '{}{}_{}{}.wav'.format(basename_enc, model_name, stems['inst'], chunk_pfx))        
+        fn = os.path.join(args.output_dir, '{}{}_{}{}.wav'.format(basename_enc, model_name, stems['inst'], chunk_pfx))        
         sf.write(fn, wave, mp.param['sr'])
         chunks_filelist['inst'][chunk] = fn
 
@@ -285,7 +285,7 @@ def main():
             if input_is_mono:
                 wave = wave.mean(axis=1, keepdims=True)
             
-            fn = os.path.join(separated_dir, '{}{}_{}{}.wav'.format(basename_enc, model_name, stems['vocals'], chunk_pfx))
+            fn = os.path.join(args.output_dir, '{}{}_{}{}.wav'.format(basename_enc, model_name, stems['vocals'], chunk_pfx))
             sf.write(fn, wave, mp.param['sr'])
             chunks_filelist['vocals'][chunk] = fn
         
@@ -293,8 +293,8 @@ def main():
         if len(chunks_filelist[stem]) > 0 and args.chunks > 1: 
             import subprocess
         
-            fn = os.path.join(separated_dir, '{}{}_{}.wav'.format(basename_enc, model_name, stems[stem]))  
-            fn2 = os.path.join(separated_dir, '{}{}_{}.wav'.format(basename, model_name, stems[stem]))  
+            fn = os.path.join(args.output_dir, '{}{}_{}.wav'.format(basename_enc, model_name, stems[stem]))  
+            fn2 = os.path.join(args.output_dir, '{}{}_{}.wav'.format(basename, model_name, stems[stem]))  
             #os.system('sox "' + '" "'.join([f for f in chunks_filelist[stem].values()]) + f'" "{fn}"')
             subprocess.run(['sox'] + [f for f in chunks_filelist[stem].values()] + [fn])
             
@@ -324,17 +324,17 @@ def main():
             {
                 'algorithm':'deep',
                 'model_params':'modelparams/1band_sr44100_hl512.json',
-                'file1':"{}/{}{}_{}.wav".format(separated_dir, basenameb, model_name, stems['vocals'], mp.param['sr']),
-                'file2':"{}/{}{}_{}.wav".format(separated_dir, basenameb, model_name, stems['inst'], mp.param['sr']),
-                'output':'{}/{}{}_{}_Deep_Extraction'.format(separated_dir, basenameb, model_name, stems['inst'], mp.param['sr'])
+                'file1':"{}/{}{}_{}.wav".format(args.output_dir, basenameb, model_name, stems['vocals'], mp.param['sr']),
+                'file2':"{}/{}{}_{}.wav".format(args.output_dir, basenameb, model_name, stems['inst'], mp.param['sr']),
+                'output':'{}/{}{}_{}_Deep_Extraction'.format(args.output_dir, basenameb, model_name, stems['inst'], mp.param['sr'])
             }
         ]
 
         for i,e in tqdm(enumerate(deepext), desc="Performing Deep Extraction..."):
             os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {e['file1']} {e['file2']} -o {e['output']}")
      
-    for file in os.scandir(ensembled_dir):
-        os.remove(file.path)
+    #for file in os.scandir(ensembled_dir):
+    #    os.remove(file.path)
     print('Complete!')
 
     print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
@@ -342,4 +342,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -112,8 +112,9 @@ def main():
 
     args = p.parse_args()
     
-    basename = os.path.splitext(os.path.basename(args.input))[0]
     ensembled_dir = os.path.join("ensembled", "temp")
+    basename = os.path.splitext(os.path.basename(args.input))[0]
+    basenameb = '{}'.format(os.path.splitext(os.path.basename(args.input))[0])
     
 #CLEAR-TEMP-FOLDER
     for file in os.scandir(ensembled_dir):
@@ -208,11 +209,22 @@ def main():
 
     for i,e in tqdm(enumerate(ensambles), desc="Ensembling..."):
         os.system("python " + os.path.join("lib", "spec_utils.py") + f" -a {e['algorithm']} -m {e['model_params']} {' '.join(e['files'])} -o {e['output']}")
-    
-    '''
+        
+    if args.savein:
+        for pm in args.pretrained_models:
+            os.rename(
+                os.path.join(ensembled_dir, f"{basename}_{pm}_Instruments.wav"),
+                os.path.join('separated', f"{basename}_{pm}_Instruments.wav")
+            )
+            
+            os.rename(
+                os.path.join(ensembled_dir, f"{basename}_{pm}_Vocals.wav"),
+                os.path.join('separated', f"{basename}_{pm}_Vocals.wav")
+            )
+
     if args.deepextraction:
-        def get_files(folder="", files=""):
-            return [f"{folder}{i}" for i in os.listdir(folder) if i.endswith(suffix)]
+        #def get_files(folder="", files=""):
+        #    return [os.path.join(folder, i) for i in os.listdir(folder) if i.endswith(suffix)]
     
         deepext = [
             {
@@ -226,7 +238,6 @@ def main():
 
         for i,e in tqdm(enumerate(deepext), desc="Performing Deep Extraction..."):
             os.system(f"python lib/spec_utils.py -a {e['algorithm']} -m {e['model_params']} {e['file1']} {e['file2']} -o {e['output']}")
-    '''
     
     for file in os.scandir(ensembled_dir):
         os.remove(file.path)

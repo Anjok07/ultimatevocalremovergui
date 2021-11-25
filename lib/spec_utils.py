@@ -7,6 +7,7 @@ import math
 import json
 import hashlib
 import threading
+import copy
 
 from tqdm import tqdm
 
@@ -193,7 +194,7 @@ def cache_or_load(mix_path, inst_path, mp):
     inst_basename = os.path.splitext(os.path.basename(inst_path))[0]
     
     # the cache will be common for some model types
-    mpp2 = dict(mp.param)
+    mpp2 = copy.deepcopy(mp.param)
     mpp2.update(dict.fromkeys(['mid_side', 'mid_side_b', 'mid_side_b2', 'reverse'], False))
     
     for d in mpp2['band']:
@@ -459,7 +460,7 @@ def adjust_aggr(mask, params):
     return mask
         
 
-def ensembling(a, specs):   
+def ensembling(a, specs, sr=44100):   
     for i in range(1, len(specs)):
         if i == 1:
             spec = specs[0]
@@ -471,7 +472,17 @@ def ensembling(a, specs):
         if 'min_mag' == a:
             spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)
         if 'max_mag' == a:
-            spec = np.where(np.abs(specs[i]) >= np.abs(spec), specs[i], spec)  
+            spec = np.where(np.abs(specs[i]) >= np.abs(spec), specs[i], spec)         
+        if 'mul' == a:
+            s1 = specs[i] * spec
+            s2 = .5 * (specs[i] + spec)
+            spec = np.divide(s1, s2, out=np.zeros_like(s1), where=s2!=0)
+        if 'crossover' == a:
+            freq_to_bin = 2 * spec.shape[1] / sr
+            bs = int(500 * freq_to_bin)
+            be = int(14000 * freq_to_bin)
+            spec = specs[i] * get_lp_filter_mask(spec.shape[1], bs, be) + spec * get_hp_filter_mask(spec.shape[1], be, bs)
+            
 
     return spec
 
@@ -505,7 +516,7 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invert_p', 'min_mag', 'max_mag', 'deep', 'align'], default='min_mag')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invert_p', 'min_mag', 'max_mag', 'mul', 'crossover', 'deep', 'align'], default='min_mag')
     p.add_argument('--model_params', '-m', type=str, default=os.path.join('modelparams', '1band_sr44100_hl512.json'))
     p.add_argument('--output_name', '-o', type=str, default='output')
     p.add_argument('--vocals_only', '-v', action='store_true')

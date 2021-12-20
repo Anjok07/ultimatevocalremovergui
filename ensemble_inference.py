@@ -125,7 +125,11 @@ def main():
         '^(HP_|HP2-)':
             {
                 'model_params': '4band_44100',
-            },       
+            },   
+        '^HighPrecison_4band_[12]':
+            {
+                'model_params': '4band_44100',
+            }, 
         'NewLayer_4band_[123]':
             {
                 'model_params': '4band_44100',

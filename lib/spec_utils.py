@@ -70,9 +70,9 @@ def convert_channels(spec, mp, band):
     elif mp.param['mid_side'] or 'mid_side' == cc:
         spec_left = np.add(spec[0], spec[1]) / 2
         spec_right = np.subtract(spec[0], spec[1])
-    #elif mp.param['stereo_w']:
-    #    spec_left = np.subtract(spec[0], spec[1] * .25)
-    #    spec_right = np.subtract(spec[1], spec[0] * .25)
+    elif mp.param['stereo_n']:
+        spec_left = np.add(spec[0], spec[1] * .25) / 0.9375
+        spec_right = np.add(spec[1], spec[0] * .25) / 0.9375
     else:
         return spec
         
@@ -288,8 +288,8 @@ def spectrogram_to_wave(spec, hop_length, mp, band, multithreading):
         return np.asfortranarray([np.subtract(wave_left / 1.0625, wave_right / 4.25), np.add(wave_right / 1.0625, wave_left / 4.25)])    
     elif mp.param['mid_side'] or 'mid_side' == cc:
         return np.asfortranarray([np.add(wave_left, wave_right / 2), np.subtract(wave_left, wave_right / 2)])
-    #elif mp.param['stereo_w']:
-    #    return np.asfortranarray([np.add(wave_left, wave_right * .25) / 0.9375, np.add(wave_right, wave_left * .25) / 0.9375])
+    elif mp.param['stereo_n']:
+        return np.asfortranarray([np.subtract(wave_left, wave_right * .25), np.subtract(wave_right, wave_left * .25)])
     else:
         return np.asfortranarray([wave_left, wave_right])
 
@@ -468,6 +468,7 @@ def ensembling(a, specs, sr=44100):
         ln = min([spec.shape[2], specs[i].shape[2]])
         spec = spec[:,:,:ln]
         specs[i] = specs[i][:,:,:ln]
+        freq_to_bin = 2 * spec.shape[1] / sr
 
         if 'min_mag' == a:
             spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)
@@ -478,11 +479,12 @@ def ensembling(a, specs, sr=44100):
             s2 = .5 * (specs[i] + spec)
             spec = np.divide(s1, s2, out=np.zeros_like(s1), where=s2!=0)
         if 'crossover' == a:
-            freq_to_bin = 2 * spec.shape[1] / sr
             bs = int(500 * freq_to_bin)
             be = int(14000 * freq_to_bin)
             spec = specs[i] * get_lp_filter_mask(spec.shape[1], bs, be) + spec * get_hp_filter_mask(spec.shape[1], be, bs)
-            
+        if 'min_mag_co' == a:
+            specs[i] += specs[i] * get_hp_filter_mask(spec.shape[1], int(14000 * freq_to_bin), int(4000 * freq_to_bin))
+            spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)      
 
     return spec
 
@@ -516,7 +518,7 @@ if __name__ == "__main__":
     from model_param_init import ModelParameters
     
     p = argparse.ArgumentParser()
-    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invert_p', 'min_mag', 'max_mag', 'mul', 'crossover', 'deep', 'align'], default='min_mag')
+    p.add_argument('--algorithm', '-a', type=str, choices=['invert', 'invert_p', 'min_mag', 'max_mag', 'mul', 'crossover', 'min_mag_co', 'deep', 'align'], default='min_mag')
     p.add_argument('--model_params', '-m', type=str, default=os.path.join('modelparams', '1band_sr44100_hl512.json'))
     p.add_argument('--output_name', '-o', type=str, default='output')
     p.add_argument('--vocals_only', '-v', action='store_true')

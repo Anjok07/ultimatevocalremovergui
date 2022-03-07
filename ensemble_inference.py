@@ -189,6 +189,9 @@ def main():
         )
         
 
+        if device.type == 'cuda':
+            torch.cuda.empty_cache()
+
         # print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
 #ENSEMBLING-BEGIN

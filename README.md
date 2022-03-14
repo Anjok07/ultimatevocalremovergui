@@ -16,9 +16,16 @@ This application is a heavily modified version of the vocal remover AI created a
 
 Please run the requirements command even if you have v4 installed!
 
+pip:
 ```
 pip install --no-cache-dir -r requirements.txt
 pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+conda:
+```
+. Conda-Setup.sh uvr5b
+conda activate uvr5b
 ```
 
 ### FFmpeg 

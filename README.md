@@ -95,7 +95,7 @@ FFmpeg must be installed and configured for the application to process any track
 
 - **Default Values:**
   - **Window Size** - 512
-  - **Aggression Setting** - 10
+  - **Aggression Setting** - 10 (optimal setting for all conversions)
 
 ### Other Buttons:
 
@@ -119,7 +119,7 @@ Here's a list of the models included within the package -
     - **HP_4BAND_44100_A.pth** - This is a strong instrumental model.
     - **HP_4BAND_44100_B.pth** - This is a fine tuned version of the HP_4BAND_44100_A.pth model.
     - **HP_KAROKEE_4BAND_44100_SN.pth** - This is a model that removes main vocals while leaving background vocals intact.
-    - **HP_Vocal_4BAND_44100.pth** - This model emphasizesvocal extraction. The vocal stem will be clean, but the instrumental might sound muddy.
+    - **HP_Vocal_4BAND_44100.pth** - This model emphasizes vocal extraction. The vocal stem will be clean, but the instrumental might sound muddy.
     - **HP_Vocal_AGG_4BAND_44100.pth** - This model also emphasizes vocal extraction and is a bit more aggressive than the previous model.
 
 ## Other GUI Notes
@@ -144,7 +144,7 @@ Please be as detailed as possible when posting a new issue. Make sure to provide
 
 If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 
-1. Open the cmd prompt from the UVR-V4GUI directory
+1. Open the cmd prompt from the UVR-V5GUI directory
 2. Run the following command - 
 ```
 python VocalRemover.py

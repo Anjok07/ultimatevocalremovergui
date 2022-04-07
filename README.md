@@ -107,14 +107,16 @@ FFmpeg must be installed and configured for the application to process any track
 All of the models included in the release were trained on large datasets containing diverse sets of music genres.
 
 - **PLEASE NOTE:** Do not change the name of the models provided! The required parameters are specified and appended to the end of the filenames.
-    - HP2 - These models have more capacity but are resource heavy.
-    - HP - These models use the standard UVR v5 model capacity.
+
+- **Model Network Types**
+    - **HP2** - The model layers are much larger. However, this makes them resource heavy.
+    - **HP** - The model layers are the standard size for UVR v5.
 
 Here's a list of the models included within the package -
 
 - **Main Models**
     - **HP2_3BAND_44100_MSB2.pth** - This is a strong instrumental model trained using more data and new parameters.
-    - **HP2_4BAND_44100_1.pth** - This is a strong instrumental model, but also resource heavy.
+    - **HP2_4BAND_44100_1.pth** - This is a strong instrumental model.
     - **HP2_4BAND_44100_2.pth** - This is a fine tuned version of the HP2_4BAND_44100_1.pth model.
     - **HP_4BAND_44100_A.pth** - This is a strong instrumental model.
     - **HP_4BAND_44100_B.pth** - This is a fine tuned version of the HP_4BAND_44100_A.pth model.

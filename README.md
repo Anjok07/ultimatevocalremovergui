@@ -42,7 +42,7 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
 
 ```
 pip install --no-cache-dir -r requirements.txt
-pip install torch==1.8.1+cu111 torchvision==0.9.1+cu111 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
 ### FFmpeg 

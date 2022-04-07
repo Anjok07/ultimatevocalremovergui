@@ -38,8 +38,8 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
     - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
 2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/tags/v5.0.1.zip
 3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.0.1/models.zip
-4. Extract the ultimatevocalremovergui-5.0.1 folder within ultimatevocalremovergui-5.0.1.zip where ever you wish.
-5. Extract the models folder within models.zip to the ultimatevocalremovergui-5.0.1 directory.
+4. Extract the *ultimatevocalremovergui-5.0.1* folder within ultimatevocalremovergui-5.0.1.zip where ever you wish.
+5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-5.0.1* directory.
     - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.
 6. Open the command prompt from the ultimatevocalremovergui-5.0.1 directory and run the following commands, separately - 
 

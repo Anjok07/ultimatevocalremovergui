@@ -186,7 +186,7 @@ data = {
     'instrumentalModel': None,
     'useModel': None,
     # Constants
-    'window_size': 384,
+    'window_size': 512,
     'agg': 10 
 }
 

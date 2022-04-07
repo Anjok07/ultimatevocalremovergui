@@ -423,8 +423,8 @@ class MainWindow(TkinterDnD.Tk):
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
         
-        # Add New Model Button
-        self.options_model_Button = ttk.Button(master=self.options_Frame,
+        # Add Open Export Directory Button
+        self.options_export_Button = ttk.Button(master=self.options_Frame,
                                                text='Open Export Directory',
                                                style="Bold.TButton",
                                                command=self.open_newModel_filedialog)
@@ -447,8 +447,8 @@ class MainWindow(TkinterDnD.Tk):
                                     relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.options_instrumentalModel_Optionmenu.place(x=-15, y=6, width=0, height=-10,
                                     relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_model_Button.place(x=0, y=0, width=-30, height=-8,
-                                    relx=1/3, rely=3/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_export_Button.place(x=0, y=0, width=-30, height=-8,
+                                    relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
         # -Column 3-
         

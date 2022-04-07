@@ -66,7 +66,7 @@ FFmpeg must be installed and configured for the application to process any track
 - **Choose Main Model** - Here is where you choose the main model to perform a deep vocal removal.
   - Each of the models provided were trained on different parameters, though they can convert tracks of all genres. 
   - Each model differs in the way they process given tracks.  
-     - The [*'Model Test Mode'*](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#checkboxes) option makes it easier for the user to test different models on given tracks.
+     - The *'Model Test Mode'* option makes it easier for the user to test different models on given tracks.
 
 ### Checkboxes
 - **GPU Conversion** - Selecting this option ensures the GPU is used to process conversions. 
@@ -95,7 +95,7 @@ FFmpeg must be installed and configured for the application to process any track
 - **Aggression Setting** - This option allows you to set how strong the vocal removal will be. The range is 0-100. The higher the value, the more the vocal data will be removed. Higher values can result in muddy-sounding instrumentals for instrumental models depending on the track being converted, so this isn't always recommended. The default is 10 for instrumental & vocal models.
 
 - **Default Values:**
-  - **Window Size** - 320
+  - **Window Size** - 512
   - **Aggression Setting** - 10
 
 ### Other Buttons:
@@ -107,7 +107,7 @@ FFmpeg must be installed and configured for the application to process any track
 
 All of the models included in the release were trained on large datasets containing diverse sets of music genres.
 
-**PLEASE NOTE:** Do not change the name of the models provided! The required parameters are specified and appended to the end of the filenames.
+- **PLEASE NOTE:** Do not change the name of the models provided! The required parameters are specified and appended to the end of the filenames.
     - HP2 - These models have more capacity but are resource heavy! 
     - HP - These models use the standard UVR v5 model capacity.
 

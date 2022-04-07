@@ -14,6 +14,18 @@ This application is a GUI version of the vocal remover AI created and posted by 
     - [DilanBoskan](https://github.com/DilanBoskan) - The main UVR GUI developer. Thank you for helping bring the GUI to life! Your hard work and continued support are greatly appreciated.
     - [tsurumeso](https://github.com/tsurumeso) - The engineer who authored the original AI code. Thank you for the hard work and dedication you put into the AI code UVR is built on!
 
+## Change Log
+
+- **v4 vs. v5***
+   - The v5 models are *much* better and greatly outperform v4 models
+   - All v2 and v4 models have been removed
+   - Stacked models have been entirely removed
+   - The NFFT, HOP_SIZE, and SR values are now set internally
+
+- **Upcoming v5.1 Update**
+   - Model ensembling
+   - MDX-NET AI engine and model support
+
 ## Installation
 
 The application was made with Tkinter for cross-platform compatibility, so it should work with Windows, Mac, and Linux systems. However, this application has only been tested on Windows 10 & Linux Ubuntu.
@@ -78,11 +90,11 @@ FFmpeg must be installed and configured for the application to process any track
         - **512** - Average conversion quality, average conversion time, normal resource usage
         - **320** - Better conversion quality, long conversion time, high resource usage
 
-- **Aggressiveness Setting** - This option allows you to set how strong the vocal removal will be. The range is 0-100. The higher the value, the more the vocal data will be removed. Higher values can result in muddy-sounding instrumentals for instrumental models depending on the track being converted, so this isn't always recommended. The default is 10 for instrumental & vocal models.
+- **Aggression Setting** - This option allows you to set how strong the vocal removal will be. The range is 0-100. The higher the value, the more the vocal data will be removed. Higher values can result in muddy-sounding instrumentals for instrumental models depending on the track being converted, so this isn't always recommended. The default is 10 for instrumental & vocal models.
 
 - **Default Values:**
   - **Window Size** - 320
-  - **Aggressivness Setting** - 10
+  - **Aggression Setting** - 10
 
 ### Other Buttons:
 

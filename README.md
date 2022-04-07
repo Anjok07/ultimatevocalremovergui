@@ -16,7 +16,7 @@ This application is a GUI version of the vocal remover AI created and posted by 
 
 ## Change Log
 
-- **v4 vs. v5***
+- **v4 vs. v5**
    - The v5 models are much better and significantly outperform the v4 models
    - All v2 and v4 models have been removed
    - Stacked models have been entirely removed

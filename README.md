@@ -108,7 +108,7 @@ FFmpeg must be installed and configured for the application to process any track
 All of the models included in the release were trained on large datasets containing diverse sets of music genres.
 
 - **PLEASE NOTE:** Do not change the name of the models provided! The required parameters are specified and appended to the end of the filenames.
-    - HP2 - These models have more capacity but are resource heavy! 
+    - HP2 - These models have more capacity but are resource heavy.
     - HP - These models use the standard UVR v5 model capacity.
 
 Here's a list of the models included within the package -

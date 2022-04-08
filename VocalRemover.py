@@ -547,6 +547,11 @@ class MainWindow(TkinterDnD.Tk):
                                           message='You have selected an invalid music file! Please make sure that the file still exists!',
                                           detail=f'File path: {path}')
                 return
+        if not os.path.isfile(instrumentalModel_path):
+            tk.messagebox.showwarning(master=self,
+                                        title='Invalid Main Model File',
+                                        message='You have selected an invalid main model file!\nPlease make sure that your model file still exists!')
+            return
         if not os.path.isdir(export_path):
             tk.messagebox.showwarning(master=self,
                                       title='Invalid Export Directory',

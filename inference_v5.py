@@ -109,9 +109,11 @@ class VocalRemover(object):
 
                 pred = pred.detach().cpu().numpy()
                 preds.append(pred[0])
-
+                
             pred = np.concatenate(preds, axis=2)
 
+
+        
         return pred
 
     def preprocess(self, X_spec):
@@ -197,7 +199,7 @@ def update_progress(progress_var, total_files, file_num, step: float = 1):
     """Calculate the progress for the progress widget in the GUI"""
     base = (100 / total_files)
     progress = base * (file_num - 1)
-    progress += step
+    progress += base * step
 
     progress_var.set(progress)
 
@@ -306,8 +308,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     base_text = get_baseText(total_files=len(data['input_paths']),
                                                 file_num=file_num)
                     progress_kwargs = {'progress_var': progress_var,
-                                        'total_files': len(data['input_paths']),
-                                        'file_num': file_num}
+                                       'total_files': len(data['input_paths']),
+                                       'file_num': file_num}
                     update_progress(**progress_kwargs,
                                     step=0)
                     
@@ -397,14 +399,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     text_widget.write(base_text + 'Done!\n')
 
                     update_progress(**progress_kwargs,
-                                    step=0.7)
+                                    step=1)
                     # Save output music files
                     text_widget.write(base_text + 'Saving Files...\n')
                     save_files(wav_instrument, wav_vocals)
                     text_widget.write(base_text + 'Done!\n')
 
                     update_progress(**progress_kwargs,
-                                    step=0.8)
+                                    step=1)
 
                     # Save output image
                     if data['output_image']:

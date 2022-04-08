@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v5.0.0
+# Ultimate Vocal Remover GUI v5.0.2
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/UVRV5.png" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
@@ -6,7 +6,7 @@
 
 ## About
 
-This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). This version also comes with eight high-performance models trained by me. You can find tsurumeso's original command-line version [here](https://github.com/tsurumeso/vocal-remover). 
+This application is a GUI version of the vocal remover AI created and posted by GitHub user [tsurumeso](https://github.com/tsurumeso). This version also comes with eight high-performance models trained by us. You can find tsurumeso's original command-line version [here](https://github.com/tsurumeso/vocal-remover). 
 
 - **The Developers**
     - [Anjok07](https://github.com/anjok07)- Model collaborator & UVR developer.
@@ -36,8 +36,8 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
 
 1. Download & install Python 3.9.8 [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe) (Windows link)
     - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
-2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/tags/v5.0.1.zip
-3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.0.1/models.zip
+2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/tags/v5.0.2.zip
+3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.0.2/models.zip
 4. Extract the *ultimatevocalremovergui-5.0.1* folder within ultimatevocalremovergui-5.0.1.zip where ever you wish.
 5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-5.0.1* directory.
     - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.

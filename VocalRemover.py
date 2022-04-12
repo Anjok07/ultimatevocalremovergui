@@ -26,6 +26,10 @@ from pathlib import Path
 
 
 import inference_v5
+import win32gui, win32con
+
+the_program_to_hide = win32gui.GetForegroundWindow()
+win32gui.ShowWindow(the_program_to_hide , win32con.SW_HIDE)
 
 # Change the current working directory to the directory
 # this file sits in

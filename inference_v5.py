@@ -4,13 +4,6 @@ import argparse
 import os
 import importlib
 from statistics import mode
-import sys
-import subprocess
-import contextlib
-from subprocess import run
-from tkinter.ttk import Progressbar
-from typing import _SpecialForm, overload
-from unittest.mock import _SpecState
 
 import cv2
 import librosa
@@ -29,7 +22,6 @@ from collections import defaultdict
 import tkinter as tk
 import traceback  # Error Message Recent Calls
 import time  # Timer
-import random
 
 class VocalRemover(object):
     
@@ -51,9 +43,6 @@ class VocalRemover(object):
         
         global args
         global model_params_d
-        
-        
-        #progressb = tqdm
         
         p = argparse.ArgumentParser()
         p.add_argument('--paramone', type=str, default='lib_v5/modelparams/4band_44100.json')

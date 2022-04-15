@@ -22,14 +22,15 @@ from collections import defaultdict
 import queue
 import threading  # Run the algorithm inside a thread
 
+
 from pathlib import Path
 
-
 import inference_v5
-import win32gui, win32con
+import inference_v5_ensemble
+# import win32gui, win32con
 
-the_program_to_hide = win32gui.GetForegroundWindow()
-win32gui.ShowWindow(the_program_to_hide , win32con.SW_HIDE)
+# the_program_to_hide = win32gui.GetForegroundWindow()
+# win32gui.ShowWindow(the_program_to_hide , win32con.SW_HIDE)
 
 # Change the current working directory to the directory
 # this file sits in
@@ -44,19 +45,21 @@ os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
 banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
-refresh_path = os.path.join(base_path, 'img', 'refresh.png')
+efile_path = os.path.join(base_path, 'img', 'file.png')
 DEFAULT_DATA = {
     'exportPath': '',
     'inputPaths': [],
     'gpu': False,
     'postprocess': False,
     'tta': False,
+    'save': True,
     'output_image': False,
     'window_size': '512',
     'agg': 10,
     'modelFolder': False,
     'modelInstrumentalLabel': '',
-    #'aiModel': 'v5',
+    'aiModel': 'Single Model',
+    'ensChoose': 'HP1 Models',
     'useModel': 'instrumental',
     'lastDir': None,
 }
@@ -196,7 +199,7 @@ class MainWindow(TkinterDnD.Tk):
     PADDING = 10
 
     COL1_ROWS = 6
-    COL2_ROWS = 5
+    COL2_ROWS = 6
     COL3_ROWS = 6
 
     def __init__(self):
@@ -223,7 +226,7 @@ class MainWindow(TkinterDnD.Tk):
         # --Variables--
         self.logo_img = open_image(path=banner_path,
                                    size=(self.winfo_width(), 9999))
-        self.refresh_img = open_image(path=refresh_path,
+        self.efile_img = open_image(path=efile_path,
                                       size=(20, 20))
         self.instrumentalLabel_to_path = defaultdict(lambda: '')
         self.lastInstrumentalModels = []
@@ -236,6 +239,7 @@ class MainWindow(TkinterDnD.Tk):
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
         self.tta_var = tk.BooleanVar(value=data['tta'])
+        self.save_var = tk.BooleanVar(value=data['save'])
         self.outputImage_var = tk.BooleanVar(value=data['output_image'])
         # Models
         self.instrumentalModel_var = tk.StringVar(value=data['modelInstrumentalLabel'])
@@ -245,8 +249,10 @@ class MainWindow(TkinterDnD.Tk):
         self.winSize_var = tk.StringVar(value=data['window_size'])
         self.agg_var = tk.StringVar(value=data['agg'])
         # AI model
-        #self.aiModel_var = tk.StringVar(value=data['aiModel'])
-        #self.last_aiModel = self.aiModel_var.get()
+        self.aiModel_var = tk.StringVar(value=data['aiModel'])
+        self.last_aiModel = self.aiModel_var.get()
+        self.ensChoose_var = tk.StringVar(value=data['ensChoose'])
+        self.last_ensChoose = self.ensChoose_var.get()
         # Other
         self.inputPathsEntry_var = tk.StringVar(value='')
         self.lastDir = data['lastDir']  # nopep8
@@ -277,9 +283,9 @@ class MainWindow(TkinterDnD.Tk):
         self.conversion_Button = ttk.Button(master=self,
                                             text='Start Conversion',
                                             command=self.start_conversion)
-        self.refresh_Button = ttk.Button(master=self,
-                                         image=self.refresh_img,
-                                         command=self.restart)
+        self.efile_Button = ttk.Button(master=self,
+                                         image=self.efile_img,
+                                         command=self.open_newModel_filedialog)
 
         self.progressbar = ttk.Progressbar(master=self,
                                            variable=self.progress_var)
@@ -288,7 +294,7 @@ class MainWindow(TkinterDnD.Tk):
                                               background='#a0a0a0',
                                               borderwidth=0,)
         self.command_Text.write(f'COMMAND LINE [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]')  # nopep8
-
+        
     def configure_widgets(self):
         """Change widget styling and appearance"""
 
@@ -322,7 +328,7 @@ class MainWindow(TkinterDnD.Tk):
                                  relx=0, rely=0, relwidth=1, relheight=0)
         self.conversion_Button.place(x=10, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.PADDING*2, width=-20 - 40, height=self.CONVERSIONBUTTON_HEIGHT,
                                      relx=0, rely=0, relwidth=1, relheight=0)
-        self.refresh_Button.place(x=-10 - 35, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.PADDING*2, width=35, height=self.CONVERSIONBUTTON_HEIGHT,
+        self.efile_Button.place(x=-10 - 35, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.PADDING*2, width=35, height=self.CONVERSIONBUTTON_HEIGHT,
                                   relx=1, rely=0, relwidth=0, relheight=0)
         self.command_Text.place(x=15, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.CONVERSIONBUTTON_HEIGHT + self.PADDING*3, width=-30, height=self.COMMAND_HEIGHT,
                                 relx=0, rely=0, relwidth=1, relheight=0)
@@ -380,11 +386,18 @@ class MainWindow(TkinterDnD.Tk):
                                                        text='TTA',
                                                        variable=self.tta_var,
                                                        )
+        # Save Ensemble Outputs
+        self.options_save_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
+                                                       text='Save All Outputs',
+                                                       variable=self.save_var,
+                                                       )
         # Save Image
         self.options_image_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
                                                          text='Output Image',
                                                          variable=self.outputImage_var,
                                                          )
+        
+        # Model Test Mode
         self.options_modelFolder_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
                                                                text='Model Test Mode',
                                                                variable=self.modelFolder_var,
@@ -407,12 +420,20 @@ class MainWindow(TkinterDnD.Tk):
                                            background='#404040', font=self.font, foreground='white', relief="groove")
         
         # AI model
-        # self.options_aiModel_Label = tk.Label(master=self.options_Frame,
-        #                                       text='Choose AI Engine', anchor=tk.CENTER,
-        #                                       background='#63605f', font=self.font, foreground='white', relief="sunken")
-        # self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
-        #                                                  self.aiModel_var,
-        #                                                  None, 'v5')
+        self.options_aiModel_Label = tk.Label(master=self.options_Frame,
+                                               text='Choose Conversion Method', anchor=tk.CENTER,
+                                               background='#404040', font=self.font, foreground='white', relief="groove")
+        self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
+                                                          self.aiModel_var,
+                                                          None, 'Single Model', 'Ensemble Mode')
+        # Ensemble Mode
+        self.options_ensChoose_Label = tk.Label(master=self.options_Frame,
+                                               text='Choose Ensemble', anchor=tk.CENTER,
+                                               background='#404040', font=self.font, foreground='white', relief="groove")
+        self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
+                                                          self.ensChoose_var,
+                                                          None, 'HP1 Models', 'HP2 Models', 'All HP Models', 'Vocal Models')
+
 
 
         #  "Save to", "Select Your Audio File(s)"", and "Start Conversion" Button Style
@@ -428,10 +449,10 @@ class MainWindow(TkinterDnD.Tk):
                                                                    self.instrumentalModel_var)
         
         # Add Open Export Directory Button
-        self.options_export_Button = ttk.Button(master=self.options_Frame,
-                                               text='Open Export Directory',
-                                               style="Bold.TButton",
-                                               command=self.open_newModel_filedialog)
+        # self.options_export_Button = ttk.Button(master=self.options_Frame,
+        #                                        text='Open Export Directory',
+        #                                        style="Bold.TButton",
+        #                                        command=self.open_newModel_filedialog)
         # -Place Widgets-
         # -Column 1-
         self.options_gpu_Checkbutton.place(x=0, y=0, width=0, height=0,
@@ -440,6 +461,8 @@ class MainWindow(TkinterDnD.Tk):
                                             relx=0, rely=1/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.options_tta_Checkbutton.place(x=0, y=0, width=0, height=0,
                                            relx=0, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+        self.options_save_Checkbutton.place(x=0, y=0, width=0, height=0,
+                                           relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.options_image_Checkbutton.place(x=0, y=0, width=0, height=0,
                                              relx=0, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.options_modelFolder_Checkbutton.place(x=0, y=0, width=0, height=0,
@@ -447,12 +470,22 @@ class MainWindow(TkinterDnD.Tk):
 
         # -Column 2-
 
+            
         self.options_instrumentalModel_Label.place(x=-15, y=6, width=0, height=-10,
-                                    relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                                    relx=1/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.options_instrumentalModel_Optionmenu.place(x=-15, y=6, width=0, height=-10,
-                                    relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_export_Button.place(x=0, y=0, width=-30, height=-8,
                                     relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+            
+
+        self.options_ensChoose_Label.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_ensChoose_Optionmenu.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        
+        
+        
+        # self.options_export_Button.place(x=0, y=0, width=-30, height=-8,
+        #                             relx=2/3, rely=4/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
 
         # -Column 3-
         
@@ -469,15 +502,17 @@ class MainWindow(TkinterDnD.Tk):
                                     relx=2/3, rely=3/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
     
         
-        # AI model
-        # self.options_aiModel_Label.place(x=5, y=-5, width=-30, height=-8,
-        #                                  relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        # self.options_aiModel_Optionmenu.place(x=5, y=-5, width=-30, height=-8,
-        #                                       relx=1/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        # Conversion Method
+        self.options_aiModel_Label.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_aiModel_Optionmenu.place(x=-15, y=4, width=0, height=-10,
+                                    relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        
+
 
         # Model deselect
-        # self.aiModel_var.trace_add('write',
-        #                            lambda *args: self.deselect_models())
+        self.aiModel_var.trace_add('write',
+                                    lambda *args: self.deselect_models())
 
     # Opening filedialogs
     def open_file_filedialog(self):
@@ -532,6 +567,7 @@ class MainWindow(TkinterDnD.Tk):
             else:
                 window_size = int(self.winSize_var.get())
                 agg = int(self.agg_var.get())
+                ensChoose = str(self.ensChoose_var.get())
         except ValueError:  # Non integer was put in entry box
             tk.messagebox.showwarning(master=self,
                                       title='Invalid Input',
@@ -551,25 +587,25 @@ class MainWindow(TkinterDnD.Tk):
                                           message='You have selected an invalid music file! Please make sure that the file still exists!',
                                           detail=f'File path: {path}')
                 return
-        if not os.path.isfile(instrumentalModel_path):
-            tk.messagebox.showwarning(master=self,
-                                        title='Invalid Main Model File',
-                                        message='You have selected an invalid main model file!\nPlease make sure that your model file still exists!')
-            return
+        if self.aiModel_var.get() == 'Single Model':       
+            if not os.path.isfile(instrumentalModel_path):
+                    tk.messagebox.showwarning(master=self,
+                                                title='Invalid Main Model File',
+                                                message='You have selected an invalid main model file!\nPlease make sure that your model file still exists!')
+                    return
+        
         if not os.path.isdir(export_path):
             tk.messagebox.showwarning(master=self,
                                       title='Invalid Export Directory',
                                       message='You have selected an invalid export directory!\nPlease make sure that your directory still exists!')
             return
 
-        # if self.aiModel_var.get() == 'v4':
-        #     inference = inference_v4
-        # elif self.aiModel_var.get() == 'v5':
-        #     inference = inference_v5
-        # else:
-        #     raise TypeError('This error should not occur.')
-        
-        inference = inference_v5
+        if self.aiModel_var.get() == 'Single Model':
+            inference = inference_v5
+        elif self.aiModel_var.get() == 'Ensemble Mode':
+            inference = inference_v5_ensemble
+        else:
+            raise TypeError('This error should not occur.')
 
         # -Run the algorithm-
         threading.Thread(target=inference.main,
@@ -580,7 +616,8 @@ class MainWindow(TkinterDnD.Tk):
                              # Processing Options
                              'gpu': 0 if self.gpuConversion_var.get() else -1,
                              'postprocess': self.postprocessing_var.get(),
-                             'tta': self.tta_var.get(),  # not needed for v2
+                             'tta': self.tta_var.get(),
+                             'save': self.save_var.get(),
                              'output_image': self.outputImage_var.get(),
                              # Models
                              'instrumentalModel': instrumentalModel_path,
@@ -591,10 +628,12 @@ class MainWindow(TkinterDnD.Tk):
                              # Constants
                              'window_size': window_size,
                              'agg': agg,
+                             'ensChoose': ensChoose,
                              # Other Variables (Tkinter)
                              'window': self,
                              'text_widget': self.command_Text,
                              'button_widget': self.conversion_Button,
+                             'inst_menu': self.options_instrumentalModel_Optionmenu,
                              'progress_var': self.progress_var,
                          },
                          daemon=True
@@ -647,23 +686,55 @@ class MainWindow(TkinterDnD.Tk):
         on certain selections
         """
 
-        # Models
-        # self.options_instrumentalModel_Label.configure(foreground='#000')
-        # self.options_instrumentalModel_Optionmenu.configure(state=tk.NORMAL)  # nopep8
-
-        # if self.aiModel_var.get() == 'v5':
-        #     self.options_tta_Checkbutton.configure(state=tk.NORMAL)
-        #     self.options_agg_Label.place(x=5, y=-5, width=-30, height=-8,
-        #                             relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        #     self.options_agg_Entry.place(x=5, y=-4, width=-30, height=-8,
-        #                             relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        if self.aiModel_var.get() == 'Single Model':
+            self.options_ensChoose_Label.place_forget()
+            self.options_ensChoose_Optionmenu.place_forget()
+            self.options_save_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.place_forget()
+            self.options_modelFolder_Checkbutton.configure(state=tk.NORMAL)
+            self.options_modelFolder_Checkbutton.place(x=0, y=0, width=0, height=0,
+                                            relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+            self.options_instrumentalModel_Label.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+            self.options_instrumentalModel_Optionmenu.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        else:  
+            self.options_instrumentalModel_Label.place_forget()
+            self.options_instrumentalModel_Optionmenu.place_forget()
+            self.options_modelFolder_Checkbutton.place_forget()
+            self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.configure(state=tk.NORMAL)
+            self.options_save_Checkbutton.place(x=0, y=0, width=0, height=0,
+                                    relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+            self.options_ensChoose_Label.place(x=-15, y=6, width=0, height=-10,
+                                        relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+            self.options_ensChoose_Optionmenu.place(x=-15, y=6, width=0, height=-10,
+                                        relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
-        # else:
-        #     self.options_tta_Checkbutton.configure(state=tk.NORMAL)
-        #     self.options_agg_Label.place(x=5, y=-5, width=-30, height=-8,
-        #                             relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        #     self.options_agg_Entry.place(x=5, y=-4, width=-30, height=-8,
-        #                             relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        if self.aiModel_var.get() == 'Ensemble Mode':   
+            self.options_instrumentalModel_Label.place_forget()
+            self.options_instrumentalModel_Optionmenu.place_forget()
+            self.options_modelFolder_Checkbutton.place_forget()
+            self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.configure(state=tk.NORMAL)
+            self.options_save_Checkbutton.place(x=0, y=0, width=0, height=0,
+                                    relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+            self.options_ensChoose_Label.place(x=-15, y=6, width=0, height=-10,
+                                        relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+            self.options_ensChoose_Optionmenu.place(x=-15, y=6, width=0, height=-10,
+                                        relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        else:
+            self.options_ensChoose_Label.place_forget()
+            self.options_ensChoose_Optionmenu.place_forget()
+            self.options_save_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.place_forget()
+            self.options_modelFolder_Checkbutton.configure(state=tk.NORMAL)
+            self.options_modelFolder_Checkbutton.place(x=0, y=0, width=0, height=0,
+                                            relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+            self.options_instrumentalModel_Label.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+            self.options_instrumentalModel_Optionmenu.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=4/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
             
         self.update_inputPaths()
@@ -678,23 +749,26 @@ class MainWindow(TkinterDnD.Tk):
             self.last_aiModel = self.aiModel_var.get()
 
         self.instrumentalModel_var.set('')
+        self.ensChoose_var.set('HP1 Models')
 
         self.winSize_var.set(DEFAULT_DATA['window_size'])
         self.agg_var.set(DEFAULT_DATA['agg'])
+        self.modelFolder_var.set(DEFAULT_DATA['modelFolder'])
+        
 
         self.update_available_models()
         self.update_states()
 
-    def restart(self):
-        """
-        Restart the application after asking for confirmation
-        """
-        save = tk.messagebox.askyesno(title='Confirmation',
-                                      message='The application will restart. Do you want to save the data?')
-        if save:
-            self.save_values()
-        subprocess.Popen(f'python "{__file__}"', shell=True)
-        exit()
+    # def restart(self):
+    #     """
+    #     Restart the application after asking for confirmation
+    #     """
+    #     save = tk.messagebox.askyesno(title='Confirmation',
+    #                                   message='The application will restart. Do you want to save the data?')
+    #     if save:
+    #         self.save_values()
+    #     subprocess.Popen(f'..App\Python\python.exe "{__file__}"')
+    #     exit()
 
     def save_values(self):
         """
@@ -716,6 +790,7 @@ class MainWindow(TkinterDnD.Tk):
             'gpu': self.gpuConversion_var.get(),
             'postprocess': self.postprocessing_var.get(),
             'tta': self.tta_var.get(),
+            'save': self.save_var.get(),
             'output_image': self.outputImage_var.get(),
             'window_size': window_size,
             'agg': agg,
@@ -723,7 +798,8 @@ class MainWindow(TkinterDnD.Tk):
             'lastDir': self.lastDir,
             'modelFolder': self.modelFolder_var.get(),
             'modelInstrumentalLabel': self.instrumentalModel_var.get(),
-            #'aiModel': self.aiModel_var.get(),
+            'aiModel': self.aiModel_var.get(),
+            'ensChoose': self.ensChoose_var.get(),
         })
 
         self.destroy()

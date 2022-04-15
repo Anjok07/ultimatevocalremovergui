@@ -28,7 +28,6 @@ class VocalRemover(object):
         self.data = data
         self.text_widget = text_widget
         # self.offset = model.offset
-        
 
 data = {
     # Paths
@@ -60,7 +59,6 @@ def update_progress(progress_var, total_files, file_num, step: float = 1):
 
     progress_var.set(progress)
 
-
 def get_baseText(total_files, file_num):
     """Create the base text for the command widget"""
     text = 'File {file_num}/{total_files} '.format(file_num=file_num,
@@ -77,7 +75,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         31191, # default
         33966, 123821, 123812, 537238 # custom
     ]
-
     
     p = argparse.ArgumentParser()
     p.add_argument('--aggressiveness',type=float, default=data['agg']/100)
@@ -139,9 +136,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
     # Separation Preperation
-    try:    #Load File(s)
-        
-
+    try:    #Ensemble Dictionary
             HP1_Models = [
                 {
                     'model_name':'HP_4BAND_44100_A',
@@ -166,7 +161,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     'model_location':'models/Main Models/HP2_4BAND_44100_1.pth',
                     'using_archtecture': '537238KB',
                     'loop_name': 'Ensemble Mode - Model 1/3'
-                    
                 },
                 {
                     'model_name':'HP2_4BAND_44100_2',
@@ -174,7 +168,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     'model_location':'models/Main Models/HP2_4BAND_44100_2.pth',
                     'using_archtecture': '537238KB',
                     'loop_name': 'Ensemble Mode - Model 2/3'
-                    
                 },
                 {
                     'model_name':'HP2_3BAND_44100_MSB2',
@@ -225,7 +218,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 }
             ]
             
-            
             Vocal_Models = [
                 {
                     'model_name':'HP_Vocal_4BAND_44100',
@@ -260,11 +252,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 ensefolder = 'Vocal_Models_Saved_Outputs'
                 ensemode = 'Vocal_Models'
 
-            
-
-
+            #Prepare Audiofile(s)
             for file_num, music_file in enumerate(data['input_paths'], start=1):
-
                 # -Get text and update progress-
                 base_text = get_baseText(total_files=len(data['input_paths']),
                                             file_num=file_num)
@@ -274,10 +263,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 update_progress(**progress_kwargs,
                                 step=0)        
 
-                
-                #Load Model(s)       
-                #text_widget.write(base_text + 'Loading models...')
-
+                #Prepare to loop models
                 for i, c in tqdm(enumerate(loops), disable=True, desc='Iterations..'):
                     
                         text_widget.write(c['loop_name'] + '\n\n')
@@ -300,7 +286,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             """
                             enseFolderName = ''
 
-                            # -Instrumental-
                             if str(ensefolder):
                                 enseFolderName += os.path.splitext(os.path.basename(ensefolder))[0]
 
@@ -326,7 +311,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         mp = ModelParameters(c['model_params'])
                         
-                        # -Instrumental-
+                        #Load model
                         if os.path.isfile(c['model_location']):
                             device = torch.device('cpu')
                             model = nets.CascadedASPPNet(mp.param['bins'] * 2)
@@ -340,7 +325,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         model_name = os.path.basename(c["model_name"])
 
-                            
                         # -Go through the different steps of seperation-
                         # Wave source
                         text_widget.write(base_text + 'Loading wave source... ')
@@ -376,9 +360,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         step=0.1)
 
                         text_widget.write(base_text + 'Stft of wave source... ')
-                        
                         text_widget.write('Done!\n')
-                        
                         text_widget.write(base_text + "Please Wait...\n")
 
                         X_spec_m = spec_utils.combine_spectrograms(X_spec_s, mp)
@@ -458,7 +440,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         aggressiveness = {'value': args.aggressiveness, 'split_bin': mp.param['band'][1]['crop_stop']}
                         
-                        
                         if data['tta']:
                             text_widget.write(base_text + "Running Inferences (TTA)... \n")
                         else:
@@ -468,10 +449,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                                                 device,
                                                                 model, aggressiveness)
                         
-                        
-
                         update_progress(**progress_kwargs,
                                         step=0.85)
+                        
                         # Postprocess
                         if data['postprocess']:
                             text_widget.write(base_text + 'Post processing... ')
@@ -489,7 +469,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         if args.high_end_process.startswith('mirroring'):        
                             input_high_end_ = spec_utils.mirroring(args.high_end_process, y_spec_m, input_high_end, mp)
-            
                             wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end_)       
                         else:
                             wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
@@ -505,12 +484,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                         update_progress(**progress_kwargs,
                                         step=0.9)
+                        
                         # Save output music files
                         text_widget.write(base_text + 'Saving Files... ')
                         save_files(wav_instrument, wav_vocals)
                         text_widget.write('Done!\n')
-
-
 
                         # Save output image
                         if data['output_image']:
@@ -526,7 +504,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         text_widget.write(base_text + 'Completed Seperation!\n\n')  
                         
                 # Emsembling Outputs
-                
                 def get_files(folder="", prefix="", suffix=""):
                     return [f"{folder}{i}" for i in os.listdir(folder) if i.startswith(prefix) if i.endswith(suffix)]
                 
@@ -535,14 +512,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         'algorithm':'min_mag',
                         'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
                         'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                        'output':'{}_Ensembled_{}_Instrumentals'.format(trackname, ensemode),
+                        'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
                         'type': 'Instrumentals'
                     },
                     {
                         'algorithm':'max_mag',
                         'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
                         'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                        'output': '{}_Ensembled_{}_Vocals'.format(trackname, ensemode),
+                        'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
                         'type': 'Vocals'
                     }
                 ]
@@ -587,7 +564,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                     text_widget.write("Done!\n")
 
-
                     update_progress(**progress_kwargs,
                     step=0.95)
                 text_widget.write("\n")
@@ -602,12 +578,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         print(type(e).__name__, e)
         print(message)
         progress_var.set(0)
-        button_widget.configure(state=tk.NORMAL)  # Enable Button
+        button_widget.configure(state=tk.NORMAL)  #Enable Button
         return
-    
             
-    if len(os.listdir(enseExport)) == 0: # Check if the folder is empty
-        shutil.rmtree(folder_path)
+    if len(os.listdir(enseExport)) == 0: #Check if the folder is empty
+        shutil.rmtree(folder_path) #Delete folder if empty
         
     update_progress(**progress_kwargs,
     step=1) 
@@ -620,4 +595,4 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     text_widget.write(f'Conversions Completed!\n')
     text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
     torch.cuda.empty_cache()
-    button_widget.configure(state=tk.NORMAL)  # Enable Button
+    button_widget.configure(state=tk.NORMAL)  #Enable Button

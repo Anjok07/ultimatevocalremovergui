@@ -32,7 +32,6 @@ class VocalRemover(object):
         self.devices = defaultdict(lambda: None)
         # self.offset = model.offset
         
-
 data = {
     # Paths
     'input_paths': None,
@@ -61,13 +60,11 @@ def update_progress(progress_var, total_files, file_num, step: float = 1):
 
     progress_var.set(progress)
 
-
 def get_baseText(total_files, file_num):
     """Create the base text for the command widget"""
     text = 'File {file_num}/{total_files} '.format(file_num=file_num,
                                                 total_files=total_files)
     return text
-
 
 def determineModelFolderName():
     """
@@ -109,8 +106,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     p.add_argument('--nn_architecture', type=str, choices= ['auto'] + list('{}KB'.format(s) for s in nn_arch_sizes), default='auto')
     p.add_argument('--high_end_process', type=str, default='mirroring')
     args = p.parse_args()  
-    
-                    
+             
     def save_files(wav_instrument, wav_vocals):
         """Save output music files"""
         vocal_name = '(Vocals)'
@@ -133,6 +129,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                  wav_instrument, mp.param['sr'])
 
         appendModelFolderName = modelFolderName.replace('/', '_')
+        
         # -Save files-
         # Instrumental
         if instrumental_name is not None:
@@ -173,7 +170,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             os.mkdir(folder_path)
 
     # Separation Preperation
-    try:    #Load File(s)
+    try:        #Load File(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
                         # Determine File Name
                         base_name = f'{data["export_path"]}{modelFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
@@ -190,8 +187,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         update_progress(**progress_kwargs,
                                         step=0)        
                 
-                
-                #Load Model(s)       
+                        #Load Model      
                         text_widget.write(base_text + 'Loading models...')
                         
 
@@ -354,9 +350,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             else:
                                 return pred * coef, X_mag, np.exp(1.j * X_phase)
                                     
-                        
                         aggressiveness = {'value': args.aggressiveness, 'split_bin': mp.param['band'][1]['crop_stop']}
-                        
                         
                         if data['tta']:
                             text_widget.write(base_text + "Running Inferences (TTA)...\n")
@@ -402,6 +396,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                         update_progress(**progress_kwargs,
                                         step=1)
+                        
                         # Save output music files
                         text_widget.write(base_text + 'Saving Files...')
                         save_files(wav_instrument, wav_vocals)

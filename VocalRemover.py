@@ -41,6 +41,7 @@ if getattr(sys, 'frozen', False):
     base_path = sys._MEIPASS
 else:
     base_path = os.path.dirname(os.path.abspath(__file__))
+    
 os.chdir(base_path)  # Change the current working directory to the base path
 
 instrumentalModels_dir = os.path.join(base_path, 'models')
@@ -63,7 +64,6 @@ DEFAULT_DATA = {
     'useModel': 'instrumental',
     'lastDir': None,
 }
-
 
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
     """
@@ -94,7 +94,6 @@ def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: 
             img = img.resize(size, Image.ANTIALIAS)
     return ImageTk.PhotoImage(img)
 
-
 def save_data(data):
     """
     Saves given data as a .pkl (pickle) file
@@ -106,7 +105,6 @@ def save_data(data):
     # Open data file, create it if it does not exist
     with open('data.pkl', 'wb') as data_file:
         pickle.dump(data, data_file)
-
 
 def load_data() -> dict:
     """
@@ -125,7 +123,6 @@ def load_data() -> dict:
         save_data(data=DEFAULT_DATA)
 
         return load_data()
-
 
 def drop(event, accept_mode: str = 'files'):
     """
@@ -153,12 +150,10 @@ def drop(event, accept_mode: str = 'files'):
         # Invalid accept mode
         return
 
-
 class ThreadSafeConsole(tk.Text):
     """
     Text Widget which is thread safe for tkinter
     """
-
     def __init__(self, master, **options):
         tk.Text.__init__(self, master, **options)
         self.queue = queue.Queue()
@@ -185,7 +180,6 @@ class ThreadSafeConsole(tk.Text):
             pass
         self.configure(state=tk.DISABLED)
         self.after(100, self.update_me)
-
 
 class MainWindow(TkinterDnD.Tk):
     # --Constants--
@@ -248,9 +242,10 @@ class MainWindow(TkinterDnD.Tk):
         # Constants
         self.winSize_var = tk.StringVar(value=data['window_size'])
         self.agg_var = tk.StringVar(value=data['agg'])
-        # AI model
+        # Choose Conversion Method
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
         self.last_aiModel = self.aiModel_var.get()
+        # Choose Ensemble
         self.ensChoose_var = tk.StringVar(value=data['ensChoose'])
         self.last_ensChoose = self.ensChoose_var.get()
         # Other
@@ -264,7 +259,6 @@ class MainWindow(TkinterDnD.Tk):
         self.configure_widgets()
         self.bind_widgets()
         self.place_widgets()
-
         self.update_available_models()
         self.update_states()
         self.update_loop()
@@ -403,6 +397,22 @@ class MainWindow(TkinterDnD.Tk):
                                                                variable=self.modelFolder_var,
                                                                )
         # -Column 2-
+        
+        # Choose Conversion Method
+        self.options_aiModel_Label = tk.Label(master=self.options_Frame,
+                                               text='Choose Conversion Method', anchor=tk.CENTER,
+                                               background='#404040', font=self.font, foreground='white', relief="groove")
+        self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
+                                                          self.aiModel_var,
+                                                          None, 'Single Model', 'Ensemble Mode')
+        # Ensemble Mode
+        self.options_ensChoose_Label = tk.Label(master=self.options_Frame,
+                                               text='Choose Ensemble', anchor=tk.CENTER,
+                                               background='#404040', font=self.font, foreground='white', relief="groove")
+        self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
+                                                          self.ensChoose_var,
+                                                          None, 'HP1 Models', 'HP2 Models', 'All HP Models', 'Vocal Models')
+        # -Column 3-
 
         # WINDOW SIZE
         self.options_winSize_Label = tk.Label(master=self.options_Frame,
@@ -418,23 +428,6 @@ class MainWindow(TkinterDnD.Tk):
         self.options_agg_Label = tk.Label(master=self.options_Frame,
                                            text='Aggression Setting',
                                            background='#404040', font=self.font, foreground='white', relief="groove")
-        
-        # AI model
-        self.options_aiModel_Label = tk.Label(master=self.options_Frame,
-                                               text='Choose Conversion Method', anchor=tk.CENTER,
-                                               background='#404040', font=self.font, foreground='white', relief="groove")
-        self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
-                                                          self.aiModel_var,
-                                                          None, 'Single Model', 'Ensemble Mode')
-        # Ensemble Mode
-        self.options_ensChoose_Label = tk.Label(master=self.options_Frame,
-                                               text='Choose Ensemble', anchor=tk.CENTER,
-                                               background='#404040', font=self.font, foreground='white', relief="groove")
-        self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
-                                                          self.ensChoose_var,
-                                                          None, 'HP1 Models', 'HP2 Models', 'All HP Models', 'Vocal Models')
-
-
 
         #  "Save to", "Select Your Audio File(s)"", and "Start Conversion" Button Style
         s = ttk.Style()
@@ -448,12 +441,8 @@ class MainWindow(TkinterDnD.Tk):
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
         
-        # Add Open Export Directory Button
-        # self.options_export_Button = ttk.Button(master=self.options_Frame,
-        #                                        text='Open Export Directory',
-        #                                        style="Bold.TButton",
-        #                                        command=self.open_newModel_filedialog)
         # -Place Widgets-
+        
         # -Column 1-
         self.options_gpu_Checkbutton.place(x=0, y=0, width=0, height=0,
                                            relx=0, rely=0, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -469,8 +458,6 @@ class MainWindow(TkinterDnD.Tk):
                                             relx=0, rely=4/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
 
         # -Column 2-
-
-            
         self.options_instrumentalModel_Label.place(x=-15, y=6, width=0, height=-10,
                                     relx=1/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.options_instrumentalModel_Optionmenu.place(x=-15, y=6, width=0, height=-10,
@@ -481,14 +468,15 @@ class MainWindow(TkinterDnD.Tk):
                                     relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.options_ensChoose_Optionmenu.place(x=-15, y=6, width=0, height=-10,
                                     relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        
-        
-        
-        # self.options_export_Button.place(x=0, y=0, width=-30, height=-8,
-        #                             relx=2/3, rely=4/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
+
+        # Conversion Method
+        self.options_aiModel_Label.place(x=-15, y=6, width=0, height=-10,
+                                    relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_aiModel_Optionmenu.place(x=-15, y=4, width=0, height=-10,
+                                    relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
         # -Column 3-
-        
+
         # WINDOW
         self.options_winSize_Label.place(x=35, y=6, width=-40, height=-10,
                                                    relx=2/3, rely=0, relwidth=1/3, relheight=1/self.COL3_ROWS)
@@ -501,15 +489,6 @@ class MainWindow(TkinterDnD.Tk):
         self.options_agg_Entry.place(x=80, y=6, width=-133, height=-10,
                                     relx=2/3, rely=3/self.COL3_ROWS, relwidth=1/3, relheight=1/self.COL3_ROWS)
     
-        
-        # Conversion Method
-        self.options_aiModel_Label.place(x=-15, y=6, width=0, height=-10,
-                                    relx=1/3, rely=0/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.options_aiModel_Optionmenu.place(x=-15, y=4, width=0, height=-10,
-                                    relx=1/3, rely=1/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        
-
-
         # Model deselect
         self.aiModel_var.trace_add('write',
                                     lambda *args: self.deselect_models())
@@ -640,7 +619,6 @@ class MainWindow(TkinterDnD.Tk):
                          ).start()
 
     # Models
-
     def update_inputPaths(self):
         """Update the music file entry"""
         if self.inputPaths:
@@ -665,7 +643,7 @@ class MainWindow(TkinterDnD.Tk):
         #temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, self.aiModel_var.get(), 'Main Models')  # nopep8
         temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, 'Main Models')  # nopep8
 
-        # Instrumental models
+        # Main models
         new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
         if new_InstrumentalModels != self.lastInstrumentalModels:
             self.instrumentalLabel_to_path.clear()
@@ -679,13 +657,11 @@ class MainWindow(TkinterDnD.Tk):
                     self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
             self.lastInstrumentalModels = new_InstrumentalModels
 
-
     def update_states(self):
         """
         Vary the states for all widgets based
         on certain selections
         """
-
         if self.aiModel_var.get() == 'Single Model':
             self.options_ensChoose_Label.place_forget()
             self.options_ensChoose_Optionmenu.place_forget()
@@ -803,7 +779,6 @@ class MainWindow(TkinterDnD.Tk):
         })
 
         self.destroy()
-
 
 if __name__ == "__main__":
     root = MainWindow()

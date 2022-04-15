@@ -34,7 +34,7 @@
 			"crop_stop": 307,
 			"hpf_start": 86,
 			"hpf_stop": 72,
-			"res_type": "polyphase"
+			"res_type": "kaiser_fast"
 		}
 	},
 	"sr": 44100,

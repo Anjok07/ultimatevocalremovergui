@@ -38,10 +38,10 @@ The application was made with Tkinter for cross-platform compatibility, so it sh
     - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
 2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip
 3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.1.0/models.zip
-4. Extract the *ultimatevocalremovergui-5.0.2* folder within ultimatevocalremovergui-5.0.2.zip where ever you wish.
-5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-5.0.2* directory.
+4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
+5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
     - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.
-6. Open the command prompt from the ultimatevocalremovergui-5.0.2 directory and run the following commands, separately - 
+6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
 
 ```
 pip install --no-cache-dir -r requirements.txt
@@ -190,7 +190,7 @@ Please be as detailed as possible when posting a new issue. Make sure to provide
 
 If the *'VocalRemover.py'* file won't open *under any circumstances* and all other resources have been exhausted, please do the following - 
 
-1. Open the cmd prompt from the UVR-V5GUI directory
+1. Open the cmd prompt from the ultimatevocalremovergui-master directory
 2. Run the following command - 
 ```
 python VocalRemover.py

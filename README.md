@@ -149,20 +149,20 @@ Ensemble Mode will run your track(s) through multiple models and combine the res
 Currently, there are 4 ensembles you can choose from. 
 
 - **List of models included in each ensemble:**
-    - **HP1 Models**
+    - **HP1 Models** - Level 1 Ensemble
         - HP_4BAND_44100_A
         - HP_4BAND_44100_B
-    - **HP2 Models** 
+    - **HP2 Models** - Level 2 Ensemble
         - HP2_4BAND_44100_1
         - HP2_4BAND_44100_2
         - HP2_3BAND_44100_MSB2
-    - **All HP Models**
+    - **All HP Models** - Level 3 Ensemble
         - HP_4BAND_44100_A
         - HP_4BAND_44100_B
         - HP2_4BAND_44100_1
         - HP2_4BAND_44100_2
         - HP2_3BAND_44100_MSB2
-    - **Vocal Models**
+    - **Vocal Models** - Level 1 Vocal Ensemble
         - HP_Vocal_4BAND_44100
         - HP_Vocal_AGG_4BAND_44100
 

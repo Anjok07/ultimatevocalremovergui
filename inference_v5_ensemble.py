@@ -173,7 +173,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     'model_name':'HP2_3BAND_44100_MSB2',
                     'model_params':'lib_v5/modelparams/3band_44100_msb2.json',
                     'model_location':'models/Main Models/HP2_3BAND_44100_MSB2.pth',
-                    'using_archtecture': '537227KB',
+                    'using_archtecture': '537238KB',
                     'loop_name': 'Ensemble Mode - Model 3/3'
                 }
             ]
@@ -213,7 +213,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     'model_name':'HP2_3BAND_44100_MSB2',
                     'model_params':'lib_v5/modelparams/3band_44100_msb2.json',
                     'model_location':'models/Main Models/HP2_3BAND_44100_MSB2.pth',
-                    'using_archtecture': '537227KB',
+                    'using_archtecture': '537238KB',
                     'loop_name': 'Ensemble Mode - Model 5/5'
                 }
             ]

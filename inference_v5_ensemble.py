@@ -508,7 +508,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         text_widget.write('Done!\n')
                                 
-                              
                         text_widget.write(base_text + 'Completed Seperation!\n\n')  
                         
                 # Emsembling Outputs

@@ -30,10 +30,11 @@ JSON_TO_NAME = OrderedDict(**{
     # Number
     'aggressiveness': 'doubleSpinBox_aggressiveness',
     'highEndProcess': 'comboBox_highEndProcess',
+    'windowSize': 'comboBox_winSize',
     # -Models-
+    'ensemble': 'checkBox_ensemble',
     'instrumentalModelName': 'comboBox_instrumental',
     'vocalModelName': 'comboBox_vocal',
-    'windowSize': 'comboBox_winSize',
 })
 DEFAULT_SETTINGS = {
     # --Independent Data (Data not directly connected with widgets)--
@@ -54,11 +55,12 @@ DEFAULT_SETTINGS = {
             'outputImage': True,
             'modelFolder': True,
             'deepExtraction': True,
+            'windowSize': 1024,
             # Number
             'aggressiveness': 0.1,
             'highEndProcess': 'Bypass',
             # -Models-
-            'windowSize': 1024,
+            'ensemble': True,
         }],
         ['NONE', {
             # -Conversion-
@@ -68,11 +70,12 @@ DEFAULT_SETTINGS = {
             'outputImage': False,
             'modelFolder': False,
             'deepExtraction': False,
+            'windowSize': 352,
             # Number
             'aggressiveness': -0.1,
             'highEndProcess': 'Mirroring',
             # -Models-
-            'windowSize': 352,
+            'ensemble': False,
         }]
     ],
     # Presets save directory (Default: desktop)

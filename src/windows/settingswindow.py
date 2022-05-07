@@ -6,6 +6,7 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2.QtGui import Qt
 # -Root imports-
+from ..resources.models.modelmanager import ModelManager
 from ..inference.lib.model_param_init import ModelParameters
 from ..resources.resources_manager import ResourcePaths
 from ..app import CustomApplication
@@ -51,6 +52,7 @@ class SettingsWindow(QtWidgets.QWidget):
             2: self.update_page_customization,
             3: self.update_page_preferences,
         }
+        self.modelmanager = ModelManager()
         # Independent data
         self.exportDirectory = self.settings.value('user/exportDirectory',
                                                    const.DEFAULT_SETTINGS['exportDirectory'],
@@ -384,8 +386,6 @@ class SettingsWindow(QtWidgets.QWidget):
 
         # -Before setup-
         self.search_for_preset = False
-        # Update available model lists
-        self._update_selectable_models()
         # Open settings window on startup
         open_settings = self.settings.value('settingswindow/checkBox_settingsStartup',
                                             const.DEFAULT_SETTINGS['checkBox_settingsStartup'],
@@ -410,11 +410,13 @@ class SettingsWindow(QtWidgets.QWidget):
         # Load menu (Preferences)
         self.update_window()
         self.menu_loadPage(0, True)
-        self.search_for_preset = True
         if not torch.cuda.is_available():
             self.ui.checkBox_gpuConversion.setEnabled(False)
             self.ui.checkBox_gpuConversion.setChecked(False)
             self.ui.checkBox_gpuConversion.setToolTip("CUDA is not available on your system")
+        self.modelmanager.set_callback(self.changed_available_models)
+        self.modelmanager.search_for_models(force_callback=True)
+        self.search_for_preset = True
         self.logger.indent_backwards()
 
     def load_window(self):
@@ -479,54 +481,42 @@ class SettingsWindow(QtWidgets.QWidget):
 
         self.logger.indent_backwards()
 
-    def _update_selectable_models(self):
+    def changed_available_models(self):
         """
         Update the list of models to select from in the
         seperation settings page based on the selected AI Engine
         """
-        def get_model_id(path: str) -> str:
-            buffer_size = 65536
-            sha1 = hashlib.sha1()
+        print(self.modelmanager.available_models)
+        # def fill_model_comboBox(widget: QtWidgets.QComboBox, folder: str):
+        #     """
+        #     Fill the combobox for the model
+        #     """
+        #     currently_selected_model_name = widget.currentText()
+        #     widget.clear()
+        #     for index, f in enumerate(os.listdir(folder)):
+        #         if not f.endswith('.pth'):
+        #             # File is not a model file, so skip
+        #             continue
+        #         # Get data
+        #         full_path = os.path.join(folder, f)
+        #         model_id = get_model_id(full_path)
+        #         model_name = os.path.splitext(os.path.basename(f))[0]
+        #         # Add item to combobox
+        #         widget.addItem(model_name,
+        #                        {
+        #                            'path': full_path,
+        #                            'id': model_id
+        #                        })
+        #         if model_name == currently_selected_model_name:
+        #             # This model was selected before clearing the
+        #             # QComboBox, so reselect
+        #             widget.setCurrentIndex(index)
 
-            with open(path, 'rb') as f:
-                while True:
-                    data = f.read(buffer_size)
-                    if not data:
-                        break
-                    sha1.update(data)
-
-            return sha1.hexdigest()
-
-        def fill_model_comboBox(widget: QtWidgets.QComboBox, folder: str):
-            """
-            Fill the combobox for the model
-            """
-            currently_selected_model_name = widget.currentText()
-            widget.clear()
-            for index, f in enumerate(os.listdir(folder)):
-                if not f.endswith('.pth'):
-                    # File is not a model file, so skip
-                    continue
-                # Get data
-                full_path = os.path.join(folder, f)
-                model_id = get_model_id(full_path)
-                model_name = os.path.splitext(os.path.basename(f))[0]
-                # Add item to combobox
-                widget.addItem(model_name,
-                               {
-                                   'path': full_path,
-                                   'id': model_id
-                               })
-                if model_name == currently_selected_model_name:
-                    # This model was selected before clearing the
-                    # QComboBox, so reselect
-                    widget.setCurrentIndex(index)
-
-        # Fill Comboboxes
-        fill_model_comboBox(widget=self.ui.comboBox_instrumental,
-                            folder=ResourcePaths.instrumentalModelsDir)
-        fill_model_comboBox(widget=self.ui.comboBox_vocal,
-                            folder=ResourcePaths.vocalModelsDir)
+        # # Fill Comboboxes
+        # fill_model_comboBox(widget=self.ui.comboBox_instrumental,
+        #                     folder=ResourcePaths.instrumentalModelsDir)
+        # fill_model_comboBox(widget=self.ui.comboBox_vocal,
+        #                     folder=ResourcePaths.vocalModelsDir)
 
     # Custom Models Page
     def update_page_customModels(self):
@@ -767,7 +757,7 @@ class SettingsManager:
                 value = widget.currentText()
             elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
                     isinstance(widget, QtWidgets.QSpinBox)):
-                value = widget.value()
+                value = round(widget.value(), 2)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
 
@@ -825,7 +815,7 @@ class SettingsManager:
                             widget.setCurrentIndex(i)
             elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
                     isinstance(widget, QtWidgets.QSpinBox)):
-                widget.setValue(value)
+                widget.setValue(round(value, 2))
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
         self.win.update_window()
@@ -838,6 +828,7 @@ class SettingsManager:
         """
         # Before
         self.win.logger.info('Settings: Loading window')
+        settings: Dict[str, Union[bool, str, float]] = {}
         # -Load states-
         self.win.settings.beginGroup('settingswindow')
         for widget in self.get_widgets():
@@ -855,35 +846,23 @@ class SettingsManager:
                 value = self.win.settings.value(widget_objectName,
                                                 defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
                                                 type=bool)
-                widget.setChecked(value)
             elif isinstance(widget, QtWidgets.QLineEdit):
                 value = self.win.settings.value(widget_objectName,
                                                 defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
                                                 type=str)
-                widget.setText(value)
             elif isinstance(widget, QtWidgets.QComboBox):
                 value = self.win.settings.value(widget_objectName,
                                                 defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
                                                 type=str)
-                if widget.isEditable():
-                    # Allows self-typing
-                    widget.setCurrentText(value)
-                else:
-                    # Only allows a list to choose from
-                    all_items = [widget.itemText(i) for i in range(widget.count())]
-                    for i, item in enumerate(all_items):
-                        if item == value:
-                            # Both have the same text
-                            widget.setCurrentIndex(i)
             elif (isinstance(widget, QtWidgets.QDoubleSpinBox) or
                     isinstance(widget, QtWidgets.QSpinBox)):
                 value = self.win.settings.value(widget_objectName,
                                                 defaultValue=const.DEFAULT_SETTINGS[widget_objectName],
                                                 type=float)
-                widget.setValue(value)
             else:
                 raise TypeError('Invalid widget type that is not supported!\nWidget: ', widget)
-
+            settings[widget_objectName] = value
+        self.set_settings(settings)
         self.win.settings.endGroup()
 
     def save_window(self):

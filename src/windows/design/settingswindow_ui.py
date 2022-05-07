@@ -18,7 +18,7 @@ class Ui_SettingsWindow(object):
         if not SettingsWindow.objectName():
             SettingsWindow.setObjectName(u"SettingsWindow")
         SettingsWindow.setEnabled(True)
-        SettingsWindow.resize(941, 551)
+        SettingsWindow.resize(941, 550)
         SettingsWindow.setStyleSheet(u"")
         self.horizontalLayout = QHBoxLayout(SettingsWindow)
         self.horizontalLayout.setSpacing(0)
@@ -134,7 +134,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_2 = QWidget()
         self.scrollAreaWidgetContents_2.setObjectName(
             u"scrollAreaWidgetContents_2")
-        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 741, 551))
+        self.scrollAreaWidgetContents_2.setGeometry(QRect(0, 0, 741, 550))
         sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         sizePolicy2.setHorizontalStretch(0)
         sizePolicy2.setVerticalStretch(0)
@@ -164,7 +164,7 @@ class Ui_SettingsWindow(object):
         self.horizontalFrame_1 = QFrame(self.frame_3)
         self.horizontalFrame_1.setObjectName(u"horizontalFrame_1")
         self.horizontalLayout_4 = QHBoxLayout(self.horizontalFrame_1)
-        self.horizontalLayout_4.setSpacing(45)
+        self.horizontalLayout_4.setSpacing(35)
         self.horizontalLayout_4.setObjectName(u"horizontalLayout_4")
         self.horizontalLayout_4.setContentsMargins(0, 0, 0, 0)
         self.frame_template_3 = QFrame(self.horizontalFrame_1)
@@ -572,25 +572,46 @@ class Ui_SettingsWindow(object):
         self.frame_12.setObjectName(u"frame_12")
         self.frame_12.setFrameShape(QFrame.NoFrame)
         self.frame_12.setFrameShadow(QFrame.Raised)
-        self.label_9 = QLabel(self.frame_12)
-        self.label_9.setObjectName(u"label_9")
-        self.label_9.setGeometry(QRect(350, 30, 151, 31))
-        self.treeWidget = QTreeWidget(self.frame_12)
-        __qtreewidgetitem = QTreeWidgetItem(self.treeWidget)
-        __qtreewidgetitem1 = QTreeWidgetItem(__qtreewidgetitem)
-        __qtreewidgetitem1.setCheckState(0, Qt.Checked)
-        __qtreewidgetitem2 = QTreeWidgetItem(__qtreewidgetitem)
-        __qtreewidgetitem2.setCheckState(0, Qt.Unchecked)
-        __qtreewidgetitem3 = QTreeWidgetItem(self.treeWidget)
-        __qtreewidgetitem4 = QTreeWidgetItem(__qtreewidgetitem3)
-        __qtreewidgetitem4.setCheckState(0, Qt.Unchecked)
-        __qtreewidgetitem5 = QTreeWidgetItem(__qtreewidgetitem3)
-        __qtreewidgetitem5.setCheckState(0, Qt.Unchecked)
-        QTreeWidgetItem(self.treeWidget)
-        self.treeWidget.setObjectName(u"treeWidget")
-        self.treeWidget.setGeometry(QRect(40, 0, 256, 192))
-        self.treeWidget.setStyleSheet(u"")
-        self.treeWidget.header().setVisible(False)
+        self.tableWidget = QTableWidget(self.frame_12)
+        if (self.tableWidget.columnCount() < 3):
+            self.tableWidget.setColumnCount(3)
+        __qtablewidgetitem = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, __qtablewidgetitem)
+        __qtablewidgetitem1 = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, __qtablewidgetitem1)
+        __qtablewidgetitem2 = QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, __qtablewidgetitem2)
+        if (self.tableWidget.rowCount() < 2):
+            self.tableWidget.setRowCount(2)
+        __qtablewidgetitem3 = QTableWidgetItem()
+        self.tableWidget.setVerticalHeaderItem(0, __qtablewidgetitem3)
+        __qtablewidgetitem4 = QTableWidgetItem()
+        self.tableWidget.setVerticalHeaderItem(1, __qtablewidgetitem4)
+        __qtablewidgetitem5 = QTableWidgetItem()
+        self.tableWidget.setItem(0, 0, __qtablewidgetitem5)
+        __qtablewidgetitem6 = QTableWidgetItem()
+        self.tableWidget.setItem(0, 1, __qtablewidgetitem6)
+        __qtablewidgetitem7 = QTableWidgetItem()
+        self.tableWidget.setItem(0, 2, __qtablewidgetitem7)
+        __qtablewidgetitem8 = QTableWidgetItem()
+        self.tableWidget.setItem(1, 0, __qtablewidgetitem8)
+        __qtablewidgetitem9 = QTableWidgetItem()
+        self.tableWidget.setItem(1, 1, __qtablewidgetitem9)
+        __qtablewidgetitem10 = QTableWidgetItem()
+        self.tableWidget.setItem(1, 2, __qtablewidgetitem10)
+        self.tableWidget.setObjectName(u"tableWidget")
+        self.tableWidget.setGeometry(QRect(50, 20, 611, 91))
+        self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.tableWidget.setTabKeyNavigation(True)
+        self.tableWidget.setAlternatingRowColors(True)
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget.horizontalHeader().setCascadingSectionResizes(True)
+        self.tableWidget.horizontalHeader().setHighlightSections(False)
+        self.tableWidget.horizontalHeader().setProperty("showSortIndicator", True)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.verticalHeader().setHighlightSections(False)
 
         self.gridLayout.addWidget(self.frame_12, 0, 0, 1, 1)
 
@@ -622,7 +643,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(
             u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 656, 551))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 741, 550))
         self.scrollAreaWidgetContents.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                     "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                     "}")
@@ -657,7 +678,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_4 = QWidget()
         self.scrollAreaWidgetContents_4.setObjectName(
             u"scrollAreaWidgetContents_4")
-        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 656, 551))
+        self.scrollAreaWidgetContents_4.setGeometry(QRect(0, 0, 741, 550))
         self.scrollAreaWidgetContents_4.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
                                                       "}")
@@ -713,7 +734,7 @@ class Ui_SettingsWindow(object):
         self.scrollAreaWidgetContents_5 = QWidget()
         self.scrollAreaWidgetContents_5.setObjectName(
             u"scrollAreaWidgetContents_5")
-        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 656, 551))
+        self.scrollAreaWidgetContents_5.setGeometry(QRect(0, 0, 741, 550))
         self.scrollAreaWidgetContents_5.setMinimumSize(QSize(600, 0))
         self.scrollAreaWidgetContents_5.setStyleSheet(u"QFrame#frame_engine, QFrame#frame_modelOptions {\n"
                                                       "	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.221409, y2:0.587, stop:0.119318 rgba(85, 78, 163, 255), stop:0.683616 rgba(0, 0, 0, 0));\n"
@@ -741,7 +762,7 @@ class Ui_SettingsWindow(object):
         self.frame_5.setFrameShape(QFrame.NoFrame)
         self.frame_5.setFrameShadow(QFrame.Raised)
         self.horizontalLayout_6 = QHBoxLayout(self.frame_5)
-        self.horizontalLayout_6.setSpacing(45)
+        self.horizontalLayout_6.setSpacing(35)
         self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
         self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
         self.frame_6 = QFrame(self.frame_5)
@@ -1137,7 +1158,7 @@ class Ui_SettingsWindow(object):
         self.stackedWidget.setCurrentIndex(0)
         self.comboBox_highEndProcess.setCurrentIndex(4)
         self.comboBox_winSize.setCurrentIndex(0)
-        self.models_stackedWidget.setCurrentIndex(0)
+        self.models_stackedWidget.setCurrentIndex(1)
         self.pushButton_de.setDefault(False)
         self.pushButton_en.setDefault(False)
 
@@ -1203,36 +1224,43 @@ class Ui_SettingsWindow(object):
             "SettingsWindow", u"Instrumental Model", None))
         self.label_4.setText(QCoreApplication.translate(
             "SettingsWindow", u"Vocal Model", None))
-        self.label_9.setText(QCoreApplication.translate(
-            "SettingsWindow", u"Ensemble Page", None))
-        ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(
-            0, QCoreApplication.translate("SettingsWindow", u"1", None))
+        ___qtablewidgetitem = self.tableWidget.horizontalHeaderItem(0)
+        ___qtablewidgetitem.setText(
+            QCoreApplication.translate("SettingsWindow", u"Type", None))
+        ___qtablewidgetitem1 = self.tableWidget.horizontalHeaderItem(1)
+        ___qtablewidgetitem1.setText(
+            QCoreApplication.translate("SettingsWindow", u"Name", None))
+        ___qtablewidgetitem2 = self.tableWidget.horizontalHeaderItem(2)
+        ___qtablewidgetitem2.setText(QCoreApplication.translate(
+            "SettingsWindow", u"Description", None))
+        ___qtablewidgetitem3 = self.tableWidget.verticalHeaderItem(0)
+        ___qtablewidgetitem3.setText(QCoreApplication.translate(
+            "SettingsWindow", u"1234567", None))
+        ___qtablewidgetitem4 = self.tableWidget.verticalHeaderItem(1)
+        ___qtablewidgetitem4.setText(QCoreApplication.translate(
+            "SettingsWindow", u"2353426", None))
 
-        __sortingEnabled = self.treeWidget.isSortingEnabled()
-        self.treeWidget.setSortingEnabled(False)
-        ___qtreewidgetitem1 = self.treeWidget.topLevelItem(0)
-        ___qtreewidgetitem1.setText(0, QCoreApplication.translate(
+        __sortingEnabled = self.tableWidget.isSortingEnabled()
+        self.tableWidget.setSortingEnabled(False)
+        ___qtablewidgetitem5 = self.tableWidget.item(0, 0)
+        ___qtablewidgetitem5.setText(
+            QCoreApplication.translate("SettingsWindow", u"Vocal", None))
+        ___qtablewidgetitem6 = self.tableWidget.item(0, 1)
+        ___qtablewidgetitem6.setText(QCoreApplication.translate(
+            "SettingsWindow", u"VOCALMODELV5", None))
+        ___qtablewidgetitem7 = self.tableWidget.item(0, 2)
+        ___qtablewidgetitem7.setText(QCoreApplication.translate(
+            "SettingsWindow", u"My Vocal Model", None))
+        ___qtablewidgetitem8 = self.tableWidget.item(1, 0)
+        ___qtablewidgetitem8.setText(QCoreApplication.translate(
             "SettingsWindow", u"Instrumental", None))
-        ___qtreewidgetitem2 = ___qtreewidgetitem1.child(0)
-        ___qtreewidgetitem2.setText(0, QCoreApplication.translate(
-            "SettingsWindow", u"Model 1", None))
-        ___qtreewidgetitem3 = ___qtreewidgetitem1.child(1)
-        ___qtreewidgetitem3.setText(0, QCoreApplication.translate(
-            "SettingsWindow", u"Model 2", None))
-        ___qtreewidgetitem4 = self.treeWidget.topLevelItem(1)
-        ___qtreewidgetitem4.setText(
-            0, QCoreApplication.translate("SettingsWindow", u"Vocal", None))
-        ___qtreewidgetitem5 = ___qtreewidgetitem4.child(0)
-        ___qtreewidgetitem5.setText(0, QCoreApplication.translate(
-            "SettingsWindow", u"Vocal Model 1", None))
-        ___qtreewidgetitem6 = ___qtreewidgetitem4.child(1)
-        ___qtreewidgetitem6.setText(0, QCoreApplication.translate(
-            "SettingsWindow", u"Vocal Model 2", None))
-        ___qtreewidgetitem7 = self.treeWidget.topLevelItem(2)
-        ___qtreewidgetitem7.setText(0, QCoreApplication.translate(
-            "SettingsWindow", u"Custom", None))
-        self.treeWidget.setSortingEnabled(__sortingEnabled)
+        ___qtablewidgetitem9 = self.tableWidget.item(1, 1)
+        ___qtablewidgetitem9.setText(QCoreApplication.translate(
+            "SettingsWindow", u"INSTRUMENTALMODEL", None))
+        ___qtablewidgetitem10 = self.tableWidget.item(1, 2)
+        ___qtablewidgetitem10.setText(QCoreApplication.translate(
+            "SettingsWindow", u"My Instrumental best model", None))
+        self.tableWidget.setSortingEnabled(__sortingEnabled)
 
         self.label_6.setText(QCoreApplication.translate(
             "SettingsWindow", u"Themes", None))

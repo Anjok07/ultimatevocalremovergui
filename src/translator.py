@@ -3,15 +3,14 @@ Translator Class File
 """
 # pylint: disable=no-name-in-module, import-error
 # -GUI-
-from typing import DefaultDict, Dict
 from PySide2 import QtWidgets
 from PySide2 import QtCore
 from PySide2 import QtGui
-import PySide2
 from PySide2.QtGui import Qt
 # -Root imports-
 # None
 # -Other-
+from typing import DefaultDict, Dict
 # System
 import os
 import sys

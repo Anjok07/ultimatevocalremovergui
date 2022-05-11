@@ -6,25 +6,24 @@
 
 ## About
 
-This application uses state of the art AI and models to remove vocals from tracks. All of the models provided in this package were trained by UVR's core developers.
+This application uses state-of-the-art AI and models to remove vocals from tracks. UVR's core developers trained all of the models provided in this package.
 
 - **Core Developers**
-    - [Anjok07](https://github.com/anjok07)- Model collaborator & UVR developer.
-    - [aufr33](https://github.com/aufr33) - Model collaborator & fellow UVR developer. This project wouldn't be what it is without your help. Thank you for your continued support!
-    - [DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
+    - [Anjok07](https://github.com/anjok07)
+    - [aufr33](https://github.com/aufr33)
 
 ## Installation
 
-UVR v5.2.0 and all of it's features are only available on Windows at this time. However, this application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
+UVR v5.2.0 and all of its features are only available on Windows. However, this application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
 
 ### Windows Installation
 
 The installer does not require any prerequisites. All of the required libraries are included within the installation.
 
 - Download the UVR installer [here]()
-- Optional
+- **Optional**
     - The Model Expansion Pack can be downloaded [here]()
-        - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on how to install the Model Expansion pack.
+        - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
     - This version of the GUI is fully backward compatible with the v4 models.
 
 ## Application Manual
@@ -52,8 +51,6 @@ The installer does not require any prerequisites. All of the required libraries 
 ## Other GUI Notes
 
 - The application will automatically remember your settings when closed.
-- Multiple conversions are supported.
-- The ability to drag & drop audio files to convert has also been added.
 - Conversion times will significantly depend on your hardware. 
   - **Note:** This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
@@ -63,11 +60,10 @@ These instructions are for those installing UVR v5.2.0 **manually** only.
 
 1. Download & install Python 3.9.8 [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe) (Windows link)
     - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
-2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip
-3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.1.0/models.zip
+2. Download the Source code zip [here]()
+3. Download the models.zip [here]()
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
 5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
-    - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.
 6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
 
 ```
@@ -88,23 +84,22 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f ht
         - **Note:** If you are unable to open the *'UVR.py'* file, please go to the **troubleshooting** section below.
     - **Note:** All output audio files will be in the *'.wav'* format.
 
-
 ## Change Log
 
 - **v4 vs. v5**
    - The v5 models significantly outperform the v4 models.
-   - The extraction's aggressiveness can be adjusted using the "Aggression Setting". The default value of 10 is optimal for most tracks.
+   - The extraction's aggressiveness can be adjusted using the "Aggression Setting." The default value of 10 is optimal for most tracks.
    - All v2 and v4 models have been removed.
-   - Ensemble Mode added - This allows the user to get the strongest result from each model.
+   - Ensemble Mode added - This allows the user to get the most robust result from each model.
    - Stacked models have been entirely removed.
-     - Stacked model feature has been replaced by the new aggression setting and model ensembling.
+     The new aggression setting and model ensembling have replaced the stacked model feature.
    - The NFFT, HOP_SIZE, and SR values are now set internally.
    - The MDX-NET AI engine and models have been added.
      - This is a brand new feature added to the UVR GUI. 
      - 4 MDX-Net models trained by UVR developers are included in this package.
      - The MDX-Net models provided were trained by the UVR core developers
-     - This network is less resource intensive, but incrediblely powerful.
-     - MDX-Net is a Hybrid Wavform/Spectrogram network.
+     - This network is less resource-intensive but incredibly powerful.
+     - MDX-Net is a Hybrid Waveform/Spectrogram network.
 
 ## Troubleshooting
 
@@ -126,18 +121,15 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 
 ## Credits
 
+[DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
 [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
 [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
 Bas Curtiz - Designed the official UVR logo, icon, banner, splash screen, and interface.
 
-**Credits Based on Secondary Packages Used**
-
-[rdbende](https://github.com/rdbende/Sun-Valley-ttk-theme) - Sun-Valley theme
-
 ## Contributing
 
-- For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI**, please send us a pull request, and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
+- For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI**, please send us a pull request, and we will review it. This project is 100% open-source and free for anyone to use and modify as they wish. 
 - We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
 
 ## References

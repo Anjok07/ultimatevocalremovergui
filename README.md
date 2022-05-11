@@ -1,5 +1,3 @@
-(Almost complete. Full release coming this week!)
-
 # Ultimate Vocal Remover GUI v5.2.0
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/UVRv5.png?raw=true" />
 
@@ -8,7 +6,7 @@
 
 ## About
 
-This application uses state-of-the-art AI and models to remove vocals from tracks. UVR's core developers trained all of the models provided in this package.
+This application uses state-of-the-art source searation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package.
 
 - **Core Developers**
     - [Anjok07](https://github.com/anjok07)
@@ -20,10 +18,14 @@ This application uses state-of-the-art AI and models to remove vocals from track
 
 This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites required.
 
-- Download the UVR installer [here]()
+- Please Note:
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+
+- Download the UVR installer via one of the following mirrors below:
+    - [pCloud Mirror](https://u.pcloud.link/publink/show?code=XZAX8HVZ03lxQbQtyqBLl07bTPaFPm1jUAbX)
+    - [Google Drive Mirror](https://drive.google.com/file/d/1ALH1WB3WjNnRQoPJFIiJHG9uVqH4U50Q/view?usp=sharing)
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here]()
@@ -56,13 +58,15 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/user_ens_opt.png?raw=true" />
 
-### Other GUI Notes
+### Other Application Notes
 
-- The application will automatically remember your settings when closed.
-- Conversion times will significantly depend on your hardware. 
+- Nvidia GPUs with at least 8GBs of V-RAM are recommended.
+- This application is only compatible with 64-bit platforms. 
 - This application relies on Sox - Sound Exchange for Noise Reduction.
 - This application relies on FFmpeg to process non-wav audio files.
-- This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- The application will automatically remember your settings when closed.
+- Conversion times will significantly depend on your hardware. 
+- These models are computationally intensive. Processing times might be slow on older or budget hardware. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
 ## Change Log
 
@@ -85,12 +89,13 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 ### Common Issues
 
-- This application is only compatible with 64-bit platforms. 
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
 
 ### Issue Reporting
 
-Please be as detailed as possible when posting a new issue. Navigate to the "Error Log" tab in the Help Guide for detailed error information that can be provided to us.
+Please be as detailed as possible when posting a new issue. 
+
+If possible, click the "Help Guide" button to the left of the "Start Processing" button and navigate to the "Error Log" tab for detailed error information that can be provided to us.
 
 ## Manual Installation (For Developers)
 

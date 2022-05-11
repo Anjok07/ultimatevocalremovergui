@@ -54,14 +54,44 @@ The installer does not require any prerequisites. All of the required libraries 
 
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 
-  - **Note:** This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- The application relies on Sox - Sound Exchange for Noise Reduction.
+- This application relies on FFmpeg to process non-wav audio files.
+- This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
-## Manual Developer Installation
+## Change Log
+
+- **v4 vs. v5**
+   - The v5 models significantly outperform the v4 models.
+   - The extraction's aggressiveness can be adjusted using the "Aggression Setting." The default value of 10 is optimal for most tracks.
+   - All v2 and v4 models have been removed.
+   - Ensemble Mode added - This allows the user to get the most robust result from each model.
+   - Stacked models have been entirely removed.
+     The new aggression setting and model ensembling have replaced the stacked model feature.
+   - The NFFT, HOP_SIZE, and SR values are now set internally.
+   - The MDX-NET AI engine and models have been added.
+     - This is a brand new feature added to the UVR GUI. 
+     - 4 MDX-Net models trained by UVR developers are included in this package.
+     - The MDX-Net models provided were trained by the UVR core developers
+     - This network is less resource-intensive but incredibly powerful.
+     - MDX-Net is a Hybrid Waveform/Spectrogram network.
+
+## Troubleshooting
+
+### Common Issues
+
+- This application is only compatible with 64-bit platforms. 
+- If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
+
+### Issue Reporting
+
+Please be as detailed as possible when posting a new issue. Navigate to the "Error Log" tab in the Help Guide for detailed error information that can be provided to us.
+
+## Manual Installation (For Developers)
 
 These instructions are for those installing UVR v5.2.0 **manually** only.
 
-1. Download & install Python 3.9.8 [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe) (Windows link)
-    - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
+1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
+    - **Note:** Ensure the *"Add Python to PATH"* box is checked
 2. Download the Source code zip [here]()
 3. Download the models.zip [here]()
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
@@ -86,35 +116,6 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f ht
         - **Note:** If you are unable to open the *'UVR.py'* file, please go to the **troubleshooting** section below.
     - **Note:** All output audio files will be in the *'.wav'* format.
 
-## Change Log
-
-- **v4 vs. v5**
-   - The v5 models significantly outperform the v4 models.
-   - The extraction's aggressiveness can be adjusted using the "Aggression Setting." The default value of 10 is optimal for most tracks.
-   - All v2 and v4 models have been removed.
-   - Ensemble Mode added - This allows the user to get the most robust result from each model.
-   - Stacked models have been entirely removed.
-     The new aggression setting and model ensembling have replaced the stacked model feature.
-   - The NFFT, HOP_SIZE, and SR values are now set internally.
-   - The MDX-NET AI engine and models have been added.
-     - This is a brand new feature added to the UVR GUI. 
-     - 4 MDX-Net models trained by UVR developers are included in this package.
-     - The MDX-Net models provided were trained by the UVR core developers
-     - This network is less resource-intensive but incredibly powerful.
-     - MDX-Net is a Hybrid Waveform/Spectrogram network.
-
-## Troubleshooting
-
-### Common Issues
-
-- This application is only compatible with 64-bit platforms. 
-- This application is not compatible with 32-bit versions of Python. Please make sure your version of Python is 64-bit. 
-- If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
-
-### Issue Reporting
-
-Please be as detailed as possible when posting a new issue. Navigate to the "Error Log" tab in the Help Guide for detailed error information that can be provided to us.
-
 ## License
 
 The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE). 
@@ -123,11 +124,11 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 
 ## Credits
 
-[DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
-[tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
-[Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
-[Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
-Bas Curtiz - Designed the official UVR logo, icon, banner, splash screen, and interface.
+- [DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
+- [Bas Curtiz](https://www.youtube.com/user/bascurtiz) - Designed the official UVR logo, icon, banner, splash screen, and interface.
+- [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
+- [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
+- [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
 
 ## Contributing
 

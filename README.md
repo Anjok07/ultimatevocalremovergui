@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v5.1.0
+# Ultimate Vocal Remover GUI v5.2.0
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/UVRv5.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
@@ -13,60 +13,19 @@ This application uses state of the art AI and models to remove vocals from track
     - [aufr33](https://github.com/aufr33) - Model collaborator & fellow UVR developer. This project wouldn't be what it is without your help. Thank you for your continued support!
     - [DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
 
-
-## Change Log
-
-- **v4 vs. v5**
-   - The v5 models significantly outperform the v4 models.
-   - The extraction's aggressiveness can be adjusted using the "Aggression Setting". The default value of 10 is optimal for most tracks.
-   - All v2 and v4 models have been removed.
-   - Ensemble Mode added - This allows the user to get the strongest result from each model.
-   - Stacked models have been entirely removed.
-     - Stacked model feature has been replaced by the new aggression setting and model ensembling.
-   - The NFFT, HOP_SIZE, and SR values are now set internally.
-   - MDX-NET AI engine and model support
-
 ## Installation
 
-UVR v5.2.0 and all of it's features are only available on Windows at this time. However, this application can be run on Mac & Linux by performing a manual install, though some features may not be available on those platforms.
+UVR v5.2.0 and all of it's features are only available on Windows at this time. However, this application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
 
 ### Windows Installation
 
-The installer does not require any prerequisite installations. All of the required libraries are included in the installation.
+The installer does not require any prerequisites. All of the required libraries are included within the installation.
 
-1. Download the UVR installer [here]()
-2. 
-
-### Manual Developer Installation
-
-1. Download & install Python 3.9.8 [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe) (Windows link)
-    - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
-2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip
-3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.1.0/models.zip
-4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
-5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
-    - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.
-6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
-
-```
-pip install --no-cache-dir -r requirements.txt
-```
-```
-pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-```
-
-- FFmpeg 
-
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. Instructions for installing FFmpeg can be found on YouTube, WikiHow, Reddit, GitHub, and many other sources around the web.
-
-    - **Note:** If you are experiencing any errors when attempting to process any media files, not in the *.wav* format, please ensure FFmpeg is installed & configured correctly.
-
-- Running the GUI & Models
-
-    - Open the file labeled *'VocalRemover.py'*.
-    - It's recommended that you create a shortcut for the file labeled *'VocalRemover.py'* to your desktop for easy access.
-        - **Note:** If you are unable to open the *'VocalRemover.py'* file, please go to the [**troubleshooting**](https://github.com/Anjok07/ultimatevocalremovergui/tree/beta#troubleshooting) section below.
-    - **Note:** All output audio files will be in the *'.wav'* format.
+- Download the UVR installer [here]()
+- Optional
+    - The Model Expansion Pack can be downloaded [here]()
+        - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on how to install the Model Expansion pack.
+    - This version of the GUI is fully backward compatible with the v4 models.
 
 ## Application Manual
 
@@ -92,12 +51,60 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f ht
 
 ## Other GUI Notes
 
-- The application will automatically remember your *'save to'* path upon closing and reopening until it's changed.
-  - **Note:** The last directory accessed within the application will also be remembered.
+- The application will automatically remember your settings when closed.
 - Multiple conversions are supported.
 - The ability to drag & drop audio files to convert has also been added.
 - Conversion times will significantly depend on your hardware. 
   - **Note:** This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
+
+## Manual Developer Installation
+
+These instructions are for those installing UVR v5.2.0 **manually** only.
+
+1. Download & install Python 3.9.8 [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe) (Windows link)
+    - **Note:** Ensure the *"Add Python 3.9 to PATH"* box is checked
+2. Download the Source code zip here - https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip
+3. Download the models.zip here - https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.1.0/models.zip
+4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
+5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
+    - **Note:** At this time, the GUI is hardcoded to run the models included in this package only.
+6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
+
+```
+pip install --no-cache-dir -r requirements.txt
+```
+```
+pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
+```
+
+- FFmpeg 
+
+    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. Instructions for installing FFmpeg is provided in the "More Info" tab within the Help Guide.
+
+- Running the GUI & Models
+
+    - Open the file labeled *'UVR.py'*.
+    - It's recommended that you create a shortcut for the file labeled *'UVR.py'* to your desktop for easy access.
+        - **Note:** If you are unable to open the *'UVR.py'* file, please go to the **troubleshooting** section below.
+    - **Note:** All output audio files will be in the *'.wav'* format.
+
+
+## Change Log
+
+- **v4 vs. v5**
+   - The v5 models significantly outperform the v4 models.
+   - The extraction's aggressiveness can be adjusted using the "Aggression Setting". The default value of 10 is optimal for most tracks.
+   - All v2 and v4 models have been removed.
+   - Ensemble Mode added - This allows the user to get the strongest result from each model.
+   - Stacked models have been entirely removed.
+     - Stacked model feature has been replaced by the new aggression setting and model ensembling.
+   - The NFFT, HOP_SIZE, and SR values are now set internally.
+   - The MDX-NET AI engine and models have been added.
+     - This is a brand new feature added to the UVR GUI. 
+     - 4 MDX-Net models trained by UVR developers are included in this package.
+     - The MDX-Net models provided were trained by the UVR core developers
+     - This network is less resource intensive, but incrediblely powerful.
+     - MDX-Net is a Hybrid Wavform/Spectrogram network.
 
 ## Troubleshooting
 
@@ -115,18 +122,23 @@ Please be as detailed as possible when posting a new issue. Navigate to the "Err
 
 The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE). 
 
-- **Please Note:** For all third-party application developers who wish to use our models, please honor the MIT license by providing credit to UVR and its developers Anjok07, aufr33, & tsurumeso.
+- **Please Note:** For all third-party application developers who wish to use our models, please honor the MIT license by providing credit to UVR and its developers.
 
-## Additional Credits
+## Credits
 
-- [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
-- [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
-- [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
+[tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
+[Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
+[Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
+Bas Curtiz - Designed the official UVR logo, icon, banner, splash screen, and interface.
+
+**Credits Based on Secondary Packages Used**
+
+[rdbende](https://github.com/rdbende/Sun-Valley-ttk-theme) - Sun-Valley theme
 
 ## Contributing
 
 - For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI**, please send us a pull request, and we will review it. This project is 100% open-source and free for anyone to use and/or modify as they wish. 
-- Please note that we do not maintain or directly support any of tsurumesos AI application code. We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
+- We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
 
 ## References
 - [1] Takahashi et al., "Multi-scale Multi-band DenseNets for Audio Source Separation", https://arxiv.org/pdf/1706.09588.pdf

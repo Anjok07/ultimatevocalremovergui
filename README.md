@@ -28,7 +28,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
     - [Google Drive Mirror](https://drive.google.com/file/d/1ALH1WB3WjNnRQoPJFIiJHG9uVqH4U50Q/view?usp=sharing)
 
 - **Optional**
-    - The Model Expansion Pack can be downloaded [here]()
+    - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/v5_model_expansion_pack.zip)
         - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
     - This version of the GUI is fully backward compatible with the v4 models.
 
@@ -103,8 +103,8 @@ These instructions are for those installing UVR v5.2.0 **manually** only.
 
 1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
     - **Note:** Ensure the *"Add Python to PATH"* box is checked
-2. Download the Source code zip [here]()
-3. Download the models.zip [here]()
+2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+3. Download the models.zip [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/models.zip)
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
 5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
 6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 

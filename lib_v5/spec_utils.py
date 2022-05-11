@@ -369,6 +369,23 @@ def ensembling(a, specs):
 
     return spec
 
+def stft(wave, nfft, hl):
+    wave_left = np.asfortranarray(wave[0])
+    wave_right = np.asfortranarray(wave[1])
+    spec_left = librosa.stft(wave_left, nfft, hop_length=hl)
+    spec_right = librosa.stft(wave_right, nfft, hop_length=hl)
+    spec = np.asfortranarray([spec_left, spec_right])
+
+    return spec
+
+def istft(spec, hl):
+    spec_left = np.asfortranarray(spec[0])
+    spec_right = np.asfortranarray(spec[1])
+
+    wave_left = librosa.istft(spec_left, hop_length=hl)
+    wave_right = librosa.istft(spec_right, hop_length=hl)
+    wave = np.asfortranarray([wave_left, wave_right])
+
 
 if __name__ == "__main__":
     import cv2

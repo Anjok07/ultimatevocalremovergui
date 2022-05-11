@@ -936,8 +936,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
             text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
             text_widget.write(f'\nError Received:\n\n')
-            text_widget.write(f'FFmpeg is missing or corrupt.\n')
-            text_widget.write(f'You will only be able to process .wav files until FFmpeg is available on this system.\n')
+            text_widget.write(f'The input file type is not supported or FFmpeg is missing.\n')
+            text_widget.write(f'Please select a file type supported by FFmpeg and try again.\n\n')
+            text_widget.write(f'If FFmpeg is missing or not installed, you will only be able to process \".wav\" files \nuntil it is available on this system.\n\n')
             text_widget.write(f'See the \"More Info\" tab in the Help Guide.\n\n')
             text_widget.write(f'If this error persists, please contact the developers.\n\n')
             text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
@@ -947,8 +948,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
                             f'Process Method: VR Architecture\n\n' +
-                            f'FFmpeg is missing or corrupt.\n' + 
-                            f'You will only be able to process .wav files until FFmpeg is available on this system.\n' + 
+                            f'The input file type is not supported or FFmpeg is missing.\nPlease select a file type supported by FFmpeg and try again.\n\n' + 
+                            f'If FFmpeg is missing or not installed, you will only be able to process \".wav\" files until it is available on this system.\n\n' + 
                             f'See the \"More Info\" tab in the Help Guide.\n\n' + 
                             f'If this error persists, please contact the developers.\n\n' +
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 

@@ -163,6 +163,9 @@ def drop(event, accept_mode: str = 'files'):
     """
     Drag & Drop verification process
     """
+    global dnd
+    global dnddir
+    
     path = event.data
 
     if accept_mode == 'folder':
@@ -179,8 +182,11 @@ def drop(event, accept_mode: str = 'files'):
         path = path.split('} ')
         path[-1] = path[-1].replace('}', '')
         # Set Variables
+        dnd = 'yes'
         root.inputPaths = path
         root.update_inputPaths()
+        dnddir = os.path.dirname(path[0])
+        print('dnddir ', str(dnddir))
     else:
         # Invalid accept mode
         return
@@ -779,6 +785,9 @@ class MainWindow(TkinterDnD.Tk):
     # Opening filedialogs
     def open_file_filedialog(self):
         """Make user select music files"""
+        global dnd
+        global nondnd
+        
         if self.lastDir is not None:
             if not os.path.isdir(self.lastDir):
                 self.lastDir = None
@@ -791,8 +800,10 @@ class MainWindow(TkinterDnD.Tk):
         )
         if paths:  # Path selected
             self.inputPaths = paths
+            dnd = 'no'
             self.update_inputPaths()
-            self.lastDir = os.path.dirname(paths[0])
+            nondnd = os.path.dirname(paths[0])
+            print('last dir', self.lastDir)
 
     def open_export_filedialog(self):
         """Make user select a folder to export the converted files in"""
@@ -813,11 +824,24 @@ class MainWindow(TkinterDnD.Tk):
             
     def open_inputPath_filedialog(self):
         """Open Input Directory"""
+         
+        try: 
+            if dnd == 'yes':  
+                self.lastDir = str(dnddir)  
+                filename = str(self.lastDir)
+                if sys.platform == "win32":
+                    os.startfile(filename)
+            if dnd == 'no':
+                self.lastDir = str(nondnd)
+                filename = str(self.lastDir)
+                
+                if sys.platform == "win32":
+                    os.startfile(filename)
+        except:
+            filename = str(self.lastDir)
             
-        filename = self.lastDir
-        
-        if sys.platform == "win32":
-            os.startfile(filename)
+            if sys.platform == "win32":
+                os.startfile(filename)
 
     def start_conversion(self):
         """
@@ -854,13 +878,15 @@ class MainWindow(TkinterDnD.Tk):
             return
 
         # -Check for invalid inputs-
+        
         for path in input_paths:
             if not os.path.isfile(path):
-                tk.messagebox.showwarning(master=self,
-                                        title='Invalid Music File',
-                                        message='You have selected an invalid music file! Please make sure that the file still exists!',
-                                        detail=f'File path: {path}')
-                return
+                    tk.messagebox.showwarning(master=self,
+                                            title='Drag and Drop Feature Failed or Invalid Input',
+                                            message='The input is invalid, or the drag and drop feature failed to select your files properly.\n\nPlease try the following:\n\n1. Select your inputs using the \"Select Input\" button\n2. Verify the input is valid.\n3. Then try again.')
+                    return 
+
+
         if self.aiModel_var.get() == 'VR Architecture':
             if not os.path.isfile(instrumentalModel_path):
                     tk.messagebox.showwarning(master=self,
@@ -938,6 +964,8 @@ class MainWindow(TkinterDnD.Tk):
             # Empty Selection
             text = ''
         self.inputPathsEntry_var.set(text)
+        
+
 
     def update_loop(self):
         """Update the dropdown menu"""

@@ -603,8 +603,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     widget_text = text_widget
     gui_progress_bar = progress_var
+    
+    #Error Handling
 
     onnxmissing = "[ONNXRuntimeError] : 3 : NO_SUCHFILE"
+    onnxmemerror = "onnxruntime::CudaCall CUDA failure 2: out of memory"
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
     cuda_err = "CUDA out of memory"
     mod_err = "ModuleNotFoundError"
@@ -1967,6 +1970,30 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             f'The application could not detect this MDX-Net model on your system.\n' + 
                             f'Please make sure all the models are present in the correct directory.\n' + 
                             f'If the error persists, please reinstall application or contact the developers.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if onnxmemerror in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough GPU memory to use this model.\n')
+            text_widget.write(f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n')
+            text_widget.write(f'If the error persists, your GPU might not be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough GPU memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                            f'If the error persists, your GPU might not be supported.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

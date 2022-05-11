@@ -98,6 +98,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global nn_arch_sizes
     global nn_architecture
     
+    #Error Handling
+    
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
     cuda_err = "CUDA out of memory"
     mod_err = "ModuleNotFoundError"

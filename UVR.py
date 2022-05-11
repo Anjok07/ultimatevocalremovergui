@@ -1,5 +1,10 @@
 # GUI modules
 import os
+try:
+    with open(os.path.join(os.getcwd(), 'tmp', 'splash.txt'), 'w') as f:
+        f.write('1')
+except:
+    pass
 import pyperclip
 from gc import freeze
 import tkinter as tk
@@ -66,7 +71,6 @@ mdx_opt_path = os.path.join(base_path, 'img', 'mdx_opt.png')
 vr_opt_path = os.path.join(base_path, 'img', 'vr_opt.png')
 ense_opt_path = os.path.join(base_path, 'img', 'ense_opt.png')
 user_ens_opt_path = os.path.join(base_path, 'img', 'user_ens_opt.png')
-more_info_path = os.path.join(base_path, 'img', 'more_info.png')
 credits_path = os.path.join(base_path, 'img', 'credits.png')
 
 DEFAULT_DATA = {
@@ -277,8 +281,6 @@ class MainWindow(TkinterDnD.Tk):
                                       size=(1016, 826))
         self.user_ens_opt_img = open_image(path=user_ens_opt_path,
                                       size=(1016, 826))
-        self.more_info_img = open_image(path=more_info_path,
-                                      size=(1016, 826))
         self.credits_img = open_image(path=credits_path,
                                       size=(100, 100))
         
@@ -334,9 +336,6 @@ class MainWindow(TkinterDnD.Tk):
         self.progress_var = tk.IntVar(value=0)
         # Font
         pyglet.font.add_file('lib_v5/fonts/centurygothic/GOTHIC.TTF')
-        pyglet.font.add_file('lib_v5/fonts/unispace/unispace.ttf')
-        #Font(file="lib_v5/fonts/centurygothic/GOTHIC.TTF", family="Century Gothic")
-        #Font(file="lib_v5/fonts/unispace/unispace.ttf", family="Unispace")
         self.font = tk.font.Font(family='Century Gothic', size=10)
         self.fontRadio = tk.font.Font(family='Century Gothic', size=8) 
         # --Widgets--

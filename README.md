@@ -16,16 +16,14 @@ This application uses state-of-the-art AI and models to remove vocals from track
 
 ## Installation
 
-UVR v5.2.0 and all of its features are only available on Windows. 
-
 ### Windows Installation
 
 This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites required.
 
 - Download the UVR installer [here]()
-- This installer is intended for those running Windows 10 or higher. 
-- Application functionality for systems running Windows 7 or lower is not guaranteed.
-- Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+    - This installer is intended for those running Windows 10 or higher. 
+    - Application functionality for systems running Windows 7 or lower is not guaranteed.
+    - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here]()

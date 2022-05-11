@@ -1,3 +1,5 @@
+(Almost complete. Full release coming this week!)
+
 # Ultimate Vocal Remover GUI v5.2.0
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/UVRv5.png?raw=true" />
 

@@ -16,17 +16,25 @@ This application uses state-of-the-art AI and models to remove vocals from track
 
 ## Installation
 
-UVR v5.2.0 and all of its features are only available on Windows. However, this application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
+UVR v5.2.0 and all of its features are only available on Windows. 
 
 ### Windows Installation
 
-The installer does not require any prerequisites. All of the required libraries are included within the installation.
+This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites required.
 
 - Download the UVR installer [here]()
+- This installer is intended for those running Windows 10 or higher. 
+- Application functionality for systems running Windows 7 or lower is not guaranteed.
+- Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+
 - **Optional**
     - The Model Expansion Pack can be downloaded [here]()
         - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
     - This version of the GUI is fully backward compatible with the v4 models.
+
+### Other Platforms
+
+This application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
 
 ## Application Manual
 
@@ -50,11 +58,11 @@ The installer does not require any prerequisites. All of the required libraries 
 
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/user_ens_opt.png?raw=true" />
 
-## Other GUI Notes
+### Other GUI Notes
 
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 
-- The application relies on Sox - Sound Exchange for Noise Reduction.
+- This application relies on Sox - Sound Exchange for Noise Reduction.
 - This application relies on FFmpeg to process non-wav audio files.
 - This application will *not* be friendly to older or budget hardware. Please proceed with caution! Please pay attention to your PC and make sure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
@@ -129,6 +137,7 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 - [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 - [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
 - [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
+- [Hv](https://github.com/NaJeongMo/Colab-for-MDX_B) - Helped implement chunks into the MDX-Net AI code. Thank you!
 
 ## Contributing
 

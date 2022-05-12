@@ -6,7 +6,7 @@
 
 ## About
 
-This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package.
+This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs helper model).
 
 - **Core Developers**
     - [Anjok07](https://github.com/anjok07)
@@ -16,7 +16,7 @@ This application uses state-of-the-art source separation models to remove vocals
 
 ### Windows Installation
 
-This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites required.
+This installation bundle contains the UVR interface, Python (stripped to the bare essentials), PyTorch, and other dependencies needed to run the application effectively. No prerequisite installs required.
 
 - Please Note:
     - This installer is intended for those running Windows 10 or higher. 
@@ -121,7 +121,7 @@ From here you should be able to open and run the UVR.py file
 
 - FFmpeg 
 
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction o how to configure it on your operating system.
+    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction on how to configure it on your operating system.
 
 ## License
 

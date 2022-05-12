@@ -66,7 +66,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 - This application relies on FFmpeg to process non-wav audio files.
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 
-- These models are computationally intensive. Processing times might be slow on older or budget hardware. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- These models are computationally intensive. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
 ## Change Log
 
@@ -80,8 +80,8 @@ This application can be run on Mac & Linux by performing a manual install (see t
    - The NFFT, HOP_SIZE, and SR values are now set internally.
    - The MDX-NET AI engine and models have been added.
      - This is a brand new feature added to the UVR GUI. 
-     - 4 MDX-Net models trained by UVR developers are included in this package.
-     - The MDX-Net models provided were trained by the UVR core developers
+     - 4 MDX-Net models are included in this package.
+     - The MDX-Net models provided were trained by the core UVR developers
      - This network is less resource-intensive but incredibly powerful.
      - MDX-Net is a Hybrid Waveform/Spectrogram network.
 
@@ -90,6 +90,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 ### Common Issues
 
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
+- Memory allocation errors can usually be resolved by lowering the "Chunk Size".
 
 ### Issue Reporting
 

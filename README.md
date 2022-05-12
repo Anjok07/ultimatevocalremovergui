@@ -106,8 +106,9 @@ These instructions are for those installing UVR v5.2.0 **manually** only.
 2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 3. Download the models.zip [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/models.zip)
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
-5. Extract the *models* folder within models.zip to the *ultimatevocalremovergui-master* directory.
-6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
+5. Extract the the folders within the models.zip to the *ultimatevocalremovergui-master/models* directory.
+6. Download the SoX archive [here](https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download) and extract the contents into the *ultimatevocalremovergui-master/lib_v5/sox* directory.
+7. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
 
 ```
 pip install --no-cache-dir -r requirements.txt
@@ -116,16 +117,11 @@ pip install --no-cache-dir -r requirements.txt
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
+From here you should be able to open and run the UVR.py file
+
 - FFmpeg 
 
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. Instructions for installing FFmpeg is provided in the "More Info" tab within the Help Guide.
-
-- Running the GUI & Models
-
-    - Open the file labeled *'UVR.py'*.
-    - It's recommended that you create a shortcut for the file labeled *'UVR.py'* to your desktop for easy access.
-        - **Note:** If you are unable to open the *'UVR.py'* file, please go to the **troubleshooting** section below.
-    - **Note:** All output audio files will be in the *'.wav'* format.
+    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction o how to configure it on your operating system.
 
 ## License
 

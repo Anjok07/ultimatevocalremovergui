@@ -17,10 +17,12 @@ SoundFile
 scipy
 norbert
 asteroid>=0.5.0
+onnxruntime-gpu
+psutil
 demucs
 pydub
 audiosegment
 pyglet
 pyperclip
 julius
-yaml
+pyyaml

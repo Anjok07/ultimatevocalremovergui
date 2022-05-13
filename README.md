@@ -21,7 +21,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
 - Please Note:
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
-    - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+    - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
 - Download the UVR installer via one of the following mirrors below:
     - [Main Download Link](https://download.multimedia.workers.dev/UVR_v5.2_setup.exe)
@@ -143,7 +143,7 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 - [Bas Curtiz](https://www.youtube.com/user/bascurtiz) - Designed the official UVR logo, icon, banner, splash screen, and interface.
 - [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 - [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
-- [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original MDX-Net AI code. 
+- [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original Demucs AI code. 
 - [Hv](https://github.com/NaJeongMo/Colab-for-MDX_B) - Helped implement chunks into the MDX-Net AI code. Thank you!
 
 ## Contributing

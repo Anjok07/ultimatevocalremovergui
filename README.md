@@ -33,10 +33,10 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - This version of the GUI is fully backward compatible with the v4 models.
 
 - **Please Note:** If your PC has a display that is under 1080p (1920 x 1080) or if you are having resolution/scaling issues when running UVR, please do the following:
-   1. Download the _*UVR_lowres.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_lowres.zip)
+   1. Download the _*UVR_Patch.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_Patch.zip)
    2. Navigate to the application directory
    3. Delete or rename the _"UVR.exe"_ file within the application directory
-   4. Extract the _"UVR.exe"_ file within the _*UVR_lowres.zip*_ archive to the application directory. 
+   4. Extract the _"UVR.exe"_ file within the _*UVR_Patch.zip*_ archive to the application directory. 
    5. Now when you open UVR, the application should fit to screen.
 
 ### Other Platforms

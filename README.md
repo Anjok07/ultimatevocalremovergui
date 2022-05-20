@@ -24,8 +24,8 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
 - Download the UVR installer via one of the following mirrors below:
-    - [Main Download Link](https://download.multimedia.workers.dev/UVR_v5.2_setup.exe)
-    - [Google Drive Mirror](https://drive.google.com/file/d/1n45m7C2VQyYyQ35KuCg5dp1AN0wCdhfv/view?usp=sharing)
+    - [Main Download Link](https://download.multimedia.workers.dev/UVR_v5.2.1_setup.exe)
+    - [Google Drive Mirror](https://drive.google.com/file/d/1kA1dsZGTu7s2R_wuXO290HxtkBpzvfnC/view?usp=drivesdk)
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/v5_model_expansion_pack.zip)

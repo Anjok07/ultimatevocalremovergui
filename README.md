@@ -33,16 +33,19 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - This version of the GUI is fully backward compatible with the v4 models.
 
 - **Please Note:** A new patch has been released. 
-    - The following issues were addressed:
+    - The has been addressed:
         - Fixed an issue with the Demucs model.
         - The application now automatically detects your resolution and sets itself accordingly.
+        - Ensemble Customization (Nagivate to the "Advanced" tab in the Help Guide for more info)
         - Enhanced error handling.
-    - Patch installation instructions:
-       1. Download the _*UVR_Patch.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_Patch.zip)
-       2. Navigate to the application directory
-       3. Delete or rename the _"UVR.exe"_ file within the application directory
-       4. Extract the _"UVR.exe"_ file within the _*UVR_Patch.zip*_ archive to the application directory. 
-       5. Now when you open UVR, the application should fit to screen.
+  - Patch installation instructions:
+     1. Download the _*UVR_Patch.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_Patch.zip)
+     2. Navigate to the application directory
+     3. Close UVR if you have it open.
+     4. Delete the "data.pkl" file (you will receive a "Key Error" if you don't remove it.)
+     5. Delete or rename the _"UVR.exe"_ file within the application directory
+     6. Extract the _"UVR.exe"_ file within the _*UVR_Patch.zip*_ archive to the application directory. 
+     7. Open the application to ensure workability.
 
 ### Other Platforms
 

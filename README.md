@@ -25,7 +25,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
 
 - Download the UVR installer via one of the following mirrors below:
     - [Main Download Link](https://download.multimedia.workers.dev/UVR_v5.2_setup.exe)
-    - [Google Drive Mirror](https://drive.google.com/file/d/1ALH1WB3WjNnRQoPJFIiJHG9uVqH4U50Q/view?usp=sharing)
+    - [Google Drive Mirror](https://drive.google.com/file/d/1n45m7C2VQyYyQ35KuCg5dp1AN0wCdhfv/view?usp=sharing)
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/v5_model_expansion_pack.zip)

@@ -37,7 +37,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
         - Fixed an issue with the Demucs model.
         - The application now automatically detects your resolution and sets itself accordingly.
         - Ensemble Customization (Nagivate to the "Advanced" tab in the Help Guide for more info)
-        -   - Be sure to download and extract the model ex
+           - Be sure to download and extract the newest model extension pack to get the most out of this option.
         - Enhanced error handling.
   - Patch installation instructions:
      1. Download the _*UVR_Patch.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_Patch.zip)

@@ -85,7 +85,7 @@ DEFAULT_DATA = {
     'vr_ensem_mdx_b': 'No Model',
     'vr_ensem_mdx_c': 'No Model',
     'mdx_ensem': 'UVR-MDX-NET 1',
-    'mdx_ensem_b': 'UVR-MDX-NET 2',
+    'mdx_ensem_b': 'No Model',
     'gpu': False,
     'postprocess': False,
     'tta': False,
@@ -1499,8 +1499,8 @@ class MainWindow(TkinterDnD.Tk):
         tabControl.add(tab6, text ='More Info')
         tabControl.add(tab7, text ='Credits')
         tabControl.add(tab8, text ='Updates')
-        tabControl.add(tab9, text ='Error Log')
-        tabControl.add(tab10, text ='Advanced')
+        tabControl.add(tab9, text ='Advanced')
+        tabControl.add(tab10, text ='Error Log')
 
         tabControl.pack(expand = 1, fill ="both")
 
@@ -1708,25 +1708,6 @@ class MainWindow(TkinterDnD.Tk):
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
-            frame0.grid(row=0,column=0,padx=0,pady=30)  
-            
-            l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=1,column=0,padx=20,pady=10)
-            
-            l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-            l0.grid(row=2,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
-            l0.grid(row=3,column=0,padx=0,pady=0)
-            
-            with open("errorlog.txt", "r") as f:
-                l0=Button(frame0,text=f.read(),font=("Century Gothic", "8"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
-                l0.grid(row=4,column=0,padx=0,pady=0)
-                
-            l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
-            l0.grid(row=5,column=0,padx=0,pady=0)
-            
-            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
             l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
@@ -1847,6 +1828,25 @@ class MainWindow(TkinterDnD.Tk):
             
             l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
             l0.grid(row=3,column=2,padx=0,pady=0)
+            
+            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            with open("errorlog.txt", "r") as f:
+                l0=Button(frame0,text=f.read(),font=("Century Gothic", "8"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
+                l0.grid(row=4,column=0,padx=0,pady=0)
+                
+            l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=0,pady=0)
             
         else:
             l0=Label(frame0,text="Notes",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
@@ -2000,7 +2000,7 @@ class MainWindow(TkinterDnD.Tk):
             l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "8"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
             l0.grid(row=12,column=0,padx=0,pady=0)
             
-            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
+            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=30)  
             
             l0=Label(frame0,text="Error Details",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
@@ -2019,7 +2019,7 @@ class MainWindow(TkinterDnD.Tk):
             l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=5,column=0,padx=0,pady=0)
             
-            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
+            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
             l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
@@ -2032,10 +2032,10 @@ class MainWindow(TkinterDnD.Tk):
                                 'UVR-MDX-NET Karaoke')
             l0.grid(row=3,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
             l0.grid(row=4,column=0,padx=0,pady=0)
             
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, '2_HP-UVR', '1_HP-UVR','3_HP-Vocal-UVR', 
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
                               '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
                               '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
                               '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
@@ -2072,7 +2072,12 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=0,padx=0,pady=0)
             
-            #ttk.OptionMenu(self.options_Frame, self.instrumentalModel_var)
+            l0=Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                                'UVR-MDX-NET Karaoke')
+            l0.grid(row=13,column=0,padx=0,pady=0)
             
             l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=1,padx=20,pady=10)
@@ -2090,7 +2095,7 @@ class MainWindow(TkinterDnD.Tk):
             l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
             l0.grid(row=4,column=1,padx=0,pady=0)
             
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '2_HP-UVR', '1_HP-UVR', '3_HP-Vocal-UVR', 
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
                               '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
                               '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
                               '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
@@ -2126,6 +2131,15 @@ class MainWindow(TkinterDnD.Tk):
                               '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=2,padx=0,pady=0)
+            
+            l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
+            l0.grid(row=2,column=2,padx=0,pady=0)
+            
+            l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
+            l0.grid(row=3,column=2,padx=0,pady=0)
 
     def copy_clip(self):
             copy_t = open("errorlog.txt", "r").read()

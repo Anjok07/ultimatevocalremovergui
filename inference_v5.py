@@ -101,6 +101,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     #Error Handling
     
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
+    systemmemerr = "DefaultCPUAllocator: not enough memory"
     cuda_err = "CUDA out of memory"
     mod_err = "ModuleNotFoundError"
     file_err = "FileNotFoundError"
@@ -453,6 +454,27 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         if model_hash == 'c3448ec923fa0edf3d03a19e633faa53':  
                             model_params_d=str('lib_v5/modelparams/4band_44100.json')
                             param_name=str('4band_44100')
+                        if model_hash == '68aa2c8093d0080704b200d140f59e54':  
+                            model_params_d=str('lib_v5/modelparams/3band_44100.json')
+                            param_name=str('3band_44100.json')
+                        if model_hash == 'fdc83be5b798e4bd29fe00fe6600e147':  
+                            model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
+                            param_name=str('3band_44100_mid.json')
+                        if model_hash == '2ce34bc92fd57f55db16b7a4def3d745':  
+                            model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
+                            param_name=str('3band_44100_mid.json')
+                        if model_hash == '52fdca89576f06cf4340b74a4730ee5f':  
+                            model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                            param_name=str('4band_44100.json')
+                        if model_hash == '41191165b05d38fc77f072fa9e8e8a30':  
+                            model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                            param_name=str('4band_44100.json')
+                        if model_hash == '89e83b511ad474592689e562d5b1f80e':  
+                            model_params_d=str('lib_v5/modelparams/2band_32000.json')
+                            param_name=str('2band_32000.json')
+                        if model_hash == '0b954da81d453b716b114d6d7c95177f':  
+                            model_params_d=str('lib_v5/modelparams/2band_32000.json')
+                            param_name=str('2band_32000.json')
                             
                         #v4 Models
                             
@@ -978,6 +1000,32 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             f'Could not write audio file.\n' + 
                             f'This could be due to low storage on target device or a system permissions issue.\n' + 
                             f'If the error persists, please contact the developers.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if systemmemerr in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough system memory to use this \nmodel.\n\n')
+            text_widget.write(f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n')
+            text_widget.write(f'Please Note: Intel Pentium and Intel Celeron processors do not work well with \nthis application.\n\n')
+            text_widget.write(f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough system memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n' + 
+                            f'Please Note: Intel Pentium and Intel Celeron processors do not work well with this application.\n\n' +
+                            f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

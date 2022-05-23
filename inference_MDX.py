@@ -9,6 +9,8 @@ import os.path
 from datetime import datetime
 import pydub
 import shutil
+
+import gc
 #MDX-Net
 #----------------------------------------
 import soundfile as sf
@@ -41,6 +43,16 @@ class Predictor():
     
     def prediction_setup(self, demucs_name,
                                channels=64):
+        
+        global device
+
+        print('Print the gpu setting: ', data['gpu'])
+
+        if data['gpu'] >= 0:
+            device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        if data['gpu'] == -1:
+            device = torch.device('cpu')
+        
         if data['demucsmodel']:
             self.demucs = Demucs(sources=["drums", "bass", "other", "vocals"], channels=channels)
             widget_text.write(base_text + 'Loading Demucs model... ')
@@ -66,8 +78,11 @@ class Predictor():
                 data['gpu'] = -1
                 widget_text.write("\n" + base_text + "No NVIDIA GPU detected. Switching to CPU... ")    
                 run_type = ['CPUExecutionProvider']     
-        else:
+        elif data['gpu'] == -1:
             run_type = ['CPUExecutionProvider']
+            
+        print(run_type)
+        print(str(device))
 
         self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', model_set), providers=run_type)
         widget_text.write('Done!\n')
@@ -463,18 +478,15 @@ class Predictor():
                     gpu_mem = round(torch.cuda.get_device_properties(0).total_memory/1.074e+9)
                 except:
                     widget_text.write(base_text + 'NVIDIA GPU Required for conversion!\n')
-                if int(gpu_mem) <= int(5):
+                if int(gpu_mem) <= int(6):
                     chunk_set = int(5)
                     widget_text.write(base_text + 'Chunk size auto-set to 5... \n')
-                if gpu_mem in [6, 7]:
-                    chunk_set = int(30)
-                    widget_text.write(base_text + 'Chunk size auto-set to 30... \n')
-                if gpu_mem in [8, 9, 10, 11, 12, 13, 14, 15]:
+                if gpu_mem in [7, 8, 9, 10, 11, 12, 13, 14, 15]:
+                    chunk_set = int(10)
+                    widget_text.write(base_text + 'Chunk size auto-set to 10... \n')
+                if int(gpu_mem) >= int(16):
                     chunk_set = int(40)
                     widget_text.write(base_text + 'Chunk size auto-set to 40... \n')
-                if int(gpu_mem) >= int(16):
-                    chunk_set = int(60)
-                    widget_text.write(base_text + 'Chunk size auto-set to 60... \n')
             if data['gpu'] == -1:
                 sys_mem = psutil.virtual_memory().total >> 30
                 if int(sys_mem) <= int(4):
@@ -666,7 +678,6 @@ def get_baseText(total_files, file_num):
 
 warnings.filterwarnings("ignore")
 cpu = torch.device('cpu')
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def hide_opt():
     with open(os.devnull, "w") as devnull:
@@ -710,6 +721,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     onnxmissing = "[ONNXRuntimeError] : 3 : NO_SUCHFILE"
     onnxmemerror = "onnxruntime::CudaCall CUDA failure 2: out of memory"
+    onnxmemerror2 = "onnxruntime::BFCArena::AllocateRawInternal"
+    systemmemerr = "DefaultCPUAllocator: not enough memory"
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
     cuda_err = "CUDA out of memory"
     mod_err = "ModuleNotFoundError"
@@ -965,16 +978,40 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
             text_widget.write(f'\nError Received:\n\n')
             text_widget.write(f'The application was unable to allocate enough GPU memory to use this model.\n')
-            text_widget.write(f'\nPlease do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n')
+            text_widget.write(f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n')
             text_widget.write(f'If the error persists, your GPU might not be supported.\n\n')
             text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: MDX-Net\n\n' +
+                            f'Process Method: Ensemble Mode\n\n' +
                             f'The application was unable to allocate enough GPU memory to use this model.\n' + 
-                            f'\nPlease do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                            f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                            f'If the error persists, your GPU might not be supported.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if onnxmemerror2 in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough GPU memory to use this model.\n')
+            text_widget.write(f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n')
+            text_widget.write(f'If the error persists, your GPU might not be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough GPU memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
                             f'If the error persists, your GPU might not be supported.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
@@ -1009,6 +1046,33 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
+        if systemmemerr in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough system memory to use this \nmodel.\n\n')
+            text_widget.write(f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n')
+            text_widget.write(f'Please Note: Intel Pentium and Intel Celeron processors do not work well with \nthis application.\n\n')
+            text_widget.write(f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough system memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n' + 
+                            f'Please Note: Intel Pentium and Intel Celeron processors do not work well with this application.\n\n' +
+                            f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        
         print(traceback_text)
         print(type(e).__name__, e)
         print(message)
@@ -1041,7 +1105,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     text_widget.write(f'\nConversion(s) Completed!\n')
         
     text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
-    torch.cuda.empty_cache()
+    torch.cuda.empty_cache() 
     button_widget.configure(state=tk.NORMAL)  # Enable Button
     
 if __name__ == '__main__':

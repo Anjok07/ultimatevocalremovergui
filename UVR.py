@@ -1,11 +1,7 @@
 # GUI modules
 import os
-try:
-    with open(os.path.join(os.getcwd(), 'tmp', 'splash.txt'), 'w') as f:
-        f.write('1')
-except:
-    pass
 import pyperclip
+import natsort
 from gc import freeze
 import tkinter as tk
 from tkinter import *
@@ -42,6 +38,8 @@ import inference_MDX
 import inference_v5
 import inference_v5_ensemble
 
+from win32api import GetSystemMetrics
+
 try:
     with open(os.path.join(os.getcwd(), 'tmp', 'splash.txt'), 'w') as f:
         f.write('1')
@@ -77,6 +75,17 @@ DEFAULT_DATA = {
     'exportPath': '',
     'inputPaths': [],
     'saveFormat': 'Wav',
+    'vr_ensem': '2_HP-UVR',
+    'vr_ensem_a': '1_HP-UVR',
+    'vr_ensem_b': '2_HP-UVR',
+    'vr_ensem_c': 'No Model',
+    'vr_ensem_d': 'No Model',
+    'vr_ensem_e': 'No Model',
+    'vr_ensem_mdx_a': 'No Model',
+    'vr_ensem_mdx_b': 'No Model',
+    'vr_ensem_mdx_c': 'No Model',
+    'mdx_ensem': 'UVR-MDX-NET 1',
+    'mdx_ensem_b': 'UVR-MDX-NET 2',
     'gpu': False,
     'postprocess': False,
     'tta': False,
@@ -92,6 +101,8 @@ DEFAULT_DATA = {
     'useModel': 'instrumental',
     'lastDir': None,
     'break': False,
+    #Advanced Options
+    'appendensem': False,
     #MDX-Net
     'demucsmodel': True,
     'non_red': False,
@@ -229,14 +240,32 @@ class ThreadSafeConsole(tk.Text):
 class MainWindow(TkinterDnD.Tk):
     # --Constants--
     # Layout
-    IMAGE_HEIGHT = 140
-    FILEPATHS_HEIGHT = 85
-    OPTIONS_HEIGHT = 275
-    CONVERSIONBUTTON_HEIGHT = 35
-    COMMAND_HEIGHT = 200
-    PROGRESS_HEIGHT = 30
-    PADDING = 10
-
+    
+    if GetSystemMetrics(1) >= 900:
+        IMAGE_HEIGHT = 140
+        FILEPATHS_HEIGHT = 85
+        OPTIONS_HEIGHT = 275
+        CONVERSIONBUTTON_HEIGHT = 35
+        COMMAND_HEIGHT = 200
+        PROGRESS_HEIGHT = 30
+        PADDING = 10
+    elif GetSystemMetrics(1) <= 720:
+        IMAGE_HEIGHT = 135
+        FILEPATHS_HEIGHT = 85
+        OPTIONS_HEIGHT = 274
+        CONVERSIONBUTTON_HEIGHT = 35
+        COMMAND_HEIGHT = 80
+        PROGRESS_HEIGHT = 6
+        PADDING = 5
+    else:
+        IMAGE_HEIGHT = 135
+        FILEPATHS_HEIGHT = 85
+        OPTIONS_HEIGHT = 274
+        CONVERSIONBUTTON_HEIGHT = 35
+        COMMAND_HEIGHT = 115
+        PROGRESS_HEIGHT = 6
+        PADDING = 7
+    
     COL1_ROWS = 11
     COL2_ROWS = 11
 
@@ -257,6 +286,10 @@ class MainWindow(TkinterDnD.Tk):
             height=height,
             xpad=int(self.winfo_screenwidth()/2 - 635/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
+        if GetSystemMetrics(1) >= 900:
+            pass
+        else:
+            self.tk.call('tk', 'scaling', 1.1)
         self.configure(bg='#0e0e0f')  # Set background color to #0c0c0d
         self.protocol("WM_DELETE_WINDOW", self.save_values)
         self.resizable(False, False)
@@ -271,18 +304,45 @@ class MainWindow(TkinterDnD.Tk):
                                       size=(20, 20))
         self.help_img = open_image(path=help_path,
                                       size=(20, 20))
-        self.gen_opt_img = open_image(path=gen_opt_path,
-                                      size=(1016, 826))
-        self.mdx_opt_img = open_image(path=mdx_opt_path,
-                                      size=(1016, 826))
-        self.vr_opt_img = open_image(path=vr_opt_path,
-                                      size=(1016, 826))
-        self.ense_opt_img = open_image(path=ense_opt_path,
-                                      size=(1016, 826))
-        self.user_ens_opt_img = open_image(path=user_ens_opt_path,
-                                      size=(1016, 826))
-        self.credits_img = open_image(path=credits_path,
-                                      size=(100, 100))
+        if GetSystemMetrics(1) >= 900:
+            self.gen_opt_img = open_image(path=gen_opt_path,
+                                        size=(900, 826))
+            self.mdx_opt_img = open_image(path=mdx_opt_path,
+                                        size=(900, 826))
+            self.vr_opt_img = open_image(path=vr_opt_path,
+                                        size=(900, 826))
+            self.ense_opt_img = open_image(path=ense_opt_path,
+                                        size=(900, 826))
+            self.user_ens_opt_img = open_image(path=user_ens_opt_path,
+                                        size=(900, 826))
+            self.credits_img = open_image(path=credits_path,
+                                        size=(100, 100))
+        elif GetSystemMetrics(1) <= 720:
+            self.gen_opt_img = open_image(path=gen_opt_path,
+                                        size=(740, 826))
+            self.mdx_opt_img = open_image(path=mdx_opt_path,
+                                        size=(740, 826))
+            self.vr_opt_img = open_image(path=vr_opt_path,
+                                        size=(695, 826))
+            self.ense_opt_img = open_image(path=ense_opt_path,
+                                        size=(740, 826))
+            self.user_ens_opt_img = open_image(path=user_ens_opt_path,
+                                        size=(740, 826))
+            self.credits_img = open_image(path=credits_path,
+                                        size=(50, 50))
+        else:
+            self.gen_opt_img = open_image(path=gen_opt_path,
+                                        size=(740, 826))
+            self.mdx_opt_img = open_image(path=mdx_opt_path,
+                                        size=(740, 826))
+            self.vr_opt_img = open_image(path=vr_opt_path,
+                                        size=(730, 826))
+            self.ense_opt_img = open_image(path=ense_opt_path,
+                                        size=(740, 826))
+            self.user_ens_opt_img = open_image(path=user_ens_opt_path,
+                                        size=(740, 826))
+            self.credits_img = open_image(path=credits_path,
+                                        size=(50, 50))
         
         self.instrumentalLabel_to_path = defaultdict(lambda: '')
         self.lastInstrumentalModels = []
@@ -294,7 +354,20 @@ class MainWindow(TkinterDnD.Tk):
         self.inputPathop_var = tk.StringVar(value=data['inputPaths'])
         self.exportPath_var = tk.StringVar(value=data['exportPath'])
         self.saveFormat_var = tk.StringVar(value=data['saveFormat'])
+        self.vrensemchoose_var = tk.StringVar(value=data['vr_ensem'])
+        self.vrensemchoose_a_var = tk.StringVar(value=data['vr_ensem_a'])
+        self.vrensemchoose_b_var = tk.StringVar(value=data['vr_ensem_b'])
+        self.vrensemchoose_c_var = tk.StringVar(value=data['vr_ensem_c'])
+        self.vrensemchoose_d_var = tk.StringVar(value=data['vr_ensem_d'])
         
+        self.vrensemchoose_e_var = tk.StringVar(value=data['vr_ensem_e'])
+        self.vrensemchoose_mdx_a_var = tk.StringVar(value=data['vr_ensem_mdx_a'])
+        self.vrensemchoose_mdx_b_var = tk.StringVar(value=data['vr_ensem_mdx_b'])
+        self.vrensemchoose_mdx_c_var = tk.StringVar(value=data['vr_ensem_mdx_c'])
+        self.mdxensemchoose_var = tk.StringVar(value=data['mdx_ensem'])
+        self.mdxensemchoose_b_var = tk.StringVar(value=data['mdx_ensem_b'])
+        #Advanced Options
+        self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
@@ -347,10 +420,7 @@ class MainWindow(TkinterDnD.Tk):
         self.update_available_models()
         self.update_states()
         self.update_loop()
-
-        
-        
-
+   
     # -Widget Methods-
     def create_widgets(self):
         """Create window widgets"""
@@ -389,7 +459,6 @@ class MainWindow(TkinterDnD.Tk):
                                               borderwidth=0,)
 
         self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
-
        
     def configure_widgets(self):
         """Change widget styling and appearance"""
@@ -397,7 +466,7 @@ class MainWindow(TkinterDnD.Tk):
         #ttk.Style().configure('TCheckbutton', background='#0e0e0f',
         #                      font=self.font, foreground='#d4d4d4')
         #ttk.Style().configure('TRadiobutton', background='#0e0e0f',
-        #                      font=("Century Gothic", "8", "bold"), foreground='#d4d4d4')
+        #                      font=("Century Gothic", "11", "bold"), foreground='#d4d4d4')
         #ttk.Style().configure('T', font=self.font, foreground='#d4d4d4')  
 
         #s = ttk.Style()
@@ -537,7 +606,7 @@ class MainWindow(TkinterDnD.Tk):
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                           self.ensChoose_var,
-                                                          None, 'MDX-Net/VR Ensemble', 'HP Models', 'Vocal Models', 'HP2 Models', 'All HP/HP2 Models', 'User Ensemble')
+                                                          None, 'MDX-Net/VR Ensemble', 'Basic Ensemble', 'HP2 Models', 'All HP/HP2 Models', 'Vocal Models', 'User Ensemble')
         
         # Choose Agorithim
         self.options_algo_Label = tk.Label(master=self.options_Frame,
@@ -623,9 +692,7 @@ class MainWindow(TkinterDnD.Tk):
         self.options_noisereduc_s_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.noisereduc_s_var,
                                                          None, 'None', '0', '1', '2', '3', '4', '5', 
-                                                         '6', '7', '8', '9', '10', '11', 
-                                                         '12', '13', '14', '15', '16', '17', 
-                                                         '18', '19', '20')
+                                                         '6', '7', '8', '9', '10')
         
 
         # Save Image
@@ -915,9 +982,23 @@ class MainWindow(TkinterDnD.Tk):
                             'input_paths': input_paths,
                             'export_path': export_path,
                             'saveFormat': self.saveFormat_var.get(),
+                            'vr_ensem': self.vrensemchoose_var.get(),
+                            'vr_ensem_a': self.vrensemchoose_a_var.get(),
+                            'vr_ensem_b': self.vrensemchoose_b_var.get(),
+                            'vr_ensem_c': self.vrensemchoose_c_var.get(),
+                            'vr_ensem_d': self.vrensemchoose_d_var.get(),
+                            
+                            'vr_ensem_e': self.vrensemchoose_e_var.get(),
+                            'vr_ensem_mdx_a': self.vrensemchoose_mdx_a_var.get(),
+                            'vr_ensem_mdx_b': self.vrensemchoose_mdx_b_var.get(),
+                            'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
+                            
+                            'mdx_ensem': self.mdxensemchoose_var.get(),
+                            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
                             # Processing Options
                             'gpu': 0 if self.gpuConversion_var.get() else -1,
                             'postprocess': self.postprocessing_var.get(),
+                            'appendensem': self.appendensem_var.get(),
                             'tta': self.tta_var.get(),
                             'save': self.save_var.get(),
                             'output_image': self.outputImage_var.get(),
@@ -984,7 +1065,7 @@ class MainWindow(TkinterDnD.Tk):
         if new_InstrumentalModels != self.lastInstrumentalModels:
             self.instrumentalLabel_to_path.clear()
             self.options_instrumentalModel_Optionmenu['menu'].delete(0, 'end')
-            for file_name in new_InstrumentalModels:
+            for file_name in natsort.natsorted(new_InstrumentalModels):
                 if file_name.endswith('.pth'):
                     # Add Radiobutton to the Options Menu
                     self.options_instrumentalModel_Optionmenu['menu'].add_radiobutton(label=file_name,
@@ -992,7 +1073,8 @@ class MainWindow(TkinterDnD.Tk):
                     # Link the files name to its absolute path
                     self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
             self.lastInstrumentalModels = new_InstrumentalModels
-
+            #print(self.instrumentalLabel_to_path)
+            
     def update_states(self):
         """
         Vary the states for all widgets based
@@ -1369,14 +1451,22 @@ class MainWindow(TkinterDnD.Tk):
         Open Help Guide
         """
         top= Toplevel(self)
-        top.geometry("1080x920")
+        if GetSystemMetrics(1) >= 900:
+            top.geometry("1080x810")
+            window_height = 810
+            window_width = 1080
+        elif GetSystemMetrics(1) <= 720:
+            top.geometry("930x640")
+            window_height = 640
+            window_width = 930
+        else:
+            top.geometry("930x670")
+            window_height = 670
+            window_width = 930
         top.title("UVR Help Guide")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
-
-        window_height = 920
-        window_width = 1080
-
+        
         screen_width = top.winfo_screenwidth()
         screen_height = top.winfo_screenheight()
 
@@ -1399,16 +1489,18 @@ class MainWindow(TkinterDnD.Tk):
         tab7 = ttk.Frame(tabControl)
         tab8 = ttk.Frame(tabControl)
         tab9 = ttk.Frame(tabControl)
-  
-        tabControl.add(tab1, text ='General Options')
-        tabControl.add(tab2, text ='VR Architecture Options')
-        tabControl.add(tab3, text ='MDX-Net Options')
+        tab10 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text ='General')
+        tabControl.add(tab2, text ='VR Architecture')
+        tabControl.add(tab3, text ='MDX-Net')
         tabControl.add(tab4, text ='Ensemble Mode')
         tabControl.add(tab5, text ='User Ensemble')
         tabControl.add(tab6, text ='More Info')
         tabControl.add(tab7, text ='Credits')
         tabControl.add(tab8, text ='Updates')
         tabControl.add(tab9, text ='Error Log')
+        tabControl.add(tab10, text ='Advanced')
 
         tabControl.pack(expand = 1, fill ="both")
 
@@ -1425,210 +1517,615 @@ class MainWindow(TkinterDnD.Tk):
         tab9.grid_rowconfigure(0, weight=1)
         tab9.grid_columnconfigure(0, weight=1)
         
+        tab10.grid_rowconfigure(0, weight=1)
+        tab10.grid_columnconfigure(0, weight=1)
+        
         ttk.Label(tab1, image=self.gen_opt_img).grid(column = 0,
                                     row = 0, 
-                                    padx = 30,
+                                    padx = 87,
                                     pady = 30)
 
         ttk.Label(tab2, image=self.vr_opt_img).grid(column = 0,
                                     row = 0, 
-                                    padx = 30,
+                                    padx = 87,
                                     pady = 30)
 
         ttk.Label(tab3, image=self.mdx_opt_img).grid(column = 0,
                                     row = 0, 
-                                    padx = 30,
+                                    padx = 87,
                                     pady = 30)
 
         ttk.Label(tab4, image=self.ense_opt_img).grid(column = 0,
                                     row = 0, 
-                                    padx = 30,
+                                    padx = 87,
                                     pady = 30)
 
         ttk.Label(tab5, image=self.user_ens_opt_img).grid(column = 0,
                                     row = 0, 
-                                    padx = 30,
+                                    padx = 87,
                                     pady = 30)
 
         #frame0
         frame0=Frame(tab6,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
 
-        l0=Label(frame0,text="Notes",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=1,column=0,padx=20,pady=15)
+        if GetSystemMetrics(1) >= 900:
+            l0=Label(frame0,text="Notes",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
 
-        l0=Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nAll the models provided as part of UVR were trained by its core developers.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=2,column=0,padx=10,pady=10)
-        
-        l0=Label(frame0,text="Resources",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=3,column=0,padx=20,pady=15, sticky=N)
-        
-        link = Label(frame0, text="Ultimate Vocal Remover (Official GitHub)",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=4,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/Anjok07/ultimatevocalremovergui"))
-        
-        l0=Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=5,column=0,padx=10,pady=10)
-        
-        link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=6,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
-        
-        l0=Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=7,column=0,padx=10,pady=10)
-        
-        link = Label(frame0, text="FFmpeg",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=8,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
-        
-        l0=Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIt's automatically included via the UVR installer but not the developer build.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=9,column=0,padx=10,pady=10)
+            l0=Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nAll the models provided as part of UVR were trained by its core developers.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=10,pady=7)
+            
+            l0=Label(frame0,text="Resources",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=3,column=0,padx=20,pady=7, sticky=N)
+            
+            link = Label(frame0, text="Ultimate Vocal Remover (Official GitHub)",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=4,column=0,padx=10,pady=7)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui"))
+            
+            l0=Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=10,pady=7)
+            
+            link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=6,column=0,padx=10,pady=7)
+            link.bind("<Button-1>", lambda e:
+            callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
+            
+            l0=Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=7,column=0,padx=10,pady=7)
+            
+            link = Label(frame0, text="FFmpeg",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=8,column=0,padx=10,pady=7)
+            link.bind("<Button-1>", lambda e:
+            callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
+            
+            l0=Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIt's automatically included via the UVR installer but not the developer build.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=9,column=0,padx=10,pady=7)
 
-        link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=10,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://x-minus.pro/ai"))
+            link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=10,column=0,padx=10,pady=7)
+            link.bind("<Button-1>", lambda e:
+            callback("https://x-minus.pro/ai"))
 
-        l0=Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=11,column=0,padx=10,pady=10)
-        
-        link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=12,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://www.patreon.com/uvr"))
-        
-        l0=Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
-        l0.grid(row=13,column=0,padx=10,pady=10)
-        
-        frame0=Frame(tab7,highlightbackground='red',highlightthicknes=0)
-        frame0.grid(row=0,column=0,padx=0,pady=30)
+            l0=Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=11,column=0,padx=10,pady=7)
+            
+            link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=12,column=0,padx=10,pady=7)
+            link.bind("<Button-1>", lambda e:
+            callback("https://www.patreon.com/uvr"))
+            
+            l0=Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0.grid(row=13,column=0,padx=10,pady=7)
+            
+            frame0=Frame(tab7,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)
 
-        #inside frame0    
-        
-        l0=Label(frame0,text="Core UVR Developers",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=0,column=0,padx=20,pady=10, sticky=N)
-        
-        l0=Label(frame0,image=self.credits_img,font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=1,column=0,padx=10,pady=10)
+            #inside frame0    
+            
+            l0=Label(frame0,text="Core UVR Developers",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=0,column=0,padx=20,pady=5, sticky=N)
+            
+            l0=Label(frame0,image=self.credits_img,font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=1,column=0,padx=10,pady=5)
 
-        l0=Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=2,column=0,padx=10,pady=10)
+            l0=Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=2,column=0,padx=10,pady=5)
 
-        l0=Label(frame0,text="Special Thanks",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=4,column=0,padx=20,pady=15)
+            l0=Label(frame0,text="Special Thanks",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=4,column=0,padx=20,pady=10)
 
-        l0=Label(frame0,text="DilanBoskan",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=5,column=0,padx=10,pady=10)
+            l0=Label(frame0,text="DilanBoskan",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=5,column=0,padx=10,pady=5)
 
-        l0=Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=6,column=0,padx=0,pady=0)
+            l0=Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=0,padx=0,pady=0)
 
-        link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=7,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/tsurumeso/vocal-remover"))
-        
-        l0=Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=8,column=0,padx=0,pady=0)
-        
-        link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=9,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/kuielab"))
-        
-        l0=Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=10,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="Bas Curtiz",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=11,column=0,padx=10,pady=10)
-        
-        l0=Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=12,column=0,padx=0,pady=0)
-        
-        link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=13,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/facebookresearch/demucs"))
-        
-        l0=Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=14,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="Audio Separation Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=15,column=0,padx=10,pady=10)
-        
-        l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=16,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="CC Karokee & Friends Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
-        l0.grid(row=17,column=0,padx=10,pady=10)
-        
-        l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=18,column=0,padx=0,pady=0)
-        
-        frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
-        frame0.grid(row=0,column=0,padx=0,pady=30)  
-        
-        l0=Label(frame0,text="Update Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=1,column=0,padx=20,pady=10)
-        
-        l0=Label(frame0,text="Installing Model Expansion Pack",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=2,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="1. Download the model expansion pack via the provided link below.\n2. Once the download has completed, click the \"Open Models Directory\" button below.\n3. Extract the \'Main Models\' folder within the downloaded archive to the opened \"models\" directory.\n4. Without restarting the application, you will now see the new models appear under the VR Architecture model selection list.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-        l0.grid(row=3,column=0,padx=0,pady=0)
-        
-        link = Label(frame0, text="Model Expansion Pack",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=4,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
-        
-        l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-        l0.grid(row=5,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="\n\n\nBackward Compatibility",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=6,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-        l0.grid(row=7,column=0,padx=0,pady=0)
-        
-        l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-        l0.grid(row=8,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="\n\n\nInstalling Future Updates",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=9,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="New updates and patches for this application can be found on the official UVR Releases GitHub page (link below).\nAny new update instructions will likely require the use of the \"Open Application Directory\" button below.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-        l0.grid(row=10,column=0,padx=0,pady=0)
-        
-        link = Label(frame0, text="UVR Releases GitHub Page",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-        link.grid(row=11,column=0,padx=10,pady=10)
-        link.bind("<Button-1>", lambda e:
-        callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
-        
-        l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "11"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-        l0.grid(row=12,column=0,padx=0,pady=0)
-        
-        frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
-        frame0.grid(row=0,column=0,padx=0,pady=30)  
-        
-        l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-        l0.grid(row=1,column=0,padx=20,pady=10)
-        
-        l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
-        l0.grid(row=2,column=0,padx=0,pady=0)
-        
-        l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
-        l0.grid(row=3,column=0,padx=0,pady=0)
-        
-        with open("errorlog.txt", "r") as f:
-            l0=Button(frame0,text=f.read(),font=("Century Gothic", "11"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
+            link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=7,column=0,padx=10,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/tsurumeso/vocal-remover"))
+            
+            l0=Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=9,column=0,padx=10,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/kuielab"))
+            
+            l0=Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Bas Curtiz",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=11,column=0,padx=10,pady=5)
+            
+            l0=Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=13,column=0,padx=10,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/facebookresearch/demucs"))
+            
+            l0=Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=14,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Audio Separation Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=15,column=0,padx=10,pady=5)
+            
+            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=16,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="CC Karokee & Friends Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=17,column=0,padx=10,pady=5)
+            
+            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=18,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Update Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text="Installing Model Expansion Pack",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="1. Download the model expansion pack via the provided link below.\n2. Once the download has completed, click the \"Open Models Directory\" button below.\n3. Extract the \'Main Models\' folder within the downloaded archive to the opened \"models\" directory.\n4. Without restarting the application, you will now see the new models appear under the VR Architecture model selection list.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Model Expansion Pack",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=4,column=0,padx=10,pady=10)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
+            
+            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="\n\nBackward Compatibility",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=6,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=7,column=0,padx=0,pady=0)
+            
+            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="\n\nInstalling Future Updates",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=9,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="New updates and patches for this application can be found on the official UVR Releases GitHub page (link below).\nAny new update instructions will likely require the use of the \"Open Application Directory\" button below.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="UVR Releases GitHub Page",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=11,column=0,padx=10,pady=10)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
+            
+            l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "11"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            with open("errorlog.txt", "r") as f:
+                l0=Button(frame0,text=f.read(),font=("Century Gothic", "8"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
+                l0.grid(row=4,column=0,padx=0,pady=0)
+                
+            l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=0)  
+            
+            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                                'UVR-MDX-NET Karaoke')
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
             l0.grid(row=4,column=0,padx=0,pady=0)
             
-        l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
-        l0.grid(row=5,column=0,padx=0,pady=0)
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=7,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=9,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=11,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                                'UVR-MDX-NET Karaoke')
+            l0.grid(row=13,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=1,padx=20,pady=10)
+            
+            l0=Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=3,column=1,padx=0,pady=0)
+
+            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=4,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=5,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=7,column=1,padx=0,pady=0) 
+            
+            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=9,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=11,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=2,padx=0,pady=0)
+            
+            l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
+            l0.grid(row=2,column=2,padx=0,pady=0)
+            
+            l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
+            l0.grid(row=3,column=2,padx=0,pady=0)
+            
+        else:
+            l0=Label(frame0,text="Notes",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=5,pady=5)
+
+            l0=Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=5,pady=5)
+            
+            l0=Label(frame0,text="Resources",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=3,column=0,padx=5,pady=5, sticky=N)
+            
+            link = Label(frame0, text="Ultimate Vocal Remover (Official GitHub)",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=4,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui"))
+            
+            l0=Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=5,pady=5)
+            
+            link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=6,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
+            
+            l0=Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=7,column=0,padx=5,pady=5)
+            
+            link = Label(frame0, text="FFmpeg",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=8,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
+            
+            l0=Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=9,column=0,padx=5,pady=5)
+
+            link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=10,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://x-minus.pro/ai"))
+
+            l0=Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=11,column=0,padx=5,pady=5)
+            
+            link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=12,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://www.patreon.com/uvr"))
+            
+            l0=Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=13,column=0,padx=5,pady=5)
+            
+            frame0=Frame(tab7,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)
+
+            #inside frame0    
+            
+            l0=Label(frame0,text="Core UVR Developers",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=0,column=0,padx=20,pady=5, sticky=N)
+            
+            l0=Label(frame0,image=self.credits_img,font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=1,column=0,padx=5,pady=5)
+
+            l0=Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=2,column=0,padx=5,pady=5)
+
+            l0=Label(frame0,text="Special Thanks",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=4,column=0,padx=20,pady=10)
+
+            l0=Label(frame0,text="DilanBoskan",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=5,column=0,padx=5,pady=5)
+
+            l0=Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=0,padx=0,pady=0)
+
+            link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=7,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/tsurumeso/vocal-remover"))
+            
+            l0=Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=9,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/kuielab"))
+            
+            l0=Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Bas Curtiz",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=11,column=0,padx=5,pady=5)
+            
+            l0=Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=13,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/facebookresearch/demucs"))
+            
+            l0=Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=14,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Audio Separation and CC Karokee & Friends Discord Communities",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0.grid(row=15,column=0,padx=5,pady=5)
+            
+            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=16,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Update Details",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=5)
+            
+            l0=Label(frame0,text="Installing Model Expansion Pack",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="1. Download the model expansion pack via the provided link below.\n2. Once the download has completed, click the \"Open Models Directory\" button below.\n3. Extract the \'Main Models\' folder within the downloaded archive to the opened \"models\" directory.\n4. Without restarting the application, you will now see the new models appear under the VR Architecture model selection list.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="Model Expansion Pack",font=("Century Gothic", "10", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=4,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
+            
+            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "8"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="\nBackward Compatibility",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=6,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=7,column=0,padx=0,pady=0)
+            
+            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "8"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="\nInstalling Future Updates",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=9,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="New updates and patches for this application can be found on the official UVR Releases GitHub page (link below).\nAny new update instructions will likely require the use of the \"Open Application Directory\" button below.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            link = Label(frame0, text="UVR Releases GitHub Page",font=("Century Gothic", "10", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
+            link.grid(row=11,column=0,padx=5,pady=5)
+            link.bind("<Button-1>", lambda e:
+            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
+            
+            l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "8"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Error Details",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=5)
+            
+            l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            with open("errorlog.txt", "r") as f:
+                l0=Button(frame0,text=f.read(),font=("Century Gothic", "8"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
+                l0.grid(row=4,column=0,padx=0,pady=0)
+                
+            l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=0)  
+            
+            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                                'UVR-MDX-NET Karaoke')
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=4,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, '2_HP-UVR', '1_HP-UVR','3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=7,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=9,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=11,column=0,padx=0,pady=0)
+            
+            #ttk.OptionMenu(self.options_Frame, self.instrumentalModel_var)
+            
+            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=1,padx=20,pady=10)
+            
+            l0=Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=3,column=1,padx=0,pady=0)
+
+            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=4,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '2_HP-UVR', '1_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=5,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=6,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=7,column=1,padx=0,pady=0) 
+            
+            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=8,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=9,column=1,padx=0,pady=0)
+            
+            l0=Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0.grid(row=10,column=1,padx=0,pady=0)
+            
+            l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+            l0.grid(row=11,column=1,padx=0,pady=0)
 
     def copy_clip(self):
             copy_t = open("errorlog.txt", "r").read()
@@ -1680,7 +2177,19 @@ class MainWindow(TkinterDnD.Tk):
             'exportPath': self.exportPath_var.get(),
             'inputPaths': self.inputPaths,
             'saveFormat': self.saveFormat_var.get(),
+            'vr_ensem': self.vrensemchoose_var.get(),
+            'vr_ensem_a': self.vrensemchoose_a_var.get(),
+            'vr_ensem_b': self.vrensemchoose_b_var.get(),
+            'vr_ensem_c': self.vrensemchoose_c_var.get(),
+            'vr_ensem_d': self.vrensemchoose_d_var.get(),
+            'vr_ensem_e': self.vrensemchoose_e_var.get(),
+            'vr_ensem_mdx_a': self.vrensemchoose_mdx_a_var.get(),
+            'vr_ensem_mdx_b': self.vrensemchoose_mdx_b_var.get(),
+            'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
+            'mdx_ensem': self.mdxensemchoose_var.get(),
+            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
             'gpu': self.gpuConversion_var.get(),
+            'appendensem': self.appendensem_var.get(),
             'postprocess': self.postprocessing_var.get(),
             'tta': self.tta_var.get(),
             'save': self.save_var.get(),

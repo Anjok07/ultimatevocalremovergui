@@ -5,6 +5,7 @@ from statistics import mode
 from pathlib import Path
 import pydub
 import hashlib
+from random import randrange
 
 import subprocess
 import soundfile as sf
@@ -48,6 +49,16 @@ class Predictor():
     
     def prediction_setup(self, demucs_name,
                                channels=64):
+        
+        global device
+
+        print('Print the gpu setting: ', data['gpu'])
+
+        if data['gpu'] >= 0:
+            device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        if data['gpu'] == -1:
+            device = torch.device('cpu')
+        
         if data['demucsmodel']:
             self.demucs = Demucs(sources=["drums", "bass", "other", "vocals"], channels=channels)
             widget_text.write(base_text + 'Loading Demucs model... ')
@@ -73,8 +84,11 @@ class Predictor():
                 data['gpu'] = -1
                 widget_text.write("\n" + base_text + "No NVIDIA GPU detected. Switching to CPU... ")    
                 run_type = ['CPUExecutionProvider']     
-        else:
+        elif data['gpu'] == -1:
             run_type = ['CPUExecutionProvider']
+            
+        print(run_type)
+        print(str(device))
 
         self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', model_set), providers=run_type)
         widget_text.write('Done!\n')
@@ -235,7 +249,7 @@ class Predictor():
                 max_mag = np.where(X_mag >= y_mag, X_mag, y_mag)  
                 v_spec = specs[1] - max_mag * np.exp(1.j * np.angle(specs[0]))
                 update_progress(**progress_kwargs,
-                step=(1))
+                step=(0.95))
                 sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
                 if data['inst_only']:
                     if file_exists == 'there':
@@ -528,6 +542,17 @@ data = {
     'input_paths': None,
     'export_path': None,
     'saveFormat': 'wav',
+    'vr_ensem': '2_HP-UVR',
+    'vr_ensem_a': '1_HP-UVR',
+    'vr_ensem_b': '2_HP-UVR',
+    'vr_ensem_c': 'No Model',
+    'vr_ensem_d': 'No Model',
+    'vr_ensem_e': 'No Model',
+    'vr_ensem_mdx_a': 'No Model',
+    'vr_ensem_mdx_b': 'No Model',
+    'vr_ensem_mdx_c': 'No Model',
+    'mdx_ensem': 'UVR-MDX-NET 1',
+    'mdx_ensem_b': 'No Model',
     # Processing Options
     'gpu': -1,
     'postprocess': True,
@@ -536,13 +561,14 @@ data = {
     'voc_only': False,
     'inst_only': False,
     'demucsmodel': True,
-    'gpu': -1,
     'chunks': 'auto',
     'non_red': False,
     'noisereduc_s': 3,
     'mixing': 'default',
-    'ensChoose': 'HP1 Models',
+    'ensChoose': 'Basic Ensemble',
     'algo': 'Instrumentals (Min Spec)',
+    #Advanced Options
+    'appendensem': True,
     # Models
     'instrumentalModel': None,
     'useModel': None,
@@ -608,8 +634,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     onnxmissing = "[ONNXRuntimeError] : 3 : NO_SUCHFILE"
     onnxmemerror = "onnxruntime::CudaCall CUDA failure 2: out of memory"
+    onnxmemerror2 = "onnxruntime::BFCArena::AllocateRawInternal"
+    systemmemerr = "DefaultCPUAllocator: not enough memory"
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
     cuda_err = "CUDA out of memory"
+    enex_err = "local variable \'enseExport\' referenced before assignment"
     mod_err = "ModuleNotFoundError"
     file_err = "FileNotFoundError"
     ffmp_err = """audioread\__init__.py", line 116, in audio_open"""
@@ -709,59 +738,326 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     else:
         hp2_ens = 'off'
 
+    timestampnum = round(datetime.utcnow().timestamp())
+    randomnum = randrange(100000, 1000000)
+
     print('Do all of the HP models exist? ' + hp2_ens)
 
     # Separation Preperation
     try:    #Ensemble Dictionary
 
         if not data['ensChoose'] == 'User Ensemble':
-                HP1_Models = [
-                    {
-                        'model_name':'1_HP-UVR',
-                        'model_name_c':'1st HP Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
-                        'model_location':'models/Main_Models/1_HP-UVR.pth',
-                        'using_archtecture': '123821KB',
-                        'loop_name': 'Ensemble Mode - Model 1/2'
-                    },
-                    {
-                        'model_name':'2_HP-UVR',
-                        'model_name_c':'2nd HP Model',
-                        'model_params':'lib_v5/modelparams/4band_v2.json',
-                        'model_param_name':'4band_v2',
-                        'model_location':'models/Main_Models/2_HP-UVR.pth',
-                        'using_archtecture': '123821KB',
-                        'loop_name': 'Ensemble Mode - Model 2/2'
-                    }
-                ]
+            
+                #1st Model
+              
+                if data['vr_ensem_a'] == 'MGM_MAIN_v4':
+                    vr_ensem_a = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_a_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_a'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_a = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_a_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_a'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_a = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_a_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_a'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_a = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_a_name = 'MGM_LOWEND_B_v4'
+                else:
+                    vr_ensem_a_name = data['vr_ensem_a']
+                    vr_ensem_a = f'models/Main_Models/{vr_ensem_a_name}.pth'
+                    
+                #2nd Model
+                       
+                if data['vr_ensem_b'] == 'MGM_MAIN_v4':
+                    vr_ensem_b = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_b_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_b'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_b = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_b_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_b'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_b = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_b_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_b'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_b = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_b_name = 'MGM_LOWEND_B_v4'
+                else:
+                    vr_ensem_b_name = data['vr_ensem_b']
+                    vr_ensem_b = f'models/Main_Models/{vr_ensem_b_name}.pth'
+                    
+                #3rd Model
+                    
+                if data['vr_ensem_c'] == 'MGM_MAIN_v4':
+                    vr_ensem_c = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_c_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_c'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_c = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_c_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_c'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_c = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_c_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_c'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_c = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_c_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem_c'] == 'No Model':
+                    vr_ensem_c = 'pass'
+                    vr_ensem_c_name = 'pass'
+                else:
+                    vr_ensem_c_name = data['vr_ensem_c']
+                    vr_ensem_c = f'models/Main_Models/{vr_ensem_c_name}.pth'
+                     
+                #4th Model
+                  
+                if data['vr_ensem_d'] == 'MGM_MAIN_v4':
+                    vr_ensem_d = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_d_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_d'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_d = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_d_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_d'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_d = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_d_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_d'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_d = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_d_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem_d'] == 'No Model':
+                    vr_ensem_d = 'pass' 
+                    vr_ensem_d_name = 'pass'
+                else:
+                    vr_ensem_d_name = data['vr_ensem_d']
+                    vr_ensem_d = f'models/Main_Models/{vr_ensem_d_name}.pth'
+                    
+                # 5th Model
+                 
+                if data['vr_ensem_e'] == 'MGM_MAIN_v4':
+                    vr_ensem_e = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_e_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_e'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_e = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_e_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_e'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_e = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_e_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_e'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_e = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_e_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem_e'] == 'No Model':
+                    vr_ensem_e = 'pass' 
+                    vr_ensem_e_name = 'pass'                    
+                else:
+                    vr_ensem_e_name = data['vr_ensem_e']
+                    vr_ensem_e = f'models/Main_Models/{vr_ensem_e_name}.pth'
+                    
+                if data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/2'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/2'
+                        }
+                    ] 
+                elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/3'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/3'
+                        },
+                        {
+                            'model_name': vr_ensem_e_name,
+                            'model_name_c':vr_ensem_e_name,
+                            'model_location': vr_ensem_e,
+                            'loop_name': 'Ensemble Mode - Model 3/3'
+                        }  
+                    ] 
+                elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/3'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/3'
+                        },
+                        {
+                            'model_name': vr_ensem_d_name,
+                            'model_name_c':vr_ensem_d_name,
+                            'model_location': vr_ensem_d,
+                            'loop_name': 'Ensemble Mode - Model 3/3' 
+                        }  
+                    ] 
+                elif data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/3'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/3'
+                        },
+                        {
+                            'model_name': vr_ensem_c_name,
+                            'model_name_c':vr_ensem_c_name,
+                            'model_location': vr_ensem_c,
+                            'loop_name': 'Ensemble Mode - Model 3/3'
+                        }  
+                    ] 
+                elif data['vr_ensem_d'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/4'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/4'
+                        },
+                        {
+                            'model_name': vr_ensem_c_name,
+                            'model_name_c':vr_ensem_c_name,
+                            'model_location': vr_ensem_c,
+                            'loop_name': 'Ensemble Mode - Model 3/4'
+                        },
+                        {
+                            'model_name': vr_ensem_e_name,
+                            'model_name_c':vr_ensem_e_name,
+                            'model_location': vr_ensem_e,
+                            'loop_name': 'Ensemble Mode - Model 4/4'
+                        }
+                    ]
+                    
+                elif data['vr_ensem_c'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/4'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/4'
+                        },
+                        {
+                            'model_name': vr_ensem_d_name,
+                            'model_name_c':vr_ensem_d_name,
+                            'model_location': vr_ensem_d,
+                            'loop_name': 'Ensemble Mode - Model 3/4'
+                        },
+                        {
+                            'model_name': vr_ensem_e_name,
+                            'model_name_c':vr_ensem_e_name,
+                            'model_location': vr_ensem_e,
+                            'loop_name': 'Ensemble Mode - Model 4/4'
+                        }
+                    ] 
+                elif data['vr_ensem_e'] == 'No Model':
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/4'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/4'
+                        },
+                        {
+                            'model_name': vr_ensem_c_name,
+                            'model_name_c':vr_ensem_c_name,
+                            'model_location': vr_ensem_c,
+                            'loop_name': 'Ensemble Mode - Model 3/4'
+                        },
+                        {
+                            'model_name': vr_ensem_d_name,
+                            'model_name_c':vr_ensem_d_name,
+                            'model_location': vr_ensem_d,
+                            'loop_name': 'Ensemble Mode - Model 4/4'
+                        }
+                    ] 
+                else:
+                    Basic_Ensem = [
+                        {
+                            'model_name': vr_ensem_a_name,
+                            'model_name_c':vr_ensem_a_name,
+                            'model_location': vr_ensem_a,
+                            'loop_name': 'Ensemble Mode - Model 1/5'
+                        },
+                        {
+                            'model_name': vr_ensem_b_name,
+                            'model_name_c':vr_ensem_b_name,
+                            'model_location': vr_ensem_b,
+                            'loop_name': 'Ensemble Mode - Model 2/5'
+                        },
+                        {
+                            'model_name': vr_ensem_c_name,
+                            'model_name_c':vr_ensem_c_name,
+                            'model_location': vr_ensem_c,
+                            'loop_name': 'Ensemble Mode - Model 3/5'
+                        },
+                        {
+                            'model_name': vr_ensem_d_name,
+                            'model_name_c':vr_ensem_d_name,
+                            'model_location': vr_ensem_d,
+                            'loop_name': 'Ensemble Mode - Model 4/5' 
+                        },
+                        {
+                            'model_name': vr_ensem_e_name,
+                            'model_name_c':vr_ensem_e_name,
+                            'model_location': vr_ensem_e,
+                            'loop_name': 'Ensemble Mode - Model 5/5'
+                        }  
+                    ] 
                 
                 HP2_Models = [
                     {
                         'model_name':'7_HP2-UVR',
                         'model_name_c':'1st HP2 Model',
-                        'model_params':'lib_v5/modelparams/3band_44100_msb2.json',
-                        'model_param_name':'3band_44100_msb2',
                         'model_location':'models/Main_Models/7_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 1/3'
                     },
                     {
                         'model_name':'8_HP2-UVR',
                         'model_name_c':'2nd HP2 Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/8_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 2/3'
                     },
                     {
                         'model_name':'9_HP2-UVR',
                         'model_name_c':'3rd HP2 Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/9_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 3/3'
                     }
                 ]
@@ -770,48 +1066,33 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     {
                         'model_name':'7_HP2-UVR',
                         'model_name_c':'1st HP2 Model',
-                        'model_params':'lib_v5/modelparams/3band_44100_msb2.json',
-                        'model_param_name':'3band_44100_msb2',
                         'model_location':'models/Main_Models/7_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 1/5'
                         
                     },
                     {
                         'model_name':'8_HP2-UVR',
                         'model_name_c':'2nd HP2 Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/8_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 2/5'
                         
                     },
                     {
                         'model_name':'9_HP2-UVR',
                         'model_name_c':'3rd HP2 Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/9_HP2-UVR.pth',
-                        'using_archtecture': '537238KB',
                         'loop_name': 'Ensemble Mode - Model 3/5'
                     },
                     {
                         'model_name':'1_HP-UVR',
                         'model_name_c':'1st HP Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/1_HP-UVR.pth',
-                        'using_archtecture': '123821KB',
                         'loop_name': 'Ensemble Mode - Model 4/5'
                     },
                     {
                         'model_name':'2_HP-UVR',
                         'model_name_c':'2nd HP Model',
-                        'model_params':'lib_v5/modelparams/4band_v2.json',
-                        'model_param_name':'4band_v2',
                         'model_location':'models/Main_Models/2_HP-UVR.pth',
-                        'using_archtecture': '123821KB',
                         'loop_name': 'Ensemble Mode - Model 5/5'
                     }
                 ]
@@ -820,40 +1101,336 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     {
                         'model_name':'3_HP-Vocal-UVR',
                         'model_name_c':'1st Vocal Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/3_HP-Vocal-UVR.pth',
-                        'using_archtecture': '123821KB',
                         'loop_name': 'Ensemble Mode - Model 1/2'
                     },
                     {
                         'model_name':'4_HP-Vocal-UVR',
                         'model_name_c':'2nd Vocal Model',
-                        'model_params':'lib_v5/modelparams/4band_44100.json',
-                        'model_param_name':'4band_44100',
                         'model_location':'models/Main_Models/4_HP-Vocal-UVR.pth',
-                        'using_archtecture': '123821KB',
                         'loop_name': 'Ensemble Mode - Model 2/2'
                     }
                 ]
 
-                mdx_vr = [
-                    {
-                        'model_name':'VR_Model',
-                        'mdx_model_name': 'UVR_MDXNET_9703',
-                        'model_name_c':'VR Model',
-                        'model_params':'lib_v5/modelparams/4band_v2.json',
-                        'model_param_name':'4band_v2',
-                        'model_location':'models/Main_Models/2_HP-UVR.pth',
-                        'using_archtecture': '123821KB',
-                        'loop_name': 'Ensemble Mode - Model 1/2'
-                    }
-                ]
+                #VR Model 1
+                
+                if data['vr_ensem'] == 'MGM_MAIN_v4':
+                    vr_ensem = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem'] == 'MGM_HIGHEND_v4':
+                    vr_ensem = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem'] == 'No Model':
+                    vr_ensem = 'pass' 
+                    vr_ensem_name = 'pass' 
+                else:
+                    vr_ensem_name = data['vr_ensem']
+                    vr_ensem = f'models/Main_Models/{vr_ensem_name}.pth'
+                
+                #VR Model 2
+                
+                if data['vr_ensem_mdx_a'] == 'MGM_MAIN_v4':
+                    vr_ensem_mdx_a = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_mdx_a_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_mdx_a'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_mdx_a = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_mdx_a_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_mdx_a'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_mdx_a = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_mdx_a_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_mdx_a'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_mdx_a = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_mdx_a_name = 'MGM_LOWEND_B_v4' 
+                elif data['vr_ensem_mdx_a'] == 'No Model':
+                    vr_ensem_mdx_a = 'pass' 
+                    vr_ensem_mdx_a_name = 'pass' 
+                else:
+                    vr_ensem_mdx_a_name = data['vr_ensem_mdx_a']
+                    vr_ensem_mdx_a = f'models/Main_Models/{vr_ensem_mdx_a_name}.pth'
 
-                if data['ensChoose'] == 'HP Models':
-                    loops = HP1_Models
-                    ensefolder = 'HP_Models_Ensemble_Outputs'
-                    ensemode = 'HP_Models'
+                #VR Model 3
+                
+                if data['vr_ensem_mdx_b'] == 'MGM_MAIN_v4':
+                    vr_ensem_mdx_b = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_mdx_b_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_mdx_b'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_mdx_b = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_mdx_b_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_mdx_b'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_mdx_b = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_mdx_b_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_mdx_b'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_mdx_b = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_mdx_b_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem_mdx_b'] == 'No Model':
+                    vr_ensem_mdx_b = 'pass' 
+                    vr_ensem_mdx_b_name = 'pass' 
+                else:
+                    vr_ensem_mdx_b_name = data['vr_ensem_mdx_b']
+                    vr_ensem_mdx_b = f'models/Main_Models/{vr_ensem_mdx_b_name}.pth'
+                
+                #VR Model 4
+                
+                if data['vr_ensem_mdx_c'] == 'MGM_MAIN_v4':
+                    vr_ensem_mdx_c = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
+                    vr_ensem_mdx_c_name = 'MGM_MAIN_v4'
+                elif data['vr_ensem_mdx_c'] == 'MGM_HIGHEND_v4':
+                    vr_ensem_mdx_c = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
+                    vr_ensem_mdx_c_name = 'MGM_HIGHEND_v4'
+                elif data['vr_ensem_mdx_c'] == 'MGM_LOWEND_A_v4':
+                    vr_ensem_mdx_c = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
+                    vr_ensem_mdx_c_name = 'MGM_LOWEND_A_v4'
+                elif data['vr_ensem_mdx_c'] == 'MGM_LOWEND_B_v4':
+                    vr_ensem_mdx_c = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
+                    vr_ensem_mdx_c_name = 'MGM_LOWEND_B_v4'
+                elif data['vr_ensem_mdx_c'] == 'No Model':
+                    vr_ensem_mdx_c = 'pass' 
+                    vr_ensem_mdx_c_name = 'pass' 
+                else:
+                    vr_ensem_mdx_c_name = data['vr_ensem_mdx_c']
+                    vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'
+                                       
+                #MDX-Net Model
+                
+                if data['mdx_ensem'] == 'UVR-MDX-NET 1':
+                    mdx_ensem = 'UVR_MDXNET_9703'
+                if data['mdx_ensem'] == 'UVR-MDX-NET 2':
+                    mdx_ensem = 'UVR_MDXNET_9682'
+                if data['mdx_ensem'] == 'UVR-MDX-NET 3':
+                    mdx_ensem = 'UVR_MDXNET_9662'
+                if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
+                    mdx_ensem = 'UVR_MDXNET_Karaoke'
+                    
+                #MDX-Net Model 2
+                    
+                if data['mdx_ensem_b'] == 'UVR-MDX-NET 1':
+                    mdx_ensem_b = 'UVR_MDXNET_9703'
+                if data['mdx_ensem_b'] == 'UVR-MDX-NET 2':
+                    mdx_ensem_b = 'UVR_MDXNET_9682'
+                if data['mdx_ensem_b'] == 'UVR-MDX-NET 3':
+                    mdx_ensem_b = 'UVR_MDXNET_9662'
+                if data['mdx_ensem_b'] == 'UVR-MDX-NET Karaoke':
+                    mdx_ensem_b = 'UVR_MDXNET_Karaoke'
+                if data['mdx_ensem_b'] == 'No Model':
+                    mdx_ensem_b = 'pass'
+                
+                
+                
+                if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_ensem}',
+                        },
+                        {
+                            'model_name': 'pass',
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': 'pass',
+                            'model_location':'pass',
+                            'loop_name': f'Ensemble Mode - Last Model - {mdx_ensem_b}',
+                        }
+                    ]
+                elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}',
+                        },
+                        {
+                            'model_name': 'pass',
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': 'pass',
+                            'model_location':'pass',
+                            'loop_name': 'Ensemble Mode - Last Model',
+                        }
+                    ]
+                elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_c_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_c_name,
+                            'model_location':vr_ensem_mdx_c,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
+                        }
+                    ]
+                elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_b_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_b_name,
+                            'model_location':vr_ensem_mdx_b,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
+                        },
+                    ]
+
+                elif data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_a_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_a_name,
+                            'model_location':vr_ensem_mdx_a,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
+                        }
+                    ]
+                elif data['vr_ensem_mdx_a'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': 'pass',
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_b_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_mdx_b_name,
+                            'model_location':vr_ensem_mdx_b,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_c_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_c_name,
+                            'model_location':vr_ensem_mdx_c,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
+                        }
+                    ]
+                elif data['vr_ensem_mdx_b'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': 'pass',
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_a_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_mdx_a_name,
+                            'model_location':vr_ensem_mdx_a,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_c_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_c_name,
+                            'model_location':vr_ensem_mdx_c,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
+                        }
+                    ]
+                elif data['vr_ensem_mdx_c'] == 'No Model':
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': 'pass',
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_a_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_mdx_a_name,
+                            'model_location':vr_ensem_mdx_a,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_b_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_b_name,
+                            'model_location':vr_ensem_mdx_b,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
+                        }
+                    ]
+                else:
+                    mdx_vr = [
+                        {
+                            'model_name': vr_ensem_name,
+                            'mdx_model_name': 'pass',
+                            'model_name_c': vr_ensem_name,
+                            'model_location':vr_ensem,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_a_name,
+                            'mdx_model_name': 'pass',
+                            'model_name_c': vr_ensem_mdx_a_name,
+                            'model_location':vr_ensem_mdx_a,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_b_name,
+                            'mdx_model_name': mdx_ensem_b,
+                            'model_name_c': vr_ensem_mdx_b_name,
+                            'model_location':vr_ensem_mdx_b,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
+                        },
+                        {
+                            'model_name': vr_ensem_mdx_c_name,
+                            'mdx_model_name': mdx_ensem,
+                            'model_name_c': vr_ensem_mdx_c_name,
+                            'model_location':vr_ensem_mdx_c,
+                            'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
+                        }
+                    ]
+                    
+                if data['ensChoose'] == 'Basic Ensemble':
+                    loops = Basic_Ensem
+                    ensefolder = 'Basic_Ensemble_Outputs'
+                    if data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name
+                    elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_e_name                        
+                    elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_d_name
+                    elif data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name
+                    elif data['vr_ensem_c'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_d_name + '_' + vr_ensem_e_name
+                    elif data['vr_ensem_d'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_e_name
+                    elif data['vr_ensem_e'] == 'No Model':
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_d_name
+                    else:
+                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_d_name + '_' + vr_ensem_e_name
                 if data['ensChoose'] == 'HP2 Models':
                     loops = HP2_Models
                     ensefolder = 'HP2_Models_Ensemble_Outputs'
@@ -869,8 +1446,24 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 if data['ensChoose'] == 'MDX-Net/VR Ensemble':           
                     loops = mdx_vr
                     ensefolder = 'MDX_VR_Ensemble_Outputs'
-                    ensemode = 'MDX-Net_VR'
-
+                    if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                        ensemode = 'MDX-Net_Models'
+                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name
+                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_c_name
+                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_b_name
+                    elif data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name
+                    elif data['vr_ensem_mdx_a'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_b_name + '_' + vr_ensem_mdx_c_name
+                    elif data['vr_ensem_mdx_b'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_c_name
+                    elif data['vr_ensem_mdx_c'] == 'No Model':
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_b_name
+                    else:
+                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_b_name + '_' + vr_ensem_mdx_c_name
 
                 #Prepare Audiofile(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
@@ -908,9 +1501,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     except:
                         pass
                       
-
                     #Prepare to loop models
                     for i, c in tqdm(enumerate(loops), disable=True, desc='Iterations..'):
+                        
+                            try:
+                                ModelName_2=(c['mdx_model_name'])
+                            except:
+                                pass
+                        
                         
                             if hp2_ens == 'off' and loops == HP2_Models:
                                     text_widget.write(base_text + 'You must install the UVR expansion pack in order to use this ensemble.\n')
@@ -929,94 +1527,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     button_widget.configure(state=tk.NORMAL)
                                     return
 
-                            presentmodel = Path(c['model_location'])
-                            
-                            if presentmodel.is_file():
-                                print(f'The file {presentmodel} exist')
-                            else: 
-                                text_widget.write(base_text + 'Model "' + c['model_name'] + '.pth" is missing, moving to next... \n\n')
-                                continue
-                        
-                            text_widget.write(c['loop_name'] + '\n\n')
-                            
-                            text_widget.write(base_text + 'Loading ' + c['model_name_c'] + '... ')
-                                
-                            aggresive_set = float(data['agg']/100)
-                            
-                            model_size = math.ceil(os.stat(c['model_location']).st_size / 1024)
-                            nn_architecture = '{}KB'.format(min(nn_arch_sizes, key=lambda x:abs(x-model_size)))
-                            
-                            nets = importlib.import_module('lib_v5.nets' + f'_{nn_architecture}'.replace('_{}KB'.format(nn_arch_sizes[0]), ''), package=None)
-                            
-                            text_widget.write('Done!\n')
-                            
-                            ModelName=(c['model_location'])
 
-                            #Package Models
-                            
-                            model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
-                            print(model_hash)
-                            
-                            #v5 Models
-                            
-                            if model_hash == '47939caf0cfe52a0e81442b85b971dfd':  
-                                model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                param_name=str('4band_44100')
-                            if model_hash == '4e4ecb9764c50a8c414fee6e10395bbe':  
-                                model_params_d=str('lib_v5/modelparams/4band_v2.json')
-                                param_name=str('4band_v2')
-                            if model_hash == 'e60a1e84803ce4efc0a6551206cc4b71':  
-                                model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                param_name=str('4band_44100')
-                            if model_hash == 'a82f14e75892e55e994376edbf0c8435':  
-                                model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                param_name=str('4band_44100')
-                            if model_hash == '6dd9eaa6f0420af9f1d403aaafa4cc06':   
-                                model_params_d=str('lib_v5/modelparams/4band_v2_sn.json')
-                                param_name=str('4band_v2_sn')
-                            if model_hash == '5c7bbca45a187e81abbbd351606164e5':    
-                                model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
-                                param_name=str('3band_44100_msb2')
-                            if model_hash == 'd6b2cb685a058a091e5e7098192d3233':    
-                                model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
-                                param_name=str('3band_44100_msb2')
-                            if model_hash == 'c1b9f38170a7c90e96f027992eb7c62b': 
-                                model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                param_name=str('4band_44100')
-                            if model_hash == 'c3448ec923fa0edf3d03a19e633faa53':  
-                                model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                param_name=str('4band_44100')
-                                
-                            #v4 Models
-                                
-                            if model_hash == '6a00461c51c2920fd68937d4609ed6c8':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr16000_hl512.json')
-                                param_name=str('1band_sr16000_hl512')
-                            if model_hash == '0ab504864d20f1bd378fe9c81ef37140':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                param_name=str('1band_sr32000_hl512')
-                            if model_hash == '7dd21065bf91c10f7fccb57d7d83b07f':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                param_name=str('1band_sr32000_hl512')
-                            if model_hash == '80ab74d65e515caa3622728d2de07d23':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                param_name=str('1band_sr32000_hl512')
-                            if model_hash == 'edc115e7fc523245062200c00caa847f':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                                param_name=str('1band_sr33075_hl384')
-                            if model_hash == '28063e9f6ab5b341c5f6d3c67f2045b7':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                                param_name=str('1band_sr33075_hl384')
-                            if model_hash == 'b58090534c52cbc3e9b5104bad666ef2':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                                param_name=str('1band_sr44100_hl512')
-                            if model_hash == '0cdab9947f1b0928705f518f3c78ea8f':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                                param_name=str('1band_sr44100_hl512')
-                            if model_hash == 'ae702fed0238afb5346db8356fe25f13':  
-                                model_params_d=str('lib_v5/modelparams/1band_sr44100_hl1024.json')
-                                param_name=str('1band_sr44100_hl1024')
-                        
                             def determineenseFolderName():
                                 """
                                 Determine the name that is used for the folder and appended
@@ -1028,11 +1539,15 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     enseFolderName += os.path.splitext(os.path.basename(ensefolder))[0]
 
                                 if enseFolderName:
-                                    enseFolderName = '/' + enseFolderName
+                                    try:
+                                        enseFolderName = '/' + enseFolderName + '_' + str(timestampnum)
+                                    except:
+                                        enseFolderName = '/' + enseFolderName + '_' + str(randomnum)
 
                                 return enseFolderName
                             
                             enseFolderName = determineenseFolderName()
+                            
                             if enseFolderName:
                                 folder_path = f'{data["export_path"]}{enseFolderName}'
                                 if not os.path.isdir(folder_path):
@@ -1043,319 +1558,483 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             enseExport = f'{data["export_path"]}{enseFolderName}/'
                             trackname = f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                             
-                            ModelName_1=(c['model_name'])
-
-                            try:
-                                ModelName_2=(c['mdx_model_name'])
-                            except:
+                            
+                            if c['model_location'] == 'pass':
                                 pass
-
-                            print('Model Parameters:', model_params_d)
-                            text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + param_name + '\"... ')
+                            else:
+                                presentmodel = Path(c['model_location'])
+                                
+                                if presentmodel.is_file():
+                                    print(f'The file {presentmodel} exist')
+                                else: 
+                                    if data['ensChoose'] == 'MDX-Net/VR Ensemble':
+                                        text_widget.write(base_text + 'Model "' + c['model_name'] + '.pth" is missing.\n')
+                                        text_widget.write(base_text + 'Installation of v5 Model Expansion Pack required to use this model.\n')
+                                        text_widget.write(base_text + f'If the error persists, please verify all models are present.\n\n')
+                                        text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                                        torch.cuda.empty_cache()
+                                        progress_var.set(0)
+                                        button_widget.configure(state=tk.NORMAL)  # Enable Button
+                                        return 
+                                    else:
+                                        text_widget.write(base_text + 'Model "' + c['model_name'] + '.pth" is missing.\n')
+                                        text_widget.write(base_text + 'Installation of v5 Model Expansion Pack required to use this model.\n\n')
+                                        continue
                             
-                            mp = ModelParameters(model_params_d)
-                            
-                            text_widget.write('Done!\n')
-                            
-                            #Load model
-                            if os.path.isfile(c['model_location']):
-                                device = torch.device('cpu')
-                                model = nets.CascadedASPPNet(mp.param['bins'] * 2)
-                                model.load_state_dict(torch.load(c['model_location'],
-                                                                map_location=device))
-                                if torch.cuda.is_available() and data['gpu'] >= 0:
-                                    device = torch.device('cuda:{}'.format(data['gpu']))
-                                    model.to(device)
-                            
-                            model_name = os.path.basename(c["model_name"])
-
-                            # -Go through the different steps of seperation-
-                            # Wave source
-                            text_widget.write(base_text + 'Loading audio source... ')
-                            
-                            X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
-                            
-                            bands_n = len(mp.param['band'])
-                            
-                            for d in range(bands_n, 0, -1):        
-                                bp = mp.param['band'][d]
-                            
-                                if d == bands_n: # high-end band
-                                    X_wave[d], _ = librosa.load(
-                                        music_file, bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
-                                        
-                                    if X_wave[d].ndim == 1:
-                                        X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
-                                else: # lower bands
-                                    X_wave[d] = librosa.resample(X_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                                text_widget.write(c['loop_name'] + '\n\n')
+                                
+                                text_widget.write(base_text + 'Loading ' + c['model_name_c'] + '... ')
                                     
-                                # Stft of wave source
+                                aggresive_set = float(data['agg']/100)
                                 
-                                X_spec_s[d] = spec_utils.wave_to_spectrogram_mt(X_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], 
-                                                                                mp.param['mid_side_b2'], mp.param['reverse'])
+                        
+                                model_size = math.ceil(os.stat(c['model_location']).st_size / 1024)
+                                nn_architecture = '{}KB'.format(min(nn_arch_sizes, key=lambda x:abs(x-model_size)))
                                 
-                                if d == bands_n and data['high_end_process'] != 'none':
-                                    input_high_end_h = (bp['n_fft']//2 - bp['crop_stop']) + (mp.param['pre_filter_stop'] - mp.param['pre_filter_start'])
-                                    input_high_end = X_spec_s[d][:, bp['n_fft']//2-input_high_end_h:bp['n_fft']//2, :]
-                            
-                            text_widget.write('Done!\n')
-
-                            update_progress(**progress_kwargs,
-                                            step=0.1)
-
-                            text_widget.write(base_text + 'Loading the stft of audio source... ')
-                            text_widget.write('Done!\n')
-                            text_widget.write(base_text + "Please Wait...\n")
-
-                            X_spec_m = spec_utils.combine_spectrograms(X_spec_s, mp)
-                            
-                            del X_wave, X_spec_s
-                            
-                            def inference(X_spec, device, model, aggressiveness):
+                                nets = importlib.import_module('lib_v5.nets' + f'_{nn_architecture}'.replace('_{}KB'.format(nn_arch_sizes[0]), ''), package=None)
                                 
-                                def _execute(X_mag_pad, roi_size, n_window, device, model, aggressiveness):
-                                    model.eval()
-                                        
-                                    with torch.no_grad():
-                                        preds = []
-                                        
-                                        iterations = [n_window]
+                                text_widget.write('Done!\n')
+                                
+                                ModelName=(c['model_location'])
 
-                                        total_iterations = sum(iterations)
+                                #Package Models
+                                
+                                model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
+                                print(model_hash)
+                                
+                                #v5 Models
+                                
+                                if model_hash == '47939caf0cfe52a0e81442b85b971dfd':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100')
+                                if model_hash == '4e4ecb9764c50a8c414fee6e10395bbe':  
+                                    model_params_d=str('lib_v5/modelparams/4band_v2.json')
+                                    param_name=str('4band_v2')
+                                if model_hash == 'e60a1e84803ce4efc0a6551206cc4b71':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100')
+                                if model_hash == 'a82f14e75892e55e994376edbf0c8435':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100')
+                                if model_hash == '6dd9eaa6f0420af9f1d403aaafa4cc06':   
+                                    model_params_d=str('lib_v5/modelparams/4band_v2_sn.json')
+                                    param_name=str('4band_v2_sn')
+                                if model_hash == '5c7bbca45a187e81abbbd351606164e5':    
+                                    model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
+                                    param_name=str('3band_44100_msb2')
+                                if model_hash == 'd6b2cb685a058a091e5e7098192d3233':    
+                                    model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
+                                    param_name=str('3band_44100_msb2')
+                                if model_hash == 'c1b9f38170a7c90e96f027992eb7c62b': 
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100')
+                                if model_hash == 'c3448ec923fa0edf3d03a19e633faa53':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100')
+                                if model_hash == '68aa2c8093d0080704b200d140f59e54':  
+                                    model_params_d=str('lib_v5/modelparams/3band_44100.json')
+                                    param_name=str('3band_44100.json')
+                                if model_hash == 'fdc83be5b798e4bd29fe00fe6600e147':  
+                                    model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
+                                    param_name=str('3band_44100_mid.json')
+                                if model_hash == '2ce34bc92fd57f55db16b7a4def3d745':  
+                                    model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
+                                    param_name=str('3band_44100_mid.json')
+                                if model_hash == '52fdca89576f06cf4340b74a4730ee5f':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100.json')
+                                if model_hash == '41191165b05d38fc77f072fa9e8e8a30':  
+                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
+                                    param_name=str('4band_44100.json')
+                                if model_hash == '89e83b511ad474592689e562d5b1f80e':  
+                                    model_params_d=str('lib_v5/modelparams/2band_32000.json')
+                                    param_name=str('2band_32000.json')
+                                if model_hash == '0b954da81d453b716b114d6d7c95177f':  
+                                    model_params_d=str('lib_v5/modelparams/2band_32000.json')
+                                    param_name=str('2band_32000.json')
                                     
-                                        text_widget.write(base_text + "Processing "f"{total_iterations} Slices... ")
-                                        
-                                        for i in tqdm(range(n_window)): 
-                                            update_progress(**progress_kwargs,
-                                                step=(0.1 + (0.8/n_window * i)))
-                                            start = i * roi_size
-                                            X_mag_window = X_mag_pad[None, :, :, start:start + data['window_size']]
-                                            X_mag_window = torch.from_numpy(X_mag_window).to(device)
+                                #v4 Models
+                                    
+                                if model_hash == '6a00461c51c2920fd68937d4609ed6c8':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr16000_hl512.json')
+                                    param_name=str('1band_sr16000_hl512')
+                                if model_hash == '0ab504864d20f1bd378fe9c81ef37140':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
+                                    param_name=str('1band_sr32000_hl512')
+                                if model_hash == '7dd21065bf91c10f7fccb57d7d83b07f':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
+                                    param_name=str('1band_sr32000_hl512')
+                                if model_hash == '80ab74d65e515caa3622728d2de07d23':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
+                                    param_name=str('1band_sr32000_hl512')
+                                if model_hash == 'edc115e7fc523245062200c00caa847f':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
+                                    param_name=str('1band_sr33075_hl384')
+                                if model_hash == '28063e9f6ab5b341c5f6d3c67f2045b7':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
+                                    param_name=str('1band_sr33075_hl384')
+                                if model_hash == 'b58090534c52cbc3e9b5104bad666ef2':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
+                                    param_name=str('1band_sr44100_hl512')
+                                if model_hash == '0cdab9947f1b0928705f518f3c78ea8f':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
+                                    param_name=str('1band_sr44100_hl512')
+                                if model_hash == 'ae702fed0238afb5346db8356fe25f13':  
+                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl1024.json')
+                                    param_name=str('1band_sr44100_hl1024')
+                                    
 
-                                            pred = model.predict(X_mag_window, aggressiveness)
+                                ModelName_1=(c['model_name'])
 
-                                            pred = pred.detach().cpu().numpy()
-                                            preds.append(pred[0])
+                                print('Model Parameters:', model_params_d)
+                                text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + param_name + '\"... ')
+                                
+                                mp = ModelParameters(model_params_d)
+                                
+                                text_widget.write('Done!\n')
+                                
+                                #Load model
+                                if os.path.isfile(c['model_location']):
+                                    device = torch.device('cpu')
+                                    model = nets.CascadedASPPNet(mp.param['bins'] * 2)
+                                    model.load_state_dict(torch.load(c['model_location'],
+                                                                    map_location=device))
+                                    if torch.cuda.is_available() and data['gpu'] >= 0:
+                                        device = torch.device('cuda:{}'.format(data['gpu']))
+                                        model.to(device)
+                                
+                                model_name = os.path.basename(c["model_name"])
+
+                                # -Go through the different steps of seperation-
+                                # Wave source
+                                text_widget.write(base_text + 'Loading audio source... ')
+                                
+                                X_wave, y_wave, X_spec_s, y_spec_s = {}, {}, {}, {}
+                                
+                                bands_n = len(mp.param['band'])
+                                
+                                for d in range(bands_n, 0, -1):        
+                                    bp = mp.param['band'][d]
+                                
+                                    if d == bands_n: # high-end band
+                                        X_wave[d], _ = librosa.load(
+                                            music_file, bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
                                             
-                                        pred = np.concatenate(preds, axis=2)
+                                        if X_wave[d].ndim == 1:
+                                            X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
+                                    else: # lower bands
+                                        X_wave[d] = librosa.resample(X_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                                        
+                                    # Stft of wave source
                                     
-                                        text_widget.write('Done!\n')
-                                    return pred
+                                    X_spec_s[d] = spec_utils.wave_to_spectrogram_mt(X_wave[d], bp['hl'], bp['n_fft'], mp.param['mid_side'], 
+                                                                                    mp.param['mid_side_b2'], mp.param['reverse'])
+                                    
+                                    if d == bands_n and data['high_end_process'] != 'none':
+                                        input_high_end_h = (bp['n_fft']//2 - bp['crop_stop']) + (mp.param['pre_filter_stop'] - mp.param['pre_filter_start'])
+                                        input_high_end = X_spec_s[d][:, bp['n_fft']//2-input_high_end_h:bp['n_fft']//2, :]
                                 
-                                def preprocess(X_spec):
-                                    X_mag = np.abs(X_spec)
-                                    X_phase = np.angle(X_spec)
+                                text_widget.write('Done!\n')
 
-                                    return X_mag, X_phase
+                                update_progress(**progress_kwargs,
+                                                step=0.1)
+
+                                text_widget.write(base_text + 'Loading the stft of audio source... ')
+                                text_widget.write('Done!\n')
+                                text_widget.write(base_text + "Please Wait...\n")
+
+                                X_spec_m = spec_utils.combine_spectrograms(X_spec_s, mp)
                                 
-                                X_mag, X_phase = preprocess(X_spec)
-
-                                coef = X_mag.max()
-                                X_mag_pre = X_mag / coef
-
-                                n_frame = X_mag_pre.shape[2]
-                                pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
-                                                                            data['window_size'], model.offset)
-                                n_window = int(np.ceil(n_frame / roi_size))
-
-                                X_mag_pad = np.pad(
-                                    X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
+                                del X_wave, X_spec_s
                                 
-                                pred = _execute(X_mag_pad, roi_size, n_window,
-                                                    device, model, aggressiveness)
-                                pred = pred[:, :, :n_frame]
-                                
-                                if data['tta']:
-                                    pad_l += roi_size // 2
-                                    pad_r += roi_size // 2
-                                    n_window += 1
+                                def inference(X_spec, device, model, aggressiveness):
+                                    
+                                    def _execute(X_mag_pad, roi_size, n_window, device, model, aggressiveness):
+                                        model.eval()
+                                            
+                                        with torch.no_grad():
+                                            preds = []
+                                            
+                                            iterations = [n_window]
+
+                                            total_iterations = sum(iterations)
+                                        
+                                            text_widget.write(base_text + "Processing "f"{total_iterations} Slices... ")
+                                            
+                                            for i in tqdm(range(n_window)): 
+                                                update_progress(**progress_kwargs,
+                                                    step=(0.1 + (0.8/n_window * i)))
+                                                start = i * roi_size
+                                                X_mag_window = X_mag_pad[None, :, :, start:start + data['window_size']]
+                                                X_mag_window = torch.from_numpy(X_mag_window).to(device)
+
+                                                pred = model.predict(X_mag_window, aggressiveness)
+
+                                                pred = pred.detach().cpu().numpy()
+                                                preds.append(pred[0])
+                                                
+                                            pred = np.concatenate(preds, axis=2)
+                                        
+                                            text_widget.write('Done!\n')
+                                        return pred
+                                    
+                                    def preprocess(X_spec):
+                                        X_mag = np.abs(X_spec)
+                                        X_phase = np.angle(X_spec)
+
+                                        return X_mag, X_phase
+                                    
+                                    X_mag, X_phase = preprocess(X_spec)
+
+                                    coef = X_mag.max()
+                                    X_mag_pre = X_mag / coef
+
+                                    n_frame = X_mag_pre.shape[2]
+                                    pad_l, pad_r, roi_size = dataset.make_padding(n_frame,
+                                                                                data['window_size'], model.offset)
+                                    n_window = int(np.ceil(n_frame / roi_size))
 
                                     X_mag_pad = np.pad(
                                         X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
-
-                                    pred_tta = _execute(X_mag_pad, roi_size, n_window,
-                                                            device, model, aggressiveness)
-                                    pred_tta = pred_tta[:, :, roi_size // 2:]
-                                    pred_tta = pred_tta[:, :, :n_frame]
-
-                                    return (pred + pred_tta) * 0.5 * coef, X_mag, np.exp(1.j * X_phase)
-                                else:
-                                    return pred * coef, X_mag, np.exp(1.j * X_phase)
-                            
-                            aggressiveness = {'value': aggresive_set, 'split_bin': mp.param['band'][1]['crop_stop']}
-                            
-                            if data['tta']:
-                                text_widget.write(base_text + "Running Inferences (TTA)... \n")
-                            else:
-                                text_widget.write(base_text + "Running Inference... \n")
-                            
-                            pred, X_mag, X_phase = inference(X_spec_m,
-                                                                    device,
-                                                                    model, aggressiveness)
-                            
-                            update_progress(**progress_kwargs,
-                                            step=0.85)
-                            
-                            # Postprocess
-                            if data['postprocess']:
-                                try:
-                                    text_widget.write(base_text + 'Post processing...')
-                                    pred_inv = np.clip(X_mag - pred, 0, np.inf)
-                                    pred = spec_utils.mask_silence(pred, pred_inv)
-                                    text_widget.write(' Done!\n')
-                                except Exception as e:
-                                    text_widget.write('\n' + base_text + 'Post process failed, check error log.\n')
-                                    text_widget.write(base_text + 'Moving on...\n')
-                                    traceback_text = ''.join(traceback.format_tb(e.__traceback__))
-                                    errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
-                                    try:
-                                        with open('errorlog.txt', 'w') as f:
-                                            f.write(f'Last Error Received:\n\n' +
-                                                    f'Error Received while attempting to run Post Processing on "{os.path.basename(music_file)}":\n' + 
-                                                    f'Process Method: Ensemble Mode\n\n' +
-                                                    f'If this error persists, please contact the developers.\n\n' + 
-                                                    f'Raw error details:\n\n' +
-                                                    errmessage + f'\nError Time Stamp: [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
-                                    except:
-                                        pass
-
-                            # Inverse stft
-                            # nopep8 
-                            y_spec_m = pred * X_phase
-                            v_spec_m = X_spec_m - y_spec_m
-
-                            if data['voc_only']:
-                                pass
-                            else:
-                                text_widget.write(base_text + 'Saving Instrumental... ')
-                            
-                            if data['high_end_process'].startswith('mirroring'):        
-                                input_high_end_ = spec_utils.mirroring(data['high_end_process'], y_spec_m, input_high_end, mp)
-                                wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end_)    
-                                if data['voc_only']:
-                                    pass
-                                else:
-                                    text_widget.write('Done!\n')   
-                            else:
-                                wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
-                                if data['voc_only']:
-                                    pass
-                                else:
-                                    text_widget.write('Done!\n')    
-
-                            if data['inst_only']:
-                                pass
-                            else:
-                                text_widget.write(base_text + 'Saving Vocals... ')
-                            
-                            if data['high_end_process'].startswith('mirroring'):        
-                                input_high_end_ = spec_utils.mirroring(data['high_end_process'], v_spec_m, input_high_end, mp)
-
-                                wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)  
-                                if data['inst_only']:
-                                        pass
-                                else:
-                                    text_widget.write('Done!\n')     
-                            else:        
-                                wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
-                                if data['inst_only']:
-                                        pass
-                                else:
-                                    text_widget.write('Done!\n')  
-
-                        
-                            update_progress(**progress_kwargs,
-                                            step=0.9)
-                            
-                            # Save output music files
-                            save_files(wav_instrument, wav_vocals)
-
-                            # Save output image
-                            if data['output_image']:
-                                with open('{}_Instruments.jpg'.format(base_name), mode='wb') as f:
-                                    image = spec_utils.spectrogram_to_image(y_spec_m)
-                                    _, bin_image = cv2.imencode('.jpg', image)
-                                    bin_image.tofile(f)
-                                with open('{}_Vocals.jpg'.format(base_name), mode='wb') as f:
-                                    image = spec_utils.spectrogram_to_image(v_spec_m)
-                                    _, bin_image = cv2.imencode('.jpg', image)
-                                    bin_image.tofile(f)
                                     
-                            text_widget.write(base_text + 'Completed Seperation!\n\n')  
+                                    pred = _execute(X_mag_pad, roi_size, n_window,
+                                                        device, model, aggressiveness)
+                                    pred = pred[:, :, :n_frame]
+                                    
+                                    if data['tta']:
+                                        pad_l += roi_size // 2
+                                        pad_r += roi_size // 2
+                                        n_window += 1
+
+                                        X_mag_pad = np.pad(
+                                            X_mag_pre, ((0, 0), (0, 0), (pad_l, pad_r)), mode='constant')
+
+                                        pred_tta = _execute(X_mag_pad, roi_size, n_window,
+                                                                device, model, aggressiveness)
+                                        pred_tta = pred_tta[:, :, roi_size // 2:]
+                                        pred_tta = pred_tta[:, :, :n_frame]
+
+                                        return (pred + pred_tta) * 0.5 * coef, X_mag, np.exp(1.j * X_phase)
+                                    else:
+                                        return pred * coef, X_mag, np.exp(1.j * X_phase)
+                                
+                                aggressiveness = {'value': aggresive_set, 'split_bin': mp.param['band'][1]['crop_stop']}
+                                
+                                if data['tta']:
+                                    text_widget.write(base_text + "Running Inferences (TTA)... \n")
+                                else:
+                                    text_widget.write(base_text + "Running Inference... \n")
+                                
+                                pred, X_mag, X_phase = inference(X_spec_m,
+                                                                        device,
+                                                                        model, aggressiveness)
+                                
+                                # update_progress(**progress_kwargs,
+                                #                 step=0.8)
+                                
+                                # Postprocess
+                                if data['postprocess']:
+                                    try:
+                                        text_widget.write(base_text + 'Post processing...')
+                                        pred_inv = np.clip(X_mag - pred, 0, np.inf)
+                                        pred = spec_utils.mask_silence(pred, pred_inv)
+                                        text_widget.write(' Done!\n')
+                                    except Exception as e:
+                                        text_widget.write('\n' + base_text + 'Post process failed, check error log.\n')
+                                        text_widget.write(base_text + 'Moving on...\n')
+                                        traceback_text = ''.join(traceback.format_tb(e.__traceback__))
+                                        errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
+                                        try:
+                                            with open('errorlog.txt', 'w') as f:
+                                                f.write(f'Last Error Received:\n\n' +
+                                                        f'Error Received while attempting to run Post Processing on "{os.path.basename(music_file)}":\n' + 
+                                                        f'Process Method: Ensemble Mode\n\n' +
+                                                        f'If this error persists, please contact the developers.\n\n' + 
+                                                        f'Raw error details:\n\n' +
+                                                        errmessage + f'\nError Time Stamp: [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+                                        except:
+                                            pass
+
+                                # Inverse stft
+                                # nopep8 
+                                y_spec_m = pred * X_phase
+                                v_spec_m = X_spec_m - y_spec_m
+
+                                if data['voc_only']:
+                                    pass
+                                else:
+                                    text_widget.write(base_text + 'Saving Instrumental... ')
+                                
+                                if data['high_end_process'].startswith('mirroring'):        
+                                    input_high_end_ = spec_utils.mirroring(data['high_end_process'], y_spec_m, input_high_end, mp)
+                                    wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end_)    
+                                    if data['voc_only']:
+                                        pass
+                                    else:
+                                        text_widget.write('Done!\n')   
+                                else:
+                                    wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
+                                    if data['voc_only']:
+                                        pass
+                                    else:
+                                        text_widget.write('Done!\n')    
+
+                                if data['inst_only']:
+                                    pass
+                                else:
+                                    text_widget.write(base_text + 'Saving Vocals... ')
+                                
+                                if data['high_end_process'].startswith('mirroring'):        
+                                    input_high_end_ = spec_utils.mirroring(data['high_end_process'], v_spec_m, input_high_end, mp)
+                                    wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)   
+                                    if data['inst_only']:
+                                            pass
+                                    else:
+                                        text_widget.write('Done!\n')     
+                                else:        
+                                    wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+                                    if data['inst_only']:
+                                            pass
+                                    else:
+                                        text_widget.write('Done!\n')  
+
+                            
+                                update_progress(**progress_kwargs,
+                                                step=1)
+                                
+                                # Save output music files
+                                save_files(wav_instrument, wav_vocals)
+
+                                # Save output image
+                                if data['output_image']:
+                                    with open('{}_{}_Instruments.jpg'.format(base_name, c['model_name']), mode='wb') as f:
+                                        image = spec_utils.spectrogram_to_image(y_spec_m)
+                                        _, bin_image = cv2.imencode('.jpg', image)
+                                        bin_image.tofile(f)
+                                    with open('{}_{}_Vocals.jpg'.format(base_name, c['model_name']), mode='wb') as f:
+                                        image = spec_utils.spectrogram_to_image(v_spec_m)
+                                        _, bin_image = cv2.imencode('.jpg', image)
+                                        bin_image.tofile(f)
+                                        
+                                text_widget.write(base_text + 'Completed Seperation!\n\n')  
                     
 
                             if data['ensChoose'] == 'MDX-Net/VR Ensemble':
-                                text_widget.write('Ensemble Mode - Model 2/2\n\n')
-
-                                update_progress(**progress_kwargs,
-                                                step=0)    
                                 
-                                if data['noisereduc_s'] == 'None':
+                                mdx_name = c['mdx_model_name']
+                                
+                                if c['mdx_model_name'] == 'pass':
                                     pass
                                 else:
-                                    if not os.path.isfile("lib_v5\sox\sox.exe"):
-                                        data['noisereduc_s'] = 'None'
-                                        data['non_red'] = False
-                                        widget_text.write(base_text + 'SoX is missing and required for noise reduction.\n')
-                                        widget_text.write(base_text + 'See the \"More Info\" tab in the Help Guide.\n')
-                                        widget_text.write(base_text + 'Noise Reduction will be disabled until SoX is available.\n\n')
-                                
-                                e = os.path.join(data["export_path"])
-                                
-                                demucsmodel = 'models/Demucs_Model/demucs_extra-3646af93_org.th'
+                                    text_widget.write('Ensemble Mode - Running Model - ' + mdx_name + '\n\n')
 
-                                pred = Predictor()
-                                pred.prediction_setup(demucs_name=demucsmodel,
-                                                    channels=channel_set)
-                                
-                                # split
-                                pred.prediction(
-                                    m=music_file,
-                                )
+
+                                    update_progress(**progress_kwargs,
+                                                    step=0)    
+                                    
+                                    if data['noisereduc_s'] == 'None':
+                                        pass
+                                    else:
+                                        if not os.path.isfile("lib_v5\sox\sox.exe"):
+                                            data['noisereduc_s'] = 'None'
+                                            data['non_red'] = False
+                                            widget_text.write(base_text + 'SoX is missing and required for noise reduction.\n')
+                                            widget_text.write(base_text + 'See the \"More Info\" tab in the Help Guide.\n')
+                                            widget_text.write(base_text + 'Noise Reduction will be disabled until SoX is available.\n\n')
+                                    
+                                    e = os.path.join(data["export_path"])
+                                    
+                                    demucsmodel = 'models/Demucs_Model/demucs_extra-3646af93_org.th'
+
+                                    pred = Predictor()
+                                    pred.prediction_setup(demucs_name=demucsmodel,
+                                                        channels=channel_set)
+                                    
+                                    # split
+                                    pred.prediction(
+                                        m=music_file,
+                                    )
                             else:
                                 pass
-
 
                     # Emsembling Outputs
                     def get_files(folder="", prefix="", suffix=""):
                         return [f"{folder}{i}" for i in os.listdir(folder) if i.startswith(prefix) if i.endswith(suffix)]
                 
-                    voc_inst = [
-                        {
-                            'algorithm':'min_mag',
-                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                            'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                            'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
-                            'type': 'Instrumentals'
-                        },
-                        {
-                            'algorithm':'max_mag',
-                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                            'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                            'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
-                            'type': 'Vocals'
-                        }
-                    ]
+                    if data['appendensem'] == False:
+                        voc_inst = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                'output':'{}_(Instrumental)'.format(trackname),
+                                'type': 'Instrumentals'
+                            },
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                'output': '{}_(Vocals)'.format(trackname),
+                                'type': 'Vocals'
+                            }
+                        ]
 
-                    inst = [
-                        {
-                            'algorithm':'min_mag',
-                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                            'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                            'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
-                            'type': 'Instrumentals'
-                        }
-                    ]
+                        inst = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                'output':'{}_(Instrumental)'.format(trackname),
+                                'type': 'Instrumentals'
+                            }
+                        ]
 
-                    vocal = [
-                        {
-                            'algorithm':'max_mag',
-                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                            'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                            'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
-                            'type': 'Vocals'
-                        }
-                    ]
+                        vocal = [
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                'output': '{}_(Vocals)'.format(trackname),
+                                'type': 'Vocals'
+                            }
+                        ]
+                    else:
+                        voc_inst = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
+                                'type': 'Instrumentals'
+                            },
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
+                                'type': 'Vocals'
+                            }
+                        ]
+
+                        inst = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
+                                'type': 'Instrumentals'
+                            }
+                        ]
+
+                        vocal = [
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
+                                'type': 'Vocals'
+                            }
+                        ] 
 
                     if data['voc_only']:
                         ensembles = vocal
@@ -1398,7 +2077,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             sf.write(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])), 
                                     spec_utils.cmb_spectrogram_to_wave(spec_utils.ensembling(e['algorithm'], 
                                                                                     specs), mp), mp.param['sr'])
-                            
                             
                             if data['saveFormat'] == 'Mp3':
                                 try:
@@ -2002,6 +2680,30 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
+        if onnxmemerror2 in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough GPU memory to use this model.\n')
+            text_widget.write(f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n')
+            text_widget.write(f'If the error persists, your GPU might not be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough GPU memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                            f'If the error persists, your GPU might not be supported.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
         if sf_write_err in message:
             text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
             text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
@@ -2019,6 +2721,56 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             f'Could not write audio file.\n' + 
                             f'This could be due to low storage on target device or a system permissions issue.\n' + 
                             f'If the error persists, please contact the developers.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if systemmemerr in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to allocate enough system memory to use this \nmodel.\n\n')
+            text_widget.write(f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n')
+            text_widget.write(f'Please Note: Intel Pentium and Intel Celeron processors do not work well with \nthis application.\n\n')
+            text_widget.write(f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to allocate enough system memory to use this model.\n' + 
+                            f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n' + 
+                            f'Please Note: Intel Pentium and Intel Celeron processors do not work well with this application.\n\n' +
+                            f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if enex_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The application was unable to locate a model you selected for this ensemble.\n')
+            text_widget.write(f'\nPlease do the following to use all compatible models:\n\n1. Navigate to the \"Updates\" tab in the Help Guide.\n2. Download and install the v5 Model Expansion Pack.\n3. Then try again.\n\n')
+            text_widget.write(f'If the error persists, please verify all models are present.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The application was unable to locate a model you selected for this ensemble.\n' + 
+                            f'\nPlease do the following to use all compatible models:\n\n1. Navigate to the \"Updates\" tab in the Help Guide.\n2. Download and install the model expansion pack.\n3. Then try again.\n\n' + 
+                            f'If the error persists, please verify all models are present.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

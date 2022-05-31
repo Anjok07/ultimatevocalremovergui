@@ -60,7 +60,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **VR Architecture Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/vr_opt.png?raw=true" />
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/vr_opt.png" />
 
 **MDX-Net Options**
 
@@ -68,7 +68,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **Ensemble Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/ense_opt.png?raw=true" />
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/ense_opt_up.png" />
 
 **User Ensemble**
 

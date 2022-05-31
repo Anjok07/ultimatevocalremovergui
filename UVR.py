@@ -1445,6 +1445,19 @@ class MainWindow(TkinterDnD.Tk):
             exit()
         else:
             pass
+        
+    def utagoe_start(self):
+        """
+        Restart the application after asking for confirmation
+        """
+        # confirm = tk.messagebox.askyesno(title='Restart Confirmation',
+        #         message='This will restart the application and halt any running processes. Your current settings will be saved. \n\n Are you sure you wish to continue?')
+        
+        # if confirm:
+        try:
+            subprocess.Popen(f'Utagoe-en.exe')
+        except:
+            pass
 
     def help(self):
         """
@@ -1681,7 +1694,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
             
-            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
             l0.grid(row=5,column=0,padx=0,pady=0)
             
             l0=Label(frame0,text="\n\nBackward Compatibility",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
@@ -1690,7 +1703,7 @@ class MainWindow(TkinterDnD.Tk):
             l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
             l0.grid(row=7,column=0,padx=0,pady=0)
             
-            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "11"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             l0=Label(frame0,text="\n\nInstalling Future Updates",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
@@ -1704,7 +1717,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
             
-            l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "11"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
+            l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
@@ -1828,6 +1841,9 @@ class MainWindow(TkinterDnD.Tk):
             
             l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
             l0.grid(row=3,column=2,padx=0,pady=0)
+            
+            l0=ttk.Button(frame0,text='Open Utagoe', command=self.utagoe_start)
+            l0.grid(row=4,column=2,padx=0,pady=0)
             
             frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=30)  

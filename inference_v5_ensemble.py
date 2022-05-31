@@ -294,18 +294,15 @@ class Predictor():
                     gpu_mem = round(torch.cuda.get_device_properties(0).total_memory/1.074e+9)
                 except:
                     widget_text.write(base_text + 'NVIDIA GPU Required for conversion!\n')
-                if int(gpu_mem) <= int(5):
+                if int(gpu_mem) <= int(6):
                     chunk_set = int(5)
                     widget_text.write(base_text + 'Chunk size auto-set to 5... \n')
-                if gpu_mem in [6, 7]:
-                    chunk_set = int(30)
-                    widget_text.write(base_text + 'Chunk size auto-set to 30... \n')
-                if gpu_mem in [8, 9, 10, 11, 12, 13, 14, 15]:
+                if gpu_mem in [7, 8, 9, 10, 11, 12, 13, 14, 15]:
+                    chunk_set = int(10)
+                    widget_text.write(base_text + 'Chunk size auto-set to 10... \n')
+                if int(gpu_mem) >= int(16):
                     chunk_set = int(40)
                     widget_text.write(base_text + 'Chunk size auto-set to 40... \n')
-                if int(gpu_mem) >= int(16):
-                    chunk_set = int(60)
-                    widget_text.write(base_text + 'Chunk size auto-set to 60... \n')
             if data['gpu'] == -1:
                 sys_mem = psutil.virtual_memory().total >> 30
                 if int(sys_mem) <= int(4):
@@ -568,7 +565,7 @@ data = {
     'ensChoose': 'Basic Ensemble',
     'algo': 'Instrumentals (Min Spec)',
     #Advanced Options
-    'appendensem': True,
+    'appendensem': False,
     # Models
     'instrumentalModel': None,
     'useModel': None,

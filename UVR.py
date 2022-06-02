@@ -20,6 +20,7 @@ from datetime import datetime
 from PIL import Image
 from PIL import ImageTk
 import pickle  # Save Data
+from pathlib import Path
 # Other Modules
 
 # Pathfinding
@@ -110,9 +111,11 @@ DEFAULT_DATA = {
     'voc_only': False,
     'inst_only': False,
     'chunks': 'Auto',
+    'n_fft_scale': 6144,
+    'dim_f': 2048,
     'noisereduc_s': '3',
     'mixing': 'default',
-    'mdxnetModel': 'UVR-MDX-NET 1',
+    'mdxnetModel': 'UVR-MDX-NET-1',
 }
 
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
@@ -346,6 +349,8 @@ class MainWindow(TkinterDnD.Tk):
         
         self.instrumentalLabel_to_path = defaultdict(lambda: '')
         self.lastInstrumentalModels = []
+        self.MDXLabel_to_path = defaultdict(lambda: '')
+        self.lastMDXModels = []
 
         # -Tkinter Value Holders-
         data = load_data()
@@ -388,6 +393,8 @@ class MainWindow(TkinterDnD.Tk):
         # Constants
         self.winSize_var = tk.StringVar(value=data['window_size'])
         self.agg_var = tk.StringVar(value=data['agg'])
+        self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
+        self.dim_f_var = tk.StringVar(value=data['dim_f'])
         # Instrumental or Vocal Only
         self.voc_only_var = tk.BooleanVar(value=data['voc_only'])
         self.inst_only_var = tk.BooleanVar(value=data['inst_only'])
@@ -422,10 +429,11 @@ class MainWindow(TkinterDnD.Tk):
         self.update_loop()
    
     # -Widget Methods-
+    
     def create_widgets(self):
         """Create window widgets"""
-        self.title_Label = tk.Label(master=self, bg='#0e0e0f',
-                                    image=self.logo_img, compound=tk.TOP)
+        self.title_Label = tk.Button(master=self,
+                                    image=self.logo_img, compound=tk.TOP, borderwidth=0, command=self.open_appdir_filedialog)
         self.filePaths_Frame = ttk.Frame(master=self)
         self.fill_filePaths_Frame()
 
@@ -587,23 +595,23 @@ class MainWindow(TkinterDnD.Tk):
                                                           self.aiModel_var, 
                                                           None, 'VR Architecture', 'MDX-Net', 'Ensemble Mode')
         #  Choose Instrumental Model
-        self.options_instrumentalModel_Label = tk.Label(master=self.options_Frame,
+        self.options_instrumentalModel_Label = tk.Button(master=self.options_Frame,
                                                         text='Choose Main Model',
-                                                        background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                                        background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_Modelfolder_vr)
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
         #  Choose MDX-Net Model
-        self.options_mdxnetModel_Label = tk.Label(master=self.options_Frame,
+        self.options_mdxnetModel_Label = tk.Button(master=self.options_Frame,
                                                         text='Choose MDX-Net Model', anchor=tk.CENTER,
-                                                        background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                                        background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_newModel_filedialog)
         
         self.options_mdxnetModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
-                                                          self.mdxnetModel_var, 
-                                                          None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 'UVR-MDX-NET Karaoke')#, 'UVR-MDX-NET Full-B')
+                                                             self.mdxnetModel_var)
+        
         # Ensemble Mode
-        self.options_ensChoose_Label = tk.Label(master=self.options_Frame,
+        self.options_ensChoose_Label = tk.Button(master=self.options_Frame,
                                                text='Choose Ensemble', anchor=tk.CENTER,
-                                               background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                               background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.custom_ensemble)
         self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                           self.ensChoose_var,
                                                           None, 'MDX-Net/VR Ensemble', 'Basic Ensemble', 'HP2 Models', 'All HP/HP2 Models', 'Vocal Models', 'User Ensemble')
@@ -1030,6 +1038,8 @@ class MainWindow(TkinterDnD.Tk):
                             'chunks': chunks,
                             'noisereduc_s': noisereduc_s,
                             'mixing': mixing,
+                            'n_fft_scale': self.n_fft_scale_var.get(),
+                            'dim_f': self.dim_f_var.get(),
                         },
                         daemon=True
                         ).start()
@@ -1062,6 +1072,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # Main models
         new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
+        
         if new_InstrumentalModels != self.lastInstrumentalModels:
             self.instrumentalLabel_to_path.clear()
             self.options_instrumentalModel_Optionmenu['menu'].delete(0, 'end')
@@ -1074,6 +1085,49 @@ class MainWindow(TkinterDnD.Tk):
                     self.instrumentalLabel_to_path[file_name] = os.path.join(temp_instrumentalModels_dir, file_name)  # nopep8
             self.lastInstrumentalModels = new_InstrumentalModels
             #print(self.instrumentalLabel_to_path)
+            
+            
+            
+            
+        temp_MDXModels_dir = os.path.join(instrumentalModels_dir, 'MDX_Net_Models')  # nopep8
+
+        # MDX-Net
+        new_MDXModels = os.listdir(temp_MDXModels_dir)
+        
+        if new_MDXModels != self.lastMDXModels:
+            #print(new_MDXModels)
+            self.MDXLabel_to_path.clear()
+            self.options_mdxnetModel_Optionmenu['menu'].delete(0, 'end')
+            for file_name_1 in natsort.natsorted(new_MDXModels):
+                if file_name_1.endswith(('.onnx')):
+                    b = [".onnx"]
+                    for char in b:
+                        file_name_1 = file_name_1.replace(char, "")
+                        
+                    c = ["UVR_MDXNET_9662"]
+                    for char in c:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 3") 
+                        
+                    d = ["UVR_MDXNET_9682"]
+                    for char in d:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 2") 
+                        
+                    e = ["UVR_MDXNET_9703"]
+                    for char in e:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 1") 
+                        
+                    f = ["UVR_MDXNET_KARA"]
+                    for char in f:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Karaoke") 
+                          
+                    #file_name = f'{os.path.basename(path)}'
+                    
+                    print(file_name_1)
+                    
+                    self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
+                                                                        command=tk._setit(self.mdxnetModel_var, file_name_1))
+            self.lastMDXModels = new_MDXModels
+        
             
     def update_states(self):
         """
@@ -1459,6 +1513,178 @@ class MainWindow(TkinterDnD.Tk):
         except:
             pass
 
+    def open_newModel_filedialog(self):
+        """Let user paste an MDX-Net model to use for the vocal seperation"""
+        
+        filename = 'models\MDX_Net_Models'
+
+        if sys.platform == "win32":
+            os.startfile(filename)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, filename])
+
+    def custom_ensemble(self):
+        """
+        Open Help Guide
+        """
+        top= Toplevel(self)
+
+        top.geometry("670x670")
+        window_height = 670
+        window_width = 800
+        
+        top.title("Customize Ensemble")
+        
+        top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        screen_width = top.winfo_screenwidth()
+        screen_height = top.winfo_screenheight()
+
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+
+        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        # change title bar icon
+        top.iconbitmap('img\\UVR-Icon-v2.ico')
+
+        tabControl = ttk.Notebook(top)
+  
+        tab1 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text ='Ensemble Options')
+
+        tabControl.pack(expand = 1, fill ="both")
+        
+        tab1.grid_rowconfigure(0, weight=1)
+        tab1.grid_columnconfigure(0, weight=1)
+
+        frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+
+        l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=0,padx=20,pady=10)
+        
+        l0=tk.Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=2,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                            'UVR-MDX-NET Karaoke')
+        l0.grid(row=3,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=4,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=5,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=6,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=7,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=8,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=9,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=10,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=11,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=12,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+                            'UVR-MDX-NET Karaoke')
+        l0.grid(row=13,column=0,padx=0,pady=0)
+        
+        l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=1,padx=20,pady=10)
+        
+        l0=tk.Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=2,column=1,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=3,column=1,padx=0,pady=0)
+
+        l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=4,column=1,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=5,column=1,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=6,column=1,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=7,column=1,padx=0,pady=0) 
+        
+        l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=8,column=1,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=9,column=1,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
+        l0.grid(row=10,column=1,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
+                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
+                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
+                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
+                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0.grid(row=11,column=1,padx=0,pady=0)
+        
+        
+        l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=2,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
+        l0.grid(row=2,column=2,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Post-Process (VR Architecture Only)', variable=self.postprocessing_var) 
+        l0.grid(row=3,column=2,padx=0,pady=0)
+
+
+
     def help(self):
         """
         Open Help Guide
@@ -1723,17 +1949,17 @@ class MainWindow(TkinterDnD.Tk):
             frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
-            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=0,padx=20,pady=10)
             
-            l0=Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=2,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                                 'UVR-MDX-NET Karaoke')
             l0.grid(row=3,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=4,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1743,7 +1969,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=5,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=6,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1753,7 +1979,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=7,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1763,7 +1989,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=9,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=10,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1773,17 +1999,17 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                                 'UVR-MDX-NET Karaoke')
             l0.grid(row=13,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=1,padx=20,pady=10)
             
-            l0=Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=2,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1793,7 +2019,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=3,column=1,padx=0,pady=0)
 
-            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=4,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1803,7 +2029,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=5,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=6,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1813,7 +2039,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=7,column=1,padx=0,pady=0) 
             
-            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=8,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1823,7 +2049,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=9,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=10,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -1833,7 +2059,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=2,padx=0,pady=0)
             
             l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
@@ -1842,8 +2068,41 @@ class MainWindow(TkinterDnD.Tk):
             l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
             l0.grid(row=3,column=2,padx=0,pady=0)
             
-            l0=ttk.Button(frame0,text='Open Utagoe', command=self.utagoe_start)
+            l0=Label(frame0,text="Set Outside Parameters",font=("Century Gothic", "10", "bold", "underline"), fg="#f4f4f4")
             l0.grid(row=4,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Window Size (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=5,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.winSize_var)
+            l0.grid(row=6,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Aggression Setting (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=7,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.agg_var)
+            l0.grid(row=8,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Chunks (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=9,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.chunks_var)
+            l0.grid(row=10,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='N_FFT Scale (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=11,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_var)
+            l0.grid(row=12,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Dim_f (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=13,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.dim_f_var)
+            l0.grid(row=14,column=2,padx=0,pady=0)
+            
+            l0=ttk.Button(frame0,text='Open Utagoe', command=self.utagoe_start)
+            
             
             frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=30)  
@@ -2038,17 +2297,17 @@ class MainWindow(TkinterDnD.Tk):
             frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
-            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=0,padx=20,pady=10)
             
-            l0=Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=2,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                                 'UVR-MDX-NET Karaoke')
             l0.grid(row=3,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=4,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2058,7 +2317,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=5,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=6,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2068,7 +2327,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=7,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2078,7 +2337,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=9,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=10,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2088,17 +2347,17 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                                 'UVR-MDX-NET Karaoke')
             l0.grid(row=13,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=1,padx=20,pady=10)
             
-            l0=Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=2,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2108,7 +2367,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=3,column=1,padx=0,pady=0)
 
-            l0=Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=4,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2118,7 +2377,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=5,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=6,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2128,7 +2387,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=7,column=1,padx=0,pady=0) 
             
-            l0=Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=8,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2138,7 +2397,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=9,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold", "underline"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
             l0.grid(row=10,column=1,padx=0,pady=0)
             
             l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
@@ -2148,7 +2407,7 @@ class MainWindow(TkinterDnD.Tk):
                               'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
             l0.grid(row=11,column=1,padx=0,pady=0)
             
-            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=2,padx=0,pady=0)
             
             l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
@@ -2156,6 +2415,62 @@ class MainWindow(TkinterDnD.Tk):
             
             l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
             l0.grid(row=3,column=2,padx=0,pady=0)
+            
+            l0=Label(frame0,text="Set Outside Parameters",font=("Century Gothic", "10", "bold", "underline"), fg="#f4f4f4")
+            l0.grid(row=4,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Window Size (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=5,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.winSize_var)
+            l0.grid(row=6,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Aggression Setting (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=7,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.agg_var)
+            l0.grid(row=8,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Chunks (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=9,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.chunks_var)
+            l0.grid(row=10,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='N_FFT Scale (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=11,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_var)
+            l0.grid(row=12,column=2,padx=0,pady=0)
+            
+            l0=tk.Label(frame0, text='Dim_f (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
+            l0.grid(row=13,column=2,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.dim_f_var)
+            l0.grid(row=14,column=2,padx=0,pady=0)
+            
+            l0=ttk.Button(frame0,text='Open Utagoe', command=self.utagoe_start)
+            
+            
+            frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=30)  
+            
+            l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0.grid(row=1,column=0,padx=20,pady=10)
+            
+            l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0.grid(row=2,column=0,padx=0,pady=0)
+            
+            l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=3,column=0,padx=0,pady=0)
+            
+            with open("errorlog.txt", "r") as f:
+                l0=Button(frame0,text=f.read(),font=("Century Gothic", "8"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
+                l0.grid(row=4,column=0,padx=0,pady=0)
+                
+            l0=Label(frame0,text="",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=5,column=0,padx=0,pady=0)
+            
 
     def copy_clip(self):
             copy_t = open("errorlog.txt", "r").read()
@@ -2164,6 +2479,16 @@ class MainWindow(TkinterDnD.Tk):
     def open_Modelfolder_filedialog(self):
         """Let user paste a ".pth" model to use for the vocal seperation"""
         filename = 'models'
+
+        if sys.platform == "win32":
+            os.startfile(filename)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, filename])
+            
+    def open_Modelfolder_vr(self):
+        """Let user paste a ".pth" model to use for the vocal seperation"""
+        filename = 'models\Main_Models'
 
         if sys.platform == "win32":
             os.startfile(filename)
@@ -2241,9 +2566,12 @@ class MainWindow(TkinterDnD.Tk):
             'voc_only': self.voc_only_var.get(),
             'inst_only': self.inst_only_var.get(),
             'chunks': chunks,
+            'n_fft_scale': self.n_fft_scale_var.get(),
+            'dim_f': self.dim_f_var.get(),
             'noisereduc_s': noisereduc_s,
             'mixing': mixing,
-        })
+        }, 
+        )
         
         self.destroy()
 

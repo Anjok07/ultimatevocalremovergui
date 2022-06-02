@@ -7,25 +7,24 @@ import librosa
 dim_c = 4
 model_path = 'model'
 
-n_fft_scale = {'vocals-one':6144, 'vocals-two':7680,'*':2}
+#n_fft_scale = {'vocals-one':6144, 'vocals-two':7680,'*':2}
 
 class Conv_TDF_net_trim(nn.Module):
-    def __init__(self, device, load, model_name, target_name, 
-                 L, dim_f, dim_t, hop=1024):
+    def __init__(self, device, n_fft_scale, dim_f, load, model_name, target_name, 
+                 L, dim_t, hop=1024):
         
         super(Conv_TDF_net_trim, self).__init__()
         
         self.dim_f, self.dim_t = dim_f, 2**dim_t
-        self.n_fft = n_fft_scale[target_name]
+        self.n_fft = n_fft_scale
         self.hop = hop
         self.n_bins = self.n_fft//2+1
         self.chunk_size = hop * (self.dim_t-1)
         self.window = torch.hann_window(window_length=self.n_fft, periodic=True).to(device)
         self.target_name = target_name
-        print(target_name)
+        print(n_fft_scale)
         out_c = dim_c*4 if target_name=='*' else dim_c
         self.freq_pad = torch.zeros([1, out_c, self.n_bins-self.dim_f, self.dim_t]).to(device)
-        print(self.n_bins)
         
     def stft(self, x):
         x = x.reshape([-1, self.chunk_size])
@@ -81,24 +80,24 @@ def spec_effects(wave, algorithm='default', value=None):
     return wave
 
     
-def get_models(name, device, load=True, stems='vocals-onevocals-two'):
+def get_models(name, device, n_fft_scale, dim_f, load=True, stems='vocals-onevocals-two'):
     
     if name=='tdf_extra':
         models = []
         if 'vocals-one' in stems:
             models.append(
                 Conv_TDF_net_trim(   
-                    device=device, load=load,
+                    device=device, load=load, n_fft_scale=n_fft_scale,
                     model_name='Conv-TDF', target_name='vocals-one', 
-                    L=11, dim_f=2048, dim_t=8
+                    L=11, dim_f=dim_f, dim_t=8
                 )
             )
         if 'vocals-two' in stems:
             models.append(
                 Conv_TDF_net_trim(   
-                    device=device, load=load,
+                    device=device, load=load, n_fft_scale=n_fft_scale,
                     model_name='Conv-TDF', target_name='vocals-two',  
-                    L=11, dim_f=3072, dim_t=8
+                    L=11, dim_f=dim_f, dim_t=8
                 )
             )
         return models

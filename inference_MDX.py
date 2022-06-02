@@ -65,7 +65,7 @@ class Predictor():
         self.onnx_models = {}
         c = 0
         
-        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype)
+        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype, n_fft_scale=n_fft_scale_set, dim_f=dim_f_set)
         widget_text.write(base_text + 'Loading ONNX model... ')
         update_progress(**progress_kwargs,
         step=0.1)
@@ -84,7 +84,7 @@ class Predictor():
         print(run_type)
         print(str(device))
 
-        self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', model_set), providers=run_type)
+        self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', str(model_set) + '.onnx'), providers=run_type)
         widget_text.write('Done!\n')
         
     def prediction(self, m):  
@@ -655,6 +655,8 @@ data = {
     'voc_only': False,
     'inst_only': False,
     'break': False,
+    'n_fft_scale': 6144,
+    'dim_f': 2048,
     # Choose Model
     'mdxnetModel': 'UVR-MDX-NET 1',
     'high_end_process': 'mirroring',
@@ -702,6 +704,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global _basename
     global _mixture
     global modeltype
+    global n_fft_scale_set
+    global dim_f_set
     global progress_kwargs
     global base_text
     global model_set
@@ -742,26 +746,37 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     data.update(kwargs)
     
     if data['mdxnetModel'] == 'UVR-MDX-NET 1':
-        model_set = 'UVR_MDXNET_9703.onnx'
+        model_set = 'UVR_MDXNET_9703'
         model_set_name = 'UVR_MDXNET_9703'
         modeltype = 'vocals-one'
-    if data['mdxnetModel'] == 'UVR-MDX-NET 2':
-        model_set = 'UVR_MDXNET_9682.onnx'
+        n_fft_scale_set=6144 
+        dim_f_set=2048
+    elif data['mdxnetModel'] == 'UVR-MDX-NET 2':
+        model_set = 'UVR_MDXNET_9682'
         model_set_name = 'UVR_MDXNET_9682'
         modeltype = 'vocals-one'
-    if data['mdxnetModel'] == 'UVR-MDX-NET 3':
-        model_set = 'UVR_MDXNET_9662.onnx'
+        n_fft_scale_set=6144 
+        dim_f_set=2048
+    elif data['mdxnetModel'] == 'UVR-MDX-NET 3':
+        model_set = 'UVR_MDXNET_9662'
         model_set_name = 'UVR_MDXNET_9662'
-        modeltype = 'vocals-one'
-    if data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
-        model_set = 'UVR_MDXNET_KARA.onnx'
+        n_fft_scale_set=6144 
+        dim_f_set=2048
+    elif data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
+        model_set = 'UVR_MDXNET_KARA'
         model_set_name = 'UVR_MDXNET_Karaoke'
         modeltype = 'vocals-one'
-    if data['mdxnetModel'] == 'UVR-MDX-NET Full-B':
-        model_set = 'UVR_MDXNET_FULL.onnx'
-        model_set_name = 'UVR_MDXNET_FULL'
+        n_fft_scale_set=6144 
+        dim_f_set=2048
+    else:
+        model_set = data['mdxnetModel']
+        model_set_name = data['mdxnetModel']
         modeltype = 'vocals-two'
+        n_fft_scale_set=int(data['n_fft_scale'])
+        dim_f_set=int(data['dim_f'])
         
+    print(n_fft_scale_set)
+    print(dim_f_set)
 
     stime = time.perf_counter()
     progress_var.set(0)
@@ -780,6 +795,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             progress_kwargs = {'progress_var': progress_var,
                             'total_files': len(data['input_paths']),
                             'file_num': file_num}
+            
+            print(model_set)
             
             try:
                 total, used, free = shutil.disk_usage("/") 

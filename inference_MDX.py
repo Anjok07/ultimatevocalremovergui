@@ -65,7 +65,7 @@ class Predictor():
         self.onnx_models = {}
         c = 0
         
-        self.models = get_models('tdf_extra', load=False, device=cpu, stems='vocals')
+        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype)
         widget_text.write(base_text + 'Loading ONNX model... ')
         update_progress(**progress_kwargs,
         step=0.1)
@@ -701,6 +701,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global default_noisereduc_s
     global _basename
     global _mixture
+    global modeltype
     global progress_kwargs
     global base_text
     global model_set
@@ -743,15 +744,24 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     if data['mdxnetModel'] == 'UVR-MDX-NET 1':
         model_set = 'UVR_MDXNET_9703.onnx'
         model_set_name = 'UVR_MDXNET_9703'
+        modeltype = 'vocals-one'
     if data['mdxnetModel'] == 'UVR-MDX-NET 2':
         model_set = 'UVR_MDXNET_9682.onnx'
         model_set_name = 'UVR_MDXNET_9682'
+        modeltype = 'vocals-one'
     if data['mdxnetModel'] == 'UVR-MDX-NET 3':
         model_set = 'UVR_MDXNET_9662.onnx'
         model_set_name = 'UVR_MDXNET_9662'
+        modeltype = 'vocals-one'
     if data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
         model_set = 'UVR_MDXNET_KARA.onnx'
         model_set_name = 'UVR_MDXNET_Karaoke'
+        modeltype = 'vocals-one'
+    if data['mdxnetModel'] == 'UVR-MDX-NET Full-B':
+        model_set = 'UVR_MDXNET_FULL.onnx'
+        model_set_name = 'UVR_MDXNET_FULL'
+        modeltype = 'vocals-two'
+        
 
     stime = time.perf_counter()
     progress_var.set(0)

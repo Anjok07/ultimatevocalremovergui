@@ -71,7 +71,7 @@ class Predictor():
         self.onnx_models = {}
         c = 0
         
-        self.models = get_models('tdf_extra', load=False, device=cpu, stems='vocals')
+        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype)
         widget_text.write(base_text + 'Loading ONNX model... ')
         update_progress(**progress_kwargs,
         step=0.1)
@@ -90,6 +90,7 @@ class Predictor():
         print(run_type)
         print(str(device))
 
+        print('model_set: ', model_set)
         self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', model_set), providers=run_type)
         widget_text.write('Done!\n')
         
@@ -609,12 +610,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global base_name
     global progress_kwargs
     global base_text
+    global modeltype
     global model_set
     global model_set_name
     global ModelName_2
-
-    model_set = 'UVR_MDXNET_9703.onnx'
-    model_set_name = 'UVR_MDXNET_9703'
     
     # Update default settings
     default_chunks = data['chunks']
@@ -1191,7 +1190,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     vr_ensem_mdx_c_name = 'pass' 
                 else:
                     vr_ensem_mdx_c_name = data['vr_ensem_mdx_c']
-                    vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'
+                    vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'   
                                        
                 #MDX-Net Model
                 
@@ -1202,7 +1201,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 if data['mdx_ensem'] == 'UVR-MDX-NET 3':
                     mdx_ensem = 'UVR_MDXNET_9662'
                 if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
-                    mdx_ensem = 'UVR_MDXNET_Karaoke'
+                    mdx_ensem = 'UVR_MDXNET_KARA'
+                    
                     
                 #MDX-Net Model 2
                     
@@ -1925,6 +1925,23 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 else:
                                     text_widget.write('Ensemble Mode - Running Model - ' + mdx_name + '\n\n')
 
+                                    if mdx_name == 'UVR_MDXNET_9703':
+                                        mdx_ensem_b = 'UVR_MDXNET_9703'
+                                        model_set = 'UVR_MDXNET_9703.onnx'
+                                        model_set_name = 'UVR_MDXNET_9703'
+                                        modeltype = 'vocals-one'
+                                    if mdx_name == 'UVR_MDXNET_9682':
+                                        model_set = 'UVR_MDXNET_9682.onnx'
+                                        model_set_name = 'UVR_MDXNET_9682'
+                                        modeltype = 'vocals-one'
+                                    if mdx_name == 'UVR_MDXNET_9662':
+                                        model_set = 'UVR_MDXNET_9662.onnx'
+                                        model_set_name = 'UVR_MDXNET_9662'
+                                        modeltype = 'vocals-one'
+                                    if mdx_name == 'UVR_MDXNET_Karaoke':
+                                        model_set = 'UVR_MDXNET_KARA.onnx'
+                                        model_set_name = 'UVR_MDXNET_Karaoke'
+                                        modeltype = 'vocals-one'
 
                                     update_progress(**progress_kwargs,
                                                     step=0)    
@@ -2116,7 +2133,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         text_widget.write(base_text + 'FFmpeg might be missing or corrupted, please check error log.\n')
                                         text_widget.write(base_text + 'Moving on... ')
                                     else:
-                                        text_widget.write(base_text + 'Failed to save output(s) as Flac(s).\n')
+                                        text_widget.write('\n' + base_text + 'Failed to save output(s) as Flac(s).\n')
                                         text_widget.write(base_text + 'Please check error log.\n')
                                         text_widget.write(base_text + 'Moving on... ')
                                     try:

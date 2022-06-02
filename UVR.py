@@ -599,7 +599,7 @@ class MainWindow(TkinterDnD.Tk):
         
         self.options_mdxnetModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                           self.mdxnetModel_var, 
-                                                          None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 'UVR-MDX-NET Karaoke')
+                                                          None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 'UVR-MDX-NET Karaoke')#, 'UVR-MDX-NET Full-B')
         # Ensemble Mode
         self.options_ensChoose_Label = tk.Label(master=self.options_Frame,
                                                text='Choose Ensemble', anchor=tk.CENTER,

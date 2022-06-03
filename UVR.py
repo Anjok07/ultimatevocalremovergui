@@ -104,6 +104,7 @@ DEFAULT_DATA = {
     'break': False,
     #Advanced Options
     'appendensem': False,
+    'demucs_only': False,
     #MDX-Net
     'demucsmodel': True,
     'non_red': False,
@@ -113,9 +114,17 @@ DEFAULT_DATA = {
     'chunks': 'Auto',
     'n_fft_scale': 6144,
     'dim_f': 2048,
+    'overlap': 0.5,
+    'shifts': 0,
+    'margin': 44100,
+    'channel': 64,
+    'compensate': 1.03597672895,
+    'mdxnetModeltype': 'Vocals (Custom)',
     'noisereduc_s': '3',
-    'mixing': 'default',
-    'mdxnetModel': 'UVR-MDX-NET-1',
+    'mixing': 'Default',
+    'mdxnetModel': 'UVR-MDX-NET 1',
+    'DemucsModel': 'demucs_extra-3646af93_org.th',
+    'ModelParams': 'Auto',
 }
 
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
@@ -351,6 +360,9 @@ class MainWindow(TkinterDnD.Tk):
         self.lastInstrumentalModels = []
         self.MDXLabel_to_path = defaultdict(lambda: '')
         self.lastMDXModels = []
+        self.DemucsLabel_to_path = defaultdict(lambda: '')
+        self.ModelParamsLabel_to_path = defaultdict(lambda: '')
+        self.lastModelParams = []
 
         # -Tkinter Value Holders-
         data = load_data()
@@ -373,6 +385,7 @@ class MainWindow(TkinterDnD.Tk):
         self.mdxensemchoose_b_var = tk.StringVar(value=data['mdx_ensem_b'])
         #Advanced Options
         self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
+        self.demucs_only_var = tk.BooleanVar(value=data['demucs_only'])
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
@@ -395,6 +408,12 @@ class MainWindow(TkinterDnD.Tk):
         self.agg_var = tk.StringVar(value=data['agg'])
         self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
         self.dim_f_var = tk.StringVar(value=data['dim_f'])
+        self.overlap_var = tk.StringVar(value=data['overlap'])
+        self.shifts_var = tk.StringVar(value=data['shifts'])
+        self.channel_var = tk.StringVar(value=data['channel'])
+        self.margin_var = tk.StringVar(value=data['margin'])
+        self.compensate_var = tk.StringVar(value=data['compensate'])
+        self.mdxnetModeltype_var = tk.StringVar(value=data['mdxnetModeltype'])
         # Instrumental or Vocal Only
         self.voc_only_var = tk.BooleanVar(value=data['voc_only'])
         self.inst_only_var = tk.BooleanVar(value=data['inst_only'])
@@ -409,6 +428,8 @@ class MainWindow(TkinterDnD.Tk):
         self.last_ensChoose = self.ensChoose_var.get()
         # Choose MDX-NET Model
         self.mdxnetModel_var = tk.StringVar(value=data['mdxnetModel'])
+        self.DemucsModel_var = tk.StringVar(value=data['DemucsModel'])
+        self.ModelParams_var = tk.StringVar(value=data['ModelParams'])
         self.last_mdxnetModel = self.mdxnetModel_var.get()
         # Other
         self.inputPathsEntry_var = tk.StringVar(value='')
@@ -432,8 +453,8 @@ class MainWindow(TkinterDnD.Tk):
     
     def create_widgets(self):
         """Create window widgets"""
-        self.title_Label = tk.Button(master=self,
-                                    image=self.logo_img, compound=tk.TOP, borderwidth=0, command=self.open_appdir_filedialog)
+        self.title_Label = tk.Label(master=self,
+                                    image=self.logo_img, compound=tk.TOP)
         self.filePaths_Frame = ttk.Frame(master=self)
         self.fill_filePaths_Frame()
 
@@ -463,8 +484,7 @@ class MainWindow(TkinterDnD.Tk):
         self.progressbar = ttk.Progressbar(master=self, variable=self.progress_var)
 
         self.command_Text = ThreadSafeConsole(master=self,
-                                              background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11), 
-                                              borderwidth=0,)
+                                              background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11),borderwidth=0)
 
         self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
        
@@ -588,12 +608,13 @@ class MainWindow(TkinterDnD.Tk):
         # -Column 1-
         
         # Choose Conversion Method
-        self.options_aiModel_Label = tk.Label(master=self.options_Frame,
+        self.options_aiModel_Label = tk.Button(master=self.options_Frame,
                                                text='Choose Process Method', anchor=tk.CENTER,
-                                               background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                               background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_appdir_filedialog)
         self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                           self.aiModel_var, 
                                                           None, 'VR Architecture', 'MDX-Net', 'Ensemble Mode')
+        
         #  Choose Instrumental Model
         self.options_instrumentalModel_Label = tk.Button(master=self.options_Frame,
                                                         text='Choose Main Model',
@@ -628,16 +649,18 @@ class MainWindow(TkinterDnD.Tk):
         # -Column 2-
         
         # WINDOW SIZE
-        self.options_winSize_Label = tk.Label(master=self.options_Frame,
+        self.options_winSize_Label = tk.Button(master=self.options_Frame,
                                               text='Window Size', anchor=tk.CENTER,
-                                              background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                              background='#0e0e0f', font=self.font, foreground='#13a4c9', 
+                                              borderwidth=0, command=self.advanced_vr_options)
         self.options_winSize_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.winSize_var,
                                                          None, '320', '512','1024')
         # MDX-chunks
-        self.options_chunks_Label = tk.Label(master=self.options_Frame,
+        self.options_chunks_Label = tk.Button(master=self.options_Frame,
                                            text='Chunks',
-                                           background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                           background='#0e0e0f', font=self.font, foreground='#13a4c9', 
+                                           borderwidth=0, command=self.advanced_mdx_options)
         self.options_chunks_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.chunks_var,
                                                          None, 'Auto', '1', '5', '10', '15', '20', 
@@ -683,9 +706,10 @@ class MainWindow(TkinterDnD.Tk):
         # -Column 3-
 
         # AGG
-        self.options_agg_Label = tk.Label(master=self.options_Frame,
+        self.options_agg_Label = tk.Button(master=self.options_Frame,
                                            text='Aggression Setting',
-                                           background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                           background='#0e0e0f', font=self.font, foreground='#13a4c9', 
+                                           borderwidth=0, command=self.advanced_vr_options)
         self.options_agg_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.agg_var,
                                                          None, '1', '2', '3', '4', '5', 
@@ -694,9 +718,10 @@ class MainWindow(TkinterDnD.Tk):
                                                          '18', '19', '20')
 
         # MDX-noisereduc_s
-        self.options_noisereduc_s_Label = tk.Label(master=self.options_Frame,
+        self.options_noisereduc_s_Label = tk.Button(master=self.options_Frame,
                                            text='Noise Reduction',
-                                           background='#0e0e0f', font=self.font, foreground='#13a4c9')
+                                           background='#0e0e0f', font=self.font, foreground='#13a4c9', 
+                                           borderwidth=0, command=self.advanced_mdx_options)
         self.options_noisereduc_s_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.noisereduc_s_var,
                                                          None, 'None', '0', '1', '2', '3', '4', '5', 
@@ -848,12 +873,27 @@ class MainWindow(TkinterDnD.Tk):
         
         self.inst_only_var.trace_add('write',
                     lambda *args: self.update_states())
-        
+
         self.voc_only_var.trace_add('write',
                     lambda *args: self.update_states())
         self.noisereduc_s_var.trace_add('write',
                     lambda *args: self.update_states())
         self.non_red_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.mdxnetModeltype_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.n_fft_scale_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.dim_f_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.demucsmodel_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.demucs_only_var.trace_add('write',
                     lambda *args: self.update_states())
         
     # Opening filedialogs
@@ -1007,6 +1047,7 @@ class MainWindow(TkinterDnD.Tk):
                             'gpu': 0 if self.gpuConversion_var.get() else -1,
                             'postprocess': self.postprocessing_var.get(),
                             'appendensem': self.appendensem_var.get(),
+                            'demucs_only': self.demucs_only_var.get(),
                             'tta': self.tta_var.get(),
                             'save': self.save_var.get(),
                             'output_image': self.outputImage_var.get(),
@@ -1023,6 +1064,8 @@ class MainWindow(TkinterDnD.Tk):
                             'break': False,
                             'ensChoose': ensChoose,
                             'mdxnetModel': mdxnetModel,
+                            'DemucsModel': self.DemucsModel_var.get(),
+                            'ModelParams': self.ModelParams_var.get(),
                             # Other Variables (Tkinter)
                             'window': self,
                             'text_widget': self.command_Text,
@@ -1040,6 +1083,12 @@ class MainWindow(TkinterDnD.Tk):
                             'mixing': mixing,
                             'n_fft_scale': self.n_fft_scale_var.get(),
                             'dim_f': self.dim_f_var.get(),
+                            'overlap': self.overlap_var.get(),
+                            'shifts': self.shifts_var.get(),
+                            'margin': self.margin_var.get(),
+                            'channel': self.channel_var.get(),
+                            'compensate': self.compensate_var.get(),
+                            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
                         },
                         daemon=True
                         ).start()
@@ -1061,11 +1110,11 @@ class MainWindow(TkinterDnD.Tk):
         """Update the dropdown menu"""
         self.update_available_models()
 
-        self.after(3000, self.update_loop)
+        self.after(1000, self.update_loop)
 
     def update_available_models(self):
         """
-        Loop through every model (.pth) in the models directory
+        Loop through every VR model (.pth) in the models directory
         and add to the select your model list
         """
         temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, 'Main_Models')  # nopep8
@@ -1086,16 +1135,17 @@ class MainWindow(TkinterDnD.Tk):
             self.lastInstrumentalModels = new_InstrumentalModels
             #print(self.instrumentalLabel_to_path)
             
-            
-            
-            
+        """
+        Loop through every MDX-Net model (.onnx) in the models directory
+        and add to the select your model list
+        """
+  
         temp_MDXModels_dir = os.path.join(instrumentalModels_dir, 'MDX_Net_Models')  # nopep8
 
         # MDX-Net
         new_MDXModels = os.listdir(temp_MDXModels_dir)
         
         if new_MDXModels != self.lastMDXModels:
-            #print(new_MDXModels)
             self.MDXLabel_to_path.clear()
             self.options_mdxnetModel_Optionmenu['menu'].delete(0, 'end')
             for file_name_1 in natsort.natsorted(new_MDXModels):
@@ -1104,30 +1154,72 @@ class MainWindow(TkinterDnD.Tk):
                     for char in b:
                         file_name_1 = file_name_1.replace(char, "")
                         
-                    c = ["UVR_MDXNET_9662"]
+                    c = ["UVR_MDXNET_3_9662"]
                     for char in c:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 3") 
                         
-                    d = ["UVR_MDXNET_9682"]
+                    d = ["UVR_MDXNET_2_9682"]
                     for char in d:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 2") 
                         
-                    e = ["UVR_MDXNET_9703"]
+                    e = ["UVR_MDXNET_1_9703"]
                     for char in e:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 1") 
                         
                     f = ["UVR_MDXNET_KARA"]
                     for char in f:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Karaoke") 
-                          
-                    #file_name = f'{os.path.basename(path)}'
-                    
-                    print(file_name_1)
                     
                     self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
                                                                         command=tk._setit(self.mdxnetModel_var, file_name_1))
             self.lastMDXModels = new_MDXModels
         
+        
+        """
+        Loop through every Demucs model (.th, .pth) in the models directory
+        and add to the select your model list
+        """
+
+        try:
+            temp_DemucsModels_dir = os.path.join(instrumentalModels_dir, 'Demucs_Model')  # nopep8
+            new_DemucsModels = os.listdir(temp_DemucsModels_dir)
+            
+            if new_DemucsModels != self.lastDemucsModels:
+                #print(new_MDXModels)
+                self.DemucsLabel_to_path.clear()
+                self.options_DemucsModel_Optionmenu['menu'].delete(0, 'end')
+                for file_name_2 in natsort.natsorted(new_DemucsModels):
+                    if file_name_2.endswith(('.th', '.pth')):
+                        
+                        self.options_DemucsModel_Optionmenu['menu'].add_radiobutton(label=file_name_2,
+                                                                            command=tk._setit(self.DemucsModel_var, file_name_2))
+                self.lastDemucsModels = new_DemucsModels
+        except:
+            pass
+        
+        
+        """
+        Loop through every model param (.json) in the models directory
+        and add to the select your model list
+        """
+
+        try:
+            temp_ModelParams_dir = 'lib_v5\modelparams'  # nopep8
+            new_ModelParams = os.listdir(temp_ModelParams_dir)
+            
+            if new_ModelParams != self.lastModelParams:
+                #print(new_MDXModels)
+                self.ModelParamsLabel_to_path.clear()
+                self.options_ModelParams_Optionmenu['menu'].delete(0, 'end')
+                for file_name_3 in natsort.natsorted(new_ModelParams):
+                    if file_name_3.endswith(('.json', 'Auto')):
+                        
+                        self.options_ModelParams_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.ModelParams_var, file_name_3))
+                self.lastModelParams = new_ModelParams
+        except:
+            pass
+
             
     def update_states(self):
         """
@@ -1460,7 +1552,91 @@ class MainWindow(TkinterDnD.Tk):
             self.non_red_var.set(False)
         if not self.noisereduc_s_var.get() == 'None':
             self.options_non_red_Checkbutton.configure(state=tk.NORMAL)
-    
+
+
+        if self.mdxnetModeltype_var.get() == 'Vocals (Default)':
+            self.n_fft_scale_var.set('6144')
+            self.dim_f_var.set('2048')
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.DISABLED)
+                self.options_dim_f_Entry.configure(state=tk.DISABLED)
+                self.options_n_fft_scale_Opt.configure(state=tk.DISABLED)
+                self.options_dim_f_Opt.configure(state=tk.DISABLED)
+            except:
+                pass
+            
+        if self.mdxnetModeltype_var.get() == 'Other (Default)':
+            self.n_fft_scale_var.set('8192')
+            self.dim_f_var.set('2048')
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.DISABLED)
+                self.options_dim_f_Entry.configure(state=tk.DISABLED)
+                self.options_n_fft_scale_Opt.configure(state=tk.DISABLED)
+                self.options_dim_f_Opt.configure(state=tk.DISABLED)
+            except:
+                pass
+
+        if self.mdxnetModeltype_var.get() == 'Drums (Default)':
+            self.n_fft_scale_var.set('4096')
+            self.dim_f_var.set('2048')
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.DISABLED)
+                self.options_dim_f_Entry.configure(state=tk.DISABLED)
+                self.options_n_fft_scale_Opt.configure(state=tk.DISABLED)
+                self.options_dim_f_Opt.configure(state=tk.DISABLED)
+            except:
+                pass
+            
+        if self.mdxnetModeltype_var.get() == 'Bass (Default)':
+            self.n_fft_scale_var.set('16384')
+            self.dim_f_var.set('2048')
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.DISABLED)
+                self.options_dim_f_Entry.configure(state=tk.DISABLED)
+                self.options_n_fft_scale_Opt.configure(state=tk.DISABLED)
+                self.options_dim_f_Opt.configure(state=tk.DISABLED)
+            except:
+                pass
+            
+        if self.mdxnetModeltype_var.get() == 'Vocals (Custom)':
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.NORMAL)
+                self.options_dim_f_Entry.configure(state=tk.NORMAL)
+                self.options_n_fft_scale_Opt.configure(state=tk.NORMAL)
+                self.options_dim_f_Opt.configure(state=tk.NORMAL)
+            except:
+                pass
+
+        if self.mdxnetModeltype_var.get() == 'Other (Custom)':
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.NORMAL)
+                self.options_dim_f_Entry.configure(state=tk.NORMAL)
+                self.options_n_fft_scale_Opt.configure(state=tk.NORMAL)
+                self.options_dim_f_Opt.configure(state=tk.NORMAL)
+            except:
+                pass
+
+        if self.mdxnetModeltype_var.get() == 'Drums (Custom)':
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.NORMAL)
+                self.options_dim_f_Entry.configure(state=tk.NORMAL)
+                self.options_n_fft_scale_Opt.configure(state=tk.NORMAL)
+                self.options_dim_f_Opt.configure(state=tk.NORMAL)
+            except:
+                pass
+            
+        if self.mdxnetModeltype_var.get() == 'Bass (Custom)':
+            try:
+                self.options_n_fft_scale_Entry.configure(state=tk.NORMAL)
+                self.options_dim_f_Entry.configure(state=tk.NORMAL)
+                self.options_n_fft_scale_Opt.configure(state=tk.NORMAL)
+                self.options_dim_f_Opt.configure(state=tk.NORMAL)
+            except:
+                pass
+
+        if self.demucs_only_var.get() == True:
+            self.demucsmodel_var.set(True)
+
 
         self.update_inputPaths()
 
@@ -1523,6 +1699,232 @@ class MainWindow(TkinterDnD.Tk):
         else:
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, filename])
+            
+    def advanced_vr_options(self):
+        """
+        Open Help Guide
+        """
+        top= Toplevel(self)
+
+        top.geometry("600x500")
+        window_height = 600
+        window_width = 500
+        
+        top.title("Advanced VR Options")
+        
+        top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        screen_width = top.winfo_screenwidth()
+        screen_height = top.winfo_screenheight()
+
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+
+        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        # change title bar icon
+        top.iconbitmap('img\\UVR-Icon-v2.ico')
+
+        tabControl = ttk.Notebook(top)
+  
+        tab1 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text ='Advanced Settings')
+
+        tabControl.pack(expand = 1, fill ="both")
+        
+        tab1.grid_rowconfigure(0, weight=1)
+        tab1.grid_columnconfigure(0, weight=1)
+
+        frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0, text='Window Size (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.winSize_var, justify="center")
+        l0.grid(row=2,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Aggression Setting (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.agg_var, justify="center")
+        l0.grid(row=4,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Select Model Param\n(Can\'t change Model Params in Ensemble Mode)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=10)
+        
+        self.options_ModelParams_Optionmenu = l0=ttk.OptionMenu(frame0, self.ModelParams_var)  
+        
+        self.options_ModelParams_Optionmenu
+        l0.grid(row=7,column=0,padx=0,pady=0) 
+        
+        l0=ttk.Checkbutton(frame0, text='Save Output Image(s) of Spectrogram(s)', variable=self.outputImage_var) 
+        l0.grid(row=8,column=0,padx=0,pady=10)
+        
+        self.ModelParamsLabel_to_path = defaultdict(lambda: '')
+        self.lastModelParams = []
+        
+        self.update_states()
+            
+    def advanced_mdx_options(self):
+        """
+        Open Help Guide
+        """
+        top= Toplevel(self)
+
+        top.geometry("600x550")
+        window_height = 600
+        window_width = 550
+        
+        top.title("Advanced MDX-Net Options")
+        
+        top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        screen_width = top.winfo_screenwidth()
+        screen_height = top.winfo_screenheight()
+
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+
+        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        # change title bar icon
+        top.iconbitmap('img\\UVR-Icon-v2.ico')
+
+        tabControl = ttk.Notebook(top)
+  
+        tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
+        tab3 = ttk.Frame(tabControl)
+
+        tabControl.add(tab1, text ='Advanced Settings')
+        tabControl.add(tab2, text ='Demucs Settings')
+        tabControl.add(tab3, text ='Advanced ONNX Model Settings')
+
+        tabControl.pack(expand = 1, fill ="both")
+        
+        tab1.grid_rowconfigure(0, weight=1)
+        tab1.grid_columnconfigure(0, weight=1)
+        tab2.grid_rowconfigure(0, weight=1)
+        tab2.grid_columnconfigure(0, weight=1)
+        tab3.grid_rowconfigure(0, weight=1)
+        tab3.grid_columnconfigure(0, weight=1)
+
+        frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=0,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.chunks_var, justify='center')
+        l0.grid(row=1,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Noise Reduction (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=2,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.noisereduc_s_var, justify='center')
+        l0.grid(row=3,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Chunk Margin', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=4,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.margin_var, justify='center')
+        l0.grid(row=5,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Volume Compensation', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=6,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.compensate_var, justify='center')
+        l0.grid(row=7,column=0,padx=0,pady=0)
+        
+        frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0, text='Choose Demucs Model', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=0,column=0,padx=0,pady=0)
+        
+        self.options_DemucsModel_Optionmenu = l0=ttk.OptionMenu(frame0, self.DemucsModel_var)  
+        
+        self.options_DemucsModel_Optionmenu
+        l0.grid(row=2,column=0,padx=0,pady=0) 
+        
+        l0=tk.Button(frame0, text='(Click here to add more Demucs models)', font=("Century Gothic", "8"), foreground='#13a4c9', borderwidth=0, command=self.open_Modelfolder_de)
+        l0.grid(row=1,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Mixing Algorithm', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=10)
+        
+        l0=ttk.OptionMenu(frame0, self.mixing_var, None, 'Default', 'Min_Mag', 'Max_Mag', 'Invert_p')   
+        l0.grid(row=4,column=0,padx=0,pady=0) 
+        
+        l0=tk.Label(frame0, text='Channel', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.channel_var, justify='center')
+        l0.grid(row=6,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
+        l0.grid(row=8,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=9,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
+        l0.grid(row=10,column=0,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Run Demucs Model Only', variable=self.demucs_only_var) 
+        l0.grid(row=12,column=0,padx=0,pady=10)
+        
+        frame0=Frame(tab3, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0, text='Stem Type', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdxnetModeltype_var, None, 'Vocals (Default)', 'Other (Default)', 'Bass (Default)', 'Drums (Default)', 'Vocals (Custom)', 'Other (Custom)', 'Bass (Custom)', 'Drums (Custom)')
+        l0.grid(row=2,column=0,padx=0,pady=10)
+
+        l0=tk.Label(frame0, text='N_FFT Scale', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='(Manual Set)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=1,padx=0,pady=0)
+        
+        self.options_n_fft_scale_Opt = l0=ttk.OptionMenu(frame0, self.n_fft_scale_var, None, '4096', '6144', '7680', '8192', '16384')
+        
+        self.options_n_fft_scale_Opt
+        l0.grid(row=4,column=0,padx=0,pady=0)
+        
+        self.options_n_fft_scale_Entry = l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_var, justify='center')
+        
+        self.options_n_fft_scale_Entry
+        l0.grid(row=4,column=1,padx=0,pady=0)
+
+        l0=tk.Label(frame0, text='Dim_f', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='(Manual Set)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=1,padx=0,pady=0)
+        
+        self.options_dim_f_Opt = l0=ttk.OptionMenu(frame0, self.dim_f_var, None, '2048', '3072', '4096')
+        
+        self.options_dim_f_Opt
+        l0.grid(row=6,column=0,padx=0,pady=0)
+        
+        self.options_dim_f_Entry = l0=ttk.Entry(frame0, textvariable=self.dim_f_var, justify='center')
+        
+        self.options_dim_f_Entry
+        l0.grid(row=6,column=1,padx=0,pady=0)
+
+        self.DemucsLabel_to_path = defaultdict(lambda: '')
+        self.lastDemucsModels = []
+        
+        self.update_states()
+        
 
     def custom_ensemble(self):
         """
@@ -1682,8 +2084,9 @@ class MainWindow(TkinterDnD.Tk):
         
         l0=ttk.Checkbutton(frame0, text='Post-Process (VR Architecture Only)', variable=self.postprocessing_var) 
         l0.grid(row=3,column=2,padx=0,pady=0)
-
-
+        
+        l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
+        l0.grid(row=4,column=2,padx=0,pady=10)
 
     def help(self):
         """
@@ -1949,160 +2352,47 @@ class MainWindow(TkinterDnD.Tk):
             frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
-            l0=Label(frame0,text="MDX-Net/VR Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+            l0=Label(frame0,text="Advanced Option Guide",font=("Century Gothic", "12", "bold", "underline"), fg="#f4f4f4")
+            l0.grid(row=0,column=0,padx=0,pady=0)
+            
+            l0=ttk.Button(frame0,text="Ensemble Customization Options", command=self.custom_ensemble)
             l0.grid(row=1,column=0,padx=20,pady=10)
             
-            l0=tk.Label(frame0,text='MDX-Net Model\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=2,column=0,padx=0,pady=0)
+            l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=self.advanced_mdx_options)
+            l0.grid(row=2,column=0,padx=20,pady=10)
             
-            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
-                                'UVR-MDX-NET Karaoke')
-            l0.grid(row=3,column=0,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=4,column=0,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=5,column=0,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=6,column=0,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=7,column=0,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=8,column=0,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=9,column=0,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=10,column=0,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=11,column=0,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nMDX-Net Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=12,column=0,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
-                                'UVR-MDX-NET Karaoke')
-            l0.grid(row=13,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="Basic Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
-            l0.grid(row=1,column=1,padx=20,pady=10)
-            
-            l0=tk.Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=2,column=1,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=3,column=1,padx=0,pady=0)
-
-            l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=4,column=1,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=5,column=1,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=6,column=1,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=7,column=1,padx=0,pady=0) 
-            
-            l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=8,column=1,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=9,column=1,padx=0,pady=0)
-            
-            l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9", "bold"), justify="center", foreground='#13a4c9')
-            l0.grid(row=10,column=1,padx=0,pady=0)
-            
-            l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                              '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                              '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                              '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                              'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
-            l0.grid(row=11,column=1,padx=0,pady=0)
-            
-            l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
-            l0.grid(row=1,column=2,padx=0,pady=0)
-            
-            l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
-            l0.grid(row=2,column=2,padx=0,pady=0)
-            
-            l0=ttk.Checkbutton(frame0, text='Save Output Image Spectrogram (VR Architecture Only)', variable=self.outputImage_var) 
-            l0.grid(row=3,column=2,padx=0,pady=0)
-            
-            l0=Label(frame0,text="Set Outside Parameters",font=("Century Gothic", "10", "bold", "underline"), fg="#f4f4f4")
-            l0.grid(row=4,column=2,padx=0,pady=0)
-            
-            l0=tk.Label(frame0, text='Window Size (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
-            l0.grid(row=5,column=2,padx=0,pady=0)
-            
-            l0=ttk.Entry(frame0, textvariable=self.winSize_var)
-            l0.grid(row=6,column=2,padx=0,pady=0)
-            
-            l0=tk.Label(frame0, text='Aggression Setting (VR Architecture)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
-            l0.grid(row=7,column=2,padx=0,pady=0)
-            
-            l0=ttk.Entry(frame0, textvariable=self.agg_var)
-            l0.grid(row=8,column=2,padx=0,pady=0)
-            
-            l0=tk.Label(frame0, text='Chunks (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
-            l0.grid(row=9,column=2,padx=0,pady=0)
-            
-            l0=ttk.Entry(frame0, textvariable=self.chunks_var)
-            l0.grid(row=10,column=2,padx=0,pady=0)
-            
-            l0=tk.Label(frame0, text='N_FFT Scale (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
-            l0.grid(row=11,column=2,padx=0,pady=0)
-            
-            l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_var)
-            l0.grid(row=12,column=2,padx=0,pady=0)
-            
-            l0=tk.Label(frame0, text='Dim_f (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
-            l0.grid(row=13,column=2,padx=0,pady=0)
-            
-            l0=ttk.Entry(frame0, textvariable=self.dim_f_var)
-            l0.grid(row=14,column=2,padx=0,pady=0)
+            l0=ttk.Button(frame0,text="Advanced VR Options", command=self.advanced_vr_options)
+            l0.grid(row=3,column=0,padx=20,pady=10)
             
             l0=ttk.Button(frame0,text='Open Utagoe', command=self.utagoe_start)
+            l0.grid(row=4,column=0,padx=20,pady=10)
             
+            l0=Label(frame0,text="Set Dropdown Parameters Manually",font=("Century Gothic", "10", "bold", "underline"), fg="#f4f4f4")
+            l0.grid(row=5,column=0,padx=30,pady=20)
+            
+            l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=6,column=0,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.chunks_var, justify='center')
+            l0.grid(row=7,column=0,padx=20,pady=10)
+            
+            l0=tk.Label(frame0, text='Noise Reduction (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=8,column=0,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.noisereduc_s_var, justify='center')
+            l0.grid(row=9,column=0,padx=20,pady=10)
+            
+            l0=tk.Label(frame0, text='Window Size (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=10,column=0,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.winSize_var, justify="center")
+            l0.grid(row=11,column=0,padx=20,pady=10)
+            
+            l0=tk.Label(frame0, text='Aggression Setting (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=12,column=0,padx=0,pady=0)
+            
+            l0=ttk.Entry(frame0, textvariable=self.agg_var, justify="center")
+            l0.grid(row=13,column=0,padx=20,pady=10)
             
             frame0=Frame(tab10,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=30)  
@@ -2437,6 +2727,8 @@ class MainWindow(TkinterDnD.Tk):
             l0=ttk.Entry(frame0, textvariable=self.chunks_var)
             l0.grid(row=10,column=2,padx=0,pady=0)
             
+            
+            
             l0=tk.Label(frame0, text='N_FFT Scale (MDX-Net)', font=("Century Gothic", "9", "bold"), foreground='#13a4c9')
             l0.grid(row=11,column=2,padx=0,pady=0)
             
@@ -2496,6 +2788,16 @@ class MainWindow(TkinterDnD.Tk):
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, filename])
             
+    def open_Modelfolder_de(self):
+        """Let user paste a ".pth" model to use for the vocal seperation"""
+        filename = 'models\Demucs_Model'
+
+        if sys.platform == "win32":
+            os.startfile(filename)
+        else:
+            opener = "open" if sys.platform == "darwin" else "xdg-open"
+            subprocess.call([opener, filename])
+            
     def open_appdir_filedialog(self):
         
         pathname = '.'
@@ -2545,6 +2847,7 @@ class MainWindow(TkinterDnD.Tk):
             'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
             'gpu': self.gpuConversion_var.get(),
             'appendensem': self.appendensem_var.get(),
+            'demucs_only': self.demucs_only_var.get(),
             'postprocess': self.postprocessing_var.get(),
             'tta': self.tta_var.get(),
             'save': self.save_var.get(),
@@ -2559,6 +2862,8 @@ class MainWindow(TkinterDnD.Tk):
             'algo': self.algo_var.get(),
             'ensChoose': self.ensChoose_var.get(),
             'mdxnetModel': self.mdxnetModel_var.get(),
+            'DemucsModel': self.DemucsModel_var.get(),
+            'ModelParams': self.ModelParams_var.get(),
             #MDX-Net
             'demucsmodel': self.demucsmodel_var.get(),
             'non_red': self.non_red_var.get(),
@@ -2568,6 +2873,12 @@ class MainWindow(TkinterDnD.Tk):
             'chunks': chunks,
             'n_fft_scale': self.n_fft_scale_var.get(),
             'dim_f': self.dim_f_var.get(),
+            'overlap': self.overlap_var.get(),
+            'shifts': self.shifts_var.get(),
+            'margin': self.margin_var.get(),
+            'channel': self.channel_var.get(),
+            'compensate': self.compensate_var.get(),
+            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
             'noisereduc_s': noisereduc_s,
             'mixing': mixing,
         }, 

@@ -60,18 +60,18 @@ def istft(spec, hl):
 
     return wave
 
-def spec_effects(wave, algorithm='default', value=None):
+def spec_effects(wave, algorithm='Default', value=None):
     spec = [stft(wave[0],2048,1024),stft(wave[1],2048,1024)]
-    if algorithm == 'min_mag':
+    if algorithm == 'Min_Mag':
         v_spec_m = np.where(np.abs(spec[1]) <= np.abs(spec[0]), spec[1], spec[0])
         wave = istft(v_spec_m,1024)
-    elif algorithm == 'max_mag':
+    elif algorithm == 'Max_Mag':
         v_spec_m = np.where(np.abs(spec[1]) >= np.abs(spec[0]), spec[1], spec[0])
         wave = istft(v_spec_m,1024)
-    elif algorithm == 'default':
+    elif algorithm == 'Default':
         #wave = [istft(spec[0],1024),istft(spec[1],1024)]
         wave = (wave[1] * value) + (wave[0] * (1-value))
-    elif algorithm == 'invert_p':
+    elif algorithm == 'Invert_p':
             X_mag = np.abs(spec[0])
             y_mag = np.abs(spec[1])            
             max_mag = np.where(X_mag >= y_mag, X_mag, y_mag)  
@@ -80,26 +80,43 @@ def spec_effects(wave, algorithm='default', value=None):
     return wave
 
     
-def get_models(name, device, n_fft_scale, dim_f, load=True, stems='vocals-onevocals-two'):
+def get_models(name, device, n_fft_scale, dim_f, load=True, stems='bdov'):
     
     if name=='tdf_extra':
         models = []
-        if 'vocals-one' in stems:
+        if 'b' in stems:
             models.append(
-                Conv_TDF_net_trim(   
+                Conv_TDF_net_trim(
                     device=device, load=load, n_fft_scale=n_fft_scale,
-                    model_name='Conv-TDF', target_name='vocals-one', 
+                    model_name='Conv-TDF', target_name='bass',  
                     L=11, dim_f=dim_f, dim_t=8
                 )
             )
-        if 'vocals-two' in stems:
+        if 'd' in stems:
             models.append(
-                Conv_TDF_net_trim(   
+                Conv_TDF_net_trim(
                     device=device, load=load, n_fft_scale=n_fft_scale,
-                    model_name='Conv-TDF', target_name='vocals-two',  
+                    model_name='Conv-TDF', target_name='drums',  
+                    L=9, dim_f=dim_f, dim_t=7
+                )
+            )
+        if 'o' in stems:
+            models.append(
+                Conv_TDF_net_trim( 
+                    device=device, load=load, n_fft_scale=n_fft_scale,
+                    model_name='Conv-TDF', target_name='other',  
                     L=11, dim_f=dim_f, dim_t=8
                 )
             )
+        if 'v' in stems:
+            models.append(
+                Conv_TDF_net_trim(   
+                    device=device, load=load, n_fft_scale=n_fft_scale,
+                    model_name='Conv-TDF', target_name='vocals', 
+                    L=11, dim_f=dim_f, dim_t=8
+                )
+            )
+            
         return models
     
     else:

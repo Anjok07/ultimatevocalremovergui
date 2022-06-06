@@ -167,9 +167,10 @@ class Predictor():
                 widget_text.write('Done!\n')        
                 widget_text.write(base_text + 'Performing Noise Reduction... ')
                 reduction_sen = float(int(data['noisereduc_s'])/10)
+                print(noise_pro_set)
                 subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
                             f"{str(non_reduced_vocal_path)}"  + '" "' + f"{str(vocal_path)}" + '" ' + 
-                            "noisered lib_v5\\sox\\mdxnetnoisereduc.prof " + f"{reduction_sen}", 
+                            "noisered lib_v5\\sox\\" + noise_pro_set + ".prof " + f"{reduction_sen}", 
                             shell=True, stdout=subprocess.PIPE,
                             stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 widget_text.write('Done!\n')        
@@ -188,7 +189,7 @@ class Predictor():
                 reduction_sen = float(data['noisereduc_s'])/10
                 subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
                             f"{str(non_reduced_vocal_path)}"  + '" "' + f"{str(vocal_path)}" + '" ' + 
-                            "noisered lib_v5\\sox\\mdxnetnoisereduc.prof " + f"{reduction_sen}", 
+                            "noisered lib_v5\\sox\\" + noise_pro_set + ".prof " + f"{reduction_sen}", 
                             shell=True, stdout=subprocess.PIPE,
                             stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 update_progress(**progress_kwargs,
@@ -570,7 +571,7 @@ data = {
     'algo': 'Instrumentals (Min Spec)',
     #Advanced Options
     'appendensem': False,
-    
+    'noise_pro_select': 'Auto Select',
     'overlap': 0.5,
     'shifts': 0,
     'margin': 44100,
@@ -624,11 +625,15 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global model_set
     global model_set_name
     global ModelName_2
+    global mdx_model_hash
     
     global channel_set
     global margin_set
     global overlap_set
     global shift_set
+    
+    global noise_pro_set
+
     
     global n_fft_scale_set
     global dim_f_set
@@ -1215,18 +1220,39 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     vr_ensem_mdx_c_name = data['vr_ensem_mdx_c']
                     vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'   
                                        
+                                       
+                                      
+                                       
                 #MDX-Net Model
-                
-                if data['mdx_ensem'] == 'UVR-MDX-NET 1':
-                    mdx_ensem = 'UVR_MDXNET_1_9703'
-                if data['mdx_ensem'] == 'UVR-MDX-NET 2':
-                    mdx_ensem = 'UVR_MDXNET_2_9682'
-                if data['mdx_ensem'] == 'UVR-MDX-NET 3':
-                    mdx_ensem = 'UVR_MDXNET_3_9662'
-                if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
-                    mdx_ensem = 'UVR_MDXNET_KARA'
+                try:
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 1':
+                        mdx_ensem = 'UVR_MDXNET_1_9703'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 2':
+                        mdx_ensem = 'UVR_MDXNET_2_9682'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 3':
+                        mdx_ensem = 'UVR_MDXNET_3_9662'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
+                        mdx_ensem = 'UVR_MDXNET_KARA'
+                        
+                    MDXModelName=('models/MDX_Net_Models/' + mdx_ensem + '.onnx')                  
+                    mdx_model_hash = hashlib.md5(open(MDXModelName, 'rb').read()).hexdigest()
+                    print(mdx_ensem)   
+                except:
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 1':
+                        mdx_ensem = 'UVR_MDXNET_9703'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 2':
+                        mdx_ensem = 'UVR_MDXNET_9682'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET 3':
+                        mdx_ensem = 'UVR_MDXNET_9662'
+                    if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
+                        mdx_ensem = 'UVR_MDXNET_KARA'
                     
-                    
+                    MDXModelName=('models/MDX_Net_Models/' + mdx_ensem + '.onnx')                  
+                    mdx_model_hash = hashlib.md5(open(MDXModelName, 'rb').read()).hexdigest()
+                    print(mdx_model_hash)  
+                    print(mdx_ensem)
+  
+
                 #MDX-Net Model 2
                     
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET 1':
@@ -1236,11 +1262,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET 3':
                     mdx_ensem_b = 'UVR_MDXNET_3_9662'
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET Karaoke':
-                    mdx_ensem_b = 'UVR_MDXNET_Karaoke'
+                    mdx_ensem_b = 'UVR_MDXNET_KARA'
                 if data['mdx_ensem_b'] == 'No Model':
                     mdx_ensem_b = 'pass'
-                
-                
                 
                 if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
                     mdx_vr = [
@@ -1949,22 +1973,51 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     text_widget.write('Ensemble Mode - Running Model - ' + mdx_name + '\n\n')
 
                                     if mdx_name == 'UVR_MDXNET_1_9703':
-                                        mdx_ensem_b = 'UVR_MDXNET_1_9703'
                                         model_set = 'UVR_MDXNET_1_9703.onnx'
                                         model_set_name = 'UVR_MDXNET_1_9703'
                                         modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
                                     if mdx_name == 'UVR_MDXNET_2_9682':
                                         model_set = 'UVR_MDXNET_2_9682.onnx'
                                         model_set_name = 'UVR_MDXNET_2_9682'
                                         modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
                                     if mdx_name == 'UVR_MDXNET_3_9662':
                                         model_set = 'UVR_MDXNET_3_9662.onnx'
                                         model_set_name = 'UVR_MDXNET_3_9662'
                                         modeltype = 'v'
-                                    if mdx_name == 'UVR_MDXNET_Karaoke':
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    if mdx_name == 'UVR_MDXNET_KARA':
                                         model_set = 'UVR_MDXNET_KARA.onnx'
-                                        model_set_name = 'UVR_MDXNET_Karaoke'
+                                        model_set_name = 'UVR_MDXNET_KARA'
                                         modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    if mdx_name == 'UVR_MDXNET_9703':
+                                        model_set = 'UVR_MDXNET_9703.onnx'
+                                        model_set_name = 'UVR_MDXNET_9703'
+                                        modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    if mdx_name == 'UVR_MDXNET_9682':
+                                        model_set = 'UVR_MDXNET_9682.onnx'
+                                        model_set_name = 'UVR_MDXNET_9682'
+                                        modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    if mdx_name == 'UVR_MDXNET_9662':
+                                        model_set = 'UVR_MDXNET_9662.onnx'
+                                        model_set_name = 'UVR_MDXNET_9662'
+                                        modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    if mdx_name == 'UVR_MDXNET_KARA':
+                                        model_set = 'UVR_MDXNET_KARA.onnx'
+                                        model_set_name = 'UVR_MDXNET_KARA'
+                                        modeltype = 'v'
+                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        
+                                        
+                                    if data['noise_pro_select'] == 'Auto Select':
+                                        noise_pro_set = noise_pro
+                                    else:
+                                        noise_pro_set = data['noise_pro_select']
 
                                     update_progress(**progress_kwargs,
                                                     step=0)    

@@ -9,6 +9,7 @@ import os.path
 from datetime import datetime
 import pydub
 import shutil
+import hashlib
 
 import gc
 #MDX-Net
@@ -257,9 +258,10 @@ class Predictor():
                 widget_text.write('Done!\n')
                 widget_text.write(base_text + 'Performing Noise Reduction... ')
                 reduction_sen = float(data['noisereduc_s'])/10
+                print(noise_pro_set)
                 subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
                             f"{str(non_reduced_vocal_path)}"  + '" "' + f"{str(vocal_path)}" + '" ' + 
-                            "noisered lib_v5\\sox\\mdxnetnoisereduc.prof " + f"{reduction_sen}", 
+                            "noisered lib_v5\\sox\\" + noise_pro_set + ".prof " + f"{reduction_sen}", 
                             shell=True, stdout=subprocess.PIPE,
                             stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 update_progress(**progress_kwargs,
@@ -688,6 +690,7 @@ data = {
     'inst_only': False,
     'n_fft_scale': 6144,
     'dim_f': 2048,
+    'noise_pro_select': 'Auto Select',
     'overlap': 0.5,
     'shifts': 0,
     'margin': 44100,
@@ -747,6 +750,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global model_set
     global model_set_name
     global stemset_n
+    global noise_pro_set
+
+    global mdx_model_hash
     
     global channel_set
     global margin_set
@@ -773,6 +779,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     file_err = "FileNotFoundError"
     ffmp_err = """audioread\__init__.py", line 116, in audio_open"""
     sf_write_err = "sf.write"
+    model_adv_set_err = "Got invalid dimensions for input"
     
     try:
         with open('errorlog.txt', 'w') as f:
@@ -816,71 +823,169 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         source_val_set = 0
         stem_name = '(Bass)'
         
-    if data['mdxnetModel'] == 'UVR-MDX-NET 1':
-        model_set = 'UVR_MDXNET_1_9703'
-        model_set_name = 'UVR_MDXNET_1_9703'
-        modeltype = 'v'
-        stemset_n = '(Vocals)'
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET 2':
-        model_set = 'UVR_MDXNET_2_9682'
-        model_set_name = 'UVR_MDXNET_2_9682'
-        modeltype = 'v'
-        stemset_n = '(Vocals)'
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET 3':
-        model_set = 'UVR_MDXNET_3_9662'
-        model_set_name = 'UVR_MDXNET_3_9662'
-        modeltype = 'v'
-        stemset_n = '(Vocals)'
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
-        model_set = 'UVR_MDXNET_KARA'
-        model_set_name = 'UVR_MDXNET_Karaoke'
-        modeltype = 'v'
-        stemset_n = '(Vocals)'
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'other':
-        model_set = 'other'
-        model_set_name = 'other'
-        modeltype = 'o'
-        stemset_n = '(Other)'
-        source_val = 2
-        n_fft_scale_set=8192 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'drums':
-        model_set = 'drums'
-        model_set_name = 'drums'
-        modeltype = 'd'
-        stemset_n = '(Drums)'
-        source_val = 1
-        n_fft_scale_set=4096 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'bass':
-        model_set = 'bass'
-        model_set_name = 'bass'
-        modeltype = 'b'
-        stemset_n = '(Bass)'
-        source_val = 0
-        n_fft_scale_set=16384 
-        dim_f_set=2048
-    else:
-        model_set = data['mdxnetModel']
-        model_set_name = data['mdxnetModel']
-        modeltype = stemset
-        stemset_n = stem_name
-        source_val = source_val_set
-        n_fft_scale_set=int(data['n_fft_scale'])
-        dim_f_set=int(data['dim_f'])
         
+    try:    
+        if data['mdxnetModel'] == 'UVR-MDX-NET 1':
+            model_set = 'UVR_MDXNET_1_9703'
+            model_set_name = 'UVR_MDXNET_1_9703'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET 2':
+            model_set = 'UVR_MDXNET_2_9682'
+            model_set_name = 'UVR_MDXNET_2_9682'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET 3':
+            model_set = 'UVR_MDXNET_3_9662'
+            model_set_name = 'UVR_MDXNET_3_9662'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
+            model_set = 'UVR_MDXNET_KARA'
+            model_set_name = 'UVR_MDXNET_Karaoke'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'other':
+            model_set = 'other'
+            model_set_name = 'other'
+            modeltype = 'o'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Other)'
+            source_val = 2
+            n_fft_scale_set=8192 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'drums':
+            model_set = 'drums'
+            model_set_name = 'drums'
+            modeltype = 'd'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Drums)'
+            source_val = 1
+            n_fft_scale_set=4096 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'bass':
+            model_set = 'bass'
+            model_set_name = 'bass'
+            modeltype = 'b'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Bass)'
+            source_val = 0
+            n_fft_scale_set=16384 
+            dim_f_set=2048
+        else:
+            model_set = data['mdxnetModel']
+            model_set_name = data['mdxnetModel']
+            modeltype = stemset
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = stem_name
+            source_val = source_val_set
+            n_fft_scale_set=int(data['n_fft_scale'])
+            dim_f_set=int(data['dim_f'])
+            
+        MDXModelName=('models/MDX_Net_Models/' + model_set + '.onnx')                  
+        mdx_model_hash = hashlib.md5(open(MDXModelName, 'rb').read()).hexdigest()
+        print(mdx_model_hash)   
+    except:
+        if data['mdxnetModel'] == 'UVR-MDX-NET 1':
+            model_set = 'UVR_MDXNET_9703'
+            model_set_name = 'UVR_MDXNET_9703'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET 2':
+            model_set = 'UVR_MDXNET_9682'
+            model_set_name = 'UVR_MDXNET_9682'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET 3':
+            model_set = 'UVR_MDXNET_9662'
+            model_set_name = 'UVR_MDXNET_9662'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
+            model_set = 'UVR_MDXNET_KARA'
+            model_set_name = 'UVR_MDXNET_Karaoke'
+            modeltype = 'v'
+            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+            stemset_n = '(Vocals)'
+            source_val = 3
+            n_fft_scale_set=6144 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'other':
+            model_set = 'other'
+            model_set_name = 'other'
+            modeltype = 'o'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Other)'
+            source_val = 2
+            n_fft_scale_set=8192 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'drums':
+            model_set = 'drums'
+            model_set_name = 'drums'
+            modeltype = 'd'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Drums)'
+            source_val = 1
+            n_fft_scale_set=4096 
+            dim_f_set=2048
+        elif data['mdxnetModel'] == 'bass':
+            model_set = 'bass'
+            model_set_name = 'bass'
+            modeltype = 'b'
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = '(Bass)'
+            source_val = 0
+            n_fft_scale_set=16384 
+            dim_f_set=2048
+        else:
+            model_set = data['mdxnetModel']
+            model_set_name = data['mdxnetModel']
+            modeltype = stemset
+            noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
+            stemset_n = stem_name
+            source_val = source_val_set
+            n_fft_scale_set=int(data['n_fft_scale'])
+            dim_f_set=int(data['dim_f'])
+            
+        MDXModelName=('models/MDX_Net_Models/' + model_set_name + '.onnx')                  
+        mdx_model_hash = hashlib.md5(open(MDXModelName, 'rb').read()).hexdigest()
+        print(mdx_model_hash)  
+        
+        
+    if data['noise_pro_select'] == 'Auto Select':
+        noise_pro_set = noise_pro
+    else:
+        noise_pro_set = data['noise_pro_select']
+        
+
     print(n_fft_scale_set)
     print(dim_f_set)
     print(data['DemucsModel'])
@@ -1135,7 +1240,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: MDX-Net\n\n' +
                             f'The application was unable to allocate enough GPU memory to use this model.\n' + 
                             f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
                             f'If the error persists, your GPU might not be supported.\n\n' + 
@@ -1159,7 +1264,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: MDX-Net\n\n' +
                             f'The application was unable to allocate enough GPU memory to use this model.\n' + 
                             f'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
                             f'If the error persists, your GPU might not be supported.\n\n' + 
@@ -1184,7 +1289,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: MDX-Net\n\n' +
                             f'Could not write audio file.\n' + 
                             f'This could be due to low storage on target device or a system permissions issue.\n' + 
                             f'If the error persists, please contact the developers.\n\n' + 
@@ -1209,11 +1314,33 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: MDX-Net\n\n' +
                             f'The application was unable to allocate enough system memory to use this model.\n' + 
                             f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n' + 
                             f'Please Note: Intel Pentium and Intel Celeron processors do not work well with this application.\n\n' +
                             f'If the error persists, the system may not have enough RAM, or your CPU might \nnot be supported.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if model_adv_set_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The current ONNX model settings are not compatible with the selected \nmodel.\n\n')
+            text_widget.write(f'Please re-configure the advanced ONNX model settings accordingly and try \nagain.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: MDX-Net\n\n' +
+                            f'The current ONNX model settings are not compatible with the selected model.\n\n' + 
+                            f'Please re-configure the advanced ONNX model settings accordingly and try again.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

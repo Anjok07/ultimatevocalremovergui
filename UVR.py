@@ -114,6 +114,7 @@ DEFAULT_DATA = {
     'chunks': 'Auto',
     'n_fft_scale': 6144,
     'dim_f': 2048,
+    'noise_pro_select': 'Auto Select',
     'overlap': 0.5,
     'shifts': 0,
     'margin': 44100,
@@ -408,6 +409,7 @@ class MainWindow(TkinterDnD.Tk):
         self.agg_var = tk.StringVar(value=data['agg'])
         self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
         self.dim_f_var = tk.StringVar(value=data['dim_f'])
+        self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
         self.overlap_var = tk.StringVar(value=data['overlap'])
         self.shifts_var = tk.StringVar(value=data['shifts'])
         self.channel_var = tk.StringVar(value=data['channel'])
@@ -1083,6 +1085,7 @@ class MainWindow(TkinterDnD.Tk):
                             'mixing': mixing,
                             'n_fft_scale': self.n_fft_scale_var.get(),
                             'dim_f': self.dim_f_var.get(),
+                            'noise_pro_select': self.noise_pro_select_var.get(),
                             'overlap': self.overlap_var.get(),
                             'shifts': self.shifts_var.get(),
                             'margin': self.margin_var.get(),
@@ -1166,8 +1169,20 @@ class MainWindow(TkinterDnD.Tk):
                     for char in e:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 1") 
                         
-                    f = ["UVR_MDXNET_KARA"]
+                    f = ["UVR_MDXNET_9662"]
                     for char in f:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 3") 
+                        
+                    g = ["UVR_MDXNET_9682"]
+                    for char in g:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 2") 
+                        
+                    h = ["UVR_MDXNET_9703"]
+                    for char in h:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET 1") 
+                        
+                    i = ["UVR_MDXNET_KARA"]
+                    for char in i:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Karaoke") 
                     
                     self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
@@ -1837,6 +1852,12 @@ class MainWindow(TkinterDnD.Tk):
         
         l0=ttk.Entry(frame0, textvariable=self.compensate_var, justify='center')
         l0.grid(row=7,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=8,column=0,padx=0,pady=10)
+        
+        l0=ttk.OptionMenu(frame0, self.noise_pro_select_var, None, 'Auto Select', 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
+        l0.grid(row=9,column=0,padx=0,pady=0)
         
         frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
@@ -2873,6 +2894,7 @@ class MainWindow(TkinterDnD.Tk):
             'chunks': chunks,
             'n_fft_scale': self.n_fft_scale_var.get(),
             'dim_f': self.dim_f_var.get(),
+            'noise_pro_select': self.noise_pro_select_var.get(),
             'overlap': self.overlap_var.get(),
             'shifts': self.shifts_var.get(),
             'margin': self.margin_var.get(),

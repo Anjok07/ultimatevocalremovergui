@@ -24,7 +24,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
 - Download the UVR installer via the link below:
-    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.3.0_setup.exe)
+    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.3_setup.exe)
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/v5_model_expansion_pack.zip)

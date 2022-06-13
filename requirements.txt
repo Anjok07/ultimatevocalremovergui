@@ -19,7 +19,7 @@ norbert
 asteroid>=0.5.0
 onnxruntime-gpu
 psutil
-demucs
+dora-search
 pydub
 audiosegment
 pyglet

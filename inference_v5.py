@@ -1,7 +1,5 @@
-from functools import total_ordering
 import os
 import importlib
-from statistics import mode
 import pydub
 import shutil
 import hashlib
@@ -1006,7 +1004,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: VR Architecture\n\n' +
                             f'Could not write audio file.\n' + 
                             f'This could be due to low storage on target device or a system permissions issue.\n' + 
                             f'If the error persists, please contact the developers.\n\n' + 
@@ -1031,7 +1029,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 with open('errorlog.txt', 'w') as f:
                     f.write(f'Last Error Received:\n\n' +
                             f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                            f'Process Method: Ensemble Mode\n\n' +
+                            f'Process Method: VR Architecture\n\n' +
                             f'The application was unable to allocate enough system memory to use this model.\n' + 
                             f'Please do the following:\n\n1. Restart this application.\n2. Ensure any CPU intensive applications are closed.\n3. Then try again.\n\n' + 
                             f'Please Note: Intel Pentium and Intel Celeron processors do not work well with this application.\n\n' +

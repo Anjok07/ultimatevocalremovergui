@@ -25,7 +25,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
 
 - Download the UVR installer via one of the following mirrors below:
     - Main Download Link *(update link forthcoming. Please use Google Drive mirror for now. If you have any issues downloading the Google Drive Mirror, you can download the previous release [here](https://download.multimedia.workers.dev/UVR_v5.2.1_setup.exe) then download and install the upgrade package [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/UVR_v5.3_automatic_update_package_setup.exe))*.
-    - [Google Drive Mirror](https://drive.google.com/file/d/1HRtkaceBdZdErKlMRc5159wm-nHBJUby/view?usp=sharing)
+    - [Google Drive Mirror](https://uvr-v530-d8e4.uvr.workers.dev/)
 
 - **Optional**
     - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/v5_model_expansion_pack.zip)

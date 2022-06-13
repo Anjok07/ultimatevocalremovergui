@@ -34,9 +34,9 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
 
 - **Please Note:** A new patch has been released. 
     - The has been addressed:
-        - Fixed an issue with the Demucs model.
+        - Demucs v3 has been fully implemented into UVR.
         - The application now automatically detects your resolution and sets itself accordingly.
-        - Ensemble Customization (Nagivate to the "Advanced" tab in the Help Guide for more info)
+        - Ensemble Customization (click the settings icon for more information)
            - Be sure to download and extract the newest model extension pack to get the most out of this option.
         - Enhanced error handling.
   - Patch installation instructions:
@@ -56,23 +56,27 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **General Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/gen_opt.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt_new.png?raw=true" />
 
 **VR Architecture Options**
 
-<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/vr_opt.png" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt_new.png?raw=true" />
 
 **MDX-Net Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/mdx_opt.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/mdx_opt.png?raw=true" />
+
+**Demucs v3 Options**
+
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt_new.png?raw=true" />
 
 **Ensemble Options**
 
-<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/ense_opt_up.png" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/ense_opt.png?raw=true" />
 
 **User Ensemble**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/user_ens_opt.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.png?raw=true" />
 
 ### Other Application Notes
 

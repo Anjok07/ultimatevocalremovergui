@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v5.2.1
+# Ultimate Vocal Remover GUI v5.3.0
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/v5.2.0/img/UVRv5.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
@@ -24,29 +24,15 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
 - Download the UVR installer via one of the following mirrors below:
-    - [Main Download Link](https://download.multimedia.workers.dev/UVR_v5.2.1_setup.exe)
-    - [Google Drive Mirror](https://drive.google.com/file/d/1kA1dsZGTu7s2R_wuXO290HxtkBpzvfnC/view?usp=drivesdk)
+    - Main Download Link *(update link forthcoming. Please use Google Drive mirror for now. If you have any issues downloading the Google Drive Mirror, you can download the previous release [here](https://download.multimedia.workers.dev/UVR_v5.2.1_setup.exe) then download and install the upgrade package [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/UVR_v5.3_automatic_update_package_setup.exe))*.
+    - [Google Drive Mirror](https://drive.google.com/file/d/1HRtkaceBdZdErKlMRc5159wm-nHBJUby/view?usp=sharing)
 
 - **Optional**
-    - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/v5_model_expansion_pack.zip)
+    - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/v5_model_expansion_pack.zip)
         - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
     - This version of the GUI is fully backward compatible with the v4 models.
 
-- **Please Note:** A new patch has been released. 
-    - The has been addressed:
-        - Demucs v3 has been fully implemented into UVR.
-        - The application now automatically detects your resolution and sets itself accordingly.
-        - Ensemble Customization (click the settings icon for more information)
-           - Be sure to download and extract the newest model extension pack to get the most out of this option.
-        - Enhanced error handling.
-  - Patch installation instructions:
-     1. Download the _*UVR_Patch.zip*_ file [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/UVR_Patch.zip)
-     2. Navigate to the application directory
-     3. Close UVR if you have it open.
-     4. Delete the "data.pkl" file (you will receive a "Key Error" if you don't remove it.)
-     5. Delete or rename the _"UVR.exe"_ file within the application directory
-     6. Extract the _"UVR.exe"_ file and lib_v5 directory within the _*UVR_Patch.zip*_ archive to the application directory. 
-     7. Open the application to ensure workability.
+- **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.3.0)
 
 ### Other Platforms
 

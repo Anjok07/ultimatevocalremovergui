@@ -23,7 +23,7 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
     - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
-- Download the UVR installer via one of the following mirrors below:
+- Download the UVR installer via the link below:
     - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.3.0_setup.exe)
 
 - **Optional**

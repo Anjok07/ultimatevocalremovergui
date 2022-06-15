@@ -89,6 +89,8 @@ This application can be run on Mac & Linux by performing a manual install (see t
      - The MDX-Net models provided were trained by the core UVR developers
      - This network is less resource-intensive but incredibly powerful.
      - MDX-Net is a Hybrid Waveform/Spectrogram network.
+   - The Demucs v3 AI engine and models have been added.
+   - The ability to separate all 4 stems through Demucs v3.
 
 ## Troubleshooting
 
@@ -101,7 +103,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 Please be as detailed as possible when posting a new issue. 
 
-If possible, click the "Help Guide" button to the left of the "Start Processing" button and navigate to the "Error Log" tab for detailed error information that can be provided to us.
+If possible, click the "Settings Button" to the left of the "Start Processing" button and click the "Error Log" button for detailed error information that can be provided to us.
 
 ## Manual Installation (For Developers)
 
@@ -138,7 +140,7 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 ## Credits
 
 - [DilanBoskan](https://github.com/DilanBoskan) - Your contributions at the start of this project were essential to the success of UVR. Thank you!
-- [Bas Curtiz](https://www.youtube.com/user/bascurtiz) - Designed the official UVR logo, icon, banner, splash screen, and interface.
+- [Bas Curtiz](https://www.youtube.com/user/bascurtiz) - Designed the official UVR logo, icon, banner, and splash screen.
 - [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 - [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
 - [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original Demucs AI code. 
@@ -146,7 +148,8 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 
 ## Contributing
 
-- For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI**, please send us a pull request, and we will review it. This project is 100% open-source and free for anyone to use and modify as they wish. 
+- For anyone interested in the ongoing development of **Ultimate Vocal Remover GUI**, please send us a pull request, and we will review it. 
+- This project is 100% open-source and free for anyone to use and modify as they wish. 
 - We only maintain the development and support for the **Ultimate Vocal Remover GUI** and the models provided. 
 
 ## References

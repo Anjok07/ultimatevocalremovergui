@@ -5,7 +5,7 @@ librosa==0.8.0
 resampy==0.2.2
 opencv-python
 numba==0.53.0
-numpy==1.21.0
+numpy==1.22.0
 samplerate
 SoundFile
 soundstretch

@@ -71,8 +71,6 @@ class Predictor():
         mix, samplerate = librosa.load(m, mono=False, sr=44100)
         if mix.ndim == 1:
             mix = np.asfortranarray([mix,mix])
-
-        samplerate = self.demucs.samplerate
         
         mix = mix.T
         sources = self.demix(mix.T)

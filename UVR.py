@@ -39,8 +39,6 @@ import inference_MDX
 import inference_v5
 import inference_v5_ensemble
 import inference_demucs
-# Version
-from __version__ import VERSION
 
 
 from win32api import GetSystemMetrics
@@ -90,8 +88,9 @@ DEFAULT_DATA = {
     'vr_ensem_mdx_a': 'No Model',
     'vr_ensem_mdx_b': 'No Model',
     'vr_ensem_mdx_c': 'No Model',
-    'mdx_ensem': 'UVR-MDX-NET 1',
+    'mdx_ensem': 'UVR-MDX-NET Main',
     'mdx_ensem_b': 'No Model',
+    'demucsmodel_sel_VR': 'UVR_Demucs_Model_1',
     'gpu': False,
     'postprocess': False,
     'tta': False,
@@ -114,15 +113,19 @@ DEFAULT_DATA = {
     'split_mode': True,
     #MDX-Net
     'demucsmodel': True,
+    'demucsmodelVR': False,
     'non_red': False,
     'noise_reduc': True,
+    'nophaseinst': False,
     'voc_only': False,
     'inst_only': False,
     'voc_only_b': False,
     'inst_only_b': False,
     'audfile': True,
+    'autocompensate': True,
     'chunks': 'Auto',
     'n_fft_scale': 6144,
+    'segment': 'None',
     'dim_f': 2048,
     'noise_pro_select': 'Auto Select',
     'overlap': 0.25,
@@ -135,7 +138,7 @@ DEFAULT_DATA = {
     'mdxnetModeltype': 'Vocals (Custom)',
     'noisereduc_s': '3',
     'mixing': 'Default',
-    'mdxnetModel': 'UVR-MDX-NET 1',
+    'mdxnetModel': 'UVR-MDX-NET Main',
     'DemucsModel': 'mdx_extra',
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
     'ModelParams': 'Auto',
@@ -406,6 +409,7 @@ class MainWindow(TkinterDnD.Tk):
         self.vrensemchoose_mdx_c_var = tk.StringVar(value=data['vr_ensem_mdx_c'])
         self.mdxensemchoose_var = tk.StringVar(value=data['mdx_ensem'])
         self.mdxensemchoose_b_var = tk.StringVar(value=data['mdx_ensem_b'])
+        self.demucsmodel_sel_VR_var = tk.StringVar(value=data['demucsmodel_sel_VR'])
         #Advanced Options
         self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
         self.demucs_only_var = tk.BooleanVar(value=data['demucs_only'])
@@ -418,7 +422,9 @@ class MainWindow(TkinterDnD.Tk):
         self.outputImage_var = tk.BooleanVar(value=data['output_image'])
         # MDX-NET Specific Processing Options
         self.demucsmodel_var = tk.BooleanVar(value=data['demucsmodel'])
+        self.demucsmodelVR_var = tk.BooleanVar(value=data['demucsmodelVR'])
         self.non_red_var = tk.BooleanVar(value=data['non_red'])
+        self.nophaseinst_var = tk.BooleanVar(value=data['nophaseinst'])
         self.noisereduc_var = tk.BooleanVar(value=data['noise_reduc'])
         self.chunks_var = tk.StringVar(value=data['chunks'])
         self.noisereduc_s_var = tk.StringVar(value=data['noisereduc_s'])
@@ -431,6 +437,7 @@ class MainWindow(TkinterDnD.Tk):
         self.winSize_var = tk.StringVar(value=data['window_size'])
         self.agg_var = tk.StringVar(value=data['agg'])
         self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
+        self.segment_var = tk.StringVar(value=data['segment'])
         self.dim_f_var = tk.StringVar(value=data['dim_f'])
         self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
         self.overlap_var = tk.StringVar(value=data['overlap'])
@@ -448,6 +455,7 @@ class MainWindow(TkinterDnD.Tk):
         self.voc_only_b_var = tk.BooleanVar(value=data['voc_only_b'])
         self.inst_only_b_var = tk.BooleanVar(value=data['inst_only_b'])
         self.audfile_var = tk.BooleanVar(value=data['audfile'])
+        self.autocompensate_var = tk.BooleanVar(value=data['autocompensate'])
         # Choose Conversion Method
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
         self.last_aiModel = self.aiModel_var.get()
@@ -519,7 +527,7 @@ class MainWindow(TkinterDnD.Tk):
         self.command_Text = ThreadSafeConsole(master=self,
                                               background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11),borderwidth=0)
 
-        self.command_Text.write(f'Ultimate Vocal Remover v{VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
+        self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
        
     def configure_widgets(self):
         """Change widget styling and appearance"""
@@ -773,14 +781,14 @@ class MainWindow(TkinterDnD.Tk):
 
         # MDX-Auto-Chunk
         self.options_non_red_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Save Noisey Vocal',
+                                                text='Save Noisey Output',
                                                 variable=self.non_red_var,
                                                 )
 
-        # Postprocessing
-        self.options_post_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                        text='Post-Process',
-                                                        variable=self.postprocessing_var,
+        # Demucs Model VR
+        self.options_demucsmodelVR_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
+                                                        text='Demucs Model',
+                                                        variable=self.demucsmodelVR_var,
                                                         )
         
         # Split Mode
@@ -974,7 +982,7 @@ class MainWindow(TkinterDnD.Tk):
 
         #---VR Architecture Specific---
         #Post-Process
-        self.options_post_Checkbutton.place(x=35, y=21, width=0, height=5,
+        self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
                                     relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         #Save Image
         # self.options_image_Checkbutton.place(x=35, y=21, width=0, height=5,
@@ -1033,6 +1041,12 @@ class MainWindow(TkinterDnD.Tk):
                     lambda *args: self.update_states())
         
         self.chunks_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.autocompensate_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.compensate_var.trace_add('write',
                     lambda *args: self.update_states())
         
     # Opening filedialogs
@@ -1176,14 +1190,13 @@ class MainWindow(TkinterDnD.Tk):
                             'vr_ensem_b': self.vrensemchoose_b_var.get(),
                             'vr_ensem_c': self.vrensemchoose_c_var.get(),
                             'vr_ensem_d': self.vrensemchoose_d_var.get(),
-                            
                             'vr_ensem_e': self.vrensemchoose_e_var.get(),
                             'vr_ensem_mdx_a': self.vrensemchoose_mdx_a_var.get(),
                             'vr_ensem_mdx_b': self.vrensemchoose_mdx_b_var.get(),
                             'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
-                            
                             'mdx_ensem': self.mdxensemchoose_var.get(),
                             'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
+                            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
                             # Processing Options
                             'gpu': 0 if self.gpuConversion_var.get() else -1,
                             'postprocess': self.postprocessing_var.get(),
@@ -1218,17 +1231,21 @@ class MainWindow(TkinterDnD.Tk):
                             'progress_var': self.progress_var,
                             # MDX-Net Specific
                             'demucsmodel': self.demucsmodel_var.get(),
+                            'demucsmodelVR': self.demucsmodelVR_var.get(),
                             'non_red': self.non_red_var.get(),
+                            'nophaseinst': self.nophaseinst_var.get(),
                             'noise_reduc': self.noisereduc_var.get(),
                             'voc_only': self.voc_only_var.get(),
                             'inst_only': self.inst_only_var.get(),
                             'voc_only_b': self.voc_only_b_var.get(),
                             'inst_only_b': self.inst_only_b_var.get(),
                             'audfile': self.audfile_var.get(),
+                            'autocompensate': self.autocompensate_var.get(),
                             'chunks': chunks,
                             'noisereduc_s': noisereduc_s,
                             'mixing': mixing,
                             'n_fft_scale': self.n_fft_scale_var.get(),
+                            'segment': self.segment_var.get(),
                             'dim_f': self.dim_f_var.get(),
                             'noise_pro_select': self.noise_pro_select_var.get(),
                             'overlap': self.overlap_var.get(),
@@ -1331,6 +1348,10 @@ class MainWindow(TkinterDnD.Tk):
                     i = ["UVR_MDXNET_KARA"]
                     for char in i:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Karaoke") 
+                        
+                    i = ["UVR_MDXNET_Main"]
+                    for char in i:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Main") 
                     
                     self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
                                                                         command=tk._setit(self.mdxnetModel_var, file_name_1))
@@ -1464,8 +1485,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_instrumentalModel_Optionmenu.place_forget()
             self.options_save_Checkbutton.configure(state=tk.DISABLED)
             self.options_save_Checkbutton.place_forget()
-            self.options_post_Checkbutton.configure(state=tk.DISABLED)
-            self.options_post_Checkbutton.place_forget()
+            self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
+            self.options_demucsmodelVR_Checkbutton.place_forget()
             self.options_tta_Checkbutton.configure(state=tk.DISABLED)
             self.options_tta_Checkbutton.place_forget()
             # self.options_image_Checkbutton.configure(state=tk.DISABLED)
@@ -1527,8 +1548,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_tta_Checkbutton.place(x=35, y=21, width=0, height=5,
                                             relx=2/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             #Post-Process
-            self.options_post_Checkbutton.configure(state=tk.NORMAL)
-            self.options_post_Checkbutton.place(x=35, y=21, width=0, height=5,
+            self.options_demucsmodelVR_Checkbutton.configure(state=tk.NORMAL)
+            self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
                                         relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             #Save Image
             # self.options_image_Checkbutton.configure(state=tk.NORMAL)
@@ -1627,8 +1648,8 @@ class MainWindow(TkinterDnD.Tk):
             # Forget Widgets
             self.options_save_Checkbutton.configure(state=tk.DISABLED)
             self.options_save_Checkbutton.place_forget()
-            self.options_post_Checkbutton.configure(state=tk.DISABLED)
-            self.options_post_Checkbutton.place_forget()
+            self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
+            self.options_demucsmodelVR_Checkbutton.place_forget()
             self.options_tta_Checkbutton.configure(state=tk.DISABLED)
             self.options_tta_Checkbutton.place_forget()
             # self.options_image_Checkbutton.configure(state=tk.DISABLED)
@@ -1674,8 +1695,8 @@ class MainWindow(TkinterDnD.Tk):
                 # Forget Widgets
                 self.options_save_Checkbutton.configure(state=tk.DISABLED)
                 self.options_save_Checkbutton.place_forget()
-                self.options_post_Checkbutton.configure(state=tk.DISABLED)
-                self.options_post_Checkbutton.place_forget()
+                self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
+                self.options_demucsmodelVR_Checkbutton.place_forget()
                 self.options_tta_Checkbutton.configure(state=tk.DISABLED)
                 self.options_tta_Checkbutton.place_forget()
                 self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
@@ -1772,8 +1793,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_save_Checkbutton.place(x=35, y=3, width=0, height=5,
                                             relx=2/3, rely=9/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 # Forget Widgets
-                self.options_post_Checkbutton.configure(state=tk.DISABLED)
-                self.options_post_Checkbutton.place_forget()
+                self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
+                self.options_demucsmodelVR_Checkbutton.place_forget()
                 self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
                 self.options_modelFolder_Checkbutton.place_forget()
                 # self.options_image_Checkbutton.configure(state=tk.DISABLED)
@@ -1832,8 +1853,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_tta_Checkbutton.place(x=35, y=21, width=0, height=5,
                                                 relx=2/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 #Post-Process
-                self.options_post_Checkbutton.configure(state=tk.NORMAL)
-                self.options_post_Checkbutton.place(x=35, y=21, width=0, height=5,
+                self.options_demucsmodelVR_Checkbutton.configure(state=tk.NORMAL)
+                self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
                                             relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 #Save Image
                 # self.options_image_Checkbutton.configure(state=tk.NORMAL)
@@ -1882,7 +1903,7 @@ class MainWindow(TkinterDnD.Tk):
         if self.inst_only_var.get() == True:
             self.options_voc_only_Checkbutton.configure(state=tk.DISABLED)
             self.voc_only_var.set(False)
-            self.non_red_var.set(False)
+            #self.non_red_var.set(False)
         elif self.inst_only_var.get() == False:
             self.options_non_red_Checkbutton.configure(state=tk.NORMAL)
             self.options_voc_only_Checkbutton.configure(state=tk.NORMAL)
@@ -1953,6 +1974,20 @@ class MainWindow(TkinterDnD.Tk):
         if not self.noisereduc_s_var.get() == 'None':
             self.options_non_red_Checkbutton.configure(state=tk.NORMAL)
 
+
+        if self.autocompensate_var.get() == True:
+            self.compensate_var.set('Auto')
+            try:
+                self.options_compensate.configure(state=tk.DISABLED)
+            except:
+                pass
+            
+        if self.autocompensate_var.get() == False:
+            self.compensate_var.set(1.03597672895)
+            try:
+                self.options_compensate.configure(state=tk.NORMAL)
+            except:
+                pass
 
         if self.mdxnetModeltype_var.get() == 'Vocals (Default)':
             self.n_fft_scale_var.set('6144')
@@ -2125,13 +2160,17 @@ class MainWindow(TkinterDnD.Tk):
         tabControl = ttk.Notebook(top)
   
         tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='Advanced Settings')
+        tabControl.add(tab2, text ='Demucs Settings')
 
         tabControl.pack(expand = 1, fill ="both")
         
         tab1.grid_rowconfigure(0, weight=1)
         tab1.grid_columnconfigure(0, weight=1)
+        tab2.grid_rowconfigure(0, weight=1)
+        tab2.grid_columnconfigure(0, weight=1)
 
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
@@ -2160,22 +2199,58 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=7,column=0,padx=0,pady=0) 
         
         l0=ttk.Checkbutton(frame0, text='Save Output Image(s) of Spectrogram(s)', variable=self.outputImage_var) 
-        l0.grid(row=8,column=0,padx=0,pady=10)
-        
-        l0=ttk.Button(frame0,text='Open VR Models Folder', command=self.open_Modelfolder_vr)
+        l0.grid(row=8,column=0,padx=0,pady=0)
+
+        l0=ttk.Checkbutton(frame0, text='Post-Process', variable=self.postprocessing_var) 
         l0.grid(row=9,column=0,padx=0,pady=0)
         
-        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0=ttk.Button(frame0,text='Open VR Models Folder', command=self.open_Modelfolder_vr)
         l0.grid(row=10,column=0,padx=0,pady=10)
+        
+        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0.grid(row=11,column=0,padx=0,pady=0)
         
         def close_win_self():
             top.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=11,column=0,padx=0,pady=0)
+        l0.grid(row=12,column=0,padx=0,pady=10)
         
         self.ModelParamsLabel_to_path = defaultdict(lambda: '')
         self.lastModelParams = []
+        
+        frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0,text='\nDemucs Model\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.demucsmodel_sel_VR_var, None, 'UVR_Demucs_Model_1', 'UVR_Demucs_Model_2', 'UVR_Demucs_Model_Bag')
+        l0.grid(row=2,column=0,padx=0,pady=0) 
+        
+        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
+        l0.grid(row=4,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
+        l0.grid(row=6,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0, text='Segment', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
+        l0.grid(row=8,column=0,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
+        l0.grid(row=9,column=0,padx=0,pady=10)
+        
+        self.DemucsLabel_MDX_to_path = defaultdict(lambda: '')
+        self.lastDemucsModels_MDX = []
         
         self.update_states()
         
@@ -2278,8 +2353,8 @@ class MainWindow(TkinterDnD.Tk):
         """
         top= Toplevel(self)
 
-        top.geometry("670x550")
-        window_height = 670
+        top.geometry("740x550")
+        window_height = 740
         window_width = 550
         
         top.title("Advanced MDX-Net Options")
@@ -2347,26 +2422,34 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0, text='Volume Compensation', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=7,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.compensate_var, justify='center')
+        self.options_compensate = l0=ttk.Entry(frame0, textvariable=self.compensate_var, justify='center')
+        
+        self.options_compensate
         l0.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=ttk.Checkbutton(frame0, text='Autoset Volume Compensation', variable=self.autocompensate_var) 
         l0.grid(row=9,column=0,padx=0,pady=10)
         
-        l0=ttk.OptionMenu(frame0, self.noise_pro_select_var, None, 'Auto Select', 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
+        l0=ttk.Checkbutton(frame0, text='Reduce Instrumental Noise Separately', variable=self.nophaseinst_var) 
         l0.grid(row=10,column=0,padx=0,pady=0)
         
-        l0=ttk.Button(frame0,text='Open MDX-Net Models Folder', command=self.open_newModel_filedialog)
+        l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=11,column=0,padx=0,pady=10)
         
-        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0=ttk.OptionMenu(frame0, self.noise_pro_select_var, None, 'Auto Select', 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
         l0.grid(row=12,column=0,padx=0,pady=0)
+        
+        l0=ttk.Button(frame0,text='Open MDX-Net Models Folder', command=self.open_newModel_filedialog)
+        l0.grid(row=13,column=0,padx=0,pady=10)
+        
+        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0.grid(row=14,column=0,padx=0,pady=0)
         
         def close_win_self():
             top.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=13,column=0,padx=0,pady=10)
+        l0.grid(row=15,column=0,padx=0,pady=10)
         
         frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
@@ -2501,14 +2584,14 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0,text='MDX-Net or Demucs Model 1\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET Main', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                             'UVR-MDX-NET Karaoke', 'Demucs UVR Model 1', 'Demucs UVR Model 2', 'Demucs mdx_extra', 'Demucs mdx_extra_q')
         l0.grid(row=3,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=4,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET Main', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
                             'UVR-MDX-NET Karaoke', 'Demucs UVR Model 1', 'Demucs UVR Model 2', 'Demucs mdx_extra', 'Demucs mdx_extra_q')
         l0.grid(row=5,column=0,padx=0,pady=0)
         
@@ -3316,6 +3399,7 @@ class MainWindow(TkinterDnD.Tk):
             'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
             'mdx_ensem': self.mdxensemchoose_var.get(),
             'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
+            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
             'gpu': self.gpuConversion_var.get(),
             'appendensem': self.appendensem_var.get(),
             'demucs_only': self.demucs_only_var.get(),
@@ -3340,15 +3424,19 @@ class MainWindow(TkinterDnD.Tk):
             'ModelParams': self.ModelParams_var.get(),
             #MDX-Net
             'demucsmodel': self.demucsmodel_var.get(),
+            'demucsmodelVR': self.demucsmodelVR_var.get(),
             'non_red': self.non_red_var.get(),
+            'nophaseinst': self.nophaseinst_var.get(),
             'noise_reduc': self.noisereduc_var.get(),
             'voc_only': self.voc_only_var.get(),
             'inst_only': self.inst_only_var.get(),
             'voc_only_b': self.voc_only_b_var.get(),
             'inst_only_b': self.inst_only_b_var.get(),
             'audfile': self.audfile_var.get(),
+            'autocompensate': self.autocompensate_var.get(),
             'chunks': chunks,
             'n_fft_scale': self.n_fft_scale_var.get(),
+            'segment': self.segment_var.get(),
             'dim_f': self.dim_f_var.get(),
             'noise_pro_select': self.noise_pro_select_var.get(),
             'overlap': self.overlap_var.get(),

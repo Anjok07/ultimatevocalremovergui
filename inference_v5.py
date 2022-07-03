@@ -11,6 +11,12 @@ import numpy as np
 import soundfile as sf
 from tqdm import tqdm
 
+from demucs.pretrained import get_model as _gm
+from demucs.hdemucs import HDemucs
+from demucs.apply import BagOfModels, apply_model
+from pathlib import Path
+from models import stft, istft
+
 from lib_v5 import dataset
 from lib_v5 import spec_utils
 from lib_v5.model_param_init import ModelParameters
@@ -51,7 +57,13 @@ data = {
     'window_size': 512,
     'agg': 10,
     'high_end_process': 'mirroring',
-    'ModelParams': 'Auto'
+    'ModelParams': 'Auto',
+    'demucsmodel_sel_VR': 'UVR_Demucs_Model_1',
+    'overlap': 0.5,
+    'shifts': 0,
+    'segment': 'None',
+    'split_mode': False,
+    'demucsmodelVR': True,
 }
 
 default_window_size = data['window_size']
@@ -97,6 +109,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global nn_arch_sizes
     global nn_architecture
     
+    global overlap_set
+    global shift_set
+    global split_mode
+    global demucs_model_set
+    
     #Error Handling
     
     runtimeerr = "CUDNN error executing cudnnSetTensorNdDescriptor"
@@ -140,8 +157,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         # For instrumental the instrumental is the temp file
         # and for vocal the instrumental is the temp file due
         # to reversement
+        if data['demucsmodelVR']:
+            sameplerate = 44100
+        else:
+            sameplerate = mp.param['sr']
+            
+            
         sf.write(f'temp.wav',
-                 wav_instrument, mp.param['sr'])
+                 wav_instrument.T, sameplerate)
 
         appendModelFolderName = modelFolderName.replace('/', '_')
         
@@ -176,14 +199,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
              
         if VModel in model_name and data['voc_only']:
                 sf.write(instrumental_path,
-                        wav_instrument, mp.param['sr'])
+                        wav_instrument.T, sameplerate)
         elif VModel in model_name and data['inst_only']:
             pass
         elif data['voc_only']:
             pass
         else:
                 sf.write(instrumental_path,
-                        wav_instrument, mp.param['sr'])
+                        wav_instrument.T, sameplerate)
                 
         # Vocal
         if vocal_name is not None:
@@ -215,14 +238,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
             if VModel in model_name and data['inst_only']:
                 sf.write(vocal_path,
-                            wav_vocals, mp.param['sr'])
+                            wav_vocals.T, sameplerate)
             elif VModel in model_name and data['voc_only']:
                 pass
             elif data['inst_only']:
                 pass
             else:
                 sf.write(vocal_path,
-                            wav_vocals, mp.param['sr'])
+                            wav_vocals.T, sameplerate)
         
             if data['saveFormat'] == 'Mp3':
                 try:
@@ -362,6 +385,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     text_widget.clear()
     button_widget.configure(state=tk.DISABLED)  # Disable Button
 
+    overlap_set = float(data['overlap'])
+    shift_set = int(data['shifts'])
+    demucs_model_set = data['demucsmodel_sel_VR']
+    split_mode = data['split_mode']
+
     vocal_remover = VocalRemover(data, text_widget)
     modelFolderName = determineModelFolderName()
 
@@ -369,6 +397,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     try:        #Load File(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
                         # Determine File Name
+                        m=music_file
                         base_name = f'{data["export_path"]}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                         
                         model_name = os.path.basename(data[f'{data["useModel"]}Model'])
@@ -802,6 +831,85 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         y_spec_m = pred * X_phase
                         v_spec_m = X_spec_m - y_spec_m
                         
+                        def demix_demucs(mix):
+                            #print('shift_set ', shift_set)
+                            text_widget.write(base_text + "Running Demucs Inference...\n")
+                            text_widget.write(base_text + "Processing... ")
+                            print(' Running Demucs Inference...')
+                            
+                            mix = torch.tensor(mix, dtype=torch.float32)
+                            ref = mix.mean(0)        
+                            mix = (mix - ref.mean()) / ref.std()
+                            
+                            with torch.no_grad():
+                                sources = apply_model(demucs, mix[None], split=split_mode, device=device, overlap=overlap_set, shifts=shift_set, progress=False)[0]
+                                
+                            text_widget.write('Done!\n')
+                                
+                            sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+                            sources[[0,1]] = sources[[1,0]]
+                            
+                            return sources
+                        
+                        def demucs_prediction(m):
+                            global demucs_sources
+                            mix, samplerate = librosa.load(m, mono=False, sr=44100)
+                            if mix.ndim == 1:
+                                mix = np.asfortranarray([mix,mix])
+                            
+                            mix = mix.T
+                            
+                            demucs_sources = demix_demucs(mix.T)
+                        
+                        if data['demucsmodelVR']:
+                            demucs = HDemucs(sources=["other", "vocals"])
+                            text_widget.write(base_text + 'Loading Demucs model... ')
+                            update_progress(**progress_kwargs,
+                            step=0.95)   
+                            path_d = Path('models/Demucs_Models')
+                            print('What Demucs model was chosen? ', demucs_model_set)
+                            demucs = _gm(name=demucs_model_set, repo=path_d)
+                            text_widget.write('Done!\n')
+                            
+                            print('segment: ', data['segment'])
+                            
+                            if data['segment'] == 'None':
+                                segment = None
+                                if isinstance(demucs, BagOfModels):
+                                    if segment is not None:
+                                        for sub in demucs.models:
+                                            sub.segment = segment
+                                else:
+                                    if segment is not None:
+                                        sub.segment = segment
+                            else:
+                                try:
+                                    segment = int(data['segment'])
+                                    if isinstance(demucs, BagOfModels):
+                                        if segment is not None:
+                                            for sub in demucs.models:
+                                                sub.segment = segment
+                                    else:
+                                        if segment is not None:
+                                            sub.segment = segment
+                                    text_widget.write(base_text + "Segments set to "f"{segment}.\n")
+                                except:
+                                    segment = None
+                                    if isinstance(demucs, BagOfModels):
+                                        if segment is not None:
+                                            for sub in demucs.models:
+                                                sub.segment = segment
+                                    else:
+                                        if segment is not None:
+                                            sub.segment = segment
+                            
+                            print('segment port-process: ', segment)
+                            
+                            demucs.cpu()
+                            demucs.eval()
+                            
+                            demucs_prediction(m)
+                        
                         if data['voc_only'] and not data['inst_only']:
                             pass
                         else:
@@ -809,13 +917,25 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         if data['high_end_process'].startswith('mirroring'):        
                             input_high_end_ = spec_utils.mirroring(data['high_end_process'], y_spec_m, input_high_end, mp)
-                            wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp, input_high_end_h, input_high_end_)    
+                            if data['demucsmodelVR']:
+                                wav_instrument = spec_utils.cmb_spectrogram_to_wave_d(y_spec_m, mp, input_high_end_h, input_high_end_, demucs=True) 
+                                demucs_inst = demucs_sources[0]
+                                sources = [wav_instrument,demucs_inst]
+                                spec = [stft(sources[0],2048,1024),stft(sources[1],2048,1024)]
+                                ln = min([spec[0].shape[2], spec[1].shape[2]])
+                                spec[0] = spec[0][:,:,:ln]
+                                spec[1] = spec[1][:,:,:ln]
+                                v_spec_c = np.where(np.abs(spec[1]) <= np.abs(spec[0]), spec[1], spec[0])
+                                wav_instrument = istft(v_spec_c,1024)
+                            else:
+                                wav_instrument = spec_utils.cmb_spectrogram_to_wave_d(y_spec_m, mp, input_high_end_h, input_high_end_, demucs=False)
+                             
                             if data['voc_only'] and not data['inst_only']:
                                 pass
                             else:
                                 text_widget.write('Done!\n')   
                         else:
-                            wav_instrument = spec_utils.cmb_spectrogram_to_wave(y_spec_m, mp)
+                            wav_instrument = spec_utils.cmb_spectrogram_to_wave_d(y_spec_m, mp)
                             if data['voc_only'] and not data['inst_only']:
                                 pass
                             else:
@@ -828,14 +948,25 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         
                         if data['high_end_process'].startswith('mirroring'):        
                             input_high_end_ = spec_utils.mirroring(data['high_end_process'], v_spec_m, input_high_end, mp)
-
-                            wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp, input_high_end_h, input_high_end_)  
+                            if data['demucsmodelVR']:
+                                wav_vocals = spec_utils.cmb_spectrogram_to_wave_d(v_spec_m, mp, input_high_end_h, input_high_end_, demucs=True)
+                                demucs_voc = demucs_sources[1]
+                                sources = [wav_vocals,demucs_voc]
+                                spec = [stft(sources[0],2048,1024),stft(sources[1],2048,1024)]
+                                ln = min([spec[0].shape[2], spec[1].shape[2]])
+                                spec[0] = spec[0][:,:,:ln]
+                                spec[1] = spec[1][:,:,:ln]
+                                v_spec_c = np.where(np.abs(spec[1]) >= np.abs(spec[0]), spec[1], spec[0])
+                                wav_vocals = istft(v_spec_c,1024)
+                            else:
+                                wav_vocals = spec_utils.cmb_spectrogram_to_wave_d(v_spec_m, mp, input_high_end_h, input_high_end_, demucs=False)
+                            
                             if data['inst_only'] and not data['voc_only']:
                                     pass
                             else:
                                 text_widget.write('Done!\n')     
-                        else:        
-                            wav_vocals = spec_utils.cmb_spectrogram_to_wave(v_spec_m, mp)
+                        else:
+                            wav_vocals = spec_utils.cmb_spectrogram_to_wave_d(v_spec_m, mp, demucs=False)
                             if data['inst_only'] and not data['voc_only']:
                                     pass
                             else:
@@ -843,7 +974,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                         update_progress(**progress_kwargs,
                                         step=1)
-                        
+
                         # Save output music files
                         save_files(wav_instrument, wav_vocals)
 

@@ -101,6 +101,7 @@ class Predictor():
         
     def prediction(self, m):  
         mix, samplerate = librosa.load(m, mono=False, sr=44100)
+        print('print mix: ', mix)
         if mix.ndim == 1:
             mix = np.asfortranarray([mix,mix])  
         samplerate = samplerate
@@ -208,6 +209,27 @@ class Predictor():
                 save_path=save_path,
                 file_name = f'{os.path.basename(_basename)}_{vocal_name}_No_Reduction',)
             
+        if data['modelFolder']:
+            non_reduced_Instrumental_path = '{save_path}/{file_name}.wav'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_{model_set_name}_No_Reduction',)
+            non_reduced_path_mp3 = '{save_path}/{file_name}.mp3'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_{model_set_name}_No_Reduction',)
+            non_reduced_Instrumental_path_flac = '{save_path}/{file_name}.flac'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_{model_set_name}_No_Reduction',)            
+        else: 
+            non_reduced_Instrumental_path = '{save_path}/{file_name}.wav'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_No_Reduction',)
+            non_reduced_Instrumental_path_mp3 = '{save_path}/{file_name}.mp3'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_No_Reduction',)
+            non_reduced_Instrumental_path_flac = '{save_path}/{file_name}.flac'.format(
+                save_path=save_path,
+                file_name = f'{os.path.basename(_basename)}_{Instrumental_name}_No_Reduction',)   
+            
             
         if os.path.isfile(non_reduced_vocal_path):
             file_exists_n = 'there'
@@ -306,14 +328,30 @@ class Predictor():
         
         if data['voc_only'] and not data['inst_only']:
             pass
-
         else:
-            finalfiles = [
-                {
-                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                    'files':[str(music_file), vocal_path],
-                }
-            ]         
+            if not data['noisereduc_s'] == 'None':
+                if data['nophaseinst']:
+                    finalfiles = [
+                        {
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'files':[str(music_file), non_reduced_vocal_path],
+                        }
+                    ]   
+                else:
+                    finalfiles = [
+                        {
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'files':[str(music_file), vocal_path],
+                        }
+                    ]  
+            else:
+                finalfiles = [
+                    {
+                        'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                        'files':[str(music_file), vocal_path],
+                    }
+                ]  
+                   
             widget_text.write(base_text + 'Saving Instrumental... ')      
             for i, e in tqdm(enumerate(finalfiles)):
 
@@ -351,9 +389,24 @@ class Predictor():
                 v_spec = specs[1] - max_mag * np.exp(1.j * np.angle(specs[0]))
                 update_progress(**progress_kwargs,
                 step=(1))
-                sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
                 
+                if not data['noisereduc_s'] == 'None':
+                    if data['nophaseinst']:
+                        sf.write(non_reduced_Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
                     
+                        reduction_sen = float(data['noisereduc_s'])/10
+                        print(noise_pro_set)
+                        
+                        subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
+                                    f"{str(non_reduced_Instrumental_path)}"  + '" "' + f"{str(Instrumental_path)}" + '" ' + 
+                                    "noisered lib_v5\\sox\\" + noise_pro_set + ".prof " + f"{reduction_sen}", 
+                                    shell=True, stdout=subprocess.PIPE,
+                                    stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+                    else:
+                        sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
+                else:
+                    sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
+                
                 if data['inst_only']:
                     if file_exists_v == 'there':
                         pass
@@ -365,14 +418,24 @@ class Predictor():
      
                 widget_text.write('Done!\n')
           
-        
         if data['saveFormat'] == 'Mp3':
             try:
+                
                 if data['inst_only'] == True:
+                    if data['non_red'] == True:
+                        if not data['nophaseinst']:
+                            pass
+                        else:
+                            musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
+                            musfile.export(non_reduced_Instrumental_path_mp3, format="mp3", bitrate="320k") 
+                            try:
+                                os.remove(non_reduced_Instrumental_path)
+                            except:
+                                pass
                     pass
                 else:
                     musfile = pydub.AudioSegment.from_wav(vocal_path)
-                    musfile.export(vocal_path_mp3, format="mp3", bitrate="320k")
+                    musfile.export(vocal_path_mp3, format="mp3", bitrate="320k") 
                     if file_exists_v == 'there':
                         pass
                     else:
@@ -380,21 +443,47 @@ class Predictor():
                             os.remove(vocal_path)
                         except:
                             pass
+                    if data['non_red'] == True:
+                        if not data['nophaseinst']:
+                            pass
+                        else:
+                            if data['voc_only'] == True:
+                                pass
+                            else:
+                                musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
+                                musfile.export(non_reduced_Instrumental_path_mp3, format="mp3", bitrate="320k") 
+                                if file_exists_n == 'there':
+                                    pass
+                                else:
+                                    try:
+                                        os.remove(non_reduced_Instrumental_path)
+                                    except:
+                                        pass
                 if data['voc_only'] == True:
+                    if data['non_red'] == True:
+                        musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
+                        musfile.export(non_reduced_vocal_path_mp3, format="mp3", bitrate="320k") 
+                        try:
+                            os.remove(non_reduced_vocal_path)
+                        except:
+                            pass
                     pass
                 else:
                     musfile = pydub.AudioSegment.from_wav(Instrumental_path)
-                    musfile.export(Instrumental_path_mp3, format="mp3", bitrate="320k")
+                    musfile.export(Instrumental_path_mp3, format="mp3", bitrate="320k")  
                     if file_exists_i == 'there':
                         pass
                     else:
                         try:
                             os.remove(Instrumental_path)
                         except:
-                            pass
+                            pass  
                     if data['non_red'] == True:
-                        musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
-                        musfile.export(non_reduced_vocal_path_mp3, format="mp3", bitrate="320k") 
+                        if data['inst_only'] == True:
+                            pass
+                        else:
+                            musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
+                            musfile.export(non_reduced_vocal_path_mp3, format="mp3", bitrate="320k") 
                         if file_exists_n == 'there':
                             pass
                         else:
@@ -429,6 +518,16 @@ class Predictor():
         if data['saveFormat'] == 'Flac':
             try:
                 if data['inst_only'] == True:
+                    if data['non_red'] == True:
+                        if not data['nophaseinst']:
+                            pass
+                        else:
+                            musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
+                            musfile.export(non_reduced_Instrumental_path_flac, format="flac") 
+                            try:
+                                os.remove(non_reduced_Instrumental_path)
+                            except:
+                                pass
                     pass
                 else:
                     musfile = pydub.AudioSegment.from_wav(vocal_path)
@@ -440,7 +539,30 @@ class Predictor():
                             os.remove(vocal_path)
                         except:
                             pass
+                    if data['non_red'] == True:
+                        if not data['nophaseinst']:
+                            pass
+                        else:
+                            if data['voc_only'] == True:
+                                pass
+                            else:
+                                musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
+                                musfile.export(non_reduced_Instrumental_path_flac, format="flac") 
+                                if file_exists_n == 'there':
+                                    pass
+                                else:
+                                    try:
+                                        os.remove(non_reduced_Instrumental_path)
+                                    except:
+                                        pass
                 if data['voc_only'] == True:
+                    if data['non_red'] == True:
+                        musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
+                        musfile.export(non_reduced_vocal_path_flac, format="flac") 
+                        try:
+                            os.remove(non_reduced_vocal_path)
+                        except:
+                            pass
                     pass
                 else:
                     musfile = pydub.AudioSegment.from_wav(Instrumental_path)
@@ -453,8 +575,11 @@ class Predictor():
                         except:
                             pass  
                     if data['non_red'] == True:
-                        musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
-                        musfile.export(non_reduced_vocal_path_flac, format="flac") 
+                        if data['inst_only'] == True:
+                            pass
+                        else:
+                            musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
+                            musfile.export(non_reduced_vocal_path_flac, format="flac") 
                         if file_exists_n == 'there':
                             pass
                         else:
@@ -489,6 +614,14 @@ class Predictor():
         if data['noisereduc_s'] == 'None':
             pass
         elif data['non_red'] == True:
+            if data['inst_only']:
+                if file_exists_n == 'there':
+                    pass
+                else:
+                    try:
+                        os.remove(non_reduced_vocal_path)
+                    except:
+                        pass
             pass
         elif data['inst_only']:
             if file_exists_n == 'there':
@@ -501,6 +634,7 @@ class Predictor():
         else:
             try:
                 os.remove(non_reduced_vocal_path)
+                os.remove(non_reduced_Instrumental_path)
             except:
                 pass
         
@@ -579,6 +713,7 @@ class Predictor():
         
         if not data['demucsmodel']:
             sources = self.demix_base(segmented_mix, margin_size=margin)
+            #value=float(0.9)*float(compensate)
         elif data['demucs_only']:
             if split_mode == True:
                 sources = self.demix_demucs_split(mix)
@@ -599,13 +734,14 @@ class Predictor():
             print(data['mixing'])
             
             if 'UVR' in demucs_model_set:
+                
                 sources[source_val] = (spec_effects(wave=[demucs_out[1],base_out[0]],
                                             algorithm=data['mixing'],
-                                            value=b[source_val])*float(data['compensate'])) # compensation
+                                            value=b[source_val])*float(compensate)) # compensation
             else:
                 sources[source_val] = (spec_effects(wave=[demucs_out[source_val],base_out[0]],
                                             algorithm=data['mixing'],
-                                            value=b[source_val])*float(data['compensate'])) # compensation
+                                            value=b[source_val])*float(compensate)) # compensation
         return sources
     
     def demix_base(self, mixes, margin_size):
@@ -697,6 +833,8 @@ class Predictor():
         sources = list(processed.values())
         sources = np.concatenate(sources, axis=-1)
         widget_text.write('Done!\n')
+        print('the demucs model is done running')
+
         return sources
     
     def demix_demucs_split(self, mix):
@@ -718,6 +856,9 @@ class Predictor():
             
         sources = (sources * ref.std() + ref.mean()).cpu().numpy()
         sources[[0,1]] = sources[[1,0]]
+    
+        print('the demucs model is done running')
+        
         return sources
         
 data = {
@@ -741,12 +882,14 @@ data = {
     'shifts': 0,
     'margin': 44100,
     'split_mode': False,
+    'nophaseinst': True,
     'compensate': 1.03597672895,
+    'autocompensate': True,
     'demucs_only': False,
     'mixing': 'Default',
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
     # Choose Model
-    'mdxnetModel': 'UVR-MDX-NET 1',
+    'mdxnetModel': 'UVR-MDX-NET Main',
     'mdxnetModeltype': 'Vocals (Custom)',
 }
 default_chunks = data['chunks']
@@ -799,7 +942,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global noise_pro_set
     global demucs_model_set
 
-    global mdx_model_hash
+    global autocompensate
+    global compensate
     
     global channel_set
     global margin_set
@@ -807,8 +951,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global shift_set
     global source_val
     global split_mode
+    global demucs_model_set
     
     global demucs_switch
+    
+    autocompensate = data['autocompensate']
     
     # Update default settings
     default_chunks = data['chunks']
@@ -883,6 +1030,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'v'
         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
         stemset_n = '(Vocals)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 3
         n_fft_scale_set=6144 
         dim_f_set=2048
@@ -896,6 +1047,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'v'
         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
         stemset_n = '(Vocals)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 3
         n_fft_scale_set=6144 
         dim_f_set=2048
@@ -909,6 +1064,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'v'
         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
         stemset_n = '(Vocals)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 3
         n_fft_scale_set=6144 
         dim_f_set=2048
@@ -918,15 +1077,36 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'v'
         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
         stemset_n = '(Vocals)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 3
         n_fft_scale_set=6144 
         dim_f_set=2048
+    elif data['mdxnetModel'] == 'UVR-MDX-NET Main':
+        model_set = 'UVR_MDXNET_Main'
+        model_set_name = 'UVR_MDXNET_Main'
+        modeltype = 'v'
+        noise_pro = 'MDX-NET_Noise_Profile_17_kHz'
+        stemset_n = '(Vocals)'
+        if autocompensate == True:
+            compensate = 1.08
+        else:
+            compensate = data['compensate']
+        source_val = 3
+        n_fft_scale_set=7680 
+        dim_f_set=3072
     elif 'other' in data['mdxnetModel']:
         model_set = 'other'
         model_set_name = 'other'
         modeltype = 'o'
         noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
         stemset_n = '(Other)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 2
         n_fft_scale_set=8192 
         dim_f_set=2048
@@ -936,6 +1116,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'd'
         noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
         stemset_n = '(Drums)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 1
         n_fft_scale_set=4096 
         dim_f_set=2048
@@ -945,6 +1129,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = 'b'
         noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
         stemset_n = '(Bass)'
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = 0
         n_fft_scale_set=16384 
         dim_f_set=2048
@@ -954,6 +1142,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         modeltype = stemset
         noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
         stemset_n = stem_name
+        if autocompensate == True:
+            compensate = 1.03597672895
+        else:
+            compensate = data['compensate']
         source_val = source_val_set
         n_fft_scale_set=int(data['n_fft_scale'])
         dim_f_set=int(data['dim_f'])
@@ -963,7 +1155,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         noise_pro_set = noise_pro
     else:
         noise_pro_set = data['noise_pro_select']
-        
+       
+    
 
     print(n_fft_scale_set)
     print(dim_f_set)
@@ -1031,7 +1224,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             
             try:
                 
-                if float(data['noisereduc_s']) >= 10:
+                if float(data['noisereduc_s']) >= 11:
                     text_widget.write('Error: Noise Reduction only supports values between 0-10.\nPlease set a value between 0-10 (with or without decimals) and try again.')
                     progress_var.set(0)
                     button_widget.configure(state=tk.NORMAL)  # Enable Button

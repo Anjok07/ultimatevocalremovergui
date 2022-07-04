@@ -867,7 +867,7 @@ data = {
     'export_path': None,
     'saveFormat': 'Wav',
     # Processing Options
-    'demucsmodel': True,
+    'demucsmodel': False,
     'gpu': -1,
     'chunks': 10,
     'non_red': False,

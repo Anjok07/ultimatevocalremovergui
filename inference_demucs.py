@@ -46,23 +46,52 @@ class Predictor():
         if data['gpu'] == -1:
             device = torch.device('cpu')
         
-        if data['demucsmodel']:
-            self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
-            widget_text.write(base_text + 'Loading Demucs model... ')
-            update_progress(**progress_kwargs,
-            step=0.05)   
-            path_d = Path('models/Demucs_Models')
-            print('What Demucs model was chosen? ', data['DemucsModel'])
-            self.demucs = _gm(name=data['DemucsModel'], repo=path_d)
-            widget_text.write('Done!\n')
-            if 'UVR' in data['DemucsModel']:
-                widget_text.write(base_text + "2 stem model selected.\n")
+        self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
+        widget_text.write(base_text + 'Loading Demucs model... ')
+        update_progress(**progress_kwargs,
+        step=0.05)   
+        path_d = Path('models/Demucs_Models')
+        print('What Demucs model was chosen? ', data['DemucsModel'])
+        self.demucs = _gm(name=data['DemucsModel'], repo=path_d)
+        widget_text.write('Done!\n')
+        if 'UVR' in data['DemucsModel']:
+            widget_text.write(base_text + "2 stem model selected.\n")
+        if isinstance(self.demucs, BagOfModels):
+            widget_text.write(base_text + f"Selected model is a bag of {len(self.demucs.models)} models.\n") 
+            
+        if data['segment'] == 'None':
+            segment = None
             if isinstance(self.demucs, BagOfModels):
-                widget_text.write(base_text + f"Selected model is a bag of {len(self.demucs.models)} models.\n") 
+                if segment is not None:
+                    for sub in self.demucs.models:
+                        sub.segment = segment
+            else:
+                if segment is not None:
+                    sub.segment = segment
+        else:
+            try:
+                segment = int(data['segment'])
+                if isinstance(self.demucs, BagOfModels):
+                    if segment is not None:
+                        for sub in self.demucs.models:
+                            sub.segment = segment
+                else:
+                    if segment is not None:
+                        sub.segment = segment
+                widget_text.write(base_text + "Segments set to "f"{segment}.\n")
+            except:
+                segment = None
+                if isinstance(self.demucs, BagOfModels):
+                    if segment is not None:
+                        for sub in self.demucs.models:
+                            sub.segment = segment
+                else:
+                    if segment is not None:
+                        sub.segment = segment
+                
             self.demucs.to(device)
             self.demucs.eval()
             
-
         update_progress(**progress_kwargs,
         step=0.1)
         
@@ -536,12 +565,16 @@ class Predictor():
 
         # 1 = demucs only
         # 0 = onnx only
-        if data['chunks'] == 'Full':
-            chunk_set = 0
+        if data['chunks_d'] == 'Full':
+            if split_mode == True:
+                chunk_set = 0
+            else:
+                widget_text.write(base_text + "Chunk size set to full... \n")
+                chunk_set = 0
         else: 
             chunk_set = data['chunks']
 
-        if data['chunks'] == 'Auto':
+        if data['chunks_d'] == 'Auto':
             if split_mode == True:
                 widget_text.write(base_text + "Split Mode is on (Chunks disabled).\n")
                 chunk_set = 0
@@ -578,16 +611,13 @@ class Predictor():
                     if int(sys_mem) >= int(33):
                         chunk_set = int(0)
                         widget_text.write(base_text + 'Chunk size auto-set to Full... \n')
-        elif data['chunks'] == 'Full':
-            chunk_set = 0
-            widget_text.write(base_text + "Chunk size set to full... \n")
         else:
             if split_mode == True:
                 widget_text.write(base_text + "Split Mode is on (Chunks disabled).\n")
                 chunk_set = 0
             else:
                 widget_text.write(base_text + "Split Mode is off (Chunks enabled).\n")
-                chunk_set = int(data['chunks'])
+                chunk_set = int(data['chunks_d'])
                 widget_text.write(base_text + "Chunk size user-set to "f"{chunk_set}... \n")
             
         samples = mix.shape[-1]
@@ -662,12 +692,13 @@ data = {
     # Processing Options
     'demucsmodel': True,
     'gpu': -1,
-    'chunks': 'Full',
+    'chunks_d': 'Full',
     'modelFolder': False,
     'voc_only_b': False,
     'inst_only_b': False,
     'overlap_b': 0.25,
     'shifts_b': 2,
+    'segment': 'None',
     'margin': 44100,
     'split_mode': False,
     'compensate': 1.03597672895,
@@ -675,7 +706,7 @@ data = {
     'DemucsModel': 'mdx_extra',
     'audfile': True,
 }
-default_chunks = data['chunks']
+default_chunks = data['chunks_d']
 
 def update_progress(progress_var, total_files, file_num, step: float = 1):
     """Calculate the progress for the progress widget in the GUI"""
@@ -724,7 +755,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global split_mode
         
     # Update default settings
-    default_chunks = data['chunks']
+    default_chunks = data['chunks_d']
     
     widget_text = text_widget
     gui_progress_bar = progress_var
@@ -808,6 +839,23 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             shift_set = int(data['shifts_b'])
             split_mode = data['split_mode']
             
+            def determinemusicfileFolderName():
+                """
+                Determine the name that is used for the folder and appended
+                to the back of the music files
+                """
+                songFolderName = ''
+
+                if str(music_file):
+                    songFolderName += os.path.splitext(os.path.basename(music_file))[0]
+
+                if songFolderName:
+
+                    songFolderName = '/' + songFolderName
+
+
+                return songFolderName
+            
             def determinemodelFolderName():
                 """
                 Determine the name that is used for the folder and appended
@@ -828,20 +876,26 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
  
             if data['audfile'] == True:   
                 modelFolderName = determinemodelFolderName()
+                songFolderName = determinemusicfileFolderName()
                 
                 if modelFolderName:
                     folder_path = f'{data["export_path"]}{modelFolderName}'
+                    if not os.path.isdir(folder_path):
+                        os.mkdir(folder_path)
+                        
+                if songFolderName:
+                    folder_path = f'{data["export_path"]}{modelFolderName}{songFolderName}'
                     if not os.path.isdir(folder_path):
                         os.mkdir(folder_path)
                 
                 _mixture = f'{data["input_paths"]}'
                 if data['modelFolder']:
                     try:
-                        _basename = f'{data["export_path"]}{modelFolderName}/{file_num}_{str(timestampnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{str(timestampnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
                     except:
-                        _basename = f'{data["export_path"]}{modelFolderName}/{file_num}_{str(randomnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{str(randomnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
                 else:
-                    _basename = f'{data["export_path"]}{modelFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                    _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
             else:
                 _mixture = f'{data["input_paths"]}'
                 if data['modelFolder']:

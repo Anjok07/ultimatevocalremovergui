@@ -407,11 +407,11 @@ class Predictor():
             if 'UVR' in demucs_model_set:
                 sources[3] = (spec_effects(wave=[demucs_out[1],base_out[0]],
                                             algorithm=data['mixing'],
-                                            value=b[3])*float(data['compensate'])) # compensation
+                                            value=b[3])*float(compensate)) # compensation
             else:
                 sources[3] = (spec_effects(wave=[demucs_out[3],base_out[0]],
                                             algorithm=data['mixing'],
-                                            value=b[3])*float(data['compensate'])) # compensation
+                                            value=b[3])*float(compensate)) # compensation
                 
         return sources
     
@@ -629,7 +629,7 @@ data = {
     'output_image': True,
     'voc_only': False,
     'inst_only': False,
-    'demucsmodel': True,
+    'demucsmodel': False,
     'chunks': 'auto',
     'non_red': False,
     'noisereduc_s': 3,
@@ -643,6 +643,7 @@ data = {
     'margin': 44100,
     'split_mode': False,
     'compensate': 1.03597672895,
+    'autocompensate': True,
     'demucs_only': False,
     'mixing': 'Default',
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
@@ -691,7 +692,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global model_set
     global model_set_name
     global ModelName_2
-    global mdx_model_hash
+    global compensate
+    global autocompensate
     
     global demucs_model_set
 
@@ -711,6 +713,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     # Update default settings
     default_chunks = data['chunks']
     default_noisereduc_s = data['noisereduc_s']
+    autocompensate = data['autocompensate']
     
     widget_text = text_widget
     gui_progress_bar = progress_var
@@ -736,8 +739,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     except:
         pass
     
-    n_fft_scale_set=6144 
-    dim_f_set=2048
 
     global nn_arch_sizes
     global nn_architecture
@@ -1322,6 +1323,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         mdx_ensem = 'UVR_MDXNET_9662'
                 if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
                     mdx_ensem = 'UVR_MDXNET_KARA'
+                if data['mdx_ensem'] == 'UVR-MDX-NET Main':
+                    mdx_ensem = 'UVR_MDXNET_Main'
                 if data['mdx_ensem'] == 'Demucs UVR Model 1':
                     mdx_ensem = 'UVR_Demucs_Model_1'
                 if data['mdx_ensem'] == 'Demucs UVR Model 2':
@@ -1332,15 +1335,26 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_ensem = 'mdx_extra_q'
   
                 #MDX-Net Model 2
-                    
+                
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET 1':
-                    mdx_ensem_b = 'UVR_MDXNET_1_9703'
+                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                        mdx_ensem_b = 'UVR_MDXNET_1_9703'
+                    else:
+                        mdx_ensem_b = 'UVR_MDXNET_9703'
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET 2':
-                    mdx_ensem_b = 'UVR_MDXNET_2_9682'
+                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                        mdx_ensem_b = 'UVR_MDXNET_2_9682'
+                    else:
+                        mdx_ensem_b = 'UVR_MDXNET_9682'
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET 3':
-                    mdx_ensem_b = 'UVR_MDXNET_3_9662'
+                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                        mdx_ensem_b = 'UVR_MDXNET_3_9662'
+                    else:
+                        mdx_ensem_b = 'UVR_MDXNET_9662'
                 if data['mdx_ensem_b'] == 'UVR-MDX-NET Karaoke':
                     mdx_ensem_b = 'UVR_MDXNET_KARA'
+                if data['mdx_ensem_b'] == 'UVR-MDX-NET Main':
+                    mdx_ensem_b = 'UVR_MDXNET_Main'
                 if data['mdx_ensem_b'] == 'Demucs UVR Model 1':
                     mdx_ensem_b = 'UVR_Demucs_Model_1'
                 if data['mdx_ensem_b'] == 'Demucs UVR Model 2':
@@ -1351,6 +1365,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_ensem_b = 'mdx_extra_q'
                 if data['mdx_ensem_b'] == 'No Model':
                     mdx_ensem_b = 'pass'
+                    
+
                 
                 if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
                     mdx_vr = [
@@ -1544,7 +1560,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     
                 if data['ensChoose'] == 'Basic VR Ensemble':
                     loops = Basic_Ensem
-                    ensefolder = 'Basic_Ensemble_Outputs'
+                    ensefolder = 'Basic_VR_Outputs'
                     if data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
                         ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name
                     elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model':
@@ -1575,7 +1591,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     ensemode = 'Vocal_Models'
                 if data['ensChoose'] == 'Multi-AI Ensemble':           
                     loops = mdx_vr
-                    ensefolder = 'MDX_VR_Ensemble_Outputs'
+                    ensefolder = 'Multi_AI_Ensemble_Outputs'
                     if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
                         ensemode = 'MDX-Net_Models'
                     elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
@@ -1607,6 +1623,13 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     step=0)      
                     
                     try:
+                        
+                        if float(data['noisereduc_s']) >= 11:
+                            text_widget.write('Error: Noise Reduction only supports values between 0-10.\nPlease set a value between 0-10 (with or without decimals) and try again.')
+                            progress_var.set(0)
+                            button_widget.configure(state=tk.NORMAL)  # Enable Button
+                            return
+                        
                         total, used, free = shutil.disk_usage("/") 
                             
                         total_space = int(total/1.074e+9)
@@ -2064,12 +2087,24 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_2_9682':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_2_9682.onnx'
                                         model_set_name = 'UVR_MDXNET_2_9682'
                                         modeltype = 'v'
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_3_9662':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_3_9662.onnx'
@@ -2077,12 +2112,24 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_KARA':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_KARA.onnx'
                                         model_set_name = 'UVR_MDXNET_KARA'
                                         modeltype = 'v'
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_9703':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_9703.onnx'
@@ -2090,6 +2137,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_9682':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_9682.onnx'
@@ -2097,6 +2150,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_9662':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_9662.onnx'
@@ -2104,6 +2163,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
                                     if mdx_name == 'UVR_MDXNET_KARA':
                                         demucs_only = 'off'
                                         model_set = 'UVR_MDXNET_KARA.onnx'
@@ -2111,6 +2176,25 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         modeltype = 'v'
                                         demucs_model_set = data['DemucsModel_MDX']
                                         noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.03597672895
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=6144 
+                                        dim_f_set=2048
+                                    if mdx_name == 'UVR_MDXNET_Main':
+                                        demucs_only = 'off'
+                                        model_set = 'UVR_MDXNET_Main.onnx'
+                                        model_set_name = 'UVR_MDXNET_Main'
+                                        modeltype = 'v'
+                                        demucs_model_set = data['DemucsModel_MDX']
+                                        noise_pro = 'MDX-NET_Noise_Profile_17_kHz'
+                                        if autocompensate == True:
+                                            compensate = 1.075
+                                        else:
+                                            compensate = data['compensate']
+                                        n_fft_scale_set=7680 
+                                        dim_f_set=3072
                                     if 'Demucs' in mdx_name:
                                         demucs_only = 'on'
                                         demucs_switch = 'on'
@@ -2527,7 +2611,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     {
                         'algorithm':'min_mag',
                         'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output':'{}_User_Ensembled_(Min Spec)'.format(trackname1),
+                        'output':'{}_Manual_Ensemble_(Min Spec)'.format(trackname1),
                         'type': 'Instrumentals'
                     }
                 ]
@@ -2536,7 +2620,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     {
                         'algorithm':'max_mag',
                         'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output': '{}_User_Ensembled_(Max Spec)'.format(trackname1),
+                        'output': '{}_Manual_Ensemble_(Max Spec)'.format(trackname1),
                         'type': 'Vocals'
                     }
                 ]

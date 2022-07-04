@@ -112,7 +112,7 @@ DEFAULT_DATA = {
     'demucs_only': False,
     'split_mode': True,
     #MDX-Net
-    'demucsmodel': True,
+    'demucsmodel': False,
     'demucsmodelVR': False,
     'non_red': False,
     'noise_reduc': True,
@@ -124,6 +124,7 @@ DEFAULT_DATA = {
     'audfile': True,
     'autocompensate': True,
     'chunks': 'Auto',
+    'chunks_d': 'Full',
     'n_fft_scale': 6144,
     'segment': 'None',
     'dim_f': 2048,
@@ -427,6 +428,7 @@ class MainWindow(TkinterDnD.Tk):
         self.nophaseinst_var = tk.BooleanVar(value=data['nophaseinst'])
         self.noisereduc_var = tk.BooleanVar(value=data['noise_reduc'])
         self.chunks_var = tk.StringVar(value=data['chunks'])
+        self.chunks_d_var = tk.StringVar(value=data['chunks_d'])
         self.noisereduc_s_var = tk.StringVar(value=data['noisereduc_s'])
         self.mixing_var = tk.StringVar(value=data['mixing']) #dropdown
         # Models
@@ -724,6 +726,17 @@ class MainWindow(TkinterDnD.Tk):
                                                          '55', '60', '65', '70', '75', '80', 
                                                          '85', '90', '95', 'Full')
         
+        # Demucs-Segment
+        self.options_segment_Label = tk.Label(master=self.options_Frame,
+                                           text='Segment',
+                                           background='#0e0e0f', font=self.font, foreground='#13a4c9')
+        self.options_segment_Optionmenu = ttk.OptionMenu(self.options_Frame, 
+                                                         self.segment_var,
+                                                         None, 'None', '1', '5', '10', '15', '20', 
+                                                         '25', '30', '35', '40', '45', '50', 
+                                                         '55', '60', '65', '70', '75', '80', 
+                                                         '85', '90', '95', '100')
+        
         
         # Overlap
         self.options_overlap_b_Label = tk.Label(master=self.options_Frame,
@@ -918,6 +931,12 @@ class MainWindow(TkinterDnD.Tk):
         self.options_chunks_Label.place(x=12, y=0, width=0, height=-10,
                                     relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.options_chunks_Optionmenu.place(x=71, y=-2, width=-118, height=7,
+                                    relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        
+        # Demucs-Segment
+        self.options_segment_Label.place(x=12, y=0, width=0, height=-10,
+                                    relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+        self.options_segment_Optionmenu.place(x=71, y=-2, width=-118, height=7,
                                     relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         
         # Overlap
@@ -1242,6 +1261,7 @@ class MainWindow(TkinterDnD.Tk):
                             'audfile': self.audfile_var.get(),
                             'autocompensate': self.autocompensate_var.get(),
                             'chunks': chunks,
+                            'chunks_d': self.chunks_d_var.get(),
                             'noisereduc_s': noisereduc_s,
                             'mixing': mixing,
                             'n_fft_scale': self.n_fft_scale_var.get(),
@@ -1512,6 +1532,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_shifts_b_Optionmenu.place_forget()
             self.options_split_Checkbutton.configure(state=tk.DISABLED)
             self.options_split_Checkbutton.place_forget()
+            self.options_segment_Label.place_forget()
+            self.options_segment_Optionmenu.place_forget()
             
             
         elif self.aiModel_var.get() == 'VR Architecture':
@@ -1594,6 +1616,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_shifts_b_Optionmenu.place_forget()
             self.options_split_Checkbutton.configure(state=tk.DISABLED)
             self.options_split_Checkbutton.place_forget()
+            self.options_segment_Label.place_forget()
+            self.options_segment_Optionmenu.place_forget()
             
         elif self.aiModel_var.get() == 'Demucs v3':
             #Keep for Ensemble & VR Architecture Mode
@@ -1609,10 +1633,10 @@ class MainWindow(TkinterDnD.Tk):
             self.options_demucs_stems_Optionmenu.place(x=55, y=-2, width=-85, height=7,
                                         relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
-            # Chunks
-            self.options_chunks_Label.place(x=12, y=0, width=0, height=-10,
+            # Segment
+            self.options_segment_Label.place(x=12, y=0, width=0, height=-10,
                                         relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-            self.options_chunks_Optionmenu.place(x=55, y=-2, width=-85, height=7,
+            self.options_segment_Optionmenu.place(x=55, y=-2, width=-85, height=7,
                                         relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
             # Shifts
@@ -1679,6 +1703,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_algo_Label.place_forget()
             self.options_algo_Optionmenu.place_forget()
             self.options_modelFolder_Checkbutton.place_forget()
+            self.options_chunks_Label.place_forget()
+            self.options_chunks_Optionmenu.place_forget()
             
         elif self.aiModel_var.get() == 'Ensemble Mode':
             if self.ensChoose_var.get() == 'Manual Ensemble':
@@ -1740,6 +1766,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
                 
 
             elif self.ensChoose_var.get() == 'Multi-AI Ensemble':
@@ -1820,6 +1848,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
             else:
                 # Choose Ensemble 
                 self.options_ensChoose_Label.place(x=0, y=19, width=0, height=-10,
@@ -1898,6 +1928,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
                 
                 
         if self.inst_only_var.get() == True:
@@ -2261,8 +2293,8 @@ class MainWindow(TkinterDnD.Tk):
         """
         top= Toplevel(self)
 
-        top.geometry("670x500")
-        window_height = 670
+        top.geometry("750x500")
+        window_height = 750
         window_width = 500
         
         top.title("Advanced Demucs Options")
@@ -2304,7 +2336,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.chunks_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.chunks_d_var, justify='center')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0, text='Chunk Margin', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -2325,26 +2357,32 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Entry(frame0, textvariable=self.overlap_b_var, justify='center')
         l0.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=ttk.Checkbutton(frame0, text='Save Stems to Model Name Directory', variable=self.audfile_var) 
-        l0.grid(row=9,column=0,padx=0,pady=0)
+        l0=tk.Label(frame0, text='Segment', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=9,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
+        l0.grid(row=10,column=0,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Save Stems to Model & Track Name Directory', variable=self.audfile_var) 
+        l0.grid(row=11,column=0,padx=0,pady=0)
         
         l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.modelFolder_var) 
-        l0.grid(row=10,column=0,padx=0,pady=0)
+        l0.grid(row=12,column=0,padx=0,pady=0)
         
         # l0=ttk.Checkbutton(frame0, text='Basic Prediction', variable=self.audfile_var) 
         # l0.grid(row=10,column=0,padx=0,pady=0)
         
         l0=ttk.Button(frame0,text='Open Demucs Model Folder', command=self.open_Modelfolder_de)
-        l0.grid(row=11,column=0,padx=0,pady=0)
+        l0.grid(row=13,column=0,padx=0,pady=0)
         
         l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
-        l0.grid(row=12,column=0,padx=0,pady=10)
+        l0.grid(row=14,column=0,padx=0,pady=10)
         
         def close_win_self():
             top.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=13,column=0,padx=0,pady=0)
+        l0.grid(row=15,column=0,padx=0,pady=0)
         
             
     def advanced_mdx_options(self):
@@ -3435,6 +3473,7 @@ class MainWindow(TkinterDnD.Tk):
             'audfile': self.audfile_var.get(),
             'autocompensate': self.autocompensate_var.get(),
             'chunks': chunks,
+            'chunks_d': self.chunks_d_var.get(),
             'n_fft_scale': self.n_fft_scale_var.get(),
             'segment': self.segment_var.get(),
             'dim_f': self.dim_f_var.get(),

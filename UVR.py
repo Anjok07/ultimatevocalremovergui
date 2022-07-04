@@ -39,7 +39,8 @@ import inference_MDX
 import inference_v5
 import inference_v5_ensemble
 import inference_demucs
-
+# Version
+from __version__ import VERSION
 
 from win32api import GetSystemMetrics
 
@@ -529,8 +530,8 @@ class MainWindow(TkinterDnD.Tk):
         self.command_Text = ThreadSafeConsole(master=self,
                                               background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11),borderwidth=0)
 
-        self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
-       
+        self.command_Text.write(f'Ultimate Vocal Remover v{VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
+            
     def configure_widgets(self):
         """Change widget styling and appearance"""
 

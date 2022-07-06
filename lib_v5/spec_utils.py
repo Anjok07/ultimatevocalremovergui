@@ -78,6 +78,26 @@ def wave_to_spectrogram_mt(wave, hop_length, n_fft, mid_side=False, mid_side_b2=
 
     return spec
     
+def normalize(wave_res):
+    """Save output music files"""
+    maxv = np.abs(wave_res).max()
+    if maxv > 1.0:
+        print(f"Input above threshold for clipping. The result was normalized. Max:{maxv}")
+        wave_res /= maxv
+    else:
+        print(f"Input not above threshold for clipping. Max:{maxv}")
+    
+    return wave_res
+
+def nonormalize(wave_res):
+    """Save output music files"""
+    maxv = np.abs(wave_res).max()
+    if maxv > 1.0:
+        print(f"Input above threshold for clipping. The result was not normalized. Max:{maxv}")
+    else:
+        print(f"Input not above threshold for clipping. Max:{maxv}")
+    
+    return wave_res
     
 def combine_spectrograms(specs, mp):
     l = min([specs[i].shape[2] for i in specs])    
@@ -239,7 +259,7 @@ def cache_or_load(mix_path, inst_path, mp):
     return X_spec_m, y_spec_m
 
 
-def spectrogram_to_wave(spec, hop_length, mid_side, mid_side_b2, reverse):
+def spectrogram_to_wave(spec, hop_length, mid_side, mid_side_b2, reverse, clamp=False):
     spec_left = np.asfortranarray(spec[0])
     spec_right = np.asfortranarray(spec[1])
 
@@ -316,6 +336,46 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
         
     return wave.T
 
+def cmb_spectrogram_to_wave_d(spec_m, mp, extra_bins_h=None, extra_bins=None, demucs=True):
+    wave_band = {}
+    bands_n = len(mp.param['band'])    
+    offset = 0
+
+    for d in range(1, bands_n + 1):
+        bp = mp.param['band'][d]
+        spec_s = np.ndarray(shape=(2, bp['n_fft'] // 2 + 1, spec_m.shape[2]), dtype=complex)
+        h = bp['crop_stop'] - bp['crop_start']
+        spec_s[:, bp['crop_start']:bp['crop_stop'], :] = spec_m[:, offset:offset+h, :]
+        
+        offset += h
+        if d == bands_n: # higher
+            if extra_bins_h: # if --high_end_process bypass
+                max_bin = bp['n_fft'] // 2
+                spec_s[:, max_bin-extra_bins_h:max_bin, :] = extra_bins[:, :extra_bins_h, :]
+            if bp['hpf_start'] > 0:
+                spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
+            if bands_n == 1:
+                wave = spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse'])
+            else:
+                wave = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']))
+        else:
+            sr = mp.param['band'][d+1]['sr']
+            if d == 1: # lower
+                spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
+                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']), bp['sr'], sr, res_type="sinc_fastest")
+            else: # mid
+                spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
+                spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
+                wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']))
+                wave = librosa.resample(wave2, bp['sr'], sr, res_type="sinc_fastest")
+                
+    print(demucs)
+  
+    if demucs == True:
+        wave = librosa.resample(wave, bp['sr'], 44100, res_type="sinc_fastest")
+        return wave
+    else:
+        return wave
 
 def fft_lp_filter(spec, bin_start, bin_stop):
     g = 1.0

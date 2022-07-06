@@ -245,22 +245,22 @@ class Predictor():
                 pass
 
             if 'UVR' in model_set_name:
-                sf.write(Instrumental_path, sources[0].T, samplerate)
-                sf.write(vocals_path, sources[1].T, samplerate)
+                sf.write(Instrumental_path, normalization_set(sources[0]).T, samplerate, subtype=wav_type_set)
+                sf.write(vocals_path, normalization_set(sources[1]).T, samplerate, subtype=wav_type_set)
             else:
-                sf.write(bass_path, sources[0].T, samplerate)
-                sf.write(drums_path, sources[1].T, samplerate)
-                sf.write(other_path, sources[2].T, samplerate)
-                sf.write(vocals_path, sources[3].T, samplerate)
+                sf.write(bass_path, normalization_set(sources[0]).T, samplerate, subtype=wav_type_set)
+                sf.write(drums_path, normalization_set(sources[1]).T, samplerate, subtype=wav_type_set)
+                sf.write(other_path, normalization_set(sources[2]).T, samplerate, subtype=wav_type_set)
+                sf.write(vocals_path, normalization_set(sources[3]).T, samplerate, subtype=wav_type_set)
             
             if data['saveFormat'] == 'Mp3':
                 try:
                     if 'UVR' in model_set_name:
                         widget_text.write(base_text + 'Saving Stem(s) as Mp3(s)... ')
                         musfile = pydub.AudioSegment.from_wav(vocals_path)
-                        musfile.export(vocals_path_mp3, format="mp3", bitrate="320k")    
+                        musfile.export(vocals_path_mp3, format="mp3", bitrate=mp3_bit_set)    
                         musfile = pydub.AudioSegment.from_wav(Instrumental_path)
-                        musfile.export(Instrumental_path_mp3, format="mp3", bitrate="320k") 
+                        musfile.export(Instrumental_path_mp3, format="mp3", bitrate=mp3_bit_set) 
                         try:
                             os.remove(Instrumental_path)
                             os.remove(vocals_path)
@@ -269,13 +269,13 @@ class Predictor():
                     else:
                         widget_text.write(base_text + 'Saving Stem(s) as Mp3(s)... ')
                         musfile = pydub.AudioSegment.from_wav(drums_path)
-                        musfile.export(drums_path_mp3, format="mp3", bitrate="320k")    
+                        musfile.export(drums_path_mp3, format="mp3", bitrate=mp3_bit_set)    
                         musfile = pydub.AudioSegment.from_wav(bass_path)
-                        musfile.export(bass_path_mp3, format="mp3", bitrate="320k")   
+                        musfile.export(bass_path_mp3, format="mp3", bitrate=mp3_bit_set)   
                         musfile = pydub.AudioSegment.from_wav(other_path)
-                        musfile.export(other_path_mp3, format="mp3", bitrate="320k")   
+                        musfile.export(other_path_mp3, format="mp3", bitrate=mp3_bit_set)   
                         musfile = pydub.AudioSegment.from_wav(vocals_path)
-                        musfile.export(vocals_path_mp3, format="mp3", bitrate="320k")  
+                        musfile.export(vocals_path_mp3, format="mp3", bitrate=mp3_bit_set)  
                         try:
                             os.remove(drums_path)
                             os.remove(bass_path)
@@ -364,11 +364,11 @@ class Predictor():
         else:
             if 'UVR' in model_set_name:
                 if stemset_n == '(Vocals)':
-                    sf.write(vocal_path, sources[1].T, samplerate)
+                    sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
                 else:
-                    sf.write(vocal_path, sources[source_val].T, samplerate)
+                    sf.write(vocal_path, sources[source_val].T, samplerate, subtype=wav_type_set)
             else:
-                sf.write(vocal_path, sources[source_val].T, samplerate)
+                sf.write(vocal_path, sources[source_val].T, samplerate, subtype=wav_type_set)
                 
             widget_text.write('Done!\n')
         
@@ -426,7 +426,7 @@ class Predictor():
                     update_progress(**progress_kwargs,
                     step=(1))
                     
-                    sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
+                    sf.write(Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
                 
                     
                 if data['inst_only_b']:
@@ -449,7 +449,7 @@ class Predictor():
                         pass
                     else:
                         musfile = pydub.AudioSegment.from_wav(vocal_path)
-                        musfile.export(vocal_path_mp3, format="mp3", bitrate="320k")
+                        musfile.export(vocal_path_mp3, format="mp3", bitrate=mp3_bit_set)
                         if file_exists_v == 'there':
                             pass
                         else:
@@ -461,7 +461,7 @@ class Predictor():
                         pass
                     else:
                         musfile = pydub.AudioSegment.from_wav(Instrumental_path)
-                        musfile.export(Instrumental_path_mp3, format="mp3", bitrate="320k")
+                        musfile.export(Instrumental_path_mp3, format="mp3", bitrate=mp3_bit_set)
                         if file_exists_i == 'there':
                             pass
                         else:
@@ -693,7 +693,7 @@ data = {
     'demucsmodel': True,
     'gpu': -1,
     'chunks_d': 'Full',
-    'modelFolder': False,
+    'settest': False,
     'voc_only_b': False,
     'inst_only_b': False,
     'overlap_b': 0.25,
@@ -701,10 +701,13 @@ data = {
     'segment': 'None',
     'margin': 44100,
     'split_mode': False,
+    'normalize': False,
     'compensate': 1.03597672895,
     'demucs_stems': 'All Stems',
     'DemucsModel': 'mdx_extra',
     'audfile': True,
+    'wavtype': 'PCM_16',
+    'mp3bit': '320k',
 }
 default_chunks = data['chunks_d']
 
@@ -753,6 +756,13 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global shift_set
     global source_val
     global split_mode
+    
+    global wav_type_set
+    global flac_type_set
+    global mp3_bit_set
+    global normalization_set
+    
+    wav_type_set = data['wavtype']
         
     # Update default settings
     default_chunks = data['chunks_d']
@@ -786,6 +796,23 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     data.update(kwargs)
         
+    if data['wavtype'] == '32-bit Float':
+        wav_type_set = 'FLOAT'
+    elif data['wavtype'] == '64-bit Float':
+        wav_type_set = 'DOUBLE'
+    else:
+        wav_type_set = data['wavtype']
+        
+    flac_type_set = data['flactype']
+    mp3_bit_set = data['mp3bit']
+    
+    if data['normalize'] == True:
+        normalization_set = spec_utils.normalize
+        print('normalization on')
+    else:
+        normalization_set = spec_utils.nonormalize
+        print('normalization off')
+        
     stime = time.perf_counter()
     progress_var.set(0)
     text_widget.clear()
@@ -793,6 +820,22 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     try:    #Load File(s)
         for file_num, music_file in tqdm(enumerate(data['input_paths'], start=1)):
+        
+            if data['wavtype'] == '64-bit Float':
+                if data['saveFormat'] == 'Flac':
+                    text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                    progress_var.set(0)
+                    button_widget.configure(state=tk.NORMAL)  # Enable Button
+                    return 
+                
+            if data['wavtype'] == '64-bit Float':
+                if data['saveFormat'] == 'Mp3':
+                    text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                    progress_var.set(0)
+                    button_widget.configure(state=tk.NORMAL)  # Enable Button
+                    return 
         
             model_set_name = data['DemucsModel']
         
@@ -889,20 +932,20 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         os.mkdir(folder_path)
                 
                 _mixture = f'{data["input_paths"]}'
-                if data['modelFolder']:
+                if data['settest']:
                     try:
-                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{str(timestampnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{str(timestampnum)}_{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                     except:
-                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{str(randomnum)}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{str(randomnum)}_{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                 else:
                     _basename = f'{data["export_path"]}{modelFolderName}{songFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
             else:
                 _mixture = f'{data["input_paths"]}'
-                if data['modelFolder']:
+                if data['settest']:
                     try:
-                        _basename = f'{data["export_path"]}/{file_num}_{str(timestampnum)}_{model_set_name}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}/{str(timestampnum)}_{file_num}_{model_set_name}_{os.path.splitext(os.path.basename(music_file))[0]}'
                     except:
-                        _basename = f'{data["export_path"]}/{file_num}_{str(randomnum)}_{model_set_name}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        _basename = f'{data["export_path"]}/{str(randomnum)}{file_num}_{model_set_name}_{os.path.splitext(os.path.basename(music_file))[0]}'
                 else:
                     _basename = f'{data["export_path"]}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                 

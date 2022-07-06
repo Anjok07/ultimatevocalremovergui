@@ -21,6 +21,7 @@ from PIL import Image
 from PIL import ImageTk
 import pickle  # Save Data
 from pathlib import Path
+
 # Other Modules
 
 # Pathfinding
@@ -39,7 +40,6 @@ import inference_MDX
 import inference_v5
 import inference_v5_ensemble
 import inference_demucs
-# Version
 from __version__ import VERSION
 
 from win32api import GetSystemMetrics
@@ -112,6 +112,7 @@ DEFAULT_DATA = {
     'appendensem': False,
     'demucs_only': False,
     'split_mode': True,
+    'normalize': False,
     #MDX-Net
     'demucsmodel': False,
     'demucsmodelVR': False,
@@ -130,6 +131,9 @@ DEFAULT_DATA = {
     'segment': 'None',
     'dim_f': 2048,
     'noise_pro_select': 'Auto Select',
+    'wavtype': 'PCM_16',
+    'flactype': 'PCM_16',
+    'mp3bit': '320k',
     'overlap': 0.25,
     'shifts': 2,
     'overlap_b': 0.25,
@@ -144,6 +148,7 @@ DEFAULT_DATA = {
     'DemucsModel': 'mdx_extra',
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
     'ModelParams': 'Auto',
+    'settest': False,
 }
 
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
@@ -416,6 +421,7 @@ class MainWindow(TkinterDnD.Tk):
         self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
         self.demucs_only_var = tk.BooleanVar(value=data['demucs_only'])
         self.split_mode_var = tk.BooleanVar(value=data['split_mode'])
+        self.normalize_var = tk.BooleanVar(value=data['normalize'])
         # Processing Options
         self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
         self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
@@ -443,6 +449,9 @@ class MainWindow(TkinterDnD.Tk):
         self.segment_var = tk.StringVar(value=data['segment'])
         self.dim_f_var = tk.StringVar(value=data['dim_f'])
         self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
+        self.wavtype_var = tk.StringVar(value=data['wavtype'])
+        self.flactype_var = tk.StringVar(value=data['flactype'])
+        self.mp3bit_var = tk.StringVar(value=data['mp3bit'])
         self.overlap_var = tk.StringVar(value=data['overlap'])
         self.shifts_var = tk.StringVar(value=data['shifts'])
         self.overlap_b_var = tk.StringVar(value=data['overlap_b'])
@@ -459,6 +468,7 @@ class MainWindow(TkinterDnD.Tk):
         self.inst_only_b_var = tk.BooleanVar(value=data['inst_only_b'])
         self.audfile_var = tk.BooleanVar(value=data['audfile'])
         self.autocompensate_var = tk.BooleanVar(value=data['autocompensate'])
+        self.settest_var = tk.BooleanVar(value=data['settest'])
         # Choose Conversion Method
         self.aiModel_var = tk.StringVar(value=data['aiModel'])
         self.last_aiModel = self.aiModel_var.get()
@@ -530,8 +540,10 @@ class MainWindow(TkinterDnD.Tk):
         self.command_Text = ThreadSafeConsole(master=self,
                                               background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11),borderwidth=0)
 
+        #self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
         self.command_Text.write(f'Ultimate Vocal Remover v{VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
-            
+       
+       
     def configure_widgets(self):
         """Change widget styling and appearance"""
 
@@ -1223,6 +1235,7 @@ class MainWindow(TkinterDnD.Tk):
                             'appendensem': self.appendensem_var.get(),
                             'demucs_only': self.demucs_only_var.get(),
                             'split_mode': self.split_mode_var.get(),
+                            'normalize': self.normalize_var.get(),
                             'tta': self.tta_var.get(),
                             'save': self.save_var.get(),
                             'output_image': self.outputImage_var.get(),
@@ -1261,6 +1274,7 @@ class MainWindow(TkinterDnD.Tk):
                             'inst_only_b': self.inst_only_b_var.get(),
                             'audfile': self.audfile_var.get(),
                             'autocompensate': self.autocompensate_var.get(),
+                            'settest': self.settest_var.get(),
                             'chunks': chunks,
                             'chunks_d': self.chunks_d_var.get(),
                             'noisereduc_s': noisereduc_s,
@@ -1269,6 +1283,9 @@ class MainWindow(TkinterDnD.Tk):
                             'segment': self.segment_var.get(),
                             'dim_f': self.dim_f_var.get(),
                             'noise_pro_select': self.noise_pro_select_var.get(),
+                            'wavtype': self.wavtype_var.get(),
+                            'flactype': self.flactype_var.get(),
+                            'mp3bit': self.mp3bit_var.get(),
                             'overlap': self.overlap_var.get(),
                             'shifts': self.shifts_var.get(),
                             'overlap_b': self.overlap_b_var.get(),
@@ -2009,14 +2026,13 @@ class MainWindow(TkinterDnD.Tk):
 
 
         if self.autocompensate_var.get() == True:
-            self.compensate_var.set('Auto')
             try:
                 self.options_compensate.configure(state=tk.DISABLED)
             except:
                 pass
             
         if self.autocompensate_var.get() == False:
-            self.compensate_var.set(1.03597672895)
+            #self.compensate_var.set()
             try:
                 self.options_compensate.configure(state=tk.NORMAL)
             except:
@@ -2365,25 +2381,19 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=10,column=0,padx=0,pady=0)
         
         l0=ttk.Checkbutton(frame0, text='Save Stems to Model & Track Name Directory', variable=self.audfile_var) 
-        l0.grid(row=11,column=0,padx=0,pady=0)
-        
-        l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.modelFolder_var) 
-        l0.grid(row=12,column=0,padx=0,pady=0)
-        
-        # l0=ttk.Checkbutton(frame0, text='Basic Prediction', variable=self.audfile_var) 
-        # l0.grid(row=10,column=0,padx=0,pady=0)
+        l0.grid(row=11,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text='Open Demucs Model Folder', command=self.open_Modelfolder_de)
-        l0.grid(row=13,column=0,padx=0,pady=0)
+        l0.grid(row=12,column=0,padx=0,pady=0)
         
         l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
-        l0.grid(row=14,column=0,padx=0,pady=10)
+        l0.grid(row=13,column=0,padx=0,pady=10)
         
         def close_win_self():
             top.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=15,column=0,padx=0,pady=0)
+        l0.grid(row=14,column=0,padx=0,pady=0)
         
             
     def advanced_mdx_options(self):
@@ -2467,13 +2477,13 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=8,column=0,padx=0,pady=0)
         
         l0=ttk.Checkbutton(frame0, text='Autoset Volume Compensation', variable=self.autocompensate_var) 
-        l0.grid(row=9,column=0,padx=0,pady=10)
+        l0.grid(row=9,column=0,padx=0,pady=5)
         
         l0=ttk.Checkbutton(frame0, text='Reduce Instrumental Noise Separately', variable=self.nophaseinst_var) 
         l0.grid(row=10,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=11,column=0,padx=0,pady=10)
+        l0.grid(row=11,column=0,padx=0,pady=5)
         
         l0=ttk.OptionMenu(frame0, self.noise_pro_select_var, None, 'Auto Select', 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
         l0.grid(row=12,column=0,padx=0,pady=0)
@@ -3242,13 +3252,18 @@ class MainWindow(TkinterDnD.Tk):
         tabControl = ttk.Notebook(top)
   
         tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='Settings Guide')
+        tabControl.add(tab2, text ='Audio Format Settings')
 
         tabControl.pack(expand = 1, fill ="both")
         
         tab1.grid_rowconfigure(0, weight=1)
         tab1.grid_columnconfigure(0, weight=1)
+        
+        tab2.grid_rowconfigure(0, weight=1)
+        tab2.grid_columnconfigure(0, weight=1)
 
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
@@ -3277,11 +3292,35 @@ class MainWindow(TkinterDnD.Tk):
         l0=Label(frame0,text="Additional Options",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=7,column=0,padx=0,pady=10)
         
+        l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.settest_var) 
+        l0.grid(row=8,column=0,padx=0,pady=0)
+        
         l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
-        l0.grid(row=8,column=0,padx=20,pady=5)
+        l0.grid(row=9,column=0,padx=20,pady=5)
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win)
-        l0.grid(row=9,column=0,padx=20,pady=5)
+        l0.grid(row=10,column=0,padx=20,pady=5)
+        
+        frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=0)  
+        
+        l0=Label(frame0,text="Audio Format Settings",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0.grid(row=0,column=0,padx=0,pady=10)
+        
+        l0=tk.Label(frame0, text='Wav Type', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=10)
+        
+        l0=ttk.OptionMenu(frame0, self.wavtype_var, None, 'PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
+        l0.grid(row=2,column=0,padx=20,pady=0)
+        
+        l0=tk.Label(frame0, text='Mp3 Bitrate', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=10)
+        
+        l0=ttk.OptionMenu(frame0, self.mp3bit_var, None, '96k', '128k', '160k', '224k', '256k', '320k')
+        l0.grid(row=6,column=0,padx=20,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Normalize Outputs\n(Prevents clipping)', variable=self.normalize_var) 
+        l0.grid(row=7,column=0,padx=0,pady=10)
         
         
     def error_log(self):
@@ -3443,6 +3482,7 @@ class MainWindow(TkinterDnD.Tk):
             'appendensem': self.appendensem_var.get(),
             'demucs_only': self.demucs_only_var.get(),
             'split_mode': self.split_mode_var.get(),
+            'normalize': self.normalize_var.get(),
             'postprocess': self.postprocessing_var.get(),
             'tta': self.tta_var.get(),
             'save': self.save_var.get(),
@@ -3473,12 +3513,16 @@ class MainWindow(TkinterDnD.Tk):
             'inst_only_b': self.inst_only_b_var.get(),
             'audfile': self.audfile_var.get(),
             'autocompensate': self.autocompensate_var.get(),
+            'settest': self.settest_var.get(),
             'chunks': chunks,
             'chunks_d': self.chunks_d_var.get(),
             'n_fft_scale': self.n_fft_scale_var.get(),
             'segment': self.segment_var.get(),
             'dim_f': self.dim_f_var.get(),
             'noise_pro_select': self.noise_pro_select_var.get(),
+            'wavtype': self.wavtype_var.get(),
+            'flactype': self.flactype_var.get(),
+            'mp3bit': self.mp3bit_var.get(),
             'overlap': self.overlap_var.get(),
             'shifts': self.shifts_var.get(),
             'overlap_b': self.overlap_b_var.get(),

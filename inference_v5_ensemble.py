@@ -6,6 +6,7 @@ from pathlib import Path
 import pydub
 import hashlib
 from random import randrange
+import re
 
 import subprocess
 import soundfile as sf
@@ -172,7 +173,7 @@ class Predictor():
                     widget_text.write(base_text + 'Preparing to save Instrumental...')
                 else:
                     widget_text.write(base_text + 'Saving vocals... ')
-                sf.write(non_reduced_vocal_path, sources[c].T, samplerate)
+                sf.write(non_reduced_vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
                 widget_text.write('Done!\n')        
@@ -193,17 +194,17 @@ class Predictor():
                     widget_text.write(base_text + 'Saving Vocals... ')
                 if demucs_only == 'on':
                     if 'UVR' in model_set_name:
-                        sf.write(vocal_path, sources[1].T, samplerate)
+                        sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
                         update_progress(**progress_kwargs,
                         step=(0.95))
                         widget_text.write('Done!\n') 
                     if 'extra' in model_set_name:
-                        sf.write(vocal_path, sources[3].T, samplerate)    
+                        sf.write(vocal_path, sources[3].T, samplerate, subtype=wav_type_set)    
                         update_progress(**progress_kwargs,
                         step=(0.95))
                         widget_text.write('Done!\n') 
                 else:
-                    sf.write(non_reduced_vocal_path, sources[3].T, samplerate)
+                    sf.write(non_reduced_vocal_path, sources[3].T, samplerate, subtype=wav_type_set)
                     update_progress(**progress_kwargs,
                     step=(0.9))
                     widget_text.write('Done!\n')
@@ -221,7 +222,7 @@ class Predictor():
             c += 1
             if demucs_switch == 'off':
                 widget_text.write(base_text + 'Saving Vocals..')
-                sf.write(vocal_path, sources[c].T, samplerate)
+                sf.write(vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
                 widget_text.write('Done!\n')
@@ -229,11 +230,11 @@ class Predictor():
                 widget_text.write(base_text + 'Saving Vocals... ')
                 if demucs_only == 'on':
                     if 'UVR' in model_set_name:
-                        sf.write(vocal_path, sources[1].T, samplerate)
+                        sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
                     if 'extra' in model_set_name:
-                        sf.write(vocal_path, sources[3].T, samplerate)
+                        sf.write(vocal_path, sources[3].T, samplerate, subtype=wav_type_set)
                 else:
-                    sf.write(vocal_path, sources[3].T, samplerate)
+                    sf.write(vocal_path, sources[3].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
                 widget_text.write('Done!\n')
@@ -284,7 +285,7 @@ class Predictor():
                 v_spec = specs[1] - max_mag * np.exp(1.j * np.angle(specs[0]))
                 update_progress(**progress_kwargs,
                 step=(0.95))
-                sf.write(Instrumental_path, spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
+                sf.write(Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
                 if data['inst_only']:
                     if file_exists == 'there':
                         pass
@@ -413,7 +414,10 @@ class Predictor():
                                             algorithm=data['mixing'],
                                             value=b[3])*float(compensate)) # compensation
                 
-        return sources
+        if demucs_switch == 'off':    
+            return sources*float(compensate)
+        else:
+            return sources
     
     def demix_base(self, mixes, margin_size):
         chunked_sources = []
@@ -642,11 +646,15 @@ data = {
     'shifts': 0,
     'margin': 44100,
     'split_mode': False,
+    'normalize': False,
     'compensate': 1.03597672895,
     'autocompensate': True,
     'demucs_only': False,
     'mixing': 'Default',
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
+    'wavtype': 'PCM_16',
+    'mp3bit': '320k',
+    'settest': False,
     
     # Models
     'instrumentalModel': None,
@@ -694,21 +702,22 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global ModelName_2
     global compensate
     global autocompensate
-    
     global demucs_model_set
-
     global channel_set
     global margin_set
     global overlap_set
     global shift_set
-    
     global noise_pro_set
     global n_fft_scale_set
     global dim_f_set
-    
     global split_mode
     global demucs_switch
     global demucs_only
+    global wav_type_set
+    global flac_type_set
+    global mp3_bit_set
+    
+    wav_type_set = data['wavtype']
     
     # Update default settings
     default_chunks = data['chunks']
@@ -768,7 +777,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         # to reversement
 
         sf.write(f'temp.wav',
-                 wav_instrument, mp.param['sr'])
+                 normalization_set(wav_instrument), mp.param['sr'], subtype=wav_type_set)
         
         # -Save files-
         # Instrumental
@@ -780,14 +789,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
              
         if VModel in ModelName_1 and data['voc_only']:
                 sf.write(instrumental_path,
-                        wav_instrument, mp.param['sr'])
+                        normalization_set(wav_instrument), mp.param['sr'], subtype=wav_type_set)
         elif VModel in ModelName_1 and data['inst_only']:
             pass
         elif data['voc_only']:
             pass
         else:
                 sf.write(instrumental_path,
-                        wav_instrument, mp.param['sr'])
+                        normalization_set(wav_instrument), mp.param['sr'], subtype=wav_type_set)
                 
         # Vocal
         if vocal_name is not None:
@@ -798,22 +807,41 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             
             if VModel in ModelName_1 and data['inst_only']:
                 sf.write(vocal_path,
-                            wav_vocals, mp.param['sr'])
+                            normalization_set(wav_vocals), mp.param['sr'], subtype=wav_type_set)
             elif VModel in ModelName_1 and data['voc_only']:
                 pass
             elif data['inst_only']:
                 pass
             else:
                 sf.write(vocal_path,
-                            wav_vocals, mp.param['sr'])
+                            normalization_set(wav_vocals), mp.param['sr'], subtype=wav_type_set)
 
     data.update(kwargs)
 
     # Update default settings
     global default_window_size
     global default_agg
+    global normalization_set
+    
     default_window_size = data['window_size']
     default_agg = data['agg']
+
+    if data['wavtype'] == '32-bit Float':
+        wav_type_set = 'FLOAT'
+    elif data['wavtype'] == '64-bit Float':
+        wav_type_set = 'DOUBLE'
+    else:
+        wav_type_set = data['wavtype']
+        
+    flac_type_set = data['flactype']
+    mp3_bit_set = data['mp3bit']
+    
+    if data['normalize'] == True:
+        normalization_set = spec_utils.normalize
+        print('normalization on')
+    else:
+        normalization_set = spec_utils.nonormalize
+        print('normalization off')
 
     stime = time.perf_counter()
     progress_var.set(0)
@@ -853,6 +881,21 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         else:
             demucs_only = 'off'
         
+        if data['wavtype'] == '64-bit Float':
+            if data['saveFormat'] == 'Flac':
+                text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                progress_var.set(0)
+                button_widget.configure(state=tk.NORMAL)  # Enable Button
+                return 
+            
+        if data['wavtype'] == '64-bit Float':
+            if data['saveFormat'] == 'Mp3':
+                text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                progress_var.set(0)
+                button_widget.configure(state=tk.NORMAL)  # Enable Button
+                return 
 
         if not data['ensChoose'] == 'Manual Ensemble':
             
@@ -1706,9 +1749,16 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     os.mkdir(folder_path)
                                         
                             # Determine File Name
+                            
                             base_name = f'{data["export_path"]}{enseFolderName}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                            
                             enseExport = f'{data["export_path"]}{enseFolderName}/'
                             trackname = f'{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                            
+                            def get_numbers_from_filename(filename):
+                                return re.search(r'\d+', filename).group(0)
+                            
+                            foldernum = get_numbers_from_filename(enseFolderName)
                             
                             
                             if c['model_location'] == 'pass':
@@ -2249,79 +2299,156 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         return [f"{folder}{i}" for i in os.listdir(folder) if i.startswith(prefix) if i.endswith(suffix)]
                 
                     if data['appendensem'] == False:
-                        voc_inst = [
-                            {
-                                'algorithm':'min_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                                'output':'{}_(Instrumental)'.format(trackname),
-                                'type': 'Instrumentals'
-                            },
-                            {
-                                'algorithm':'max_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                                'output': '{}_(Vocals)'.format(trackname),
-                                'type': 'Vocals'
-                            }
-                        ]
+                        if data['settest']:
+                            voc_inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_{}_(Instrumental)'.format(foldernum, trackname),
+                                    'type': 'Instrumentals'
+                                },
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_{}_(Vocals)'.format(foldernum, trackname),
+                                    'type': 'Vocals'
+                                }
+                            ]
 
-                        inst = [
-                            {
-                                'algorithm':'min_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                                'output':'{}_(Instrumental)'.format(trackname),
-                                'type': 'Instrumentals'
-                            }
-                        ]
+                            inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_{}_(Instrumental)'.format(foldernum, trackname),
+                                    'type': 'Instrumentals'
+                                }
+                            ]
 
-                        vocal = [
-                            {
-                                'algorithm':'max_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                                'output': '{}_(Vocals)'.format(trackname),
-                                'type': 'Vocals'
-                            }
-                        ]
+                            vocal = [
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_{}_(Vocals)'.format(foldernum, trackname),
+                                    'type': 'Vocals'
+                                }
+                            ]
+                        else:
+                            voc_inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_(Instrumental)'.format(trackname),
+                                    'type': 'Instrumentals'
+                                },
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_(Vocals)'.format(trackname),
+                                    'type': 'Vocals'
+                                }
+                            ]
+
+                            inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_(Instrumental)'.format(trackname),
+                                    'type': 'Instrumentals'
+                                }
+                            ]
+
+                            vocal = [
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_(Vocals)'.format(trackname),
+                                    'type': 'Vocals'
+                                }
+                            ]
+                            
                     else:
-                        voc_inst = [
-                            {
-                                'algorithm':'min_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                                'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
-                                'type': 'Instrumentals'
-                            },
-                            {
-                                'algorithm':'max_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                                'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
-                                'type': 'Vocals'
-                            }
-                        ]
+                        if data['settest']:
+                            voc_inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_{}_Ensembled_{}_(Instrumental)'.format(foldernum, trackname, ensemode),
+                                    'type': 'Instrumentals'
+                                },
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_{}_Ensembled_{}_(Vocals)'.format(foldernum, trackname, ensemode),
+                                    'type': 'Vocals'
+                                }
+                            ]
 
-                        inst = [
-                            {
-                                'algorithm':'min_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
-                                'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
-                                'type': 'Instrumentals'
-                            }
-                        ]
+                            inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_{}_Ensembled_{}_(Instrumental)'.format(foldernum, trackname, ensemode),
+                                    'type': 'Instrumentals'
+                                }
+                            ]
 
-                        vocal = [
-                            {
-                                'algorithm':'max_mag',
-                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                                'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
-                                'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
-                                'type': 'Vocals'
-                            }
-                        ] 
+                            vocal = [
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_{}_Ensembled_{}_(Vocals)'.format(foldernum, trackname, ensemode),
+                                    'type': 'Vocals'
+                                }
+                            ] 
+                        else:
+                            voc_inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
+                                    'type': 'Instrumentals'
+                                },
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
+                                    'type': 'Vocals'
+                                }
+                            ]
+
+                            inst = [
+                                {
+                                    'algorithm':'min_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Instrumental).wav"),
+                                    'output':'{}_Ensembled_{}_(Instrumental)'.format(trackname, ensemode),
+                                    'type': 'Instrumentals'
+                                }
+                            ]
+
+                            vocal = [
+                                {
+                                    'algorithm':'max_mag',
+                                    'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                    'files':get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav"),
+                                    'output': '{}_Ensembled_{}_(Vocals)'.format(trackname, ensemode),
+                                    'type': 'Vocals'
+                                }
+                            ] 
 
                     if data['voc_only']:
                         ensembles = vocal
@@ -2362,13 +2489,13 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             del wave    
                             
                             sf.write(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])), 
-                                    spec_utils.cmb_spectrogram_to_wave(spec_utils.ensembling(e['algorithm'], 
-                                                                                    specs), mp), mp.param['sr'])
+                                    normalization_set(spec_utils.cmb_spectrogram_to_wave(spec_utils.ensembling(e['algorithm'], 
+                                                                                    specs), mp)), mp.param['sr'], subtype=wav_type_set)
                             
                             if data['saveFormat'] == 'Mp3':
                                 try:
                                     musfile = pydub.AudioSegment.from_wav(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])))
-                                    musfile.export((os.path.join('{}'.format(data['export_path']),'{}.mp3'.format(e['output']))), format="mp3", bitrate="320k")
+                                    musfile.export((os.path.join('{}'.format(data['export_path']),'{}.mp3'.format(e['output']))), format="mp3", bitrate=mp3_bit_set)
                                     os.remove((os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output']))))
                                 except Exception as e:
                                     traceback_text = ''.join(traceback.format_tb(e.__traceback__))
@@ -2456,7 +2583,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     if trackname in file:
                                         musfile = pydub.AudioSegment.from_wav(file)
                                         #rename them using the old name + ".wav"
-                                        musfile.export("{0}.mp3".format(name), format="mp3", bitrate="320k")    
+                                        musfile.export("{0}.mp3".format(name), format="mp3", bitrate=mp3_bit_set)    
                             try:
                                 files = get_files(folder=enseExport, prefix=trackname, suffix="_(Vocals).wav")
                                 for file in files:
@@ -2607,39 +2734,112 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 savefilename = (data['input_paths'][0])
                 trackname1 = f'{os.path.splitext(os.path.basename(savefilename))[0]}'
                 
-                insts = [
-                    {
-                        'algorithm':'min_mag',
-                        'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output':'{}_Manual_Ensemble_(Min Spec)'.format(trackname1),
-                        'type': 'Instrumentals'
-                    }
-                ]
+                timestampnum = round(datetime.utcnow().timestamp())
+                randomnum = randrange(100000, 1000000)
+                
+                if data['settest']:
+                    try:
+                        insts = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output':'{}_{}_Manual_Ensemble_(Min Spec)'.format(timestampnum, trackname1),
+                                'type': 'Instrumentals'
+                            }
+                        ]
 
-                vocals = [
-                    {
-                        'algorithm':'max_mag',
-                        'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output': '{}_Manual_Ensemble_(Max Spec)'.format(trackname1),
-                        'type': 'Vocals'
-                    }
-                ]
-                
-                invert_spec = [
-                    {
-                        'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output': '{}_diff_si'.format(trackname1),
-                        'type': 'Spectral Inversion'
-                    }
-                ]
-                
-                invert_nor = [
-                    {
-                        'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
-                        'output': '{}_diff_ni'.format(trackname1),
-                        'type': 'Normal Inversion'
-                    }
-                ]
+                        vocals = [
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_Manual_Ensemble_(Max Spec)'.format(timestampnum, trackname1),
+                                'type': 'Vocals'
+                            }
+                        ]
+                        
+                        invert_spec = [
+                            {
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_diff_si'.format(timestampnum, trackname1),
+                                'type': 'Spectral Inversion'
+                            }
+                        ]
+                        
+                        invert_nor = [
+                            {
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_diff_ni'.format(timestampnum, trackname1),
+                                'type': 'Normal Inversion'
+                            }
+                        ]
+                    except:
+                        insts = [
+                            {
+                                'algorithm':'min_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output':'{}_{}_Manual_Ensemble_(Min Spec)'.format(randomnum, trackname1),
+                                'type': 'Instrumentals'
+                            }
+                        ]
+
+                        vocals = [
+                            {
+                                'algorithm':'max_mag',
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_Manual_Ensemble_(Max Spec)'.format(randomnum, trackname1),
+                                'type': 'Vocals'
+                            }
+                        ]
+                        
+                        invert_spec = [
+                            {
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_diff_si'.format(randomnum, trackname1),
+                                'type': 'Spectral Inversion'
+                            }
+                        ]
+                        
+                        invert_nor = [
+                            {
+                                'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                                'output': '{}_{}_diff_ni'.format(randomnum, trackname1),
+                                'type': 'Normal Inversion'
+                            }
+                        ]
+                else:
+                    insts = [
+                        {
+                            'algorithm':'min_mag',
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'output':'{}_Manual_Ensemble_(Min Spec)'.format(trackname1),
+                            'type': 'Instrumentals'
+                        }
+                    ]
+
+                    vocals = [
+                        {
+                            'algorithm':'max_mag',
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'output': '{}_Manual_Ensemble_(Max Spec)'.format(trackname1),
+                            'type': 'Vocals'
+                        }
+                    ]
+                    
+                    invert_spec = [
+                        {
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'output': '{}_diff_si'.format(trackname1),
+                            'type': 'Spectral Inversion'
+                        }
+                    ]
+                    
+                    invert_nor = [
+                        {
+                            'model_params':'lib_v5/modelparams/1band_sr44100_hl512.json',
+                            'output': '{}_diff_ni'.format(trackname1),
+                            'type': 'Normal Inversion'
+                        }
+                    ]
                 
                 if data['algo'] == 'Instrumentals (Min Spec)':
                     ensem = insts
@@ -2681,13 +2881,13 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         del wave    
 
                         sf.write(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])), 
-                                spec_utils.cmb_spectrogram_to_wave(spec_utils.ensembling(e['algorithm'], 
-                                                                                specs), mp), mp.param['sr'])
+                                normalization_set(spec_utils.cmb_spectrogram_to_wave(spec_utils.ensembling(e['algorithm'], 
+                                                                                specs), mp)), mp.param['sr'], subtype=wav_type_set)
                         
                     if data['saveFormat'] == 'Mp3':
                         try:
                             musfile = pydub.AudioSegment.from_wav(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])))
-                            musfile.export((os.path.join('{}'.format(data['export_path']),'{}.mp3'.format(e['output']))), format="mp3", bitrate="320k")
+                            musfile.export((os.path.join('{}'.format(data['export_path']),'{}.mp3'.format(e['output']))), format="mp3", bitrate=mp3_bit_set)
                             os.remove((os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output']))))
                         except Exception as e:
                             text_widget.write('\n' + base_text + 'Failed to save output(s) as Mp3.')
@@ -2782,11 +2982,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 max_mag = np.where(X_mag >= y_mag, X_mag, y_mag)  
                                 v_spec = specs[1] - max_mag * np.exp(1.j * np.angle(specs[0]))
                                 sf.write(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])), 
-                                        spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'])
+                                        spec_utils.cmb_spectrogram_to_wave(-v_spec, mp), mp.param['sr'], subtype=wav_type_set)
                             if data['algo'] == 'Invert (Normal)':
                                 v_spec = specs[0] - specs[1]
                                 sf.write(os.path.join('{}'.format(data['export_path']),'{}.wav'.format(e['output'])), 
-                                        spec_utils.cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'])
+                                        spec_utils.cmb_spectrogram_to_wave(v_spec, mp), mp.param['sr'], subtype=wav_type_set)
                             text_widget.write("Done!\n")
                             
 

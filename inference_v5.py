@@ -28,6 +28,7 @@ from collections import defaultdict
 import tkinter as tk
 import traceback  # Error Message Recent Calls
 import time  # Timer
+from random import randrange
 
 class VocalRemover(object):
     
@@ -63,7 +64,11 @@ data = {
     'shifts': 0,
     'segment': 'None',
     'split_mode': False,
+    'normalize': False,
     'demucsmodelVR': True,
+    'wavtype': 'PCM_16',
+    'mp3bit': '320k',
+    'settest': False,
 }
 
 default_window_size = data['window_size']
@@ -113,6 +118,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global shift_set
     global split_mode
     global demucs_model_set
+    global wav_type_set
+    
+    global flac_type_set
+    global mp3_bit_set
+    
+    wav_type_set = data['wavtype']
     
     #Error Handling
     
@@ -158,13 +169,13 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         # and for vocal the instrumental is the temp file due
         # to reversement
         if data['demucsmodelVR']:
-            sameplerate = 44100
+            samplerate = 44100
         else:
-            sameplerate = mp.param['sr']
+            samplerate = mp.param['sr']
             
             
         sf.write(f'temp.wav',
-                 wav_instrument.T, sameplerate)
+                 normalization_set(wav_instrument).T, samplerate, subtype=wav_type_set)
 
         appendModelFolderName = modelFolderName.replace('/', '_')
         
@@ -199,14 +210,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
              
         if VModel in model_name and data['voc_only']:
                 sf.write(instrumental_path,
-                        wav_instrument.T, sameplerate)
+                        normalization_set(wav_instrument).T, samplerate, subtype=wav_type_set)
         elif VModel in model_name and data['inst_only']:
             pass
         elif data['voc_only']:
             pass
         else:
                 sf.write(instrumental_path,
-                        wav_instrument.T, sameplerate)
+                        normalization_set(wav_instrument).T, samplerate, subtype=wav_type_set)
                 
         # Vocal
         if vocal_name is not None:
@@ -238,14 +249,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
             if VModel in model_name and data['inst_only']:
                 sf.write(vocal_path,
-                            wav_vocals.T, sameplerate)
+                            normalization_set(wav_vocals).T, samplerate, subtype=wav_type_set)
             elif VModel in model_name and data['voc_only']:
                 pass
             elif data['inst_only']:
                 pass
             else:
                 sf.write(vocal_path,
-                            wav_vocals.T, sameplerate)
+                            normalization_set(wav_vocals).T, samplerate, subtype=wav_type_set)
         
             if data['saveFormat'] == 'Mp3':
                 try:
@@ -253,7 +264,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         pass
                     else:
                         musfile = pydub.AudioSegment.from_wav(vocal_path)
-                        musfile.export(vocal_path_mp3, format="mp3", bitrate="320k")
+                        musfile.export(vocal_path_mp3, format="mp3", bitrate=mp3_bit_set)
                         if file_exists_v == 'there':
                             pass
                         else:
@@ -265,7 +276,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         pass
                     else:
                         musfile = pydub.AudioSegment.from_wav(instrumental_path)
-                        musfile.export(instrumental_path_mp3, format="mp3", bitrate="320k")
+                        musfile.export(instrumental_path_mp3, format="mp3", bitrate=mp3_bit_set)
                         if file_exists_i == 'there':
                             pass
                         else:
@@ -377,6 +388,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     # Update default settings
     global default_window_size
     global default_agg
+    global normalization_set
     default_window_size = data['window_size']
     default_agg = data['agg']
 
@@ -389,16 +401,43 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     shift_set = int(data['shifts'])
     demucs_model_set = data['demucsmodel_sel_VR']
     split_mode = data['split_mode']
+    
+    if data['wavtype'] == '32-bit Float':
+        wav_type_set = 'FLOAT'
+    elif data['wavtype'] == '64-bit Float':
+        wav_type_set = 'DOUBLE'
+    else:
+        wav_type_set = data['wavtype']
+        
+    flac_type_set = data['flactype']
+    mp3_bit_set = data['mp3bit']
+    
+    if data['normalize'] == True:
+        normalization_set = spec_utils.normalize
+        print('normalization on')
+    else:
+        normalization_set = spec_utils.nonormalize
+        print('normalization off')
 
     vocal_remover = VocalRemover(data, text_widget)
     modelFolderName = determineModelFolderName()
+
+    timestampnum = round(datetime.utcnow().timestamp())
+    randomnum = randrange(100000, 1000000)
 
     # Separation Preperation
     try:        #Load File(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
                         # Determine File Name
                         m=music_file
-                        base_name = f'{data["export_path"]}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        
+                        if data['settest']:
+                            try:
+                                base_name = f'{data["export_path"]}/{str(timestampnum)}_{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                            except:
+                                base_name = f'{data["export_path"]}/{str(randomnum)}_{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
+                        else:
+                            base_name = f'{data["export_path"]}/{file_num}_{os.path.splitext(os.path.basename(music_file))[0]}'
                         
                         model_name = os.path.basename(data[f'{data["useModel"]}Model'])
                         model = vocal_remover.models[data['useModel']]
@@ -435,6 +474,22 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 text_widget.write('Detected Free Space: ' + str(free_space) + ' GB' + '\n\n')
                         except:
                             pass
+                        
+                        if data['wavtype'] == '64-bit Float':
+                            if data['saveFormat'] == 'Flac':
+                                text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                                text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                                progress_var.set(0)
+                                button_widget.configure(state=tk.NORMAL)  # Enable Button
+                                return 
+                            
+                        if data['wavtype'] == '64-bit Float':
+                            if data['saveFormat'] == 'Mp3':
+                                text_widget.write('Please select \"WAV\" as your save format to use 64-bit Float.\n')
+                                text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                                progress_var.set(0)
+                                button_widget.configure(state=tk.NORMAL)  # Enable Button
+                                return 
                 
                         #Load Model      
                         text_widget.write(base_text + 'Loading models...')

@@ -18,6 +18,7 @@ import zlib
 
 import torch
 
+import pyximport; pyximport.install()
 from . import bitpack
 from . import torch_pack as torch_pack_mod
 

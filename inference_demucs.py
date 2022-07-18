@@ -559,7 +559,7 @@ class Predictor():
                     except:
                         pass
         
-        widget_text.write(base_text + 'Completed Seperation!\n')
+        widget_text.write(base_text + 'Completed Separation!\n')
 
     def demix(self, mix):
 

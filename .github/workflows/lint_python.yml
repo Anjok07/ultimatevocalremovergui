@@ -1,0 +1,26 @@
+name: lint_python
+on: [pull_request, push, workflow_dispatch]
+jobs:
+  lint_python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+      - run: pipx --version
+      - run: pip install flake8 flake8-2020 flake8-bugbear flake8-comprehensions
+      - run: pipx run bandit --recursive --skip B101,B110,B301,B303,B311,B324,B403,B404,B602,B603,B605,B606,B607 .
+      - run: pipx run black --check . || true
+      - run: pipx run codespell --ignore-words-list=activ,fo,nin,ot,trough
+      - run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - run: flake8 . --count --exit-zero --max-complexity=10 --max-line-length=88
+                      --show-source --statistics
+      - run: pipx run isort --check-only --profile black . || true
+      - run: pip install -r requirements.txt
+      - run: mkdir --parents --verbose .mypy_cache
+      - run: pipx run mypy --ignore-missing-imports --install-types --non-interactive . || true
+      - run: pipx run pytest . || true
+      - run: pipx run pytest --doctest-modules . || true
+      - run: shopt -s globstar && pipx run pyupgrade --py37-plus **/*.py || true
+      - run: pipx run safety check

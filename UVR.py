@@ -154,7 +154,7 @@ DEFAULT_DATA = {
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
     """
     Open the image on the path and apply given settings\n
-    Paramaters:
+    Parameters:
         path(str):
             Absolute path of the image
         size(tuple):
@@ -184,7 +184,7 @@ def save_data(data):
     """
     Saves given data as a .pkl (pickle) file
 
-    Paramters:
+    Parameters:
         data(dict):
             Dictionary containing all the necessary data to save
     """
@@ -596,7 +596,7 @@ class MainWindow(TkinterDnD.Tk):
                                relx=0, rely=0, relwidth=1, relheight=0)
 
     def fill_filePaths_Frame(self):
-        """Fill Frame with neccessary widgets"""
+        """Fill Frame with necessary widgets"""
         # -Create Widgets-
         # Save To Option
          # Select Music Files Option
@@ -636,7 +636,7 @@ class MainWindow(TkinterDnD.Tk):
 
 
     def fill_options_Frame(self):
-        """Fill Frame with neccessary widgets"""
+        """Fill Frame with necessary widgets"""
         # -Create Widgets-
       
 
@@ -2167,7 +2167,7 @@ class MainWindow(TkinterDnD.Tk):
             pass
 
     def open_newModel_filedialog(self):
-        """Let user paste an MDX-Net model to use for the vocal seperation"""
+        """Let user paste an MDX-Net model to use for the vocal separation"""
         
         filename = 'models\MDX_Net_Models'
 
@@ -3401,7 +3401,7 @@ class MainWindow(TkinterDnD.Tk):
             pyperclip.copy(copy_t)
             
     def open_Modelfolder_filedialog(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal separation"""
         filename = 'models'
 
         if sys.platform == "win32":
@@ -3411,7 +3411,7 @@ class MainWindow(TkinterDnD.Tk):
             subprocess.call([opener, filename])
             
     def open_Modelfolder_vr(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal separation"""
         filename = 'models\Main_Models'
 
         if sys.platform == "win32":
@@ -3421,7 +3421,7 @@ class MainWindow(TkinterDnD.Tk):
             subprocess.call([opener, filename])
             
     def open_Modelfolder_de(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal separation"""
         filename = 'models\Demucs_Models'
 
         if sys.platform == "win32":

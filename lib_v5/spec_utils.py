@@ -113,7 +113,7 @@ def combine_spectrograms(specs, mp):
     if offset > mp.param['bins']:
         raise ValueError('Too much bins')
         
-    # lowpass fiter
+    # lowpass filter
     if mp.param['pre_filter_start'] > 0: # and mp.param['band'][bands_n]['res_type'] in ['scipy', 'polyphase']:   
         if bands_n == 1:
             spec_c = fft_lp_filter(spec_c, mp.param['pre_filter_start'], mp.param['pre_filter_stop'])

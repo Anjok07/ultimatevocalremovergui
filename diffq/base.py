@@ -174,25 +174,25 @@ class BaseQuantizer:
     def _bit_pack_param(self, qparam: _QuantizedParam, quantized: tp.Any,
                         pack_fn: tp.Any) -> tp.Any:
         """Further bitpack the quantized representation.
-        This is used to return the quantized state. Should be overriden.
+        This is used to return the quantized state. Should be overridden.
         """
         return quantized
 
     def _bit_unpack_param(self, qparam: _QuantizedParam, packed: tp.Any,
                           unpack_fn: tp.Any) -> tp.Any:
-        """Unpack bitpacked representation. Should be overriden
+        """Unpack bitpacked representation. Should be overridden
         """
         return packed
 
     def _quantize_param(self, qparam: _QuantizedParam) -> tp.Any:
         """
-        To be overriden.
+        To be overridden.
         """
         raise NotImplementedError()
 
     def _unquantize_param(self, qparam: _QuantizedParam, quantized: tp.Any) -> torch.Tensor:
         """
-        To be overriden.
+        To be overridden.
         """
         raise NotImplementedError()
 

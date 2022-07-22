@@ -156,7 +156,7 @@ class LSQ(BaseQuantizer):
         return (packed, scale)
 
     def _bit_unpack_param(self, qparam, packed, unpack_fn):
-        """Unpack bitpacked representation. Should be overriden
+        """Unpack bitpacked representation. Should be overridden
         """
         packed_levels, scale = packed
         levels = unpack_fn(

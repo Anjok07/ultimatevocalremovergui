@@ -108,7 +108,7 @@ class UniformQuantizer(BaseQuantizer):
         return (packed, scales)
 
     def _bit_unpack_param(self, qparam, packed, unpack_fn):
-        """Unpack bitpacked representation. Should be overriden
+        """Unpack bitpacked representation. Should be overridden
         """
         packed_levels, scales = packed
         levels = unpack_fn(

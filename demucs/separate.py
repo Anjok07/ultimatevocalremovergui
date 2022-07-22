@@ -174,7 +174,7 @@ def main():
             sources = list(sources)
             stem = str(track_folder / (args.stem + ext))
             save_audio(sources.pop(model.sources.index(args.stem)), stem, **kwargs)
-            # Warning : after poping the stem, selected stem is no longer in the list 'sources'
+            # Warning : after popping the stem, selected stem is no longer in the list 'sources'
             other_stem = th.zeros_like(sources[0])
             for i in sources:
                 other_stem += i

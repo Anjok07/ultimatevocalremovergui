@@ -57,7 +57,7 @@ def load_model(path_or_package, strict=False):
         sig = inspect.signature(klass)
         for key in list(kwargs):
             if key not in sig.parameters:
-                warnings.warn("Dropping inexistant parameter " + key)
+                warnings.warn("Dropping inexistent parameter " + key)
                 del kwargs[key]
         model = klass(*args, **kwargs)
 

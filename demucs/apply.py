@@ -156,7 +156,7 @@ def apply_model(model, mix, shifts=1, split=True,
     }
     if isinstance(model, BagOfModels):
         # Special treatment for bag of model.
-        # We explicitely apply multiple times `apply_model` so that the random shifts
+        # We explicitly apply multiple times `apply_model` so that the random shifts
         # are different for each model.
         estimates = 0
         totals = [0] * len(model.sources)

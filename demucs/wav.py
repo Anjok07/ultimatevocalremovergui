@@ -109,13 +109,13 @@ class Wavset:
             metadata (dict): output from `build_metadata`.
             sources (list[str]): list of source names.
             segment (None or float): segment length in seconds. If `None`, returns entire tracks.
-            shift (None or float): stride in seconds bewteen samples.
+            shift (None or float): stride in seconds between samples.
             normalize (bool): normalizes input audio, **based on the metadata content**,
                 i.e. the entire track is normalized, not individual extracts.
             samplerate (int): target sample rate. if the file sample rate
                 is different, it will be resampled on the fly.
             channels (int): target nb of channels. if different, will be
-                changed onthe fly.
+                changed on the fly.
             ext (str): extension for audio files (default is .wav).
 
         samplerate and channels are converted on the fly.

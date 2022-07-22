@@ -238,7 +238,7 @@ class DnDWrapper:
 
     def platform_independent_types(self, *dndtypes):
         '''This command will accept a list of types that can contain platform
-        independnent or platform specific types. A new list will be returned,
+        independent or platform specific types. A new list will be returned,
         where each platform specific type in DNDTYPES will be substituted by
         one or more platform independent types. Thus, the returned list may
         have more elements than DNDTYPES.'''
@@ -248,7 +248,7 @@ class DnDWrapper:
 
     def platform_specific_types(self, *dndtypes):
         '''This command will accept a list of types that can contain platform
-        independnent or platform specific types. A new list will be returned,
+        independent or platform specific types. A new list will be returned,
         where each platform independent type in DNDTYPES will be substituted
         by one or more platform specific types. Thus, the returned list may
         have more elements than DNDTYPES.'''

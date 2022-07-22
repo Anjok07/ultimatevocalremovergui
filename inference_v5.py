@@ -425,7 +425,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     timestampnum = round(datetime.utcnow().timestamp())
     randomnum = randrange(100000, 1000000)
 
-    # Separation Preperation
+    # Separation Preparation
     try:        #Load File(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
                         # Determine File Name
@@ -1048,7 +1048,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 bin_image.tofile(f)
            
 
-                        text_widget.write(base_text + 'Completed Seperation!\n\n')
+                        text_widget.write(base_text + 'Completed Separation!\n\n')
     except Exception as e:
         traceback_text = ''.join(traceback.format_tb(e.__traceback__))
         message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'

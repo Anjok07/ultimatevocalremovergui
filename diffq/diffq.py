@@ -293,7 +293,7 @@ class DiffQuantizer(BaseQuantizer):
         return (all_packed, scales, packed_bits)
 
     def _bit_unpack_param(self, qparam, packed, unpack_fn):
-        """Unpack bitpacked representation. Should be overriden.
+        """Unpack bitpacked representation. Should be overridden.
         """
         packed_all_levels, scales, packed_bits = packed
         bits = unpack_fn(packed_bits, qparam.logit.numel()) + self.min_bits

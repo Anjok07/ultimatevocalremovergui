@@ -8,7 +8,7 @@ We have to do a lot of black magic for TorchScript to be happy
 because we cannot dynamically allocate new weights when loading the model.
 
 Here is how it works:
-- we generate code in a temporary python file for the given model that explicitely
+- we generate code in a temporary python file for the given model that explicitly
     override all the weights on the first forward from their packed version.
     This is because TorchScript does not let us iterate over parameters in a generic manner.
 - we zero out all the original weights. We cannot simply remove those weights
@@ -62,7 +62,7 @@ class DiffQTSModel(torch.nn.Module):
     def unpack(self):
         """
         Unpack the weights, automatically called on the first forward,
-        or explicitely."""
+        or explicitly."""
         if self._unpacked:
             return
 {unpack_assigns}

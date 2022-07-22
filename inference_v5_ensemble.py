@@ -313,7 +313,7 @@ class Predictor():
             except:
                 pass
         
-        widget_text.write(base_text + 'Completed Seperation!\n\n')
+        widget_text.write(base_text + 'Completed Separation!\n\n')
 
     def demix(self, mix):
         # 1 = demucs only
@@ -860,7 +860,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     print('Do all of the HP models exist? ' + hp2_ens)
 
-    # Separation Preperation
+    # Separation Preparation
     try:    #Ensemble Dictionary
 
         overlap_set = float(data['overlap'])
@@ -2118,7 +2118,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         _, bin_image = cv2.imencode('.jpg', image)
                                         bin_image.tofile(f)
                                         
-                                text_widget.write(base_text + 'Completed Seperation!\n\n')  
+                                text_widget.write(base_text + 'Completed Separation!\n\n')  
                     
 
                             if data['ensChoose'] == 'Multi-AI Ensemble':
@@ -2577,7 +2577,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             os.chdir(path)
                             audio_files = os.listdir()
                             for file in audio_files:
-                                #spliting the file into the name and the extension
+                                #splitting the file into the name and the extension
                                 name, ext = os.path.splitext(file)
                                 if ext == ".wav":
                                     if trackname in file:
@@ -2634,7 +2634,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             os.chdir(path)
                             audio_files = os.listdir()
                             for file in audio_files:
-                                #spliting the file into the name and the extension
+                                #splitting the file into the name and the extension
                                 name, ext = os.path.splitext(file)
                                 if ext == ".wav":
                                     if trackname in file:

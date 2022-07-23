@@ -27,3 +27,4 @@ pyperclip
 julius
 pyyaml
 natsort
+pyAesCrypt

@@ -1,5 +1,5 @@
-# Ultimate Vocal Remover GUI v5.3.0
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/UVR_v5.3.0.png?raw=true" />
+# Ultimate Vocal Remover GUI v5.4.0
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/UVR_v54.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
@@ -24,14 +24,13 @@ This installation bundle contains the UVR interface, Python (stripped to the bar
     - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
 
 - Download the UVR installer via the link below:
-    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.3_setup.exe)
+    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4_setup.exe)
+    - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe) - This package is for those who have UVR v5.3 or lower already installed.
 
 - **Optional**
-    - The Model Expansion Pack can be downloaded [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.3.0/v5_model_expansion_pack.zip)
-        - Please navigate to the "Updates" tab within the Help Guide provided in the GUI for instructions on installing the Model Expansion pack.
-    - This version of the GUI is fully backward compatible with the v4 models.
+    - Additional models and application patches can be downloaded via the "Settings" menu.
 
-- **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.3.0)
+- **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.4.0)
 
 ### Other Platforms
 
@@ -41,11 +40,11 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **General Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt_new.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt.png?raw=true" />
 
 **VR Architecture Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt_new.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt.png?raw=true" />
 
 **MDX-Net Options**
 
@@ -53,7 +52,7 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **Demucs v3 Options**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt_new.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt.png?raw=true" />
 
 **Ensemble Options**
 
@@ -112,11 +111,10 @@ These instructions are for those installing UVR v5.2.0 **manually** only.
 1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
     - **Note:** Ensure the *"Add Python to PATH"* box is checked
 2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-3. Download the models.zip [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.2.0/models.zip)
+3. Download the models via the "Settings" menu within the application.
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
-5. Extract the the folders within the models.zip to the *ultimatevocalremovergui-master/models* directory.
-6. Download the SoX archive [here](https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download) and extract the contents into the *ultimatevocalremovergui-master/lib_v5/sox* directory.
-7. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
+5. Download the SoX archive [here](https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download) and extract the contents into the *ultimatevocalremovergui-master/lib_v5/sox* directory.
+6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
 
 ```
 pip install --no-cache-dir -r requirements.txt

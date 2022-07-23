@@ -1,54 +1,252 @@
-from functools import total_ordering
-import importlib
-import os
-from statistics import mode
-from pathlib import Path
-import pydub
-import hashlib
-from random import randrange
-import re
-
-import subprocess
-import soundfile as sf
-import torch
-import numpy as np
-from demucs.pretrained import get_model as _gm
-from demucs.hdemucs import HDemucs
-from demucs.apply import BagOfModels, apply_model
-import pathlib
-from models import get_models, spec_effects
-import onnxruntime as ort
-import time
-import os
-from tqdm import tqdm
-import warnings
-import sys
-import librosa
-import psutil
-
-import cv2
-import math
-import librosa
-import numpy as np
-import soundfile as sf
-import shutil
-from tqdm import tqdm
+from collections import defaultdict
 from datetime import datetime
-
+from demucs.apply import BagOfModels, apply_model
+from demucs.hdemucs import HDemucs
+from demucs.model_v2 import Demucs
+from demucs.pretrained import get_model as _gm
+from demucs.tasnet_v2 import ConvTasNet
+from demucs.utils import apply_model_v1
+from demucs.utils import apply_model_v2
+from functools import total_ordering
 from lib_v5 import dataset
 from lib_v5 import spec_utils
 from lib_v5.model_param_init import ModelParameters
-import torch
-
-# Command line text parsing and widget manipulation
-from collections import defaultdict
+from models import get_models, spec_effects
+from pathlib import Path
+from random import randrange
+from statistics import mode
+from tqdm import tqdm
+from tqdm import tqdm
+from tkinter import filedialog
+import tkinter.ttk as ttk
+import tkinter.messagebox
+import tkinter.filedialog
+import tkinter.simpledialog
+import tkinter.font
 import tkinter as tk
-import traceback  # Error Message Recent Calls
+from tkinter import *
+from tkinter.tix import *
+import lib_v5.filelist
+import cv2
+import gzip
+import hashlib
+import importlib
+import librosa
+import json
+import math
+import numpy as np
+import numpy as np
+import onnxruntime as ort
+import os
+import pathlib
+import psutil
+import pydub
+import re
+import shutil
+import soundfile as sf
+import soundfile as sf
+import subprocess
+import sys
+import time
 import time  # Timer
+import tkinter as tk
+import torch
+import torch
+import traceback  # Error Message Recent Calls
+import warnings
 
 class Predictor():        
     def __init__(self):
         pass
+    
+    def mdx_options(self):
+        """
+        Open Advanced MDX Options
+        """
+        self.okVar = tk.IntVar()
+        self.n_fft_scale_set_var = tk.StringVar(value='6144')
+        self.dim_f_set_var = tk.StringVar(value='2048')
+        self.mdxnetModeltype_var = tk.StringVar(value='Vocals')
+        self.noise_pro_select_set_var = tk.StringVar(value='MDX-NET_Noise_Profile_14_kHz')
+        self.compensate_v_var = tk.StringVar(value=1.03597672895)
+        
+        top= Toplevel()
+
+        top.geometry("740x550")
+        window_height = 740
+        window_width = 550
+        
+        top.title("Specify Parameters")
+        
+        top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        screen_width = top.winfo_screenwidth()
+        screen_height = top.winfo_screenheight()
+
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+
+        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        # change title bar icon
+        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        
+        tabControl = ttk.Notebook(top)
+        
+        tabControl.pack(expand = 1, fill ="both")
+        
+        tabControl.grid_rowconfigure(0, weight=1)
+        tabControl.grid_columnconfigure(0, weight=1)
+        
+        frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=0)  
+        
+        frame0.tkraise(frame0)
+        
+        space_small = '  '*20
+        space_small_1 = '  '*10
+        
+        l0=tk.Label(frame0, text=f'{space_small}Stem Type{space_small}', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=5)
+        
+        l0=ttk.OptionMenu(frame0, self.mdxnetModeltype_var, None, 'Vocals', 'Instrumental')
+        l0.grid(row=4,column=0,padx=0,pady=5)
+
+        l0=tk.Label(frame0, text='N_FFT Scale', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text=f'{space_small_1}(Manual Set){space_small_1}', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=1,padx=0,pady=5)
+        
+        self.options_n_fft_scale_Opt = l0=ttk.OptionMenu(frame0, self.n_fft_scale_set_var, None, '4096', '6144', '7680', '8192', '16384')
+        
+        self.options_n_fft_scale_Opt
+        l0.grid(row=6,column=0,padx=0,pady=5)
+        
+        self.options_n_fft_scale_Entry = l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_set_var, justify='center')
+        
+        self.options_n_fft_scale_Entry
+        l0.grid(row=6,column=1,padx=0,pady=5)
+
+        l0=tk.Label(frame0, text='Dim_f', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='(Manual Set)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=1,padx=0,pady=5)
+        
+        self.options_dim_f_Opt = l0=ttk.OptionMenu(frame0, self.dim_f_set_var, None, '2048', '3072', '4096')
+        
+        self.options_dim_f_Opt
+        l0.grid(row=8,column=0,padx=0,pady=5)
+        
+        self.options_dim_f_Entry = l0=ttk.Entry(frame0, textvariable=self.dim_f_set_var, justify='center')
+        
+        self.options_dim_f_Entry
+        l0.grid(row=8,column=1,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=9,column=0,padx=0,pady=5)
+        
+        l0=ttk.OptionMenu(frame0, self.noise_pro_select_set_var, None, 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
+        l0.grid(row=10,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='Volume Compensation', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=11,column=0,padx=0,pady=10)
+        
+        self.options_compensate = l0=ttk.Entry(frame0, textvariable=self.compensate_v_var, justify='center')
+        
+        self.options_compensate
+        l0.grid(row=12,column=0,padx=0,pady=0)
+        
+        l0=ttk.Button(frame0,text="Continue & Set These Parameters", command=lambda: self.okVar.set(1))
+        l0.grid(row=13,column=0,padx=0,pady=30)
+        
+        def stop():
+            widget_text.write(f'Please configure the ONNX model settings accordingly and try again.\n\n')
+            widget_text.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            torch.cuda.empty_cache()
+            gui_progress_bar.set(0)
+            widget_button.configure(state=tk.NORMAL)  # Enable Button
+            top.destroy()
+            return
+        
+        l0=ttk.Button(frame0,text="Stop Process", command=stop)
+        l0.grid(row=13,column=1,padx=0,pady=30)
+        
+        #print('print from top ', model_hash)
+        
+        #source_val = 0
+        
+        def change_event():
+            self.okVar.set(1)
+            #top.destroy()
+            pass
+        
+        top.protocol("WM_DELETE_WINDOW", change_event)
+        
+        frame0.wait_variable(self.okVar)
+        
+        global n_fft_scale_set
+        global dim_f_set
+        global modeltype
+        global stemset_n
+        global source_val
+        global noise_pro_set
+        global compensate
+        global demucs_model_set
+        
+        stemtype = self.mdxnetModeltype_var.get()
+        
+        if stemtype == 'Vocals':
+            modeltype = 'v'
+            stemset_n = '(Vocals)'
+            source_val = 3
+        if stemtype == 'Instrumental':
+            modeltype = 'v'
+            stemset_n = '(Instrumental)'
+            source_val = 2
+        if stemtype == 'Other':
+            modeltype = 'o'
+            stemset_n = '(Other)'
+            source_val = 2
+        if stemtype == 'Drums':
+            modeltype = 'd'
+            stemset_n = '(Drums)'
+            source_val = 1
+        if stemtype == 'Bass':
+            modeltype = 'b'
+            stemset_n = '(Bass)'
+            source_val = 0
+            
+        compensate = self.compensate_v_var.get()
+        n_fft_scale_set = int(self.n_fft_scale_set_var.get())
+        dim_f_set = int(self.dim_f_set_var.get())
+        noise_pro_set = self.noise_pro_select_set_var.get()
+        
+        mdx_model_params = {
+                'modeltype' : modeltype,
+                'stemset_n' : stemset_n,
+                'source_val' : source_val,
+                'compensate' : compensate,
+                'n_fft_scale_set' : n_fft_scale_set,
+                'dim_f_set' : dim_f_set,
+                'noise_pro' : noise_pro_set,
+                }
+        
+        mdx_model_params_r = json.dumps(mdx_model_params, indent=4)
+        
+        with open(f"lib_v5/filelists/model_cache/mdx_model_cache/{model_hash}.json", "w") as outfile:
+            outfile.write(mdx_model_params_r)
+            
+
+        if stemset_n == '(Instrumental)':
+            if not 'UVR' in demucs_model_set:
+                widget_text.write(base_text + 'The selected Demucs model cannot be used with this model.\n')
+                widget_text.write(base_text + 'Only 2 stem Demucs models are compatible with this model.\n')
+                widget_text.write(base_text + 'Setting Demucs model to \"UVR_Demucs_Model_1\".\n\n')
+                demucs_model_set = 'UVR_Demucs_Model_1'
+        
+        top.destroy()
     
     def prediction_setup(self):
         
@@ -60,27 +258,75 @@ class Predictor():
             device = torch.device('cpu')
         
         if demucs_switch == 'on':
-            if 'UVR' in demucs_model_set:
-                self.demucs = HDemucs(sources=["other", "vocals"])
-            else:
-                self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
-            widget_text.write(base_text + 'Loading Demucs model... ')
-            update_progress(**progress_kwargs,
-            step=0.05)   
-            path_d = Path('models/Demucs_Models')
-            self.demucs = _gm(name=demucs_model_set, repo=path_d)
-            self.demucs.to(device)
-            self.demucs.eval()
-            widget_text.write('Done!\n')
-            if isinstance(self.demucs, BagOfModels):
-                widget_text.write(base_text + f"Selected Demucs model is a bag of {len(self.demucs.models)} model(s).\n")
+            
+            #print('check model here: ', demucs_model_set)
+            
+            #'demucs.th.gz', 'demucs_extra.th.gz', 'light.th.gz', 'light_extra.th.gz'
+            
+            if 'tasnet.th' in demucs_model_set or 'tasnet_extra.th' in demucs_model_set or \
+            'demucs.th' in demucs_model_set or \
+            'demucs_extra.th' in demucs_model_set or 'light.th' in demucs_model_set or \
+            'light_extra.th' in demucs_model_set or 'v1' in demucs_model_set or '.gz' in demucs_model_set:
+                load_from = "models/Demucs_Models/"f"{demucs_model_set}"
+                if str(load_from).endswith(".gz"):
+                    load_from = gzip.open(load_from, "rb")
+                klass, args, kwargs, state = torch.load(load_from)
+                self.demucs = klass(*args, **kwargs)
+                widget_text.write(base_text + 'Loading Demucs v1 model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                self.demucs.to(device) 
+                self.demucs.load_state_dict(state)
+                widget_text.write('Done!\n')
+            
+            elif 'tasnet-beb46fac.th' in demucs_model_set or 'tasnet_extra-df3777b2.th' in demucs_model_set or \
+            'demucs48_hq-28a1282c.th' in demucs_model_set or'demucs-e07c671f.th' in demucs_model_set or \
+            'demucs_extra-3646af93.th' in demucs_model_set or 'demucs_unittest-09ebc15f.th' in demucs_model_set or \
+            'v2' in demucs_model_set:
+                if '48' in demucs_model_set:
+                    channels=48
+                elif 'unittest' in demucs_model_set:
+                    channels=4
+                else:
+                    channels=64
+                    
+                if 'tasnet' in demucs_model_set:
+                    self.demucs = ConvTasNet(sources=["drums", "bass", "other", "vocals"], X=10)
+                else:
+                    self.demucs = Demucs(sources=["drums", "bass", "other", "vocals"], channels=channels)
+                widget_text.write(base_text + 'Loading Demucs v2 model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                self.demucs.to(device) 
+                self.demucs.load_state_dict(torch.load("models/Demucs_Models/"f"{demucs_model_set}"))
+                widget_text.write('Done!\n')
+                self.demucs.eval()
+                
+            else:  
+                if 'UVR' in demucs_model_set:
+                    self.demucs = HDemucs(sources=["other", "vocals"])
+                else:
+                    self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
+                widget_text.write(base_text + 'Loading Demucs model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                path_d = Path('models/Demucs_Models/v3_repo')
+                #print('What Demucs model was chosen? ', demucs_model_set)
+                self.demucs = _gm(name=demucs_model_set, repo=path_d)
+                self.demucs.to(device)
+                self.demucs.eval()
+                widget_text.write('Done!\n')
+                if isinstance(self.demucs, BagOfModels):
+                    widget_text.write(base_text + f"Selected Demucs model is a bag of {len(self.demucs.models)} model(s).\n")
 
         self.onnx_models = {}
         c = 0
         
-        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype, n_fft_scale=n_fft_scale_set, dim_f=dim_f_set)
-        if demucs_only == 'off':
-            widget_text.write(base_text + 'Loading ONNX model... ')
+        if demucs_only == 'on':
+            pass
+        else:
+            self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype, n_fft_scale=n_fft_scale_set, dim_f=dim_f_set)
+            widget_text.write(base_text + 'Loading ONNX model... ')     
         
         update_progress(**progress_kwargs,
         step=0.1)
@@ -98,10 +344,10 @@ class Predictor():
 
         if demucs_only == 'off':
             self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', model_set), providers=run_type)
-            print(demucs_model_set)
+            #print(demucs_model_set)
             widget_text.write('Done!\n')
         elif demucs_only == 'on':
-            print(demucs_model_set)
+            #print(demucs_model_set)
             pass
           
     def prediction(self, m):  
@@ -121,7 +367,12 @@ class Predictor():
         save_path = os.path.dirname(base_name)
         
         #Vocal Path
-        vocal_name = '(Vocals)'
+
+        if stemset_n == '(Vocals)':
+            vocal_name = '(Vocals)'
+        elif stemset_n == '(Instrumental)':
+            vocal_name = '(Instrumental)'
+
         if data['modelFolder']:
             vocal_path = '{save_path}/{file_name}.wav'.format(
                 save_path=save_path,
@@ -132,7 +383,11 @@ class Predictor():
                 file_name = f'{os.path.basename(base_name)}_{ModelName_2}_{vocal_name}',)
         
         #Instrumental Path
-        Instrumental_name = '(Instrumental)'
+        if stemset_n == '(Vocals)':
+            Instrumental_name = '(Instrumental)'
+        elif stemset_n == '(Instrumental)':
+            Instrumental_name = '(Vocals)'
+            
         if data['modelFolder']:
             Instrumental_path = '{save_path}/{file_name}.wav'.format(
                 save_path=save_path,
@@ -143,7 +398,11 @@ class Predictor():
                 file_name = f'{os.path.basename(base_name)}_{ModelName_2}_{Instrumental_name}',)
             
         #Non-Reduced Vocal Path
-        vocal_name = '(Vocals)'
+        if stemset_n == '(Vocals)':
+            vocal_name = '(Vocals)'
+        elif stemset_n == '(Instrumental)':
+            vocal_name = '(Instrumental)'
+    
         if data['modelFolder']:
             non_reduced_vocal_path = '{save_path}/{file_name}.wav'.format(
                 save_path=save_path,
@@ -313,7 +572,7 @@ class Predictor():
             except:
                 pass
         
-        widget_text.write(base_text + 'Completed Seperation!\n\n')
+        widget_text.write(base_text + 'Completed Separation!\n\n')
 
     def demix(self, mix):
         # 1 = demucs only
@@ -389,16 +648,39 @@ class Predictor():
         if demucs_switch == 'off':
             sources = self.demix_base(segmented_mix, margin_size=margin)
         elif demucs_only == 'on':
-            if split_mode == True:
-                sources = self.demix_demucs_split(mix)
-            if split_mode == False:
-                sources = self.demix_demucs(segmented_mix, margin_size=margin)
+            
+            if 'tasnet.th' in demucs_model_set or 'tasnet_extra.th' in demucs_model_set or \
+            'demucs.th' in demucs_model_set or \
+            'demucs_extra.th' in demucs_model_set or 'light.th' in demucs_model_set or \
+            'light_extra.th' in demucs_model_set or 'v1' in demucs_model_set or '.gz' in demucs_model_set:
+                sources = self.demix_demucs_v1(segmented_mix, margin_size=margin)
+            elif 'tasnet-beb46fac.th' in demucs_model_set or 'tasnet_extra-df3777b2.th' in demucs_model_set or \
+            'demucs48_hq-28a1282c.th' in demucs_model_set or'demucs-e07c671f.th' in demucs_model_set or \
+            'demucs_extra-3646af93.th' in demucs_model_set or 'demucs_unittest-09ebc15f.th' in demucs_model_set or \
+            'v2' in demucs_model_set:
+                sources = self.demix_demucs_v2(segmented_mix, margin_size=margin)
+            else:
+                if split_mode == True:
+                    sources = self.demix_demucs_split(mix)
+                if split_mode == False:
+                    sources = self.demix_demucs(segmented_mix, margin_size=margin)
         else: # both, apply spec effects
             base_out = self.demix_base(segmented_mix, margin_size=margin)
-            if split_mode == True:
-                demucs_out = self.demix_demucs_split(mix)
-            if split_mode == False:
-                demucs_out = self.demix_demucs(segmented_mix, margin_size=margin)
+            if 'tasnet.th' in demucs_model_set or 'tasnet_extra.th' in demucs_model_set or \
+            'demucs.th' in demucs_model_set or \
+            'demucs_extra.th' in demucs_model_set or 'light.th' in demucs_model_set or \
+            'light_extra.th' in demucs_model_set or 'v1' in demucs_model_set or '.gz' in demucs_model_set:
+                demucs_out = self.demix_demucs_v1(segmented_mix, margin_size=margin)
+            elif 'tasnet-beb46fac.th' in demucs_model_set or 'tasnet_extra-df3777b2.th' in demucs_model_set or \
+            'demucs48_hq-28a1282c.th' in demucs_model_set or'demucs-e07c671f.th' in demucs_model_set or \
+            'demucs_extra-3646af93.th' in demucs_model_set or 'demucs_unittest-09ebc15f.th' in demucs_model_set or \
+            'v2' in demucs_model_set:
+                demucs_out = self.demix_demucs_v2(segmented_mix, margin_size=margin)
+            else:
+                if split_mode == True:
+                    demucs_out = self.demix_demucs_split(mix)
+                if split_mode == False:
+                    demucs_out = self.demix_demucs(segmented_mix, margin_size=margin)
             nan_count = np.count_nonzero(np.isnan(demucs_out)) + np.count_nonzero(np.isnan(base_out))
             if nan_count > 0:
                 print('Warning: there are {} nan values in the array(s).'.format(nan_count))
@@ -406,9 +688,14 @@ class Predictor():
             sources = {}
 
             if 'UVR' in demucs_model_set:
-                sources[3] = (spec_effects(wave=[demucs_out[1],base_out[0]],
-                                            algorithm=data['mixing'],
-                                            value=b[3])*float(compensate)) # compensation
+                if stemset_n == '(Instrumental)':
+                    sources[3] = (spec_effects(wave=[demucs_out[0],base_out[0]],
+                                                algorithm=data['mixing'],
+                                                value=b[3])*float(compensate)) # compensation
+                else:
+                    sources[3] = (spec_effects(wave=[demucs_out[1],base_out[0]],
+                                                algorithm=data['mixing'],
+                                                value=b[3])*float(compensate)) # compensation
             else:
                 sources[3] = (spec_effects(wave=[demucs_out[3],base_out[0]],
                                             algorithm=data['mixing'],
@@ -475,7 +762,7 @@ class Predictor():
         return _sources
     
     def demix_demucs(self, mix, margin_size):
-        print('shift_set ', shift_set)
+        #print('shift_set ', shift_set)
         processed = {}
         demucsitera = len(mix)
         demucsitera_calc = demucsitera * 2
@@ -513,7 +800,7 @@ class Predictor():
         
     def demix_demucs_split(self, mix):
 
-        print('shift_set ', shift_set)
+        #print('shift_set ', shift_set)
         widget_text.write(base_text + "Split Mode is on. (Chunks disabled for Demucs Model)\n")
         widget_text.write(base_text + "Running Demucs Inference...\n")
         widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
@@ -530,6 +817,70 @@ class Predictor():
             
         sources = (sources * ref.std() + ref.mean()).cpu().numpy()
         sources[[0,1]] = sources[[1,0]]
+        return sources
+    
+    def demix_demucs_v2(self, mix, margin_size):
+        processed = {}
+        demucsitera = len(mix)
+        demucsitera_calc = demucsitera * 2
+        gui_progress_bar_demucs = 0
+        widget_text.write(base_text + "Running Demucs v2 Inference...\n")
+        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
+        print(' Running Demucs Inference...')
+        for nmix in mix:
+            gui_progress_bar_demucs += 1
+            update_progress(**progress_kwargs,
+                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+            cmix = mix[nmix]
+            cmix = torch.tensor(cmix, dtype=torch.float32)
+            ref = cmix.mean(0)        
+            cmix = (cmix - ref.mean()) / ref.std()
+            with torch.no_grad():
+                sources = apply_model_v2(self.demucs, cmix.to(device), split=split_mode, overlap=overlap_set, shifts=shift_set)
+            sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+            sources[[0,1]] = sources[[1,0]]
+
+            start = 0 if nmix == 0 else margin_size
+            end = None if nmix == list(mix.keys())[::-1][0] else -margin_size
+            if margin_size == 0:
+                end = None
+            processed[nmix] = sources[:,:,start:end].copy()
+
+        sources = list(processed.values())
+        sources = np.concatenate(sources, axis=-1)
+        widget_text.write('Done!\n')
+        return sources
+    
+    def demix_demucs_v1(self, mix, margin_size):
+        processed = {}
+        demucsitera = len(mix)
+        demucsitera_calc = demucsitera * 2
+        gui_progress_bar_demucs = 0
+        widget_text.write(base_text + "Running Demucs v1 Inference...\n")
+        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
+        print(' Running Demucs Inference...')
+        for nmix in mix:
+            gui_progress_bar_demucs += 1
+            update_progress(**progress_kwargs,
+                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+            cmix = mix[nmix]
+            cmix = torch.tensor(cmix, dtype=torch.float32)
+            ref = cmix.mean(0)        
+            cmix = (cmix - ref.mean()) / ref.std()
+            with torch.no_grad():
+                sources = apply_model_v1(self.demucs, cmix.to(device), split=split_mode, shifts=shift_set)
+            sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+            sources[[0,1]] = sources[[1,0]]
+
+            start = 0 if nmix == 0 else margin_size
+            end = None if nmix == list(mix.keys())[::-1][0] else -margin_size
+            if margin_size == 0:
+                end = None
+            processed[nmix] = sources[:,:,start:end].copy()
+
+        sources = list(processed.values())
+        sources = np.concatenate(sources, axis=-1)
+        widget_text.write('Done!\n')
         return sources
 
 def update_progress(progress_var, total_files, file_num, step: float = 1):
@@ -611,10 +962,45 @@ class VocalRemover(object):
         # self.offset = model.offset
 
 data = {
-    # Paths
-    'input_paths': None,
+    'agg': 10,
+    'algo': 'Instrumentals (Min Spec)',
+    'appendensem': False,
+    'autocompensate': True,
+    'chunks': 'auto',
+    'compensate': 1.03597672895,
+    'demucs_only': False,
+    'demucsmodel': False,
+    'DemucsModel_MDX': 'UVR_Demucs_Model_1',
+    'ensChoose': 'Basic VR Ensemble',
     'export_path': None,
+    'gpu': -1,
+    'high_end_process': 'mirroring',
+    'input_paths': None,
+    'inst_only': False,
+    'instrumentalModel': None,
+    'margin': 44100,
+    'mdx_ensem': 'MDX-Net: UVR-MDX-NET 1',
+    'mdx_ensem_b': 'No Model',
+    'mdx_only_ensem_a': 'MDX-Net: UVR-MDX-NET Main',
+    'mdx_only_ensem_b': 'MDX-Net: UVR-MDX-NET 1',
+    'mdx_only_ensem_c': 'No Model',
+    'mdx_only_ensem_d': 'No Model',
+    'mdx_only_ensem_e': 'No Model',
+    'mixing': 'Default',
+    'mp3bit': '320k',
+    'noise_pro_select': 'Auto Select',
+    'noisereduc_s': 3,
+    'non_red': False,
+    'normalize': False,
+    'output_image': True,
+    'overlap': 0.5,
+    'postprocess': True,
     'saveFormat': 'wav',
+    'shifts': 0,
+    'split_mode': False,
+    'tta': True,
+    'useModel': None,
+    'voc_only': False,
     'vr_ensem': '2_HP-UVR',
     'vr_ensem_a': '1_HP-UVR',
     'vr_ensem_b': '2_HP-UVR',
@@ -624,45 +1010,17 @@ data = {
     'vr_ensem_mdx_a': 'No Model',
     'vr_ensem_mdx_b': 'No Model',
     'vr_ensem_mdx_c': 'No Model',
-    'mdx_ensem': 'UVR-MDX-NET 1',
-    'mdx_ensem_b': 'No Model',
-    # Processing Options
-    'gpu': -1,
-    'postprocess': True,
-    'tta': True,
-    'output_image': True,
-    'voc_only': False,
-    'inst_only': False,
-    'demucsmodel': False,
-    'chunks': 'auto',
-    'non_red': False,
-    'noisereduc_s': 3,
-    'ensChoose': 'Basic VR Ensemble',
-    'algo': 'Instrumentals (Min Spec)',
-    #Advanced Options
-    'appendensem': False,
-    'noise_pro_select': 'Auto Select',
-    'overlap': 0.5,
-    'shifts': 0,
-    'margin': 44100,
-    'split_mode': False,
-    'normalize': False,
-    'compensate': 1.03597672895,
-    'autocompensate': True,
-    'demucs_only': False,
-    'mixing': 'Default',
-    'DemucsModel_MDX': 'UVR_Demucs_Model_1',
+    'vr_multi_USER_model_param_1': 'Auto',
+    'vr_multi_USER_model_param_2': 'Auto',
+    'vr_multi_USER_model_param_3': 'Auto',
+    'vr_multi_USER_model_param_4': 'Auto',
+    'vr_basic_USER_model_param_1': 'Auto',
+    'vr_basic_USER_model_param_2': 'Auto',
+    'vr_basic_USER_model_param_3': 'Auto',
+    'vr_basic_USER_model_param_4': 'Auto',
+    'vr_basic_USER_model_param_5': 'Auto',
     'wavtype': 'PCM_16',
-    'mp3bit': '320k',
-    'settest': False,
-    
-    # Models
-    'instrumentalModel': None,
-    'useModel': None,
-    # Constants
-    'window_size': 512,
-    'agg': 10,
-    'high_end_process': 'mirroring'
+    'window_size': 512
 }
 
 default_window_size = data['window_size']
@@ -716,6 +1074,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global wav_type_set
     global flac_type_set
     global mp3_bit_set
+    global model_hash
+    global stime
+    global stemset_n
+    global source_val
+    global widget_button
     
     wav_type_set = data['wavtype']
     
@@ -726,6 +1089,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     widget_text = text_widget
     gui_progress_bar = progress_var
+    widget_button = button_widget
     
     #Error Handling
 
@@ -754,7 +1118,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     nn_arch_sizes = [
         31191, # default
-        33966, 123821, 123812, 537238, 537227 # custom
+        33966, 123821, 123812, 129605, 537238, 537227 # custom
     ]
               
     def save_files(wav_instrument, wav_vocals):
@@ -818,6 +1182,395 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     data.update(kwargs)
 
+    if data['DemucsModel_MDX'] == "Tasnet v1":
+        demucs_model_set_name = 'tasnet.th'
+    elif data['DemucsModel_MDX'] == "Tasnet_extra v1":
+        demucs_model_set_name = 'tasnet_extra.th'
+    elif data['DemucsModel_MDX'] == "Demucs v1":
+        demucs_model_set_name = 'demucs.th'
+    elif data['DemucsModel_MDX'] == "Demucs v1.gz":
+        demucs_model_set_name = 'demucs.th.gz'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v1":
+        demucs_model_set_name = 'demucs_extra.th'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v1.gz":
+        demucs_model_set_name = 'demucs_extra.th.gz'
+    elif data['DemucsModel_MDX'] == "Light v1":
+        demucs_model_set_name = 'light.th'
+    elif data['DemucsModel_MDX'] == "Light v1.gz":
+        demucs_model_set_name = 'light.th.gz'
+    elif data['DemucsModel_MDX'] == "Light_extra v1":
+        demucs_model_set_name = 'light_extra.th'
+    elif data['DemucsModel_MDX'] == "Light_extra v1.gz":
+        demucs_model_set_name = 'light_extra.th.gz'
+    elif data['DemucsModel_MDX'] == "Tasnet v2":
+        demucs_model_set_name = 'tasnet-beb46fac.th'
+    elif data['DemucsModel_MDX'] == "Tasnet_extra v2":
+        demucs_model_set_name = 'tasnet_extra-df3777b2.th'
+    elif data['DemucsModel_MDX'] == "Demucs48_hq v2":
+        demucs_model_set_name = 'demucs48_hq-28a1282c.th'
+    elif data['DemucsModel_MDX'] == "Demucs v2":
+        demucs_model_set_name = 'demucs-e07c671f.th'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v2":
+        demucs_model_set_name = 'demucs_extra-3646af93.th'
+    elif data['DemucsModel_MDX'] == "Demucs_unittest v2":
+        demucs_model_set_name = 'demucs_unittest-09ebc15f.th'
+    elif '.ckpt' in data['DemucsModel_MDX'] and 'v2' in data['DemucsModel_MDX']:
+        demucs_model_set_name = data['DemucsModel_MDX']
+    elif '.ckpt' in data['DemucsModel_MDX'] and 'v1' in data['DemucsModel_MDX']:
+        demucs_model_set_name = data['DemucsModel_MDX']
+    else:
+        demucs_model_set_name = data['DemucsModel_MDX']
+        
+    if data['mdx_ensem'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_muilti_a = 'tasnet.th'
+    elif data['mdx_ensem'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_muilti_a = 'tasnet_extra.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs v1":
+        demucs_model_set_name_muilti_a = 'demucs.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_muilti_a = 'demucs_extra.th'
+    elif data['mdx_ensem'] == "Demucs: Light v1":
+        demucs_model_set_name_muilti_a = 'light.th'
+    elif data['mdx_ensem'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_muilti_a = 'light_extra.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_muilti_a = 'demucs.th.gz'
+    elif data['mdx_ensem'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_muilti_a = 'demucs_extra.th.gz'
+    elif data['mdx_ensem'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_muilti_a = 'light.th.gz'
+    elif data['mdx_ensem'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_muilti_a = 'light_extra.th.gz'
+    elif data['mdx_ensem'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_muilti_a = 'tasnet-beb46fac.th'
+    elif data['mdx_ensem'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_muilti_a = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_muilti_a = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs v2":
+        demucs_model_set_name_muilti_a = 'demucs-e07c671f.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_muilti_a = 'demucs_extra-3646af93.th'
+    elif data['mdx_ensem'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_muilti_a = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_ensem'] == "Demucs: mdx_extra":
+        demucs_model_set_name_muilti_a = 'mdx_extra'
+    elif data['mdx_ensem'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_muilti_a = 'mdx_extra_q'
+    elif data['mdx_ensem'] == "Demucs: mdx":
+        demucs_model_set_name_muilti_a = 'mdx'
+    elif data['mdx_ensem'] == "Demucs: mdx_q":
+        demucs_model_set_name_muilti_a = 'mdx_q'
+    elif data['mdx_ensem'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_muilti_a = 'UVR_Demucs_Model_1'
+    elif data['mdx_ensem'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_muilti_a = 'UVR_Demucs_Model_2'
+    elif data['mdx_ensem'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_muilti_a = 'UVR_Demucs_Model_Bag'
+        
+    else:
+        demucs_model_set_name_muilti_a = data['mdx_ensem']
+        
+    if data['mdx_ensem_b'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_muilti_b = 'tasnet.th'
+    elif data['mdx_ensem_b'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_muilti_b = 'tasnet_extra.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs v1":
+        demucs_model_set_name_muilti_b = 'demucs.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_muilti_b = 'demucs_extra.th'
+    elif data['mdx_ensem_b'] == "Demucs: Light v1":
+        demucs_model_set_name_muilti_b = 'light.th'
+    elif data['mdx_ensem_b'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_muilti_b = 'light_extra.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_muilti_b = 'demucs.th.gz'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_muilti_b = 'demucs_extra.th.gz'
+    elif data['mdx_ensem_b'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_muilti_b = 'light.th.gz'
+    elif data['mdx_ensem_b'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_muilti_b = 'light_extra.th.gz'
+    elif data['mdx_ensem_b'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_muilti_b = 'tasnet-beb46fac.th'
+    elif data['mdx_ensem_b'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_muilti_b = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_muilti_b = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs v2":
+        demucs_model_set_name_muilti_b = 'demucs-e07c671f.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_muilti_b = 'demucs_extra-3646af93.th'
+    elif data['mdx_ensem_b'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_muilti_b = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_ensem_b'] == "Demucs: mdx_extra":
+        demucs_model_set_name_muilti_b = 'mdx_extra'
+    elif data['mdx_ensem_b'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_muilti_b = 'mdx_extra_q'
+    elif data['mdx_ensem_b'] == "Demucs: mdx":
+        demucs_model_set_name_muilti_b = 'mdx'
+    elif data['mdx_ensem_b'] == "Demucs: mdx_q":
+        demucs_model_set_name_muilti_b = 'mdx_q'
+    elif data['mdx_ensem_b'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_muilti_b = 'UVR_Demucs_Model_1'
+    elif data['mdx_ensem_b'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_muilti_b = 'UVR_Demucs_Model_2'
+    elif data['mdx_ensem_b'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_muilti_b = 'UVR_Demucs_Model_Bag' 
+    else:
+        demucs_model_set_name_muilti_b = data['mdx_ensem_b']
+        
+    if data['mdx_only_ensem_a'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_a = 'tasnet.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_a = 'tasnet_extra.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs v1":
+        demucs_model_set_name_a = 'demucs.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_a = 'demucs_extra.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Light v1":
+        demucs_model_set_name_a = 'light.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_a = 'light_extra.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_a = 'demucs.th.gz'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_a = 'demucs_extra.th.gz'
+    elif data['mdx_only_ensem_a'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_a = 'light.th.gz'
+    elif data['mdx_only_ensem_a'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_a = 'light_extra.th.gz'
+    elif data['mdx_only_ensem_a'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_a = 'tasnet-beb46fac.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_a = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_a = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs v2":
+        demucs_model_set_name_a = 'demucs-e07c671f.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_a = 'demucs_extra-3646af93.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_a = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_only_ensem_a'] == "Demucs: mdx_extra":
+        demucs_model_set_name_a = 'mdx_extra'
+    elif data['mdx_only_ensem_a'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_a = 'mdx_extra_q'
+    elif data['mdx_only_ensem_a'] == "Demucs: mdx":
+        demucs_model_set_name_a = 'mdx'
+    elif data['mdx_only_ensem_a'] == "Demucs: mdx_q":
+        demucs_model_set_name_a = 'mdx_q'
+    elif data['mdx_only_ensem_a'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_a = 'UVR_Demucs_Model_1'
+    elif data['mdx_only_ensem_a'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_a = 'UVR_Demucs_Model_2'
+    elif data['mdx_only_ensem_a'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_a = 'UVR_Demucs_Model_Bag'
+        
+    else:
+        demucs_model_set_name_a = data['mdx_only_ensem_a']
+        
+        
+    if data['mdx_only_ensem_b'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_b = 'tasnet.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_b = 'tasnet_extra.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs v1":
+        demucs_model_set_name_b = 'demucs.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_b = 'demucs_extra.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Light v1":
+        demucs_model_set_name_b = 'light.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_b = 'light_extra.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_b = 'demucs.th.gz'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_b = 'demucs_extra.th.gz'
+    elif data['mdx_only_ensem_b'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_b = 'light.th.gz'
+    elif data['mdx_only_ensem_b'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_b = 'light_extra.th.gz'
+    elif data['mdx_only_ensem_b'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_b = 'tasnet-beb46fac.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_b = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_b = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs v2":
+        demucs_model_set_name_b = 'demucs-e07c671f.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_b = 'demucs_extra-3646af93.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_b = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_only_ensem_b'] == "Demucs: mdx_extra":
+        demucs_model_set_name_b = 'mdx_extra'
+    elif data['mdx_only_ensem_b'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_b = 'mdx_extra_q'
+    elif data['mdx_only_ensem_b'] == "Demucs: mdx":
+        demucs_model_set_name_b = 'mdx'
+    elif data['mdx_only_ensem_b'] == "Demucs: mdx_q":
+        demucs_model_set_name_b = 'mdx_q'
+    elif data['mdx_only_ensem_b'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_b = 'UVR_Demucs_Model_1'
+    elif data['mdx_only_ensem_b'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_b = 'UVR_Demucs_Model_2'
+    elif data['mdx_only_ensem_b'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_b = 'UVR_Demucs_Model_Bag'
+        
+    else:
+        demucs_model_set_name_b = data['mdx_only_ensem_b']
+        
+    if data['mdx_only_ensem_c'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_c = 'tasnet.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_c = 'tasnet_extra.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs v1":
+        demucs_model_set_name_c = 'demucs.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_c = 'demucs_extra.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Light v1":
+        demucs_model_set_name_c = 'light.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_c = 'light_extra.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_c = 'demucs.th.gz'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_c = 'demucs_extra.th.gz'
+    elif data['mdx_only_ensem_c'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_c = 'light.th.gz'
+    elif data['mdx_only_ensem_c'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_c = 'light_extra.th.gz'
+    elif data['mdx_only_ensem_c'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_c = 'tasnet-beb46fac.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_c = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_c = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs v2":
+        demucs_model_set_name_c = 'demucs-e07c671f.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_c = 'demucs_extra-3646af93.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_c = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_only_ensem_c'] == "Demucs: mdx_extra":
+        demucs_model_set_name_c = 'mdx_extra'
+    elif data['mdx_only_ensem_c'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_c = 'mdx_extra_q'
+    elif data['mdx_only_ensem_c'] == "Demucs: mdx":
+        demucs_model_set_name_c = 'mdx'
+    elif data['mdx_only_ensem_c'] == "Demucs: mdx_q":
+        demucs_model_set_name_c = 'mdx_q'
+    elif data['mdx_only_ensem_c'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_c = 'UVR_Demucs_Model_1'
+    elif data['mdx_only_ensem_c'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_c = 'UVR_Demucs_Model_2'
+    elif data['mdx_only_ensem_c'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_c = 'UVR_Demucs_Model_Bag'
+        
+    else:
+        demucs_model_set_name_c = data['mdx_only_ensem_c']
+        
+    if data['mdx_only_ensem_d'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_d = 'tasnet.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_d = 'tasnet_extra.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs v1":
+        demucs_model_set_name_d = 'demucs.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_d = 'demucs_extra.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Light v1":
+        demucs_model_set_name_d = 'light.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_d = 'light_extra.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_d = 'demucs.th.gz'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_d = 'demucs_extra.th.gz'
+    elif data['mdx_only_ensem_d'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_d = 'light.th.gz'
+    elif data['mdx_only_ensem_d'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_d = 'light_extra.th.gz'
+    elif data['mdx_only_ensem_d'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_d = 'tasnet-beb46fac.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_d = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_d = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs v2":
+        demucs_model_set_name_d = 'demucs-e07c671f.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_d = 'demucs_extra-3646af93.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_d = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_only_ensem_d'] == "Demucs: mdx_extra":
+        demucs_model_set_name_d = 'mdx_extra'
+    elif data['mdx_only_ensem_d'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_d = 'mdx_extra_q'
+    elif data['mdx_only_ensem_d'] == "Demucs: mdx":
+        demucs_model_set_name_d = 'mdx'
+    elif data['mdx_only_ensem_d'] == "Demucs: mdx_q":
+        demucs_model_set_name_d = 'mdx_q'
+    elif data['mdx_only_ensem_d'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_d = 'UVR_Demucs_Model_1'
+    elif data['mdx_only_ensem_d'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_d = 'UVR_Demucs_Model_2'
+    elif data['mdx_only_ensem_d'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_d = 'UVR_Demucs_Model_Bag' 
+    else:
+        demucs_model_set_name_d = data['mdx_only_ensem_d']
+        
+    if data['mdx_only_ensem_e'] == "Demucs: Tasnet v1":
+        demucs_model_set_name_e = 'tasnet.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Tasnet_extra v1":
+        demucs_model_set_name_e = 'tasnet_extra.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs v1":
+        demucs_model_set_name_e = 'demucs.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs_extra v1":
+        demucs_model_set_name_e = 'demucs_extra.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Light v1":
+        demucs_model_set_name_e = 'light.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Light_extra v1":
+        demucs_model_set_name_e = 'light_extra.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs v1.gz":
+        demucs_model_set_name_e = 'demucs.th.gz'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs_extra v1.gz":
+        demucs_model_set_name_e = 'demucs_extra.th.gz'
+    elif data['mdx_only_ensem_e'] == "Demucs: Light v1.gz":
+        demucs_model_set_name_e = 'light.th.gz'
+    elif data['mdx_only_ensem_e'] == "Demucs: Light_extra v1.gz":
+        demucs_model_set_name_e = 'light_extra.th.gz'
+    elif data['mdx_only_ensem_e'] == "Demucs: Tasnet v2":
+        demucs_model_set_name_e = 'tasnet-beb46fac.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Tasnet_extra v2":
+        demucs_model_set_name_e = 'tasnet_extra-df3777b2.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs48_hq v2":
+        demucs_model_set_name_e = 'demucs48_hq-28a1282c.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs v2":
+        demucs_model_set_name_e = 'demucs-e07c671f.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs_extra v2":
+        demucs_model_set_name_e = 'demucs_extra-3646af93.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: Demucs_unittest v2":
+        demucs_model_set_name_e = 'demucs_unittest-09ebc15f.th'
+    elif data['mdx_only_ensem_e'] == "Demucs: mdx_extra":
+        demucs_model_set_name_e = 'mdx_extra'
+    elif data['mdx_only_ensem_e'] == "Demucs: mdx_extra_q":
+        demucs_model_set_name_e = 'mdx_extra_q'
+    elif data['mdx_only_ensem_e'] == "Demucs: mdx":
+        demucs_model_set_name_e = 'mdx'
+    elif data['mdx_only_ensem_e'] == "Demucs: mdx_q":
+        demucs_model_set_name_e = 'mdx_q'
+    elif data['mdx_only_ensem_e'] == "Demucs: UVR_Demucs_Model_1":
+        demucs_model_set_name_e = 'UVR_Demucs_Model_1'
+    elif data['mdx_only_ensem_e'] == "Demucs: UVR_Demucs_Model_2":
+        demucs_model_set_name_e = 'UVR_Demucs_Model_2'
+    elif data['mdx_only_ensem_e'] == "Demucs: UVR_Demucs_Model_Bag":
+        demucs_model_set_name_e = 'UVR_Demucs_Model_Bag'
+        
+    else:
+        demucs_model_set_name_e = data['mdx_only_ensem_e']
+
+
     # Update default settings
     global default_window_size
     global default_agg
@@ -858,7 +1611,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     timestampnum = round(datetime.utcnow().timestamp())
     randomnum = randrange(100000, 1000000)
 
-    print('Do all of the HP models exist? ' + hp2_ens)
+    #print('Do all of the HP models exist? ' + hp2_ens)
 
     # Separation Preperation
     try:    #Ensemble Dictionary
@@ -867,19 +1620,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         channel_set = int(data['channel'])
         margin_set = int(data['margin'])
         shift_set = int(data['shifts'])
-        demucs_model_set = data['DemucsModel_MDX']
+        demucs_model_set = demucs_model_set_name
         split_mode = data['split_mode']
-        demucs_switch = data['demucsmodel']
         
-        if data['demucsmodel']:
-            demucs_switch = 'on'
-        else:
-            demucs_switch = 'off'
-        
-        if data['demucs_only']:
-            demucs_only = 'on'
-        else:
-            demucs_only = 'off'
         
         if data['wavtype'] == '64-bit Float':
             if data['saveFormat'] == 'Flac':
@@ -899,116 +1642,51 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
         if not data['ensChoose'] == 'Manual Ensemble':
             
+                ##### Basic VR Ensemble #####
+            
                 #1st Model
               
-                if data['vr_ensem_a'] == 'MGM_MAIN_v4':
-                    vr_ensem_a = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_a_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_a'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_a = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_a_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_a'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_a = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_a_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_a'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_a = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_a_name = 'MGM_LOWEND_B_v4'
-                else:
-                    vr_ensem_a_name = data['vr_ensem_a']
-                    vr_ensem_a = f'models/Main_Models/{vr_ensem_a_name}.pth'
+                vr_ensem_a_name = data['vr_ensem_a']
+                vr_ensem_a = f'models/Main_Models/{vr_ensem_a_name}.pth'
+                vr_param_ens_a = data['vr_basic_USER_model_param_1']
                     
                 #2nd Model
                        
-                if data['vr_ensem_b'] == 'MGM_MAIN_v4':
-                    vr_ensem_b = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_b_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_b'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_b = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_b_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_b'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_b = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_b_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_b'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_b = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_b_name = 'MGM_LOWEND_B_v4'
-                else:
-                    vr_ensem_b_name = data['vr_ensem_b']
-                    vr_ensem_b = f'models/Main_Models/{vr_ensem_b_name}.pth'
+                vr_ensem_b_name = data['vr_ensem_b']
+                vr_ensem_b = f'models/Main_Models/{vr_ensem_b_name}.pth'
+                vr_param_ens_b = data['vr_basic_USER_model_param_2']
                     
                 #3rd Model
                     
-                if data['vr_ensem_c'] == 'MGM_MAIN_v4':
-                    vr_ensem_c = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_c_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_c'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_c = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_c_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_c'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_c = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_c_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_c'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_c = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_c_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem_c'] == 'No Model':
-                    vr_ensem_c = 'pass'
-                    vr_ensem_c_name = 'pass'
-                else:
-                    vr_ensem_c_name = data['vr_ensem_c']
-                    vr_ensem_c = f'models/Main_Models/{vr_ensem_c_name}.pth'
+                vr_ensem_c_name = data['vr_ensem_c']
+                vr_ensem_c = f'models/Main_Models/{vr_ensem_c_name}.pth'
+                vr_param_ens_c = data['vr_basic_USER_model_param_3']
                      
                 #4th Model
                   
-                if data['vr_ensem_d'] == 'MGM_MAIN_v4':
-                    vr_ensem_d = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_d_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_d'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_d = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_d_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_d'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_d = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_d_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_d'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_d = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_d_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem_d'] == 'No Model':
-                    vr_ensem_d = 'pass' 
-                    vr_ensem_d_name = 'pass'
-                else:
-                    vr_ensem_d_name = data['vr_ensem_d']
-                    vr_ensem_d = f'models/Main_Models/{vr_ensem_d_name}.pth'
+                vr_ensem_d_name = data['vr_ensem_d']
+                vr_ensem_d = f'models/Main_Models/{vr_ensem_d_name}.pth'
+                vr_param_ens_d = data['vr_basic_USER_model_param_4']
                     
                 # 5th Model
                  
-                if data['vr_ensem_e'] == 'MGM_MAIN_v4':
-                    vr_ensem_e = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_e_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_e'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_e = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_e_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_e'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_e = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_e_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_e'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_e = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_e_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem_e'] == 'No Model':
-                    vr_ensem_e = 'pass' 
-                    vr_ensem_e_name = 'pass'                    
-                else:
-                    vr_ensem_e_name = data['vr_ensem_e']
-                    vr_ensem_e = f'models/Main_Models/{vr_ensem_e_name}.pth'
+                vr_ensem_e_name = data['vr_ensem_e']
+                vr_ensem_e = f'models/Main_Models/{vr_ensem_e_name}.pth'
+                vr_param_ens_e = data['vr_basic_USER_model_param_5']
                     
                 if data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
                     Basic_Ensem = [
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/2'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/2'
                         }
@@ -1018,18 +1696,21 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/3'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/3'
                         },
                         {
                             'model_name': vr_ensem_e_name,
                             'model_name_c':vr_ensem_e_name,
+                            'model_param': vr_param_ens_e,
                             'model_location': vr_ensem_e,
                             'loop_name': 'Ensemble Mode - Model 3/3'
                         }  
@@ -1039,18 +1720,21 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/3'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/3'
                         },
                         {
                             'model_name': vr_ensem_d_name,
                             'model_name_c':vr_ensem_d_name,
+                            'model_param': vr_param_ens_d,
                             'model_location': vr_ensem_d,
                             'loop_name': 'Ensemble Mode - Model 3/3' 
                         }  
@@ -1060,18 +1744,21 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/3'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/3'
                         },
                         {
                             'model_name': vr_ensem_c_name,
                             'model_name_c':vr_ensem_c_name,
+                            'model_param': vr_param_ens_c,
                             'model_location': vr_ensem_c,
                             'loop_name': 'Ensemble Mode - Model 3/3'
                         }  
@@ -1081,24 +1768,28 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/4'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/4'
                         },
                         {
                             'model_name': vr_ensem_c_name,
                             'model_name_c':vr_ensem_c_name,
+                            'model_param': vr_param_ens_c,
                             'model_location': vr_ensem_c,
                             'loop_name': 'Ensemble Mode - Model 3/4'
                         },
                         {
                             'model_name': vr_ensem_e_name,
                             'model_name_c':vr_ensem_e_name,
+                            'model_param': vr_param_ens_e,
                             'model_location': vr_ensem_e,
                             'loop_name': 'Ensemble Mode - Model 4/4'
                         }
@@ -1109,24 +1800,28 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/4'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/4'
                         },
                         {
                             'model_name': vr_ensem_d_name,
                             'model_name_c':vr_ensem_d_name,
+                            'model_param': vr_param_ens_d,
                             'model_location': vr_ensem_d,
                             'loop_name': 'Ensemble Mode - Model 3/4'
                         },
                         {
                             'model_name': vr_ensem_e_name,
                             'model_name_c':vr_ensem_e_name,
+                            'model_param': vr_param_ens_e,
                             'model_location': vr_ensem_e,
                             'loop_name': 'Ensemble Mode - Model 4/4'
                         }
@@ -1136,24 +1831,28 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/4'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/4'
                         },
                         {
                             'model_name': vr_ensem_c_name,
                             'model_name_c':vr_ensem_c_name,
+                            'model_param': vr_param_ens_c,
                             'model_location': vr_ensem_c,
                             'loop_name': 'Ensemble Mode - Model 3/4'
                         },
                         {
                             'model_name': vr_ensem_d_name,
                             'model_name_c':vr_ensem_d_name,
+                            'model_param': vr_param_ens_d,
                             'model_location': vr_ensem_d,
                             'loop_name': 'Ensemble Mode - Model 4/4'
                         }
@@ -1163,267 +1862,160 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_a_name,
                             'model_name_c':vr_ensem_a_name,
+                            'model_param': vr_param_ens_a,
                             'model_location': vr_ensem_a,
                             'loop_name': 'Ensemble Mode - Model 1/5'
                         },
                         {
                             'model_name': vr_ensem_b_name,
                             'model_name_c':vr_ensem_b_name,
+                            'model_param': vr_param_ens_b,
                             'model_location': vr_ensem_b,
                             'loop_name': 'Ensemble Mode - Model 2/5'
                         },
                         {
                             'model_name': vr_ensem_c_name,
                             'model_name_c':vr_ensem_c_name,
+                            'model_param': vr_param_ens_c,
                             'model_location': vr_ensem_c,
                             'loop_name': 'Ensemble Mode - Model 3/5'
                         },
                         {
                             'model_name': vr_ensem_d_name,
                             'model_name_c':vr_ensem_d_name,
+                            'model_param': vr_param_ens_d,
                             'model_location': vr_ensem_d,
                             'loop_name': 'Ensemble Mode - Model 4/5' 
                         },
                         {
                             'model_name': vr_ensem_e_name,
                             'model_name_c':vr_ensem_e_name,
+                            'model_param': vr_param_ens_e,
                             'model_location': vr_ensem_e,
                             'loop_name': 'Ensemble Mode - Model 5/5'
                         }  
                     ] 
                 
-                HP2_Models = [
-                    {
-                        'model_name':'7_HP2-UVR',
-                        'model_name_c':'1st HP2 Model',
-                        'model_location':'models/Main_Models/7_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 1/3'
-                    },
-                    {
-                        'model_name':'8_HP2-UVR',
-                        'model_name_c':'2nd HP2 Model',
-                        'model_location':'models/Main_Models/8_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 2/3'
-                    },
-                    {
-                        'model_name':'9_HP2-UVR',
-                        'model_name_c':'3rd HP2 Model',
-                        'model_location':'models/Main_Models/9_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 3/3'
-                    }
-                ]
-            
-                All_HP_Models = [
-                    {
-                        'model_name':'7_HP2-UVR',
-                        'model_name_c':'1st HP2 Model',
-                        'model_location':'models/Main_Models/7_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 1/5'
-                        
-                    },
-                    {
-                        'model_name':'8_HP2-UVR',
-                        'model_name_c':'2nd HP2 Model',
-                        'model_location':'models/Main_Models/8_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 2/5'
-                        
-                    },
-                    {
-                        'model_name':'9_HP2-UVR',
-                        'model_name_c':'3rd HP2 Model',
-                        'model_location':'models/Main_Models/9_HP2-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 3/5'
-                    },
-                    {
-                        'model_name':'1_HP-UVR',
-                        'model_name_c':'1st HP Model',
-                        'model_location':'models/Main_Models/1_HP-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 4/5'
-                    },
-                    {
-                        'model_name':'2_HP-UVR',
-                        'model_name_c':'2nd HP Model',
-                        'model_location':'models/Main_Models/2_HP-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 5/5'
-                    }
-                ]
-                
-                Vocal_Models = [
-                    {
-                        'model_name':'3_HP-Vocal-UVR',
-                        'model_name_c':'1st Vocal Model',
-                        'model_location':'models/Main_Models/3_HP-Vocal-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 1/2'
-                    },
-                    {
-                        'model_name':'4_HP-Vocal-UVR',
-                        'model_name_c':'2nd Vocal Model',
-                        'model_location':'models/Main_Models/4_HP-Vocal-UVR.pth',
-                        'loop_name': 'Ensemble Mode - Model 2/2'
-                    }
-                ]
+                ##### Multi-AI Ensemble #####
 
                 #VR Model 1
                 
-                if data['vr_ensem'] == 'MGM_MAIN_v4':
-                    vr_ensem = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem'] == 'MGM_HIGHEND_v4':
-                    vr_ensem = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem'] == 'No Model':
-                    vr_ensem = 'pass' 
-                    vr_ensem_name = 'pass' 
-                else:
-                    vr_ensem_name = data['vr_ensem']
-                    vr_ensem = f'models/Main_Models/{vr_ensem_name}.pth'
+                vr_ensem_name = data['vr_ensem']
+                vr_ensem = f'models/Main_Models/{vr_ensem_name}.pth'
+                vr_param_ens_multi = data['vr_multi_USER_model_param_1']
                 
                 #VR Model 2
                 
-                if data['vr_ensem_mdx_a'] == 'MGM_MAIN_v4':
-                    vr_ensem_mdx_a = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_mdx_a_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_mdx_a'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_mdx_a = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_mdx_a_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_mdx_a'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_mdx_a = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_mdx_a_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_mdx_a'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_mdx_a = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_mdx_a_name = 'MGM_LOWEND_B_v4' 
-                elif data['vr_ensem_mdx_a'] == 'No Model':
-                    vr_ensem_mdx_a = 'pass' 
-                    vr_ensem_mdx_a_name = 'pass' 
-                else:
-                    vr_ensem_mdx_a_name = data['vr_ensem_mdx_a']
-                    vr_ensem_mdx_a = f'models/Main_Models/{vr_ensem_mdx_a_name}.pth'
+                vr_ensem_mdx_a_name = data['vr_ensem_mdx_a']
+                vr_ensem_mdx_a = f'models/Main_Models/{vr_ensem_mdx_a_name}.pth'
+                vr_param_ens_multi_a = data['vr_multi_USER_model_param_2']
 
                 #VR Model 3
                 
-                if data['vr_ensem_mdx_b'] == 'MGM_MAIN_v4':
-                    vr_ensem_mdx_b = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_mdx_b_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_mdx_b'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_mdx_b = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_mdx_b_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_mdx_b'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_mdx_b = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_mdx_b_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_mdx_b'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_mdx_b = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_mdx_b_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem_mdx_b'] == 'No Model':
-                    vr_ensem_mdx_b = 'pass' 
-                    vr_ensem_mdx_b_name = 'pass' 
-                else:
-                    vr_ensem_mdx_b_name = data['vr_ensem_mdx_b']
-                    vr_ensem_mdx_b = f'models/Main_Models/{vr_ensem_mdx_b_name}.pth'
+                vr_ensem_mdx_b_name = data['vr_ensem_mdx_b']
+                vr_ensem_mdx_b = f'models/Main_Models/{vr_ensem_mdx_b_name}.pth'
+                vr_param_ens_multi_b = data['vr_multi_USER_model_param_3']
                 
                 #VR Model 4
                 
-                if data['vr_ensem_mdx_c'] == 'MGM_MAIN_v4':
-                    vr_ensem_mdx_c = 'models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth'
-                    vr_ensem_mdx_c_name = 'MGM_MAIN_v4'
-                elif data['vr_ensem_mdx_c'] == 'MGM_HIGHEND_v4':
-                    vr_ensem_mdx_c = 'models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth'
-                    vr_ensem_mdx_c_name = 'MGM_HIGHEND_v4'
-                elif data['vr_ensem_mdx_c'] == 'MGM_LOWEND_A_v4':
-                    vr_ensem_mdx_c = 'models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth' 
-                    vr_ensem_mdx_c_name = 'MGM_LOWEND_A_v4'
-                elif data['vr_ensem_mdx_c'] == 'MGM_LOWEND_B_v4':
-                    vr_ensem_mdx_c = 'models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth' 
-                    vr_ensem_mdx_c_name = 'MGM_LOWEND_B_v4'
-                elif data['vr_ensem_mdx_c'] == 'No Model':
-                    vr_ensem_mdx_c = 'pass' 
-                    vr_ensem_mdx_c_name = 'pass' 
-                else:
-                    vr_ensem_mdx_c_name = data['vr_ensem_mdx_c']
-                    vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'   
+                vr_ensem_mdx_c_name = data['vr_ensem_mdx_c']
+                vr_ensem_mdx_c = f'models/Main_Models/{vr_ensem_mdx_c_name}.pth'
+                vr_param_ens_multi_c = data['vr_multi_USER_model_param_4']    
                                                           
-                #MDX-Net Model
-
-                if data['mdx_ensem'] == 'UVR-MDX-NET 1':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
-                        mdx_ensem = 'UVR_MDXNET_1_9703'
-                    else:
-                        mdx_ensem = 'UVR_MDXNET_9703'
-                if data['mdx_ensem'] == 'UVR-MDX-NET 2':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
-                        mdx_ensem = 'UVR_MDXNET_2_9682'
-                    else:
-                        mdx_ensem = 'UVR_MDXNET_9682'
-                if data['mdx_ensem'] == 'UVR-MDX-NET 3':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
-                        mdx_ensem = 'UVR_MDXNET_3_9662'
-                    else:
-                        mdx_ensem = 'UVR_MDXNET_9662'
-                if data['mdx_ensem'] == 'UVR-MDX-NET Karaoke':
-                    mdx_ensem = 'UVR_MDXNET_KARA'
-                if data['mdx_ensem'] == 'UVR-MDX-NET Main':
-                    mdx_ensem = 'UVR_MDXNET_Main'
-                if data['mdx_ensem'] == 'Demucs UVR Model 1':
-                    mdx_ensem = 'UVR_Demucs_Model_1'
-                if data['mdx_ensem'] == 'Demucs UVR Model 2':
-                    mdx_ensem = 'UVR_Demucs_Model_2'
-                if data['mdx_ensem'] == 'Demucs mdx_extra':
-                    mdx_ensem = 'mdx_extra'
-                if data['mdx_ensem'] == 'Demucs mdx_extra_q':
-                    mdx_ensem = 'mdx_extra_q'
-  
-                #MDX-Net Model 2
+                #MDX-Net/Demucs Model 1
                 
-                if data['mdx_ensem_b'] == 'UVR-MDX-NET 1':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
-                        mdx_ensem_b = 'UVR_MDXNET_1_9703'
+                if 'MDX-Net:' in data['mdx_ensem']:
+                    mdx_model_run_mul_a = 'yes'
+                    mdx_net_model_name = data['mdx_ensem']
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_ensem = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_ensem = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_ensem = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_ensem = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_ensem = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_ensem = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_ensem = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_ensem = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_ensem = 'UVR_MDXNET_Main'
                     else:
-                        mdx_ensem_b = 'UVR_MDXNET_9703'
-                if data['mdx_ensem_b'] == 'UVR-MDX-NET 2':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
-                        mdx_ensem_b = 'UVR_MDXNET_2_9682'
+                        mdx_ensem = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_ensem']:
+                    mdx_model_run_mul_a = 'no'
+                    mdx_ensem = demucs_model_set_name_muilti_a
+                    
+                if data['mdx_ensem'] == 'No Model':
+                    mdx_ensem = 'pass'
+
+                #MDX-Net/Demucs Model 2
+                
+                if 'MDX-Net:' in data['mdx_ensem_b']:
+                    mdx_model_run_mul_b = 'yes'
+                    mdx_net_model_name = data['mdx_ensem_b']
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_ensem_b = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_ensem_b = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_ensem_b = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_ensem_b = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_ensem_b = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_ensem_b = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_ensem_b = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_ensem_b = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_ensem_b = 'UVR_MDXNET_Main'
+                        
                     else:
-                        mdx_ensem_b = 'UVR_MDXNET_9682'
-                if data['mdx_ensem_b'] == 'UVR-MDX-NET 3':
-                    if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
-                        mdx_ensem_b = 'UVR_MDXNET_3_9662'
-                    else:
-                        mdx_ensem_b = 'UVR_MDXNET_9662'
-                if data['mdx_ensem_b'] == 'UVR-MDX-NET Karaoke':
-                    mdx_ensem_b = 'UVR_MDXNET_KARA'
-                if data['mdx_ensem_b'] == 'UVR-MDX-NET Main':
-                    mdx_ensem_b = 'UVR_MDXNET_Main'
-                if data['mdx_ensem_b'] == 'Demucs UVR Model 1':
-                    mdx_ensem_b = 'UVR_Demucs_Model_1'
-                if data['mdx_ensem_b'] == 'Demucs UVR Model 2':
-                    mdx_ensem_b = 'UVR_Demucs_Model_2'
-                if data['mdx_ensem_b'] == 'Demucs mdx_extra':
-                    mdx_ensem_b = 'mdx_extra'
-                if data['mdx_ensem_b'] == 'Demucs mdx_extra_q':
-                    mdx_ensem_b = 'mdx_extra_q'
+                        mdx_ensem_b = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_ensem_b']:
+                    mdx_model_run_mul_b = 'no'
+                    mdx_ensem_b = demucs_model_set_name_muilti_b
+                    
                 if data['mdx_ensem_b'] == 'No Model':
                     mdx_ensem_b = 'pass'
+                    mdx_model_run_mul_b = 'pass'
                     
-
                 
                 if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
                     mdx_vr = [
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {mdx_ensem}',
                         },
                         {
                             'model_name': 'pass',
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': 'pass',
+                            'model_param': 'pass',
                             'model_location':'pass',
                             'loop_name': f'Ensemble Mode - Last Model - {mdx_ensem_b}',
                         }
@@ -1433,14 +2025,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}',
                         },
                         {
                             'model_name': 'pass',
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': 'pass',
+                            'model_param': 'pass',
                             'model_location':'pass',
                             'loop_name': 'Ensemble Mode - Last Model',
                         }
@@ -1450,14 +2046,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_c_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_c_name,
+                            'model_param': vr_param_ens_multi_c,
                             'model_location':vr_ensem_mdx_c,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
                         }
@@ -1467,14 +2067,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_b_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_b_name,
+                            'model_param': vr_param_ens_multi_b,
                             'model_location':vr_ensem_mdx_b,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
                         },
@@ -1485,14 +2089,18 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_a_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_a_name,
+                            'model_param': vr_param_ens_multi_a,
                             'model_location':vr_ensem_mdx_a,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
                         }
@@ -1502,21 +2110,27 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': 'pass',
+                            'mdx_model_run': 'pass',
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_b_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_mdx_b_name,
+                            'model_param': vr_param_ens_multi_b,
                             'model_location':vr_ensem_mdx_b,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_c_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_c_name,
+                            'model_param': vr_param_ens_multi_c,
                             'model_location':vr_ensem_mdx_c,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
                         }
@@ -1526,21 +2140,27 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': 'pass',
+                            'mdx_model_run': 'pass',
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_a_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_mdx_a_name,
+                            'model_param': vr_param_ens_multi_a,
                             'model_location':vr_ensem_mdx_a,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_c_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_c_name,
+                            'model_param': vr_param_ens_multi_c,
                             'model_location':vr_ensem_mdx_c,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
                         }
@@ -1550,21 +2170,27 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': 'pass',
+                            'mdx_model_run': 'pass',
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_a_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_mdx_a_name,
+                            'model_param': vr_param_ens_multi_a,
                             'model_location':vr_ensem_mdx_a,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_b_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_b_name,
+                            'model_param': vr_param_ens_multi_b,
                             'model_location':vr_ensem_mdx_b,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
                         }
@@ -1574,85 +2200,494 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         {
                             'model_name': vr_ensem_name,
                             'mdx_model_name': 'pass',
+                            'mdx_model_run': 'pass',
                             'model_name_c': vr_ensem_name,
+                            'model_param': vr_param_ens_multi,
                             'model_location':vr_ensem,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_a_name,
                             'mdx_model_name': 'pass',
+                            'mdx_model_run': 'pass',
                             'model_name_c': vr_ensem_mdx_a_name,
+                            'model_param': vr_param_ens_multi_a,
                             'model_location':vr_ensem_mdx_a,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_a_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_b_name,
                             'mdx_model_name': mdx_ensem_b,
+                            'mdx_model_run': mdx_model_run_mul_b,
                             'model_name_c': vr_ensem_mdx_b_name,
+                            'model_param': vr_param_ens_multi_b,
                             'model_location':vr_ensem_mdx_b,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_b_name}'
                         },
                         {
                             'model_name': vr_ensem_mdx_c_name,
                             'mdx_model_name': mdx_ensem,
+                            'mdx_model_run': mdx_model_run_mul_a,
                             'model_name_c': vr_ensem_mdx_c_name,
+                            'model_param': vr_param_ens_multi_c,
                             'model_location':vr_ensem_mdx_c,
                             'loop_name': f'Ensemble Mode - Running Model - {vr_ensem_mdx_c_name}'
                         }
                     ]
                     
-                if data['ensChoose'] == 'Basic VR Ensemble':
-                    loops = Basic_Ensem
-                    ensefolder = 'Basic_VR_Outputs'
-                    if data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name
-                    elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_d'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_e_name                        
-                    elif data['vr_ensem_c'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_d_name
-                    elif data['vr_ensem_d'] == 'No Model' and data['vr_ensem_e'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name
-                    elif data['vr_ensem_c'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_d_name + '_' + vr_ensem_e_name
-                    elif data['vr_ensem_d'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_e_name
-                    elif data['vr_ensem_e'] == 'No Model':
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_d_name
+                ##### Basic MD Ensemble #####
+                    
+                #MDX-Net/Demucs Model 1
+
+                if 'MDX-Net:' in data['mdx_only_ensem_a']:
+                    mdx_model_run_a = 'yes'
+                    mdx_net_model_name = str(data['mdx_only_ensem_a'])
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #print('mdx_net_model_name ', mdx_net_model_name)
+                    #mdx_only_ensem_a = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_only_ensem_a = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_only_ensem_a = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_only_ensem_a = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_only_ensem_a = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_only_ensem_a = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_only_ensem_a = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_only_ensem_a = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_only_ensem_a = 'UVR_MDXNET_Main'
                     else:
-                        ensemode = 'Basic_Ensemble' + '_' + vr_ensem_a_name + '_' + vr_ensem_b_name + '_' + vr_ensem_c_name + '_' + vr_ensem_d_name + '_' + vr_ensem_e_name
-                if data['ensChoose'] == 'HP2 Models':
-                    loops = HP2_Models
-                    ensefolder = 'HP2_Models_Ensemble_Outputs'
-                    ensemode = 'HP2_Models'
-                if data['ensChoose'] == 'All HP/HP2 Models':
-                    loops = All_HP_Models
-                    ensefolder = 'All_HP_HP2_Models_Ensemble_Outputs'
-                    ensemode = 'All_HP_HP2_Models'
-                if data['ensChoose'] == 'Vocal Models':           
-                    loops = Vocal_Models
-                    ensefolder = 'Vocal_Models_Ensemble_Outputs'
-                    ensemode = 'Vocal_Models'
+                        mdx_only_ensem_a = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_only_ensem_a']:
+                    mdx_model_run_a = 'no'
+                    mdx_only_ensem_a = demucs_model_set_name_a
+                    
+                if data['mdx_only_ensem_a'] == 'No Model':
+                    mdx_only_ensem_a = 'pass'
+
+                #MDX-Net/Demucs Model 2
+                
+                if 'MDX-Net:' in data['mdx_only_ensem_b']:
+                    mdx_model_run_b = 'yes'
+                    mdx_net_model_name = str(data['mdx_only_ensem_b'])
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_only_ensem_b = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_only_ensem_b = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_only_ensem_b = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_only_ensem_b = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_only_ensem_b = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_only_ensem_b = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_only_ensem_b = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_only_ensem_b = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_only_ensem_b = 'UVR_MDXNET_Main'
+                    else:
+                        mdx_only_ensem_b = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_only_ensem_b']:
+                    mdx_model_run_b = 'no'
+                    mdx_only_ensem_b = demucs_model_set_name_b
+                    
+                if data['mdx_only_ensem_b'] == 'No Model':
+                    mdx_only_ensem_b = 'pass'
+                    
+                #MDX-Net/Demucs Model 3
+                
+                if 'MDX-Net:' in data['mdx_only_ensem_c']:
+                    mdx_model_run_c = 'yes'
+                    mdx_net_model_name = data['mdx_only_ensem_c']
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_only_ensem_c = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_only_ensem_c = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_only_ensem_c = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_only_ensem_c = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_only_ensem_c = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_only_ensem_c = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_only_ensem_c = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_only_ensem_c = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_only_ensem_c = 'UVR_MDXNET_Main'
+                    else:
+                        mdx_only_ensem_c = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_only_ensem_c']:
+                    mdx_model_run_c = 'no'
+                    mdx_only_ensem_c = demucs_model_set_name_c
+                    
+                if data['mdx_only_ensem_c'] == 'No Model':
+                    mdx_only_ensem_c = 'pass'
+                    
+                #MDX-Net/Demucs Model 4
+                    
+                if 'MDX-Net:' in data['mdx_only_ensem_d']:
+                    mdx_model_run_d = 'yes'
+                    mdx_net_model_name = data['mdx_only_ensem_d']
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_only_ensem_d = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_only_ensem_d = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_only_ensem_d = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_only_ensem_d = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_only_ensem_d = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_only_ensem_d = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_only_ensem_d = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_only_ensem_d = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_only_ensem_d = 'UVR_MDXNET_Main'
+                    else:
+                        mdx_only_ensem_d = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_only_ensem_d']:
+                    mdx_model_run_d = 'no'
+                    mdx_only_ensem_d = demucs_model_set_name_d
+                    
+                if data['mdx_only_ensem_d'] == 'No Model':
+                    mdx_only_ensem_d = 'pass'
+                    
+                #MDX-Net/Demucs Model 5
+                
+                if 'MDX-Net:' in data['mdx_only_ensem_e']:
+                    mdx_model_run_e = 'yes'
+                    mdx_net_model_name = data['mdx_only_ensem_e']
+                    head, sep, tail = mdx_net_model_name.partition('MDX-Net: ')
+                    mdx_net_model_name = tail
+                    #mdx_only_ensem_e = mdx_net_model_name
+                    if mdx_net_model_name == 'UVR-MDX-NET 1':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
+                            mdx_only_ensem_e = 'UVR_MDXNET_1_9703'
+                        else:
+                            mdx_only_ensem_e = 'UVR_MDXNET_9703'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 2':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
+                            mdx_only_ensem_e = 'UVR_MDXNET_2_9682'
+                        else:
+                            mdx_only_ensem_e = 'UVR_MDXNET_9682'
+                    elif mdx_net_model_name == 'UVR-MDX-NET 3':
+                        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
+                            mdx_only_ensem_e = 'UVR_MDXNET_3_9662'
+                        else:
+                            mdx_only_ensem_e = 'UVR_MDXNET_9662'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Karaoke':
+                        mdx_only_ensem_e = 'UVR_MDXNET_KARA'
+                    elif mdx_net_model_name == 'UVR-MDX-NET Main':
+                        mdx_only_ensem_e = 'UVR_MDXNET_Main'
+                    else:
+                        mdx_only_ensem_e = mdx_net_model_name
+                        
+                if 'Demucs:' in data['mdx_only_ensem_e']:
+                    mdx_model_run_e = 'no'
+                    mdx_only_ensem_e = demucs_model_set_name_e
+                    
+                if data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_only_ensem_e = 'pass'
+                      
+                    
+                if data['mdx_only_ensem_c'] == 'No Model' and data['mdx_only_ensem_d'] == 'No Model' and data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        }
+                    ] 
+                elif data['mdx_only_ensem_c'] == 'No Model' and data['mdx_only_ensem_d'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_e,
+                            'mdx_model_run': mdx_model_run_e,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_e}'
+                        }  
+                    ] 
+                elif data['mdx_only_ensem_c'] == 'No Model' and data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_d,
+                            'mdx_model_run': mdx_model_run_d,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_d}'
+                        }  
+                    ] 
+                elif data['mdx_only_ensem_d'] == 'No Model' and data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_c,
+                            'mdx_model_run': mdx_model_run_c,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_c}'
+                        }  
+                    ] 
+                elif data['mdx_only_ensem_d'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_c,
+                            'mdx_model_run': mdx_model_run_c,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_c}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_e,
+                            'mdx_model_run': mdx_model_run_e,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_e}'
+                        }
+                    ]
+                    
+                elif data['mdx_only_ensem_c'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_d,
+                            'mdx_model_run': mdx_model_run_d,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_d}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_e,
+                            'mdx_model_run': mdx_model_run_e,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_e}'
+                        }
+                    ] 
+                elif data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_c,
+                            'mdx_model_run': mdx_model_run_c,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_c}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_d,
+                            'mdx_model_run': mdx_model_run_d,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_d}'
+                        }
+                    ] 
+                else:
+                    mdx_demuc_only = [
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_a,
+                            'mdx_model_run': mdx_model_run_a,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_a}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_b,
+                            'mdx_model_run': mdx_model_run_b,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_b}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_c,
+                            'mdx_model_run': mdx_model_run_c,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_c}'
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_d,
+                            'mdx_model_run': mdx_model_run_d,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_d}' 
+                        },
+                        {
+                            'model_name': 'pass',
+                            'model_name_c':'pass',
+                            'mdx_model_name': mdx_only_ensem_e,
+                            'mdx_model_run': mdx_model_run_e,
+                            'model_location': 'pass',
+                            'loop_name': f'Ensemble Mode - Running Model - {mdx_only_ensem_e}'
+                        }  
+                    ] 
+                    
                 if data['ensChoose'] == 'Multi-AI Ensemble':           
                     loops = mdx_vr
                     ensefolder = 'Multi_AI_Ensemble_Outputs'
-                    if data['vr_ensem'] == 'No Model' and data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
-                        ensemode = 'MDX-Net_Models'
-                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name
-                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_b'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_c_name
-                    elif data['vr_ensem_mdx_a'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_b_name
-                    elif data['vr_ensem_mdx_b'] == 'No Model' and data['vr_ensem_mdx_c'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name
-                    elif data['vr_ensem_mdx_a'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_b_name + '_' + vr_ensem_mdx_c_name
-                    elif data['vr_ensem_mdx_b'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_c_name
-                    elif data['vr_ensem_mdx_c'] == 'No Model':
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_b_name
-                    else:
-                        ensemode = 'MDX-Net_' + vr_ensem_name + '_' + vr_ensem_mdx_a_name + '_' + vr_ensem_mdx_b_name + '_' + vr_ensem_mdx_c_name
+                    ensemode = 'Multi_AI_Ensemble'
+ 
+                if data['ensChoose'] == 'Basic VR Ensemble':
+                    loops = Basic_Ensem
+                    ensefolder = 'Basic_VR_Outputs'
+                    ensemode = 'Multi_VR_Ensemble'
+
+                if data['ensChoose'] == 'Basic MD Ensemble':
+                    loops = mdx_demuc_only
+                    ensefolder = 'Basic_MDX_Net_Demucs_Ensemble'
+                    ensemode = 'Basic_MDX_Net_Demucs_Ensemble'
 
                 #Prepare Audiofile(s)
                 for file_num, music_file in enumerate(data['input_paths'], start=1):
@@ -1700,27 +2735,34 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     for i, c in tqdm(enumerate(loops), disable=True, desc='Iterations..'):
                         
                             try:
-                                ModelName_2=(c['mdx_model_name'])
+                                if c['mdx_model_name'] == 'tasnet.th':
+                                    ModelName_2 = "Tasnet_v1"
+                                elif c['mdx_model_name'] == 'tasnet_extra.th':
+                                    ModelName_2 = "Tasnet_extra_v1"
+                                elif c['mdx_model_name'] == 'demucs.th':
+                                    ModelName_2 = "Demucs_v1"
+                                elif c['mdx_model_name'] == 'demucs_extra.th':
+                                    ModelName_2 = "Demucs_extra_v1"
+                                elif c['mdx_model_name'] == 'light_extra.th':
+                                    ModelName_2 = "Light_v1"
+                                elif c['mdx_model_name'] == 'light_extra.th':
+                                    ModelName_2 = "Light_extra_v1"
+                                elif c['mdx_model_name'] == 'tasnet-beb46fac.th':
+                                    ModelName_2 = "Tasnet_v2"
+                                elif c['mdx_model_name'] == 'tasnet_extra-df3777b2.th':
+                                    ModelName_2 = "Tasnet_extra_v2"
+                                elif c['mdx_model_name'] == 'demucs48_hq-28a1282c.th':
+                                    ModelName_2 = "Demucs48_hq_v2"
+                                elif c['mdx_model_name'] == 'demucs-e07c671f.th':
+                                    ModelName_2 = "Demucs_v2"
+                                elif c['mdx_model_name'] == 'demucs_extra-3646af93.th':
+                                    ModelName_2 = "Demucs_extra_v2"
+                                elif c['mdx_model_name'] == 'demucs_unittest-09ebc15f.th':
+                                    ModelName_2 = "Demucs_unittest_v2"
+                                else:
+                                    ModelName_2 = c['mdx_model_name']
                             except:
                                 pass
-                        
-                        
-                            if hp2_ens == 'off' and loops == HP2_Models:
-                                    text_widget.write(base_text + 'You must install the UVR expansion pack in order to use this ensemble.\n')
-                                    text_widget.write(base_text + 'Please install the expansion pack or choose another ensemble.\n')
-                                    text_widget.write(base_text + 'See the \"Updates\" tab in the Help Guide for installation instructions.\n')
-                                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
-                                    torch.cuda.empty_cache()
-                                    button_widget.configure(state=tk.NORMAL)
-                                    return
-                            elif hp2_ens == 'off' and loops == All_HP_Models:
-                                    text_widget.write(base_text + 'You must install the UVR expansion pack in order to use this ensemble.\n')
-                                    text_widget.write(base_text + 'Please install the expansion pack or choose another ensemble.\n')
-                                    text_widget.write(base_text + 'See the \"Updates\" tab in the Help Guide for installation instructions.\n')
-                                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')  # nopep8
-                                    torch.cuda.empty_cache()
-                                    button_widget.configure(state=tk.NORMAL)
-                                    return
 
 
                             def determineenseFolderName():
@@ -1771,7 +2813,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 else: 
                                     if data['ensChoose'] == 'Multi-AI Ensemble':
                                         text_widget.write(base_text + 'Model "' + c['model_name'] + '.pth" is missing.\n')
-                                        text_widget.write(base_text + 'Installation of v5 Model Expansion Pack required to use this model.\n')
+                                        text_widget.write(base_text + 'This model can be downloaded straight from the \"Settings\" options.\n')
                                         text_widget.write(base_text + f'If the error persists, please verify all models are present.\n\n')
                                         text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
                                         torch.cuda.empty_cache()
@@ -1798,100 +2840,62 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 text_widget.write('Done!\n')
                                 
                                 ModelName=(c['model_location'])
-
+                                ModelParamSettings=(c['model_param'])
                                 #Package Models
                                 
-                                model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
-                                print(model_hash)
-                                
-                                #v5 Models
-                                
-                                if model_hash == '47939caf0cfe52a0e81442b85b971dfd':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100')
-                                if model_hash == '4e4ecb9764c50a8c414fee6e10395bbe':  
-                                    model_params_d=str('lib_v5/modelparams/4band_v2.json')
-                                    param_name=str('4band_v2')
-                                if model_hash == 'e60a1e84803ce4efc0a6551206cc4b71':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100')
-                                if model_hash == 'a82f14e75892e55e994376edbf0c8435':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100')
-                                if model_hash == '6dd9eaa6f0420af9f1d403aaafa4cc06':   
-                                    model_params_d=str('lib_v5/modelparams/4band_v2_sn.json')
-                                    param_name=str('4band_v2_sn')
-                                if model_hash == '5c7bbca45a187e81abbbd351606164e5':    
-                                    model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
-                                    param_name=str('3band_44100_msb2')
-                                if model_hash == 'd6b2cb685a058a091e5e7098192d3233':    
-                                    model_params_d=str('lib_v5/modelparams/3band_44100_msb2.json')
-                                    param_name=str('3band_44100_msb2')
-                                if model_hash == 'c1b9f38170a7c90e96f027992eb7c62b': 
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100')
-                                if model_hash == 'c3448ec923fa0edf3d03a19e633faa53':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100')
-                                if model_hash == '68aa2c8093d0080704b200d140f59e54':  
-                                    model_params_d=str('lib_v5/modelparams/3band_44100.json')
-                                    param_name=str('3band_44100.json')
-                                if model_hash == 'fdc83be5b798e4bd29fe00fe6600e147':  
-                                    model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
-                                    param_name=str('3band_44100_mid.json')
-                                if model_hash == '2ce34bc92fd57f55db16b7a4def3d745':  
-                                    model_params_d=str('lib_v5/modelparams/3band_44100_mid.json')
-                                    param_name=str('3band_44100_mid.json')
-                                if model_hash == '52fdca89576f06cf4340b74a4730ee5f':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100.json')
-                                if model_hash == '41191165b05d38fc77f072fa9e8e8a30':  
-                                    model_params_d=str('lib_v5/modelparams/4band_44100.json')
-                                    param_name=str('4band_44100.json')
-                                if model_hash == '89e83b511ad474592689e562d5b1f80e':  
-                                    model_params_d=str('lib_v5/modelparams/2band_32000.json')
-                                    param_name=str('2band_32000.json')
-                                if model_hash == '0b954da81d453b716b114d6d7c95177f':  
-                                    model_params_d=str('lib_v5/modelparams/2band_32000.json')
-                                    param_name=str('2band_32000.json')
-                                    
-                                #v4 Models
-                                    
-                                if model_hash == '6a00461c51c2920fd68937d4609ed6c8':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr16000_hl512.json')
-                                    param_name=str('1band_sr16000_hl512')
-                                if model_hash == '0ab504864d20f1bd378fe9c81ef37140':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                    param_name=str('1band_sr32000_hl512')
-                                if model_hash == '7dd21065bf91c10f7fccb57d7d83b07f':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                    param_name=str('1band_sr32000_hl512')
-                                if model_hash == '80ab74d65e515caa3622728d2de07d23':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                                    param_name=str('1band_sr32000_hl512')
-                                if model_hash == 'edc115e7fc523245062200c00caa847f':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                                    param_name=str('1band_sr33075_hl384')
-                                if model_hash == '28063e9f6ab5b341c5f6d3c67f2045b7':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                                    param_name=str('1band_sr33075_hl384')
-                                if model_hash == 'b58090534c52cbc3e9b5104bad666ef2':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                                    param_name=str('1band_sr44100_hl512')
-                                if model_hash == '0cdab9947f1b0928705f518f3c78ea8f':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                                    param_name=str('1band_sr44100_hl512')
-                                if model_hash == 'ae702fed0238afb5346db8356fe25f13':  
-                                    model_params_d=str('lib_v5/modelparams/1band_sr44100_hl1024.json')
-                                    param_name=str('1band_sr44100_hl1024')
-                                    
+                                if ModelParamSettings == 'Auto':
+                                    model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
+                                    model_params = []   
+                                    model_params = lib_v5.filelist.provide_model_param_hash(model_hash)
+                                    #print(model_params)
+                                    if model_params[0] == 'Not Found Using Hash':
+                                        model_params = []   
+                                        model_params = lib_v5.filelist.provide_model_param_name(ModelName)
+                                    if model_params[0] == 'Not Found Using Name':
+                                        text_widget.write(base_text + f'Unable to set model parameters automatically with the selected model. Continue?\n')
+                                        confirm = tk.messagebox.askyesno(title='Unrecognized Model Detected',
+                                                message=f'\nThe application could not automatically set the model param for the selected model.\n\n' + 
+                                                f'Would you like to select the Model Param file for this model?\n\n' + 
+                                                f'This model will be skipped if no Model Param is selected.')
+                                        
+                                        if confirm:
+                                            model_param_selection = filedialog.askopenfilename(initialdir='lib_v5/modelparams', 
+                                                                                    title=f'Select Model Param', 
+                                                                                    filetypes=[("Model Param", "*.json")])
+                                            
+                                            model_param_file_path = str(model_param_selection)
+                                            model_param_file = os.path.splitext(os.path.basename(model_param_file_path))[0] + '.json'
+                                            model_params = [model_param_file_path, model_param_file]
+                                            
+                                            with open(f"lib_v5/filelists/model_cache/vr_param_cache/{model_hash}.txt", 'w') as f:
+                                                f.write(model_param_file)
+                                            
+                                            if model_params[0] == '':
+                                                text_widget.write(base_text + f'Model param not selected.\n')
+                                                text_widget.write(base_text + f'Moving on to next model...\n\n')
 
+                                                continue
+                                            else:
+                                                pass
+                                        else:
+                                            text_widget.write(base_text + f'Model param not selected.\n')
+                                            text_widget.write(base_text + f'Moving on to next model...\n\n')
+
+                                            continue
+                                            
+                                            
+                                else:
+                                    model_param_file_path = f'lib_v5/modelparams/{ModelParamSettings}'
+                                    model_params = [model_param_file_path, ModelParamSettings]
+                                    
                                 ModelName_1=(c['model_name'])
 
-                                print('Model Parameters:', model_params_d)
-                                text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + param_name + '\"... ')
+                                #print('model param function output ', model_params)
+
+                                print('Model Parameters:', model_params[0])
+                                text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + model_params[1] + '\"... ')
                                 
-                                mp = ModelParameters(model_params_d)
+                                mp = ModelParameters(model_params[0])
                                 
                                 text_widget.write('Done!\n')
                                 
@@ -1907,7 +2911,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 
                                 model_name = os.path.basename(c["model_name"])
 
-                                # -Go through the different steps of seperation-
+                                # -Go through the different steps of Separation-
                                 # Wave source
                                 text_widget.write(base_text + 'Loading audio source... ')
                                 
@@ -2118,150 +3122,101 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         _, bin_image = cv2.imencode('.jpg', image)
                                         bin_image.tofile(f)
                                         
-                                text_widget.write(base_text + 'Completed Seperation!\n\n')  
+                                text_widget.write(base_text + 'Completed Separation!\n\n')  
                     
-
-                            if data['ensChoose'] == 'Multi-AI Ensemble':
+###################################
+                            if data['ensChoose'] == 'Multi-AI Ensemble' or data['ensChoose'] == 'Basic MD Ensemble':
+                                
+                                if data['demucsmodel']:
+                                    demucs_switch = 'on'
+                                else:
+                                    demucs_switch = 'off'
+                                
+                                if data['demucs_only']:
+                                    demucs_only = 'on'
+                                else:
+                                    demucs_only = 'off'
+                                
+                                if c['mdx_model_name'] == 'tasnet.th':
+                                    post_mdx_name = "Tasnet v1"
+                                elif c['mdx_model_name'] == 'tasnet_extra.th':
+                                    post_mdx_name = "Tasnet_extra v1"
+                                elif c['mdx_model_name'] == 'demucs.th':
+                                    post_mdx_name = "Demucs v1"
+                                elif c['mdx_model_name'] == 'demucs_extra.th':
+                                    post_mdx_name = "Demucs_extra v1"
+                                elif c['mdx_model_name'] == 'light_extra.th':
+                                    post_mdx_name = "Light v1"
+                                elif c['mdx_model_name'] == 'light_extra.th':
+                                    post_mdx_name = "Light_extra v1"
+                                elif c['mdx_model_name'] == 'tasnet-beb46fac.th':
+                                    post_mdx_name = "Tasnet v2"
+                                elif c['mdx_model_name'] == 'tasnet_extra-df3777b2.th':
+                                    post_mdx_name = "Tasnet_extra v2"
+                                elif c['mdx_model_name'] == 'demucs48_hq-28a1282c.th':
+                                    post_mdx_name = "Demucs48_hq v2"
+                                elif c['mdx_model_name'] == 'demucs-e07c671f.th':
+                                    post_mdx_name = "Demucs v2"
+                                elif c['mdx_model_name'] == 'demucs_extra-3646af93.th':
+                                    post_mdx_name = "Demucs_extra v2"
+                                elif c['mdx_model_name'] == 'demucs_unittest-09ebc15f.th':
+                                    post_mdx_name = "Demucs_unittest v2"
+                                else:
+                                    post_mdx_name = c['mdx_model_name']
                                 
                                 mdx_name = c['mdx_model_name']
+                                
+                                
                                 
                                 if c['mdx_model_name'] == 'pass':
                                     pass
                                 else:
-                                    text_widget.write('Ensemble Mode - Running Model - ' + mdx_name + '\n\n')
-
-                                    if mdx_name == 'UVR_MDXNET_1_9703':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_1_9703.onnx'
-                                        model_set_name = 'UVR_MDXNET_1_9703'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_2_9682':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_2_9682.onnx'
-                                        model_set_name = 'UVR_MDXNET_2_9682'
-                                        modeltype = 'v'
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_3_9662':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_3_9662.onnx'
-                                        model_set_name = 'UVR_MDXNET_3_9662'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_KARA':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_KARA.onnx'
-                                        model_set_name = 'UVR_MDXNET_KARA'
-                                        modeltype = 'v'
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_9703':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_9703.onnx'
-                                        model_set_name = 'UVR_MDXNET_9703'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_9682':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_9682.onnx'
-                                        model_set_name = 'UVR_MDXNET_9682'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_9662':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_9662.onnx'
-                                        model_set_name = 'UVR_MDXNET_9662'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_KARA':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_KARA.onnx'
-                                        model_set_name = 'UVR_MDXNET_KARA'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.03597672895
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=6144 
-                                        dim_f_set=2048
-                                    if mdx_name == 'UVR_MDXNET_Main':
-                                        demucs_only = 'off'
-                                        model_set = 'UVR_MDXNET_Main.onnx'
-                                        model_set_name = 'UVR_MDXNET_Main'
-                                        modeltype = 'v'
-                                        demucs_model_set = data['DemucsModel_MDX']
-                                        noise_pro = 'MDX-NET_Noise_Profile_17_kHz'
-                                        if autocompensate == True:
-                                            compensate = 1.075
-                                        else:
-                                            compensate = data['compensate']
-                                        n_fft_scale_set=7680 
-                                        dim_f_set=3072
-                                    if 'Demucs' in mdx_name:
-                                        demucs_only = 'on'
-                                        demucs_switch = 'on'
-                                        demucs_model_set = mdx_name
-                                        model_set = ''
-                                        model_set_name = 'UVR'
-                                        modeltype = 'v'
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-                                    if 'extra' in mdx_name:
-                                        demucs_only = 'on'
-                                        demucs_switch = 'on'
-                                        demucs_model_set = mdx_name
-                                        model_set = ''
-                                        model_set_name = 'extra'
-                                        modeltype = 'v'
-                                        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                    text_widget.write('Ensemble Mode - Running Model - ' + post_mdx_name + '\n\n')
                                         
+                                    if c['mdx_model_run'] == 'no':
+                                        if 'UVR' in mdx_name:
+                                            demucs_only = 'on'
+                                            demucs_switch = 'on'
+                                            demucs_model_set = mdx_name
+                                            model_set = ''
+                                            model_set_name = 'UVR'
+                                            modeltype = 'v'
+                                            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                            stemset_n = '(Vocals)'
+                                        else:
+                                            demucs_only = 'on'
+                                            demucs_switch = 'on'
+                                            demucs_model_set = mdx_name
+                                            model_set = ''
+                                            model_set_name = 'extra'
+                                            modeltype = 'v'
+                                            noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
+                                            stemset_n = '(Vocals)'
+                                    if c['mdx_model_run'] == 'yes':
+                                        demucs_only = 'off'
+                                        model_set = f"{mdx_name}.onnx"
+                                        model_set_name = mdx_name
+                                        demucs_model_set = demucs_model_set_name
+                                        mdx_model_path = f'models/MDX_Net_Models/{mdx_name}.onnx'
+                                        
+                                        model_hash = hashlib.md5(open(mdx_model_path,'rb').read()).hexdigest()
+                                        model_params_mdx = []   
+                                        model_params_mdx = lib_v5.filelist.provide_mdx_model_param_name(model_hash)
+                                        
+                                        modeltype = model_params_mdx[0]
+                                        noise_pro = model_params_mdx[1]
+                                        stemset_n = model_params_mdx[2]
+                                        if autocompensate:
+                                            compensate = model_params_mdx[3]
+                                        else:
+                                            compensate = data['compensate']
+                                        source_val = model_params_mdx[4]
+                                        n_fft_scale_set = model_params_mdx[5]
+                                        dim_f_set = model_params_mdx[6]
+
+                                        #print(model_params_mdx)
+                                    
+                            
                                     print('demucs_only? ', demucs_only)
                                         
                                     if data['noise_pro_select'] == 'Auto Select':
@@ -2285,6 +3240,30 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                     e = os.path.join(data["export_path"])
 
                                     pred = Predictor()
+                                    
+                                    if c['mdx_model_run'] == 'yes':
+                                        if stemset_n == '(Bass)' or stemset_n == '(Drums)' or stemset_n == '(Other)':
+                                            widget_text.write(base_text + 'Only vocal and instrumental MDX-Net models are supported in \nensemble mode.\n')
+                                            widget_text.write(base_text + 'Moving on to next model...\n\n')
+                                            continue
+                                        if modeltype == 'Not Set' or \
+                                        noise_pro == 'Not Set' or \
+                                        stemset_n == 'Not Set' or \
+                                        compensate == 'Not Set' or \
+                                        source_val == 'Not Set' or \
+                                        n_fft_scale_set == 'Not Set' or \
+                                        dim_f_set == 'Not Set':
+                                            confirm = tk.messagebox.askyesno(title='Unrecognized Model Detected',
+                                                    message=f'\nWould you like to set the correct model parameters for this model before continuing?\n')
+                                            
+                                            if confirm:
+                                                pred.mdx_options()
+                                            else:
+                                                text_widget.write(base_text + 'An unrecognized model has been detected.\n')
+                                                text_widget.write(base_text + 'Please configure the ONNX model settings accordingly and try again.\n')
+                                                text_widget.write(base_text + 'Moving on to next model...\n\n')
+                                                continue
+                                    
                                     pred.prediction_setup()
                                     
                                     # split

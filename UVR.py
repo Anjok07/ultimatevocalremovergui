@@ -1,5 +1,7 @@
 # GUI modules
 import os
+import glob
+from re import T
 import pyperclip
 import natsort
 from gc import freeze
@@ -21,9 +23,14 @@ from PIL import Image
 from PIL import ImageTk
 import pickle  # Save Data
 from pathlib import Path
-
-# Other Modules
-
+import hashlib
+import wget
+import time
+import ctypes
+import trace
+import zipfile
+import traceback
+import torch
 # Pathfinding
 import pathlib
 import sys
@@ -40,8 +47,12 @@ import inference_MDX
 import inference_v5
 import inference_v5_ensemble
 import inference_demucs
+import lib_v5.filelist
+import shutil
+import importlib
+import urllib.request
+import pyAesCrypt
 from __version__ import VERSION
-
 from win32api import GetSystemMetrics
 
 try:
@@ -49,6 +60,31 @@ try:
         f.write('1')
 except:
     pass
+
+class KThread(threading.Thread):
+  def __init__(self, *args, **keywords):
+    threading.Thread.__init__(self, *args, **keywords)
+    self.killed = False
+  def start(self):
+    self.__run_backup = self.run
+    self.run = self.__run     
+    threading.Thread.start(self)
+  def __run(self):
+    sys.settrace(self.globaltrace)
+    self.__run_backup()
+    self.run = self.__run_backup
+  def globaltrace(self, frame, why, arg):
+    if why == 'call':
+      return self.localtrace
+    else:
+      return None
+  def localtrace(self, frame, why, arg):
+    if self.killed:
+      if why == 'line':
+        raise SystemExit()
+    return self.localtrace
+  def kill(self):
+    self.killed = True
 
 # Change the current working directory to the directory
 # this file sits in
@@ -62,24 +98,209 @@ else:
 
 os.chdir(base_path)  # Change the current working directory to the base path
 
+demucs_v3_repo_folder_path = 'models/Demucs_Models/v3_repo'
+if not os.path.isdir(demucs_v3_repo_folder_path):
+    os.mkdir(demucs_v3_repo_folder_path)
+
+try:
+    shutil.move("models/Demucs_Models/5d2d6c55-db83574e.th", "models/Demucs_Models/v3_repo/5d2d6c55-db83574e.th")
+    shutil.move("models/Demucs_Models/7fd6ef75-a905dd85.th", "models/Demucs_Models/v3_repo/7fd6ef75-a905dd85.th")
+    shutil.move("models/Demucs_Models/14fc6a69-a89dd0ee.th", "models/Demucs_Models/v3_repo/14fc6a69-a89dd0ee.th")
+    shutil.move("models/Demucs_Models/83fc094f-4a16d450.th", "models/Demucs_Models/v3_repo/83fc094f-4a16d450.th")
+    shutil.move("models/Demucs_Models/464b36d7-e5a9386e.th", "models/Demucs_Models/v3_repo/464b36d7-e5a9386e.th")
+    shutil.move("models/Demucs_Models/a1d90b5c-ae9d2452.th", "models/Demucs_Models/v3_repo/a1d90b5c-ae9d2452.th")
+    shutil.move("models/Demucs_Models/cfa93e08-61801ae1.th", "models/Demucs_Models/v3_repo/cfa93e08-61801ae1.th")
+    shutil.move("models/Demucs_Models/e51eebcc-c1b80bdd.th", "models/Demucs_Models/v3_repo/e51eebcc-c1b80bdd.th")
+    shutil.move("models/Demucs_Models/ebf34a2d.th", "models/Demucs_Models/v3_repo/ebf34a2d.th")
+    shutil.move("models/Demucs_Models/ebf34a2db.th", "models/Demucs_Models/v3_repo/ebf34a2db.th")
+    print('Demucs v3 models have been moved to the correct directory.')
+except:
+    pass
+
+try:
+    srcdir = "models/Demucs_Models/v3_repo"
+    dstdir = "models/Demucs_Models"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.yaml'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                shutil.copy2(pathname, dstdir)
+except:
+    pass
+
+try:
+    srcdir = "models/Demucs_Models"
+    dstdir = "models/Demucs_Models/v3_repo"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.yaml'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                shutil.copy2(pathname, dstdir)
+except:
+    pass     
+
+try:
+    srcdir = "models/Demucs_Models"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.tmp'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                os.remove(pathname)
+except:
+    pass   
+
+try:
+    srcdir = "models/Main_Models"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.tmp'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                os.remove(pathname)
+except:
+    pass  
+
+try:
+    srcdir = "models/MDX_Net_Models"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.tmp'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                os.remove(pathname)
+except:
+    pass  
+
+try:
+    with open('lib_v5/filelists/ensemble_list/mdx_demuc_en_list.txt', 'w') as f:
+        f.write('No Model\nNo Model\n')
+except:
+    pass
+
+try:
+    srcdir = "models/Demucs_Models/v3_repo"
+
+    for basename in os.listdir(srcdir):
+        if basename.endswith('.tmp'):
+            pathname = os.path.join(srcdir, basename)
+            if os.path.isfile(pathname):
+                os.remove(pathname)
+except:
+    pass   
+
+try:
+    os.rename("models/Main_Models/MGM_HIGHEND_v4_sr44100_hl1024_nf2048.pth", "models/Main_Models/MGM_HIGHEND_v4.pth")
+    os.rename("models/Main_Models/MGM_LOWEND_A_v4_sr32000_hl512_nf2048.pth", "models/Main_Models/MGM_LOWEND_A_v4.pth")
+    os.rename("models/Main_Models/MGM_LOWEND_B_v4_sr33075_hl384_nf2048.pth", "models/Main_Models/MGM_LOWEND_B_v4.pth")
+    os.rename("models/Main_Models/MGM_MAIN_v4_sr44100_hl512_nf2048.pth", "models/Main_Models/MGM_MAIN_v4.pth")
+
+except:
+    pass
+
+try:
+    os.rename("models/MDX_Net_Models/UVR_MDXNET_9703.onnx", "models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx")
+    os.rename("models/MDX_Net_Models/UVR_MDXNET_9682.onnx", "models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx")
+    os.rename("models/MDX_Net_Models/UVR_MDXNET_9662.onnx", "models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx")
+except:
+    pass
+
 #Images
-instrumentalModels_dir = os.path.join(base_path, 'models')
 banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
-efile_path = os.path.join(base_path, 'img', 'file.png')
-stop_path = os.path.join(base_path, 'img', 'stop.png')
-help_path = os.path.join(base_path, 'img', 'help.png')
-gen_opt_path = os.path.join(base_path, 'img', 'gen_opt.png')
-mdx_opt_path = os.path.join(base_path, 'img', 'mdx_opt.png')
-vr_opt_path = os.path.join(base_path, 'img', 'vr_opt.png')
-demucs_opt_path = os.path.join(base_path, 'img', 'demucs_opt.png')
-ense_opt_path = os.path.join(base_path, 'img', 'ense_opt.png')
-user_ens_opt_path = os.path.join(base_path, 'img', 'user_ens_opt.png')
 credits_path = os.path.join(base_path, 'img', 'credits.png')
+demucs_opt_path = os.path.join(base_path, 'img', 'demucs_opt.png')
+download_path = os.path.join(base_path, 'img', 'download.png')
+efile_path = os.path.join(base_path, 'img', 'file.png')
+ense_opt_path = os.path.join(base_path, 'img', 'ense_opt.png')
+gen_opt_path = os.path.join(base_path, 'img', 'gen_opt.png')
+help_path = os.path.join(base_path, 'img', 'help.png')
+instrumentalModels_dir = os.path.join(base_path, 'models')
+key_path = os.path.join(base_path, 'img', 'key.png')
+mdx_opt_path = os.path.join(base_path, 'img', 'mdx_opt.png')
+stop_path = os.path.join(base_path, 'img', 'stop.png')
+user_ens_opt_path = os.path.join(base_path, 'img', 'user_ens_opt.png')
+vr_opt_path = os.path.join(base_path, 'img', 'vr_opt.png')
+
+try:
+    with open('uvr_patch_version.txt', 'r') as file :
+        patch_version = file.read()
+    os.remove(f'{patch_version}.exe')
+except:
+    pass
 
 DEFAULT_DATA = {
+    'agg': 10,
+    'aiModel': 'MDX-Net',
+    'algo': 'Instrumentals (Min Spec)',
+    'appendensem': False,
+    'audfile': True,
+    'aud_mdx': True,
+    'autocompensate': True,
+    'break': False,
+    'channel': 64,
+    'chunks': 'Auto',
+    'chunks_d': 'Full',
+    'compensate': 1.03597672895,
+    'demucs_only': False,
+    'demucs_stems': 'All Stems',
+    'DemucsModel': 'mdx_extra',
+    'demucsmodel': False,
+    'DemucsModel_MDX': 'UVR_Demucs_Model_1',
+    'demucsmodel_sel_VR': 'UVR_Demucs_Model_1',
+    'demucsmodelVR': False,
+    'dim_f': 2048,
+    'ensChoose': 'Multi-AI Ensemble',
     'exportPath': '',
+    'flactype': 'PCM_16',
+    'gpu': False,
     'inputPaths': [],
+    'inst_only': False,
+    'inst_only_b': False,
+    'lastDir': None,
+    'margin': 44100,
+    'mdx_ensem': 'MDX-Net: UVR-MDX-NET Main',
+    'mdx_ensem_b': 'No Model',
+    'mdx_only_ensem_a': 'MDX-Net: UVR-MDX-NET Main',
+    'mdx_only_ensem_b': 'MDX-Net: UVR-MDX-NET 1',
+    'mdx_only_ensem_c': 'No Model',
+    'mdx_only_ensem_d': 'No Model',
+    'mdx_only_ensem_e': 'No Model',
+    'mdxnetModel': 'UVR-MDX-NET Main',
+    'mdxnetModeltype': 'Vocals (Custom)',
+    'mixing': 'Default',
+    'modeldownload': 'No Model Selected',
+    'modeldownload_mdx': 'No Model Selected',
+    'modeldownload_demucs': 'No Model Selected',
+    'modeldownload_type': 'VR Arc',
+    'modelFolder': False,
+    'modelInstrumentalLabel': '',
+    'ModelParams': 'Auto',
+    'mp3bit': '320k',
+    'n_fft_scale': 6144,
+    'noise_pro_select': 'Auto Select',
+    'noise_reduc': True,
+    'noisereduc_s': '3',
+    'non_red': False,
+    'nophaseinst': False,
+    'normalize': False,
+    'output_image': False,
+    'overlap': 0.25,
+    'overlap_b': 0.25,
+    'postprocess': False,
+    'save': True,
     'saveFormat': 'Wav',
+    'selectdownload': 'VR Arc',
+    'segment': 'None',
+    'settest': False,
+    'shifts': 2,
+    'shifts_b': 2,
+    'split_mode': True,
+    'tta': False,
+    'useModel': 'instrumental',
+    'voc_only': False,
+    'voc_only_b': False,
     'vr_ensem': '2_HP-UVR',
     'vr_ensem_a': '1_HP-UVR',
     'vr_ensem_b': '2_HP-UVR',
@@ -89,66 +310,19 @@ DEFAULT_DATA = {
     'vr_ensem_mdx_a': 'No Model',
     'vr_ensem_mdx_b': 'No Model',
     'vr_ensem_mdx_c': 'No Model',
-    'mdx_ensem': 'UVR-MDX-NET Main',
-    'mdx_ensem_b': 'No Model',
-    'demucsmodel_sel_VR': 'UVR_Demucs_Model_1',
-    'gpu': False,
-    'postprocess': False,
-    'tta': False,
-    'save': True,
-    'output_image': False,
-    'window_size': '512',
-    'agg': 10,
-    'modelFolder': False,
-    'modelInstrumentalLabel': '',
-    'aiModel': 'MDX-Net',
-    'algo': 'Instrumentals (Min Spec)',
-    'demucs_stems': 'All Stems',
-    'ensChoose': 'Multi-AI Ensemble',
-    'useModel': 'instrumental',
-    'lastDir': None,
-    'break': False,
-    #Advanced Options
-    'appendensem': False,
-    'demucs_only': False,
-    'split_mode': True,
-    'normalize': False,
-    #MDX-Net
-    'demucsmodel': False,
-    'demucsmodelVR': False,
-    'non_red': False,
-    'noise_reduc': True,
-    'nophaseinst': False,
-    'voc_only': False,
-    'inst_only': False,
-    'voc_only_b': False,
-    'inst_only_b': False,
-    'audfile': True,
-    'autocompensate': True,
-    'chunks': 'Auto',
-    'chunks_d': 'Full',
-    'n_fft_scale': 6144,
-    'segment': 'None',
-    'dim_f': 2048,
-    'noise_pro_select': 'Auto Select',
+    
+    'vr_multi_USER_model_param_1': 'Auto',
+    'vr_multi_USER_model_param_2': 'Auto',
+    'vr_multi_USER_model_param_3': 'Auto',
+    'vr_multi_USER_model_param_4': 'Auto',
+    'vr_basic_USER_model_param_1': 'Auto',
+    'vr_basic_USER_model_param_2': 'Auto',
+    'vr_basic_USER_model_param_3': 'Auto',
+    'vr_basic_USER_model_param_4': 'Auto',
+    'vr_basic_USER_model_param_5': 'Auto',
+
     'wavtype': 'PCM_16',
-    'flactype': 'PCM_16',
-    'mp3bit': '320k',
-    'overlap': 0.25,
-    'shifts': 2,
-    'overlap_b': 0.25,
-    'shifts_b': 2,
-    'margin': 44100,
-    'channel': 64,
-    'compensate': 1.03597672895,
-    'mdxnetModeltype': 'Vocals (Custom)',
-    'noisereduc_s': '3',
-    'mixing': 'Default',
-    'mdxnetModel': 'UVR-MDX-NET Main',
-    'DemucsModel': 'mdx_extra',
-    'DemucsModel_MDX': 'UVR_Demucs_Model_1',
-    'ModelParams': 'Auto',
-    'settest': False,
+    'window_size': '512',
 }
 
 def open_image(path: str, size: tuple = None, keep_aspect: bool = True, rotate: int = 0) -> ImageTk.PhotoImage:
@@ -191,6 +365,13 @@ def save_data(data):
     # Open data file, create it if it does not exist
     with open('data.pkl', 'wb') as data_file:
         pickle.dump(data, data_file)
+
+def load_data_alt():
+    
+    save_data(data=DEFAULT_DATA)
+
+    return load_data()
+    
 
 def load_data() -> dict:
     """
@@ -237,7 +418,6 @@ def drop(event, accept_mode: str = 'files'):
         root.inputPaths = path
         root.update_inputPaths()
         dnddir = os.path.dirname(path[0])
-        print('dnddir ', str(dnddir))
     else:
         # Invalid accept mode
         return
@@ -340,6 +520,10 @@ class MainWindow(TkinterDnD.Tk):
                                       size=(20, 20))
         self.help_img = open_image(path=help_path,
                                       size=(20, 20))
+        self.download_img = open_image(path=download_path,
+                                size=(30, 30))       
+        self.key_img = open_image(path=key_path,
+                                size=(30, 30))     
         if GetSystemMetrics(1) >= 900:
             self.gen_opt_img = open_image(path=gen_opt_path,
                                         size=(900, 826))
@@ -388,120 +572,421 @@ class MainWindow(TkinterDnD.Tk):
         
         self.instrumentalLabel_to_path = defaultdict(lambda: '')
         self.lastInstrumentalModels = []
+        self.lastInstrumentalModels_ensem = []
+        self.lastmdx_demuc_ensem = []
         self.MDXLabel_to_path = defaultdict(lambda: '')
         self.lastMDXModels = []
         self.ModelParamsLabel_to_path = defaultdict(lambda: '')
         self.lastModelParams = []
         self.DemucsLabel_to_path = defaultdict(lambda: '')
         self.lastDemucsModels = []
-        self.DemucsLabel_to_path_MDX = defaultdict(lambda: '')
-        self.lastDemucsModels_MDX = []
+        self.ModelParamsLabel_ens_to_path = defaultdict(lambda: '')
+        self.lastModelParams_ens = []
 
         # -Tkinter Value Holders-
         data = load_data()
-        # Paths
-        self.inputPaths = data['inputPaths']
-        self.inputPathop_var = tk.StringVar(value=data['inputPaths'])
-        self.exportPath_var = tk.StringVar(value=data['exportPath'])
-        self.saveFormat_var = tk.StringVar(value=data['saveFormat'])
-        self.vrensemchoose_var = tk.StringVar(value=data['vr_ensem'])
-        self.vrensemchoose_a_var = tk.StringVar(value=data['vr_ensem_a'])
-        self.vrensemchoose_b_var = tk.StringVar(value=data['vr_ensem_b'])
-        self.vrensemchoose_c_var = tk.StringVar(value=data['vr_ensem_c'])
-        self.vrensemchoose_d_var = tk.StringVar(value=data['vr_ensem_d'])
-        
-        self.vrensemchoose_e_var = tk.StringVar(value=data['vr_ensem_e'])
-        self.vrensemchoose_mdx_a_var = tk.StringVar(value=data['vr_ensem_mdx_a'])
-        self.vrensemchoose_mdx_b_var = tk.StringVar(value=data['vr_ensem_mdx_b'])
-        self.vrensemchoose_mdx_c_var = tk.StringVar(value=data['vr_ensem_mdx_c'])
-        self.mdxensemchoose_var = tk.StringVar(value=data['mdx_ensem'])
-        self.mdxensemchoose_b_var = tk.StringVar(value=data['mdx_ensem_b'])
-        self.demucsmodel_sel_VR_var = tk.StringVar(value=data['demucsmodel_sel_VR'])
-        #Advanced Options
-        self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
-        self.demucs_only_var = tk.BooleanVar(value=data['demucs_only'])
-        self.split_mode_var = tk.BooleanVar(value=data['split_mode'])
-        self.normalize_var = tk.BooleanVar(value=data['normalize'])
-        # Processing Options
-        self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
-        self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
-        self.tta_var = tk.BooleanVar(value=data['tta'])
-        self.save_var = tk.BooleanVar(value=data['save'])
-        self.outputImage_var = tk.BooleanVar(value=data['output_image'])
-        # MDX-NET Specific Processing Options
-        self.demucsmodel_var = tk.BooleanVar(value=data['demucsmodel'])
-        self.demucsmodelVR_var = tk.BooleanVar(value=data['demucsmodelVR'])
-        self.non_red_var = tk.BooleanVar(value=data['non_red'])
-        self.nophaseinst_var = tk.BooleanVar(value=data['nophaseinst'])
-        self.noisereduc_var = tk.BooleanVar(value=data['noise_reduc'])
-        self.chunks_var = tk.StringVar(value=data['chunks'])
-        self.chunks_d_var = tk.StringVar(value=data['chunks_d'])
-        self.noisereduc_s_var = tk.StringVar(value=data['noisereduc_s'])
-        self.mixing_var = tk.StringVar(value=data['mixing']) #dropdown
-        # Models
-        self.instrumentalModel_var = tk.StringVar(value=data['modelInstrumentalLabel'])
-        # Model Test Mode
-        self.modelFolder_var = tk.BooleanVar(value=data['modelFolder'])
-        # Constants
-        self.winSize_var = tk.StringVar(value=data['window_size'])
-        self.agg_var = tk.StringVar(value=data['agg'])
-        self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
-        self.segment_var = tk.StringVar(value=data['segment'])
-        self.dim_f_var = tk.StringVar(value=data['dim_f'])
-        self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
-        self.wavtype_var = tk.StringVar(value=data['wavtype'])
-        self.flactype_var = tk.StringVar(value=data['flactype'])
-        self.mp3bit_var = tk.StringVar(value=data['mp3bit'])
-        self.overlap_var = tk.StringVar(value=data['overlap'])
-        self.shifts_var = tk.StringVar(value=data['shifts'])
-        self.overlap_b_var = tk.StringVar(value=data['overlap_b'])
-        self.shifts_b_var = tk.StringVar(value=data['shifts_b'])
-        
-        self.channel_var = tk.StringVar(value=data['channel'])
-        self.margin_var = tk.StringVar(value=data['margin'])
-        self.compensate_var = tk.StringVar(value=data['compensate'])
-        self.mdxnetModeltype_var = tk.StringVar(value=data['mdxnetModeltype'])
-        # Instrumental or Vocal Only
-        self.voc_only_var = tk.BooleanVar(value=data['voc_only'])
-        self.inst_only_var = tk.BooleanVar(value=data['inst_only'])
-        self.voc_only_b_var = tk.BooleanVar(value=data['voc_only_b'])
-        self.inst_only_b_var = tk.BooleanVar(value=data['inst_only_b'])
-        self.audfile_var = tk.BooleanVar(value=data['audfile'])
-        self.autocompensate_var = tk.BooleanVar(value=data['autocompensate'])
-        self.settest_var = tk.BooleanVar(value=data['settest'])
-        # Choose Conversion Method
-        self.aiModel_var = tk.StringVar(value=data['aiModel'])
+        data_alt = load_data_alt()
+
+        try:
+            self.agg_var = tk.StringVar(value=data['agg'])
+        except:
+            self.agg_var = tk.StringVar(value=data_alt['agg'])
+        try:
+            self.aiModel_var = tk.StringVar(value=data['aiModel'])
+        except:
+            self.aiModel_var = tk.StringVar(value=data_alt['aiModel'])
+        try:
+            self.algo_var = tk.StringVar(value=data['algo'])
+        except:
+            self.algo_var = tk.StringVar(value=data_alt['algo'])
+        try:
+            self.appendensem_var = tk.BooleanVar(value=data['appendensem'])
+        except:
+            self.appendensem_var = tk.BooleanVar(value=data_alt['appendensem'])
+        try:
+            self.audfile_var = tk.BooleanVar(value=data['audfile'])
+        except:
+            self.audfile_var = tk.BooleanVar(value=data_alt['audfile'])
+        try:
+            self.aud_mdx_var = tk.BooleanVar(value=data['aud_mdx'])
+        except:
+            self.aud_mdx_var = tk.BooleanVar(value=data_alt['aud_mdx'])
+        try:
+            self.autocompensate_var = tk.BooleanVar(value=data['autocompensate'])
+        except:
+            self.autocompensate_var = tk.BooleanVar(value=data_alt['autocompensate'])
+        try:
+            self.channel_var = tk.StringVar(value=data['channel'])
+        except:
+            self.channel_var = tk.StringVar(value=data_alt['channel'])
+        try:
+            self.chunks_d_var = tk.StringVar(value=data['chunks_d'])
+        except:
+            self.chunks_d_var = tk.StringVar(value=data_alt['chunks_d'])
+        try:
+            self.chunks_var = tk.StringVar(value=data['chunks'])
+        except:
+            self.chunks_var = tk.StringVar(value=data_alt['chunks'])
+        try:
+            self.compensate_var = tk.StringVar(value=data['compensate'])
+        except:
+            self.compensate_var = tk.StringVar(value=data_alt['compensate'])
+        try:
+            self.demucs_only_var = tk.BooleanVar(value=data['demucs_only'])
+        except:
+            self.demucs_only_var = tk.BooleanVar(value=data_alt['demucs_only'])
+        try:
+            self.demucs_stems_var = tk.StringVar(value=data['demucs_stems'])
+        except:
+            self.demucs_stems_var = tk.StringVar(value=data_alt['demucs_stems'])
+        try:
+            self.DemucsModel_MDX_var = tk.StringVar(value=data['DemucsModel_MDX'])
+        except:
+            self.DemucsModel_MDX_var = tk.StringVar(value=data_alt['DemucsModel_MDX'])
+        try:
+            self.demucsmodel_sel_VR_var = tk.StringVar(value=data['demucsmodel_sel_VR'])
+        except:
+            self.demucsmodel_sel_VR_var = tk.StringVar(value=data_alt['demucsmodel_sel_VR'])
+        try:
+            self.demucsmodel_var = tk.BooleanVar(value=data['demucsmodel'])
+        except:
+            self.demucsmodel_var = tk.BooleanVar(value=data_alt['demucsmodel'])
+        try:
+            self.DemucsModel_var = tk.StringVar(value=data['DemucsModel'])
+        except:
+            self.DemucsModel_var = tk.StringVar(value=data_alt['DemucsModel'])
+        try:
+            self.demucsmodelVR_var = tk.BooleanVar(value=data['demucsmodelVR'])
+        except:
+            self.demucsmodelVR_var = tk.BooleanVar(value=data_alt['demucsmodelVR'])
+        try:
+            self.dim_f_var = tk.StringVar(value=data['dim_f'])    
+        except:
+            self.dim_f_var = tk.StringVar(value=data_alt['dim_f'])    
+        try:
+            self.ensChoose_var = tk.StringVar(value=data['ensChoose'])
+        except:
+            self.ensChoose_var = tk.StringVar(value=data_alt['ensChoose'])
+        try:
+            self.exportPath_var = tk.StringVar(value=data['exportPath'])
+        except:
+            self.exportPath_var = tk.StringVar(value=data_alt['exportPath'])
+        try:
+            self.flactype_var = tk.StringVar(value=data['flactype'])
+        except:
+            self.flactype_var = tk.StringVar(value=data_alt['flactype'])
+        try:
+            self.gpuConversion_var = tk.BooleanVar(value=data['gpu'])
+        except:
+            self.gpuConversion_var = tk.BooleanVar(value=data_alt['gpu'])
+        try:
+            self.inputPathop_var = tk.StringVar(value=data['inputPaths'])
+        except:
+            self.inputPathop_var = tk.StringVar(value=data_alt['inputPaths'])
+        try:
+            self.inputPaths = data['inputPaths']
+        except:
+            self.inputPaths = data_alt['inputPaths']
+        try:
+            self.inst_only_b_var = tk.BooleanVar(value=data['inst_only_b'])
+        except:
+            self.inst_only_b_var = tk.BooleanVar(value=data_alt['inst_only_b'])
+        try:
+            self.inst_only_var = tk.BooleanVar(value=data['inst_only'])
+        except:
+            self.inst_only_var = tk.BooleanVar(value=data_alt['inst_only'])
+        try:
+            self.instrumentalModel_var = tk.StringVar(value=data['modelInstrumentalLabel'])
+        except:
+            self.instrumentalModel_var = tk.StringVar(value=data_alt['modelInstrumentalLabel'])
+        try:
+            self.margin_var = tk.StringVar(value=data['margin'])
+        except:
+            self.margin_var = tk.StringVar(value=data_alt['margin'])
+        try:
+            self.mdx_only_ensem_a_var = tk.StringVar(value=data['mdx_only_ensem_a'])
+        except:
+            self.mdx_only_ensem_a_var = tk.StringVar(value=data_alt['mdx_only_ensem_a'])
+        try:
+            self.mdx_only_ensem_b_var = tk.StringVar(value=data['mdx_only_ensem_b'])
+        except:
+            self.mdx_only_ensem_b_var = tk.StringVar(value=data_alt['mdx_only_ensem_b'])
+        try:
+            self.mdx_only_ensem_c_var = tk.StringVar(value=data['mdx_only_ensem_c'])
+        except:
+            self.mdx_only_ensem_c_var = tk.StringVar(value=data_alt['mdx_only_ensem_c'])
+        try:
+            self.mdx_only_ensem_d_var = tk.StringVar(value=data['mdx_only_ensem_d'])
+        except:
+            self.mdx_only_ensem_d_var = tk.StringVar(value=data_alt['mdx_only_ensem_d'])
+        try:
+            self.mdx_only_ensem_e_var = tk.StringVar(value=data['mdx_only_ensem_e'])
+        except:
+            self.mdx_only_ensem_e_var = tk.StringVar(value=data_alt['mdx_only_ensem_e'])
+        try:
+            self.mdxensemchoose_b_var = tk.StringVar(value=data['mdx_ensem_b'])
+        except:
+            self.mdxensemchoose_b_var = tk.StringVar(value=data_alt['mdx_ensem_b'])
+        try:
+            self.mdxensemchoose_var = tk.StringVar(value=data['mdx_ensem'])
+        except:
+            self.mdxensemchoose_var = tk.StringVar(value=data_alt['mdx_ensem'])
+        try:
+            self.mdxnetModel_var = tk.StringVar(value=data['mdxnetModel'])
+        except:
+            self.mdxnetModel_var = tk.StringVar(value=data_alt['mdxnetModel'])
+        try:
+            self.mdxnetModeltype_var = tk.StringVar(value=data['mdxnetModeltype'])
+        except:
+            self.mdxnetModeltype_var = tk.StringVar(value=data_alt['mdxnetModeltype'])
+        try:
+            self.mixing_var = tk.StringVar(value=data['mixing'])
+        except:
+            self.mixing_var = tk.StringVar(value=data_alt['mixing'])
+        try:
+            self.modeldownload_type_var = tk.StringVar(value=data['modeldownload_type'])
+        except:
+            self.modeldownload_type_var = tk.StringVar(value=data_alt['modeldownload_type'])
+        try:
+            self.modeldownload_var = tk.StringVar(value=data['modeldownload'])
+        except:
+            self.modeldownload_var = tk.StringVar(value=data_alt['modeldownload'])
+        try:
+            self.modeldownload_mdx_var = tk.StringVar(value=data['modeldownload_mdx'])
+        except:
+            self.modeldownload_mdx_var = tk.StringVar(value=data_alt['modeldownload_mdx'])
+        try:
+            self.modeldownload_demucs_var = tk.StringVar(value=data['modeldownload_demucs'])
+        except:
+            self.modeldownload_demucs_var = tk.StringVar(value=data_alt['modeldownload_demucs'])
+        try:
+            self.modelFolder_var = tk.BooleanVar(value=data['modelFolder'])
+        except:
+            self.modelFolder_var = tk.BooleanVar(value=data_alt['modelFolder'])
+        try:
+            self.ModelParams_var = tk.StringVar(value=data['ModelParams'])
+        except:
+            self.ModelParams_var = tk.StringVar(value=data_alt['ModelParams'])
+        try:
+            self.mp3bit_var = tk.StringVar(value=data['mp3bit'])
+        except:
+            self.mp3bit_var = tk.StringVar(value=data_alt['mp3bit'])
+        try:
+            self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
+        except:
+            self.n_fft_scale_var = tk.StringVar(value=data_alt['n_fft_scale'])
+        try:
+            self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
+        except:
+            self.noise_pro_select_var = tk.StringVar(value=data_alt['noise_pro_select'])
+        try:
+            self.noisereduc_s_var = tk.StringVar(value=data['noisereduc_s'])
+        except:
+            self.noisereduc_s_var = tk.StringVar(value=data_alt['noisereduc_s'])
+        try:
+            self.noisereduc_var = tk.BooleanVar(value=data['noise_reduc'])
+        except:
+            self.noisereduc_var = tk.BooleanVar(value=data_alt['noise_reduc'])
+        try:
+            self.non_red_var = tk.BooleanVar(value=data['non_red'])
+        except:
+            self.non_red_var = tk.BooleanVar(value=data_alt['non_red'])
+        try:
+            self.nophaseinst_var = tk.BooleanVar(value=data['nophaseinst'])
+        except:
+            self.nophaseinst_var = tk.BooleanVar(value=data_alt['nophaseinst'])
+        try:
+            self.normalize_var = tk.BooleanVar(value=data['normalize'])
+        except:
+            self.normalize_var = tk.BooleanVar(value=data_alt['normalize'])
+        try:
+            self.outputImage_var = tk.BooleanVar(value=data['output_image'])
+        except:
+            self.outputImage_var = tk.BooleanVar(value=data_alt['output_image'])
+        try:
+            self.overlap_b_var = tk.StringVar(value=data['overlap_b'])
+        except:
+            self.overlap_b_var = tk.StringVar(value=data_alt['overlap_b'])
+        try:
+            self.overlap_var = tk.StringVar(value=data['overlap'])
+        except:
+            self.overlap_var = tk.StringVar(value=data_alt['overlap'])
+        try:
+            self.postprocessing_var = tk.BooleanVar(value=data['postprocess'])
+        except:
+            self.postprocessing_var = tk.BooleanVar(value=data_alt['postprocess'])
+        try:
+            self.save_var = tk.BooleanVar(value=data['save'])
+        except:
+            self.save_var = tk.BooleanVar(value=data_alt['save'])
+        try:
+            self.saveFormat_var = tk.StringVar(value=data['saveFormat'])
+        except:
+            self.saveFormat_var = tk.StringVar(value=data_alt['saveFormat'])
+        try:
+            self.selectdownload_var = tk.StringVar(value=data['selectdownload'])
+        except:
+            self.selectdownload_var = tk.StringVar(value=data_alt['selectdownload'])
+        try:
+            self.segment_var = tk.StringVar(value=data['segment'])
+        except:
+            self.segment_var = tk.StringVar(value=data_alt['segment'])
+        try:
+            self.settest_var = tk.BooleanVar(value=data['settest'])
+        except:
+            self.settest_var = tk.BooleanVar(value=data_alt['settest'])
+        try:
+            self.shifts_b_var = tk.StringVar(value=data['shifts_b'])
+        except:
+            self.shifts_b_var = tk.StringVar(value=data_alt['shifts_b'])
+        try:
+            self.shifts_var = tk.StringVar(value=data['shifts'])
+        except:
+            self.shifts_var = tk.StringVar(value=data_alt['shifts'])
+        try:
+            self.split_mode_var = tk.BooleanVar(value=data['split_mode'])
+        except:
+            self.split_mode_var = tk.BooleanVar(value=data_alt['split_mode'])
+        try:
+            self.tta_var = tk.BooleanVar(value=data['tta'])
+        except:
+            self.tta_var = tk.BooleanVar(value=data_alt['tta'])
+        try:
+            self.voc_only_b_var = tk.BooleanVar(value=data['voc_only_b'])
+        except:
+            self.voc_only_b_var = tk.BooleanVar(value=data_alt['voc_only_b'])
+        try:
+            self.voc_only_var = tk.BooleanVar(value=data['voc_only'])
+        except:
+            self.voc_only_var = tk.BooleanVar(value=data_alt['voc_only'])
+        try:
+            self.vrensemchoose_a_var = tk.StringVar(value=data['vr_ensem_a'])
+        except:
+            self.vrensemchoose_a_var = tk.StringVar(value=data_alt['vr_ensem_a'])
+        try:
+            self.vrensemchoose_b_var = tk.StringVar(value=data['vr_ensem_b'])
+        except:
+            self.vrensemchoose_b_var = tk.StringVar(value=data_alt['vr_ensem_b'])
+        try:
+            self.vrensemchoose_c_var = tk.StringVar(value=data['vr_ensem_c'])
+        except:
+            self.vrensemchoose_c_var = tk.StringVar(value=data_alt['vr_ensem_c'])
+        try:
+            self.vrensemchoose_d_var = tk.StringVar(value=data['vr_ensem_d'])
+        except:
+            self.vrensemchoose_d_var = tk.StringVar(value=data_alt['vr_ensem_d'])
+        try:
+            self.vrensemchoose_e_var = tk.StringVar(value=data['vr_ensem_e'])
+        except:
+            self.vrensemchoose_e_var = tk.StringVar(value=data_alt['vr_ensem_e'])
+        try:
+            self.vr_multi_USER_model_param_1 = tk.StringVar(value=data['vr_multi_USER_model_param_1'])
+        except:
+            self.vr_multi_USER_model_param_1 = tk.StringVar(value=data_alt['vr_multi_USER_model_param_1'])
+        try:
+            self.vr_multi_USER_model_param_2 = tk.StringVar(value=data['vr_multi_USER_model_param_2'])
+        except:
+            self.vr_multi_USER_model_param_2 = tk.StringVar(value=data_alt['vr_multi_USER_model_param_2'])
+        try:
+            self.vr_multi_USER_model_param_3 = tk.StringVar(value=data['vr_multi_USER_model_param_3'])
+        except:
+            self.vr_multi_USER_model_param_3 = tk.StringVar(value=data_alt['vr_multi_USER_model_param_3'])
+        try:
+            self.vr_multi_USER_model_param_4 = tk.StringVar(value=data['vr_multi_USER_model_param_4'])
+        except:
+            self.vr_multi_USER_model_param_4 = tk.StringVar(value=data_alt['vr_multi_USER_model_param_4'])
+        try:
+            self.vr_basic_USER_model_param_1 = tk.StringVar(value=data['vr_basic_USER_model_param_1'])
+        except:
+            self.vr_basic_USER_model_param_1 = tk.StringVar(value=data_alt['vr_basic_USER_model_param_1'])
+        try:
+            self.vr_basic_USER_model_param_2 = tk.StringVar(value=data['vr_basic_USER_model_param_2'])
+        except:
+            self.vr_basic_USER_model_param_2 = tk.StringVar(value=data_alt['vr_basic_USER_model_param_2'])
+        try:
+            self.vr_basic_USER_model_param_3 = tk.StringVar(value=data['vr_basic_USER_model_param_3'])
+        except:
+            self.vr_basic_USER_model_param_3 = tk.StringVar(value=data_alt['vr_basic_USER_model_param_3'])
+        try:
+            self.vr_basic_USER_model_param_4 = tk.StringVar(value=data['vr_basic_USER_model_param_4'])
+        except:
+            self.vr_basic_USER_model_param_4 = tk.StringVar(value=data_alt['vr_basic_USER_model_param_4'])
+        try:
+            self.vr_basic_USER_model_param_5 = tk.StringVar(value=data['vr_basic_USER_model_param_5'])
+        except:
+            self.vr_basic_USER_model_param_5 = tk.StringVar(value=data_alt['vr_basic_USER_model_param_5'])
+        try:
+            self.vrensemchoose_mdx_a_var = tk.StringVar(value=data['vr_ensem_mdx_a'])
+        except:
+            self.vrensemchoose_mdx_a_var = tk.StringVar(value=data_alt['vr_ensem_mdx_a'])
+        try:
+            self.vrensemchoose_mdx_b_var = tk.StringVar(value=data['vr_ensem_mdx_b'])
+        except:
+            self.vrensemchoose_mdx_b_var = tk.StringVar(value=data_alt['vr_ensem_mdx_b'])
+        try:
+            self.vrensemchoose_mdx_c_var = tk.StringVar(value=data['vr_ensem_mdx_c'])
+        except:
+            self.vrensemchoose_mdx_c_var = tk.StringVar(value=data_alt['vr_ensem_mdx_c'])
+        try:
+            self.vrensemchoose_var = tk.StringVar(value=data['vr_ensem'])
+        except:
+            self.vrensemchoose_var = tk.StringVar(value=data_alt['vr_ensem'])
+        try:
+            self.wavtype_var = tk.StringVar(value=data['wavtype'])
+        except:
+            self.wavtype_var = tk.StringVar(value=data_alt['wavtype'])
+        try:
+            self.winSize_var = tk.StringVar(value=data['window_size'])
+        except:
+            self.winSize_var = tk.StringVar(value=data_alt['window_size'])
+        try:
+            self.lastDir = data['lastDir']
+        except:
+            self.lastDir = data_alt['lastDir']
+
         self.last_aiModel = self.aiModel_var.get()
-        # Choose Conversion Method
-        self.algo_var = tk.StringVar(value=data['algo'])
         self.last_algo = self.aiModel_var.get()
-        self.demucs_stems_var = tk.StringVar(value=data['demucs_stems'])
-        # Choose Ensemble
-        self.ensChoose_var = tk.StringVar(value=data['ensChoose'])
         self.last_ensChoose = self.ensChoose_var.get()
-        # Choose MDX-NET Model
-        self.mdxnetModel_var = tk.StringVar(value=data['mdxnetModel'])
-        self.DemucsModel_var = tk.StringVar(value=data['DemucsModel'])
-        self.DemucsModel_MDX_var = tk.StringVar(value=data['DemucsModel_MDX'])
-        self.ModelParams_var = tk.StringVar(value=data['ModelParams'])
-        self.last_mdxnetModel = self.mdxnetModel_var.get()
-        # Other
-        self.inputPathsEntry_var = tk.StringVar(value='')
-        self.lastDir = data['lastDir']  # nopep8
+        self.download_progress_var = tk.StringVar(value='')
+        self.download_progress_bar_var = tk.StringVar(value='')
+        self.download_progress_bar_zip_var = tk.IntVar(value=0)
+        self.download_stop_var = tk.StringVar(value='') 
         self.progress_var = tk.IntVar(value=0)
+        
+        self.last_mdxnetModel = self.mdxnetModel_var.get()
+        self.inputPathsEntry_var = tk.StringVar(value='')
+        
         # Font
         pyglet.font.add_file('lib_v5/fonts/centurygothic/GOTHIC.TTF')
         self.font = tk.font.Font(family='Century Gothic', size=10)
         self.fontRadio = tk.font.Font(family='Century Gothic', size=8) 
         # --Widgets--
         self.create_widgets()
-        self.configure_widgets()
         self.bind_widgets()
         self.place_widgets()
         
         self.update_available_models()
         self.update_states()
         self.update_loop()
+   
+        global space_fill_wide
+        global space_medium_l
+        global space_medium
+        global space_small
+        global space_tiny
+        global download_code_file
+        global user_code_file
+        global download_code_temp_dir
+
+        download_code_file = 'lib_v5/filelists/download_codes/user_code_download.txt'
+        user_code_file = 'lib_v5/filelists/download_codes/user_code.txt'
+        download_code_temp_dir = 'lib_v5/filelists/download_codes/temp'
+
+        space_fill_wide = '  '*32
+        space_medium_l = '  '*20
+        space_medium = '  '*17
+        space_small = '  '*10
+        space_tiny = '  '*5
    
     # -Widget Methods-
     
@@ -520,7 +1005,7 @@ class MainWindow(TkinterDnD.Tk):
                                             command=self.start_conversion)
         self.stop_Button = ttk.Button(master=self,
                                          image=self.stop_img,
-                                         command=self.restart)
+                                         command=self.stop_inf)
         self.settings_Button = ttk.Button(master=self,
                                          image=self.help_img,
                                          command=self.settings)
@@ -541,21 +1026,28 @@ class MainWindow(TkinterDnD.Tk):
                                               background='#0e0e0f',fg='#898b8e', font=('Century Gothic', 11),borderwidth=0)
 
         #self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
-        self.command_Text.write(f'Ultimate Vocal Remover v{VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
-       
-       
-    def configure_widgets(self):
-        """Change widget styling and appearance"""
-
-        #ttk.Style().configure('TCheckbutton', background='#0e0e0f',
-        #                      font=self.font, foreground='#d4d4d4')
-        #ttk.Style().configure('TRadiobutton', background='#0e0e0f',
-        #                      font=("Century Gothic", "11", "bold"), foreground='#d4d4d4')
-        #ttk.Style().configure('T', font=self.font, foreground='#d4d4d4')  
-
-        #s = ttk.Style()
-        #s.configure('TButton', background='blue', foreground='black', font=('Century Gothic', '9', 'bold'), relief="groove")
         
+        global current_version
+        global update_signal_url
+        
+        update_signal_url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
+        
+        with open('uvr_patch_version.txt', 'r') as file :
+            current_version = file.read()
+        
+        try:
+            url = update_signal_url
+            file = urllib.request.urlopen(url)
+            for line in file:
+                patch_name = line.decode("utf-8")
+                if patch_name == current_version:
+                    label_set = ''
+                else:
+                    label_set = f"New Update Found: {patch_name}\n\nClick the update button in the \"Settings\" menu to download and install!"
+        except:
+            label_set = " "
+        
+        self.command_Text.write(f'Ultimate Vocal Remover v5.4.0 [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n\n{label_set}')   
 
     def bind_widgets(self):
         """Bind widgets to the drag & drop mechanic"""
@@ -699,7 +1191,7 @@ class MainWindow(TkinterDnD.Tk):
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.custom_ensemble)
         self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                           self.ensChoose_var,
-                                                          None, 'Multi-AI Ensemble', 'Basic VR Ensemble', 'Vocal Models', 'Manual Ensemble')
+                                                          None, 'Multi-AI Ensemble', 'Basic VR Ensemble', 'Basic MD Ensemble', 'Manual Ensemble')
         
         # Choose Agorithim
         self.options_algo_Label = tk.Label(master=self.options_Frame,
@@ -812,9 +1304,9 @@ class MainWindow(TkinterDnD.Tk):
                                                 )
 
         # Demucs Model VR
-        self.options_demucsmodelVR_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                        text='Demucs Model',
-                                                        variable=self.demucsmodelVR_var,
+        self.options_postpro_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
+                                                        text='Post-Process',
+                                                        variable=self.postprocessing_var,
                                                         )
         
         # Split Mode
@@ -1014,7 +1506,7 @@ class MainWindow(TkinterDnD.Tk):
 
         #---VR Architecture Specific---
         #Post-Process
-        self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
+        self.options_postpro_Checkbutton.place(x=35, y=21, width=0, height=5,
                                     relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         #Save Image
         # self.options_image_Checkbutton.place(x=35, y=21, width=0, height=5,
@@ -1081,6 +1573,18 @@ class MainWindow(TkinterDnD.Tk):
         self.compensate_var.trace_add('write',
                     lambda *args: self.update_states())
         
+        self.selectdownload_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.modeldownload_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.modeldownload_mdx_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.modeldownload_demucs_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
     # Opening filedialogs
     def open_file_filedialog(self):
         """Make user select music files"""
@@ -1102,7 +1606,6 @@ class MainWindow(TkinterDnD.Tk):
             dnd = 'no'
             self.update_inputPaths()
             nondnd = os.path.dirname(paths[0])
-            print('last dir', self.lastDir)
 
     def open_export_filedialog(self):
         """Make user select a folder to export the converted files in"""
@@ -1137,8 +1640,11 @@ class MainWindow(TkinterDnD.Tk):
                 if sys.platform == "win32":
                     os.startfile(filename)
         except:
-            filename = str(self.lastDir)
-            
+            tbs = str(self.inputPathsEntry_var.get())
+            head, sep, tail = tbs.partition(';')
+            in_path=os.path.dirname(head)
+            filename = str(in_path)
+                
             if sys.platform == "win32":
                 os.startfile(filename)
 
@@ -1211,12 +1717,81 @@ class MainWindow(TkinterDnD.Tk):
             raise TypeError('This error should not occur.')
 
         # -Run the algorithm-
-        threading.Thread(target=inference.main,
+        
+        global inf
+        inf = KThread(target=inference.main,
                         kwargs={
                             # Paths
-                            'input_paths': input_paths,
+                            'agg': agg,
+                            'algo': self.algo_var.get(),
+                            'appendensem': self.appendensem_var.get(),
+                            'audfile': self.audfile_var.get(),
+                            'aud_mdx': self.aud_mdx_var.get(),
+                            'autocompensate': self.autocompensate_var.get(),
+                            'break': False,
+                            'button_widget_mdx_model_set': self.conversion_Button,
+                            'button_widget': self.conversion_Button,
+                            'channel': self.channel_var.get(),
+                            'chunks': chunks,
+                            'chunks_d': self.chunks_d_var.get(),
+                            'compensate': self.compensate_var.get(),
+                            'demucs_only': self.demucs_only_var.get(),
+                            'demucs_stems': self.demucs_stems_var.get(),
+                            'DemucsModel': self.DemucsModel_var.get(),
+                            'demucsmodel': self.demucsmodel_var.get(),
+                            'DemucsModel_MDX': self.DemucsModel_MDX_var.get(),
+                            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
+                            'demucsmodelVR': self.demucsmodelVR_var.get(),
+                            'dim_f': self.dim_f_var.get(),
+                            'ensChoose': ensChoose,
                             'export_path': export_path,
+                            'flactype': self.flactype_var.get(),
+                            'gpu': 0 if self.gpuConversion_var.get() else -1,
+                            'input_paths': input_paths,
+                            'inst_menu': self.options_instrumentalModel_Optionmenu,
+                            'inst_only': self.inst_only_var.get(),
+                            'inst_only_b': self.inst_only_b_var.get(),
+                            'instrumentalModel': instrumentalModel_path,
+                            'margin': self.margin_var.get(),
+                            'mdx_ensem': self.mdxensemchoose_var.get(),
+                            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
+                            'mdx_only_ensem_a': self.mdx_only_ensem_a_var.get(),
+                            'mdx_only_ensem_b': self.mdx_only_ensem_b_var.get(),
+                            'mdx_only_ensem_c': self.mdx_only_ensem_c_var.get(),
+                            'mdx_only_ensem_d': self.mdx_only_ensem_d_var.get(),
+                            'mdx_only_ensem_e': self.mdx_only_ensem_e_var.get(),
+                            'mdxnetModel': mdxnetModel,
+                            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
+                            'mixing': mixing,
+                            'modelFolder': self.modelFolder_var.get(),
+                            'ModelParams': self.ModelParams_var.get(),
+                            'mp3bit': self.mp3bit_var.get(),
+                            'n_fft_scale': self.n_fft_scale_var.get(),
+                            'noise_pro_select': self.noise_pro_select_var.get(),
+                            'noise_reduc': self.noisereduc_var.get(),
+                            'noisereduc_s': noisereduc_s,
+                            'non_red': self.non_red_var.get(),
+                            'nophaseinst': self.nophaseinst_var.get(),
+                            'normalize': self.normalize_var.get(),
+                            'output_image': self.outputImage_var.get(),
+                            'overlap': self.overlap_var.get(),
+                            'overlap_b': self.overlap_b_var.get(),
+                            'postprocess': self.postprocessing_var.get(),
+                            'progress_var': self.progress_var,
+                            'save': self.save_var.get(),
                             'saveFormat': self.saveFormat_var.get(),
+                            'selectdownload': self.selectdownload_var.get(),
+                            'segment': self.segment_var.get(),
+                            'settest': self.settest_var.get(),
+                            'shifts': self.shifts_var.get(),
+                            'shifts_b': self.shifts_b_var.get(),
+                            'split_mode': self.split_mode_var.get(),
+                            'text_widget': self.command_Text,
+                            'tta': self.tta_var.get(),
+                            'useModel': 'instrumental',  # Always instrumental
+                            'voc_only': self.voc_only_var.get(),
+                            'voc_only_b': self.voc_only_b_var.get(),
+                            'vocalModel': '',  # Always not needed
                             'vr_ensem': self.vrensemchoose_var.get(),
                             'vr_ensem_a': self.vrensemchoose_a_var.get(),
                             'vr_ensem_b': self.vrensemchoose_b_var.get(),
@@ -1226,77 +1801,52 @@ class MainWindow(TkinterDnD.Tk):
                             'vr_ensem_mdx_a': self.vrensemchoose_mdx_a_var.get(),
                             'vr_ensem_mdx_b': self.vrensemchoose_mdx_b_var.get(),
                             'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
-                            'mdx_ensem': self.mdxensemchoose_var.get(),
-                            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
-                            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
-                            # Processing Options
-                            'gpu': 0 if self.gpuConversion_var.get() else -1,
-                            'postprocess': self.postprocessing_var.get(),
-                            'appendensem': self.appendensem_var.get(),
-                            'demucs_only': self.demucs_only_var.get(),
-                            'split_mode': self.split_mode_var.get(),
-                            'normalize': self.normalize_var.get(),
-                            'tta': self.tta_var.get(),
-                            'save': self.save_var.get(),
-                            'output_image': self.outputImage_var.get(),
-                            'algo': self.algo_var.get(),
-                            'demucs_stems': self.demucs_stems_var.get(),
-                            # Models
-                            'instrumentalModel': instrumentalModel_path,
-                            'vocalModel': '',  # Always not needed
-                            'useModel': 'instrumental',  # Always instrumental
-                            # Model Folder
-                            'modelFolder': self.modelFolder_var.get(),
-                            # Constants
-                            'window_size': window_size,
-                            'agg': agg,
-                            'break': False,
-                            'ensChoose': ensChoose,
-                            'mdxnetModel': mdxnetModel,
-                            'DemucsModel': self.DemucsModel_var.get(),
-                            'DemucsModel_MDX': self.DemucsModel_MDX_var.get(),
-                            'ModelParams': self.ModelParams_var.get(),
-                            # Other Variables (Tkinter)
-                            'window': self,
-                            'text_widget': self.command_Text,
-                            'button_widget': self.conversion_Button,
-                            'inst_menu': self.options_instrumentalModel_Optionmenu,
-                            'progress_var': self.progress_var,
-                            # MDX-Net Specific
-                            'demucsmodel': self.demucsmodel_var.get(),
-                            'demucsmodelVR': self.demucsmodelVR_var.get(),
-                            'non_red': self.non_red_var.get(),
-                            'nophaseinst': self.nophaseinst_var.get(),
-                            'noise_reduc': self.noisereduc_var.get(),
-                            'voc_only': self.voc_only_var.get(),
-                            'inst_only': self.inst_only_var.get(),
-                            'voc_only_b': self.voc_only_b_var.get(),
-                            'inst_only_b': self.inst_only_b_var.get(),
-                            'audfile': self.audfile_var.get(),
-                            'autocompensate': self.autocompensate_var.get(),
-                            'settest': self.settest_var.get(),
-                            'chunks': chunks,
-                            'chunks_d': self.chunks_d_var.get(),
-                            'noisereduc_s': noisereduc_s,
-                            'mixing': mixing,
-                            'n_fft_scale': self.n_fft_scale_var.get(),
-                            'segment': self.segment_var.get(),
-                            'dim_f': self.dim_f_var.get(),
-                            'noise_pro_select': self.noise_pro_select_var.get(),
+                            'vr_multi_USER_model_param_1': self.vr_multi_USER_model_param_1.get(),
+                            'vr_multi_USER_model_param_2': self.vr_multi_USER_model_param_2.get(),
+                            'vr_multi_USER_model_param_3': self.vr_multi_USER_model_param_3.get(),
+                            'vr_multi_USER_model_param_4': self.vr_multi_USER_model_param_4.get(),
+                            'vr_basic_USER_model_param_1': self.vr_basic_USER_model_param_1.get(),
+                            'vr_basic_USER_model_param_2': self.vr_basic_USER_model_param_2.get(),
+                            'vr_basic_USER_model_param_3': self.vr_basic_USER_model_param_3.get(),
+                            'vr_basic_USER_model_param_4': self.vr_basic_USER_model_param_4.get(),
+                            'vr_basic_USER_model_param_5': self.vr_basic_USER_model_param_5.get(),
                             'wavtype': self.wavtype_var.get(),
-                            'flactype': self.flactype_var.get(),
-                            'mp3bit': self.mp3bit_var.get(),
-                            'overlap': self.overlap_var.get(),
-                            'shifts': self.shifts_var.get(),
-                            'overlap_b': self.overlap_b_var.get(),
-                            'shifts_b': self.shifts_b_var.get(),
-                            'margin': self.margin_var.get(),
-                            'channel': self.channel_var.get(),
-                            'compensate': self.compensate_var.get(),
-                            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
+                            'window': self,
+                            'window_size': window_size,
                         },
                         daemon=True
-                        ).start()
+                        )
+        
+        inf.start()
+        
+    def stop_inf(self):
+        
+        confirm = tk.messagebox.askyesno(title='Confirmation',
+                message='You are about to stop all active processes.\n\nAre you sure you wish to continue?')
+        
+        # if self.aiModel_var.get() == 'VR Architecture':
+        #     inference = inference_v5
+        # elif self.aiModel_var.get() == 'Ensemble Mode':
+        #     inference = inference_v5_ensemble
+        # elif self.aiModel_var.get() == 'MDX-Net':
+        #     inference = inference_MDX
+        # elif self.aiModel_var.get() == 'Demucs v3':
+        #     inference = inference_demucs
+        
+        if confirm:
+            inf.kill()
+            button_widget = self.conversion_Button
+            button_widget.configure(state=tk.NORMAL)
+            text = self.command_Text
+            text.write('\n\nProcess stopped by user.')
+            torch.cuda.empty_cache()
+            importlib.reload(inference_v5)
+            importlib.reload(inference_v5_ensemble)
+            importlib.reload(inference_MDX)
+            importlib.reload(inference_demucs)
+            self.progress_var.set(0)
+        else:
+            pass
         
     # Models
     def update_inputPaths(self):
@@ -1308,7 +1858,6 @@ class MainWindow(TkinterDnD.Tk):
             # Empty Selection
             text = ''
         self.inputPathsEntry_var.set(text)
-        
 
 
     def update_loop(self):
@@ -1322,10 +1871,21 @@ class MainWindow(TkinterDnD.Tk):
         Loop through every VR model (.pth) in the models directory
         and add to the select your model list
         """
-        temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, 'Main_Models')  # nopep8
+        temp_DemucsModels_dir = os.path.join(instrumentalModels_dir, 'Demucs_Models')
+        new_DemucsModels = os.listdir(temp_DemucsModels_dir)
+  
+        temp_MDXModels_dir = os.path.join(instrumentalModels_dir, 'MDX_Net_Models')  # nopep8
+        new_MDXModels = os.listdir(temp_MDXModels_dir)
+        
+        newmodels = [new_DemucsModels, new_MDXModels]
 
-        # Main models
+        temp_instrumentalModels_dir = os.path.join(instrumentalModels_dir, 'Main_Models')  # nopep8
         new_InstrumentalModels = os.listdir(temp_instrumentalModels_dir)
+        
+        if new_InstrumentalModels != self.lastInstrumentalModels_ensem:
+            
+            with open('lib_v5/filelists/ensemble_list/vr_en_list.txt', 'w') as f:
+                f.write('No Model\nNo Model\n')
         
         if new_InstrumentalModels != self.lastInstrumentalModels:
             self.instrumentalLabel_to_path.clear()
@@ -1340,17 +1900,31 @@ class MainWindow(TkinterDnD.Tk):
             self.lastInstrumentalModels = new_InstrumentalModels
             #print(self.instrumentalLabel_to_path)
             
+        if new_InstrumentalModels != self.lastInstrumentalModels_ensem:
+            
+            for file_name_vr in natsort.natsorted(new_InstrumentalModels):
+                if file_name_vr.endswith(".pth"):
+                    b = [".pth"]
+                    for char in b:
+                        file_name_vr = file_name_vr.replace(char, "")
+
+                    vr_list_en = file_name_vr
+                    
+                    with open('lib_v5/filelists/ensemble_list/vr_en_list.txt', 'a') as f:
+                        f.write("{}\n".format(vr_list_en))
+                    
+            self.lastInstrumentalModels_ensem = new_InstrumentalModels
+
         """
         Loop through every MDX-Net model (.onnx) in the models directory
         and add to the select your model list
         """
-  
-        temp_MDXModels_dir = os.path.join(instrumentalModels_dir, 'MDX_Net_Models')  # nopep8
-
-        # MDX-Net
-        new_MDXModels = os.listdir(temp_MDXModels_dir)
         
-        if new_MDXModels != self.lastMDXModels:
+        if newmodels != self.lastmdx_demuc_ensem:
+            with open('lib_v5/filelists/ensemble_list/mdx_demuc_en_list.txt', 'w') as f:
+                f.write('No Model\nNo Model\n')
+        
+        if new_MDXModels != self.lastMDXModels or newmodels != self.lastmdx_demuc_ensem:
             self.MDXLabel_to_path.clear()
             self.options_mdxnetModel_Optionmenu['menu'].delete(0, 'end')
             for file_name_1 in natsort.natsorted(new_MDXModels):
@@ -1387,61 +1961,153 @@ class MainWindow(TkinterDnD.Tk):
                     for char in i:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Karaoke") 
                         
-                    i = ["UVR_MDXNET_Main"]
-                    for char in i:
+                    j = ["UVR_MDXNET_Main"]
+                    for char in j:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Main") 
                     
                     self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
                                                                         command=tk._setit(self.mdxnetModel_var, file_name_1))
+                    
+                    mdx_list_en = file_name_1
+                    
+                    self.ensemfiles = mdx_list_en
+                    
+                    with open('lib_v5/filelists/ensemble_list/mdx_demuc_en_list.txt', 'a') as f:
+                        f.write("MDX-Net: {}\n".format(mdx_list_en))
+                    
+                    
             self.lastMDXModels = new_MDXModels
-        
-        
+            
         """
         Loop through every Demucs model (.th, .pth) in the models directory
         and add to the select your model list
         """
 
         try:
-            temp_DemucsModels_dir = os.path.join(instrumentalModels_dir, 'Demucs_Models')  # nopep8
-            new_DemucsModels = os.listdir(temp_DemucsModels_dir)
-            
-            if new_DemucsModels != self.lastDemucsModels:
-                #print(new_MDXModels)
+            if new_DemucsModels != self.lastDemucsModels or newmodels != self.lastmdx_demuc_ensem:
                 self.DemucsLabel_to_path.clear()
                 self.options_DemucsModel_Optionmenu['menu'].delete(0, 'end')
                 for file_name_2 in natsort.natsorted(new_DemucsModels):
-                    if file_name_2.endswith(('.yaml')):
+                    if file_name_2.endswith(('.yaml', '.ckpt', '.gz', 'tasnet-beb46fac.th', 'tasnet_extra-df3777b2.th', 
+                                             'demucs48_hq-28a1282c.th', 'demucs-e07c671f.th', 'demucs_extra-3646af93.th', 'demucs_unittest-09ebc15f.th', 
+                                             'tasnet.th', 'tasnet_extra.th', 'demucs.th', 'demucs_extra.th', 'light.th', 'light_extra.th')):
+                        #Demucs v3 Models
                         b = [".yaml"]
                         for char in b:
-                            file_name_2 = file_name_2.replace(char, "")
+                            file_name_2 = file_name_2.replace(char, "") 
+                        #Demucs v2 Models 
+                        c = ["tasnet-beb46fac.th"]
+                        for char in c:
+                            file_name_2 = file_name_2.replace(char, "Tasnet v2")
+                        d = ["tasnet_extra-df3777b2.th"]
+                        for char in d:
+                            file_name_2 = file_name_2.replace(char, "Tasnet_extra v2")
+                        e = ["demucs48_hq-28a1282c.th"]
+                        for char in e:
+                            file_name_2 = file_name_2.replace(char, "Demucs48_hq v2")
+                        f = ["demucs-e07c671f.th"]
+                        for char in f:
+                            file_name_2 = file_name_2.replace(char, "Demucs v2")
+                        g = ["demucs_extra-3646af93.th"]
+                        for char in g:
+                            file_name_2 = file_name_2.replace(char, "Demucs_extra v2")
+                        n = ["demucs_unittest-09ebc15f.th"]
+                        for char in n:
+                            file_name_2 = file_name_2.replace(char, "Demucs_unittest v2")
+                        #Demucs v1 Models
+                        h = ["tasnet.th"]
+                        for char in h:
+                            file_name_2 = file_name_2.replace(char, "Tasnet v1")
+                        i = ["tasnet_extra.th"]
+                        for char in i:
+                            file_name_2 = file_name_2.replace(char, "Tasnet_extra v1")
+                        j = ["demucs.th"]
+                        for char in j:
+                            file_name_2 = file_name_2.replace(char, "Demucs v1")
+                        k = ["demucs_extra.th"]
+                        for char in k:
+                            file_name_2 = file_name_2.replace(char, "Demucs_extra v1")
+                        l = ["light.th"]
+                        for char in l:
+                            file_name_2 = file_name_2.replace(char, "Light v1")
+                        m = ["light_extra.th"]
+                        for char in m:
+                            file_name_2 = file_name_2.replace(char, "Light_extra v1")
 
                         
                         self.options_DemucsModel_Optionmenu['menu'].add_radiobutton(label=file_name_2,
                                                                             command=tk._setit(self.DemucsModel_var, file_name_2))
+                        
+                        demucs_list_en = file_name_2
+                        
+                        with open('lib_v5/filelists/ensemble_list/mdx_demuc_en_list.txt', 'a') as f:
+                            f.writelines("Demucs: {}\n".format(demucs_list_en))
+                        
                 self.lastDemucsModels = new_DemucsModels
+                
         except:
             pass
         
         try:
-            temp_DemucsModels_MDX_dir = os.path.join(instrumentalModels_dir, 'Demucs_Models')  # nopep8
-            new_DemucsModels_MDX = os.listdir(temp_DemucsModels_MDX_dir)
-            
-            if new_DemucsModels_MDX != self.lastDemucsModels_MDX:
+            if new_DemucsModels != self.lastDemucsModels or newmodels != self.lastmdx_demuc_ensem:
                 #print(new_MDXModels)
-                self.DemucsLabel_MDX_to_path.clear()
+                self.DemucsLabel_to_path.clear()
                 self.options_DemucsModel_MDX_Optionmenu['menu'].delete(0, 'end')
-                for file_name_3 in natsort.natsorted(new_DemucsModels_MDX):
-                    if file_name_3.endswith(('.yaml')):
+                for file_name_3 in natsort.natsorted(new_DemucsModels):
+                    if file_name_3.endswith(('.yaml', '.ckpt', '.gz', 'tasnet-beb46fac.th', 'tasnet_extra-df3777b2.th', 
+                                             'demucs48_hq-28a1282c.th', 'demucs-e07c671f.th', 'demucs_extra-3646af93.th', 'demucs_unittest-09ebc15f.th', 
+                                             'tasnet.th', 'tasnet_extra.th', 'demucs.th', 'demucs_extra.th', 'light.th', 'light_extra.th')):
+                        #Demucs v3 Models
                         b = [".yaml"]
                         for char in b:
-                            file_name_3 = file_name_3.replace(char, "")
+                            file_name_3 = file_name_3.replace(char, "") 
+                        #Demucs v2 Models 
+                        c = ["tasnet-beb46fac.th"]
+                        for char in c:
+                            file_name_3 = file_name_3.replace(char, "Tasnet v2")
+                        d = ["tasnet_extra-df3777b2.th"]
+                        for char in d:
+                            file_name_3 = file_name_3.replace(char, "Tasnet_extra v2")
+                        e = ["demucs48_hq-28a1282c.th"]
+                        for char in e:
+                            file_name_3 = file_name_3.replace(char, "Demucs48_hq v2")
+                        f = ["demucs-e07c671f.th"]
+                        for char in f:
+                            file_name_3 = file_name_3.replace(char, "Demucs v2")
+                        g = ["demucs_extra-3646af93.th"]
+                        for char in g:
+                            file_name_3 = file_name_3.replace(char, "Demucs_extra v2")
+                        n = ["demucs_unittest-09ebc15f.th"]
+                        for char in n:
+                            file_name_3 = file_name_3.replace(char, "Demucs_unittest v2")
+                        #Demucs v1 Models
+                        h = ["tasnet.th"]
+                        for char in h:
+                            file_name_3 = file_name_3.replace(char, "Tasnet v1")
+                        i = ["tasnet_extra.th"]
+                        for char in i:
+                            file_name_3 = file_name_3.replace(char, "Tasnet_extra v1")
+                        j = ["demucs.th"]
+                        for char in j:
+                            file_name_3 = file_name_3.replace(char, "Demucs v1")
+                        k = ["demucs_extra.th"]
+                        for char in k:
+                            file_name_3 = file_name_3.replace(char, "Demucs_extra v1")
+                        l = ["light.th"]
+                        for char in l:
+                            file_name_3 = file_name_3.replace(char, "Light v1")
+                        m = ["light_extra.th"]
+                        for char in m:
+                            file_name_3 = file_name_3.replace(char, "Light_extra v1")
+
                         
                         self.options_DemucsModel_MDX_Optionmenu['menu'].add_radiobutton(label=file_name_3,
                                                                             command=tk._setit(self.DemucsModel_MDX_var, file_name_3))
-                self.lastDemucsModels_MDX = new_DemucsModels_MDX
+                        
+                self.lastDemucsModels = new_DemucsModels
+                
         except:
             pass
-        
         
         """
         Loop through every model param (.json) in the models directory
@@ -1453,7 +2119,6 @@ class MainWindow(TkinterDnD.Tk):
             new_ModelParams = os.listdir(temp_ModelParams_dir)
             
             if new_ModelParams != self.lastModelParams:
-                #print(new_MDXModels)
                 self.ModelParamsLabel_to_path.clear()
                 self.options_ModelParams_Optionmenu['menu'].delete(0, 'end')
                 for file_name_3 in natsort.natsorted(new_ModelParams):
@@ -1464,7 +2129,50 @@ class MainWindow(TkinterDnD.Tk):
                 self.lastModelParams = new_ModelParams
         except:
             pass
-
+        
+        
+        
+        try:
+            temp_ModelParams_dir = 'lib_v5\modelparams'  # nopep8
+            new_ModelParams = os.listdir(temp_ModelParams_dir)
+            
+            if new_ModelParams != self.lastModelParams_ens:
+                self.ModelParamsLabel_ens_to_path.clear()
+                self.options_ModelParams_a_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_b_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_c_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_d_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_1_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_2_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_3_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_4_Optionmenu['menu'].delete(0, 'end')
+                self.options_ModelParams_5_Optionmenu['menu'].delete(0, 'end')
+                for file_name_3 in natsort.natsorted(new_ModelParams):
+                    if file_name_3.endswith(('.json', 'Auto')):
+                        
+                        self.options_ModelParams_a_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_multi_USER_model_param_1, file_name_3))
+                        self.options_ModelParams_b_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_multi_USER_model_param_2, file_name_3))
+                        self.options_ModelParams_c_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_multi_USER_model_param_3, file_name_3))
+                        self.options_ModelParams_d_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_multi_USER_model_param_4, file_name_3))
+                        self.options_ModelParams_1_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_basic_USER_model_param_1, file_name_3))
+                        self.options_ModelParams_2_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_basic_USER_model_param_2, file_name_3))
+                        self.options_ModelParams_3_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_basic_USER_model_param_3, file_name_3))
+                        self.options_ModelParams_4_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_basic_USER_model_param_4, file_name_3))
+                        self.options_ModelParams_5_Optionmenu['menu'].add_radiobutton(label=file_name_3,
+                                                                            command=tk._setit(self.vr_basic_USER_model_param_5, file_name_3))
+                self.lastModelParams_ens = new_ModelParams
+        except:
+            pass
+        
+        self.lastmdx_demuc_ensem = [new_DemucsModels, new_MDXModels]
             
     def update_states(self):
         """
@@ -1517,41 +2225,39 @@ class MainWindow(TkinterDnD.Tk):
                                                 relx=2/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
             # Forget widgets
-            self.options_ensChoose_Label.place_forget()
-            self.options_ensChoose_Optionmenu.place_forget()
-            self.options_instrumentalModel_Label.place_forget()
-            self.options_instrumentalModel_Optionmenu.place_forget()
-            self.options_save_Checkbutton.configure(state=tk.DISABLED)
-            self.options_save_Checkbutton.place_forget()
-            self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
-            self.options_demucsmodelVR_Checkbutton.place_forget()
-            self.options_tta_Checkbutton.configure(state=tk.DISABLED)
-            self.options_tta_Checkbutton.place_forget()
-            # self.options_image_Checkbutton.configure(state=tk.DISABLED)
-            # self.options_image_Checkbutton.place_forget()
-            self.options_winSize_Label.place_forget()
-            self.options_winSize_Optionmenu.place_forget()
             self.options_agg_Label.place_forget()
             self.options_agg_Optionmenu.place_forget()
             self.options_algo_Label.place_forget()
             self.options_algo_Optionmenu.place_forget()
-            self.options_DemucsModel_Label.place_forget()
-            self.options_DemucsModel_Optionmenu.place_forget()
             self.options_demucs_stems_Label.place_forget()
             self.options_demucs_stems_Optionmenu.place_forget()
-            self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
-            self.options_voc_only_b_Checkbutton.place_forget()
+            self.options_DemucsModel_Label.place_forget()
+            self.options_DemucsModel_Optionmenu.place_forget()
+            self.options_ensChoose_Label.place_forget()
+            self.options_ensChoose_Optionmenu.place_forget()
             self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
             self.options_inst_only_b_Checkbutton.place_forget()
             self.options_inst_only_b_Checkbutton.place_forget()
+            self.options_instrumentalModel_Label.place_forget()
+            self.options_instrumentalModel_Optionmenu.place_forget()
             self.options_overlap_b_Label.place_forget()
             self.options_overlap_b_Optionmenu.place_forget()
+            self.options_postpro_Checkbutton.configure(state=tk.DISABLED)
+            self.options_postpro_Checkbutton.place_forget()
+            self.options_save_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.place_forget()
+            self.options_segment_Label.place_forget()
+            self.options_segment_Optionmenu.place_forget()
             self.options_shifts_b_Label.place_forget()
             self.options_shifts_b_Optionmenu.place_forget()
             self.options_split_Checkbutton.configure(state=tk.DISABLED)
             self.options_split_Checkbutton.place_forget()
-            self.options_segment_Label.place_forget()
-            self.options_segment_Optionmenu.place_forget()
+            self.options_tta_Checkbutton.configure(state=tk.DISABLED)
+            self.options_tta_Checkbutton.place_forget()
+            self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+            self.options_voc_only_b_Checkbutton.place_forget()
+            self.options_winSize_Label.place_forget()
+            self.options_winSize_Optionmenu.place_forget()
             
             
         elif self.aiModel_var.get() == 'VR Architecture':
@@ -1588,8 +2294,8 @@ class MainWindow(TkinterDnD.Tk):
             self.options_tta_Checkbutton.place(x=35, y=21, width=0, height=5,
                                             relx=2/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             #Post-Process
-            self.options_demucsmodelVR_Checkbutton.configure(state=tk.NORMAL)
-            self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
+            self.options_postpro_Checkbutton.configure(state=tk.NORMAL)
+            self.options_postpro_Checkbutton.place(x=35, y=21, width=0, height=5,
                                         relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             #Save Image
             # self.options_image_Checkbutton.configure(state=tk.NORMAL)
@@ -1600,42 +2306,42 @@ class MainWindow(TkinterDnD.Tk):
             self.options_modelFolder_Checkbutton.place(x=35, y=21, width=0, height=5,
                                                 relx=2/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             #Forget Widgets
-            self.options_ensChoose_Label.place_forget()
-            self.options_ensChoose_Optionmenu.place_forget()
-            self.options_chunks_Label.place_forget()
-            self.options_chunks_Optionmenu.place_forget()
-            self.options_noisereduc_s_Label.place_forget()
-            self.options_noisereduc_s_Optionmenu.place_forget()
-            self.options_mdxnetModel_Label.place_forget()
-            self.options_mdxnetModel_Optionmenu.place_forget()
             self.options_algo_Label.place_forget()
             self.options_algo_Optionmenu.place_forget()
-            self.options_save_Checkbutton.configure(state=tk.DISABLED)
-            self.options_save_Checkbutton.place_forget()
-            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
-            self.options_non_red_Checkbutton.place_forget()
-            self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
-            self.options_noisereduc_Checkbutton.place_forget()
-            self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
-            self.options_demucsmodel_Checkbutton.place_forget()
-            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
-            self.options_non_red_Checkbutton.place_forget()
-            self.options_DemucsModel_Label.place_forget()
-            self.options_DemucsModel_Optionmenu.place_forget()
+            self.options_chunks_Label.place_forget()
+            self.options_chunks_Optionmenu.place_forget()
             self.options_demucs_stems_Label.place_forget()
             self.options_demucs_stems_Optionmenu.place_forget()
-            self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
-            self.options_voc_only_b_Checkbutton.place_forget()
+            self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
+            self.options_demucsmodel_Checkbutton.place_forget()
+            self.options_DemucsModel_Label.place_forget()
+            self.options_DemucsModel_Optionmenu.place_forget()
+            self.options_ensChoose_Label.place_forget()
+            self.options_ensChoose_Optionmenu.place_forget()
             self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
             self.options_inst_only_b_Checkbutton.place_forget()
+            self.options_mdxnetModel_Label.place_forget()
+            self.options_mdxnetModel_Optionmenu.place_forget()
+            self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
+            self.options_noisereduc_Checkbutton.place_forget()
+            self.options_noisereduc_s_Label.place_forget()
+            self.options_noisereduc_s_Optionmenu.place_forget()
+            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+            self.options_non_red_Checkbutton.place_forget()
+            self.options_non_red_Checkbutton.place_forget()
             self.options_overlap_b_Label.place_forget()
             self.options_overlap_b_Optionmenu.place_forget()
+            self.options_save_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.place_forget()
+            self.options_segment_Label.place_forget()
+            self.options_segment_Optionmenu.place_forget()
             self.options_shifts_b_Label.place_forget()
             self.options_shifts_b_Optionmenu.place_forget()
             self.options_split_Checkbutton.configure(state=tk.DISABLED)
             self.options_split_Checkbutton.place_forget()
-            self.options_segment_Label.place_forget()
-            self.options_segment_Optionmenu.place_forget()
+            self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+            self.options_voc_only_b_Checkbutton.place_forget()
             
         elif self.aiModel_var.get() == 'Demucs v3':
             #Keep for Ensemble & VR Architecture Mode
@@ -1682,47 +2388,47 @@ class MainWindow(TkinterDnD.Tk):
             self.options_inst_only_b_Checkbutton.place(x=35, y=21, width=0, height=5,
                                         relx=1/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
             
-            #Instrumental Only
+            #Split Mode
             self.options_split_Checkbutton.configure(state=tk.NORMAL)
             self.options_split_Checkbutton.place(x=35, y=21, width=0, height=5,
                                         relx=1/3, rely=8/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
             # Forget Widgets
-            self.options_save_Checkbutton.configure(state=tk.DISABLED)
-            self.options_save_Checkbutton.place_forget()
-            self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
-            self.options_demucsmodelVR_Checkbutton.place_forget()
-            self.options_tta_Checkbutton.configure(state=tk.DISABLED)
-            self.options_tta_Checkbutton.place_forget()
             # self.options_image_Checkbutton.configure(state=tk.DISABLED)
             # self.options_image_Checkbutton.place_forget()
-            self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
-            self.options_demucsmodel_Checkbutton.place_forget()
-            self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
-            self.options_noisereduc_Checkbutton.place_forget()
-            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
-            self.options_non_red_Checkbutton.place_forget()
-            self.options_voc_only_Checkbutton.configure(state=tk.DISABLED)
-            self.options_voc_only_Checkbutton.place_forget()
-            self.options_inst_only_Checkbutton.configure(state=tk.DISABLED)
-            self.options_inst_only_Checkbutton.place_forget()
-            self.options_noisereduc_s_Label.place_forget()
-            self.options_noisereduc_s_Optionmenu.place_forget()
-            self.options_mdxnetModel_Label.place_forget()
-            self.options_mdxnetModel_Optionmenu.place_forget()
-            self.options_winSize_Label.place_forget()
-            self.options_winSize_Optionmenu.place_forget()
             self.options_agg_Label.place_forget()
             self.options_agg_Optionmenu.place_forget()
-            self.options_ensChoose_Label.place_forget()
-            self.options_ensChoose_Optionmenu.place_forget()
-            self.options_instrumentalModel_Label.place_forget()
-            self.options_instrumentalModel_Optionmenu.place_forget()
             self.options_algo_Label.place_forget()
             self.options_algo_Optionmenu.place_forget()
-            self.options_modelFolder_Checkbutton.place_forget()
             self.options_chunks_Label.place_forget()
             self.options_chunks_Optionmenu.place_forget()
+            self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
+            self.options_demucsmodel_Checkbutton.place_forget()
+            self.options_ensChoose_Label.place_forget()
+            self.options_ensChoose_Optionmenu.place_forget()
+            self.options_inst_only_Checkbutton.configure(state=tk.DISABLED)
+            self.options_inst_only_Checkbutton.place_forget()
+            self.options_instrumentalModel_Label.place_forget()
+            self.options_instrumentalModel_Optionmenu.place_forget()
+            self.options_mdxnetModel_Label.place_forget()
+            self.options_mdxnetModel_Optionmenu.place_forget()
+            self.options_modelFolder_Checkbutton.place_forget()
+            self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
+            self.options_noisereduc_Checkbutton.place_forget()
+            self.options_noisereduc_s_Label.place_forget()
+            self.options_noisereduc_s_Optionmenu.place_forget()
+            self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+            self.options_non_red_Checkbutton.place_forget()
+            self.options_postpro_Checkbutton.configure(state=tk.DISABLED)
+            self.options_postpro_Checkbutton.place_forget()
+            self.options_save_Checkbutton.configure(state=tk.DISABLED)
+            self.options_save_Checkbutton.place_forget()
+            self.options_tta_Checkbutton.configure(state=tk.DISABLED)
+            self.options_tta_Checkbutton.place_forget()
+            self.options_voc_only_Checkbutton.configure(state=tk.DISABLED)
+            self.options_voc_only_Checkbutton.place_forget()
+            self.options_winSize_Label.place_forget()
+            self.options_winSize_Optionmenu.place_forget()
             
         elif self.aiModel_var.get() == 'Ensemble Mode':
             if self.ensChoose_var.get() == 'Manual Ensemble':
@@ -1737,55 +2443,55 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_ensChoose_Optionmenu.place(x=0, y=19, width=0, height=7,
                                         relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
                 # Forget Widgets
-                self.options_save_Checkbutton.configure(state=tk.DISABLED)
-                self.options_save_Checkbutton.place_forget()
-                self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
-                self.options_demucsmodelVR_Checkbutton.place_forget()
-                self.options_tta_Checkbutton.configure(state=tk.DISABLED)
-                self.options_tta_Checkbutton.place_forget()
-                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
-                self.options_modelFolder_Checkbutton.place_forget()
                 # self.options_image_Checkbutton.configure(state=tk.DISABLED)
                 # self.options_image_Checkbutton.place_forget()
-                self.options_gpu_Checkbutton.configure(state=tk.DISABLED)
-                self.options_gpu_Checkbutton.place_forget()
-                self.options_voc_only_Checkbutton.configure(state=tk.DISABLED)
-                self.options_voc_only_Checkbutton.place_forget()
-                self.options_inst_only_Checkbutton.configure(state=tk.DISABLED)
-                self.options_inst_only_Checkbutton.place_forget()
-                self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
-                self.options_demucsmodel_Checkbutton.place_forget()
-                self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
-                self.options_noisereduc_Checkbutton.place_forget()
-                self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
-                self.options_non_red_Checkbutton.place_forget()
-                self.options_chunks_Label.place_forget()
-                self.options_chunks_Optionmenu.place_forget()
-                self.options_noisereduc_s_Label.place_forget()
-                self.options_noisereduc_s_Optionmenu.place_forget()
-                self.options_mdxnetModel_Label.place_forget()
-                self.options_mdxnetModel_Optionmenu.place_forget()
-                self.options_winSize_Label.place_forget()
-                self.options_winSize_Optionmenu.place_forget()
                 self.options_agg_Label.place_forget()
                 self.options_agg_Optionmenu.place_forget()
-                self.options_DemucsModel_Label.place_forget()
-                self.options_DemucsModel_Optionmenu.place_forget()
+                self.options_chunks_Label.place_forget()
+                self.options_chunks_Optionmenu.place_forget()
                 self.options_demucs_stems_Label.place_forget()
                 self.options_demucs_stems_Optionmenu.place_forget()
-                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
-                self.options_voc_only_b_Checkbutton.place_forget()
+                self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
+                self.options_demucsmodel_Checkbutton.place_forget()
+                self.options_DemucsModel_Label.place_forget()
+                self.options_DemucsModel_Optionmenu.place_forget()
+                self.options_gpu_Checkbutton.configure(state=tk.DISABLED)
+                self.options_gpu_Checkbutton.place_forget()
                 self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
                 self.options_inst_only_b_Checkbutton.place_forget()
                 self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_inst_only_Checkbutton.configure(state=tk.DISABLED)
+                self.options_inst_only_Checkbutton.place_forget()
+                self.options_mdxnetModel_Label.place_forget()
+                self.options_mdxnetModel_Optionmenu.place_forget()
+                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+                self.options_modelFolder_Checkbutton.place_forget()
+                self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
+                self.options_noisereduc_Checkbutton.place_forget()
+                self.options_noisereduc_s_Label.place_forget()
+                self.options_noisereduc_s_Optionmenu.place_forget()
+                self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+                self.options_non_red_Checkbutton.place_forget()
                 self.options_overlap_b_Label.place_forget()
                 self.options_overlap_b_Optionmenu.place_forget()
+                self.options_postpro_Checkbutton.configure(state=tk.DISABLED)
+                self.options_postpro_Checkbutton.place_forget()
+                self.options_save_Checkbutton.configure(state=tk.DISABLED)
+                self.options_save_Checkbutton.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
                 self.options_shifts_b_Label.place_forget()
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
-                self.options_segment_Label.place_forget()
-                self.options_segment_Optionmenu.place_forget()
+                self.options_tta_Checkbutton.configure(state=tk.DISABLED)
+                self.options_tta_Checkbutton.place_forget()
+                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_voc_only_b_Checkbutton.place_forget()
+                self.options_voc_only_Checkbutton.configure(state=tk.DISABLED)
+                self.options_voc_only_Checkbutton.place_forget()
+                self.options_winSize_Label.place_forget()
+                self.options_winSize_Optionmenu.place_forget()
                 
 
             elif self.ensChoose_var.get() == 'Multi-AI Ensemble':
@@ -1839,35 +2545,114 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_save_Checkbutton.place(x=35, y=3, width=0, height=5,
                                             relx=2/3, rely=9/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 # Forget Widgets
-                self.options_demucsmodelVR_Checkbutton.configure(state=tk.DISABLED)
-                self.options_demucsmodelVR_Checkbutton.place_forget()
-                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
-                self.options_modelFolder_Checkbutton.place_forget()
                 # self.options_image_Checkbutton.configure(state=tk.DISABLED)
                 # self.options_image_Checkbutton.place_forget()
+                self.options_algo_Label.place_forget()
+                self.options_algo_Optionmenu.place_forget()
+                self.options_demucs_stems_Label.place_forget()
+                self.options_demucs_stems_Optionmenu.place_forget()
+                self.options_DemucsModel_Label.place_forget()
+                self.options_DemucsModel_Optionmenu.place_forget()
+                self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+                self.options_modelFolder_Checkbutton.place_forget()
                 self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
                 self.options_noisereduc_Checkbutton.place_forget()
                 self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
                 self.options_non_red_Checkbutton.place_forget()
-                self.options_algo_Label.place_forget()
-                self.options_algo_Optionmenu.place_forget()
-                self.options_DemucsModel_Label.place_forget()
-                self.options_DemucsModel_Optionmenu.place_forget()
-                self.options_demucs_stems_Label.place_forget()
-                self.options_demucs_stems_Optionmenu.place_forget()
-                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
-                self.options_voc_only_b_Checkbutton.place_forget()
-                self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
-                self.options_inst_only_b_Checkbutton.place_forget()
-                self.options_inst_only_b_Checkbutton.place_forget()
                 self.options_overlap_b_Label.place_forget()
                 self.options_overlap_b_Optionmenu.place_forget()
+                self.options_postpro_Checkbutton.configure(state=tk.DISABLED)
+                self.options_postpro_Checkbutton.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
                 self.options_shifts_b_Label.place_forget()
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
+                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_voc_only_b_Checkbutton.place_forget()
+            elif self.ensChoose_var.get() == 'Basic MD Ensemble':
+                # Choose Ensemble 
+                self.options_ensChoose_Label.place(x=0, y=19, width=0, height=-10,
+                                        relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+                self.options_ensChoose_Optionmenu.place(x=0, y=19, width=0, height=7,
+                                        relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
+                # MDX-chunks
+                self.options_chunks_Label.place(x=12, y=0, width=0, height=-10,
+                                            relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                self.options_chunks_Optionmenu.place(x=71, y=-2, width=-118, height=7,
+                                            relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                # MDX-noisereduc_s
+                self.options_noisereduc_s_Label.place(x=15, y=0, width=0, height=-10,
+                                            relx=1/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                self.options_noisereduc_s_Optionmenu.place(x=71, y=-2, width=-118, height=7,
+                                            relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                #GPU Conversion
+                self.options_gpu_Checkbutton.configure(state=tk.NORMAL)
+                self.options_gpu_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                                relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                #Vocals Only
+                self.options_voc_only_Checkbutton.configure(state=tk.NORMAL)
+                self.options_voc_only_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                            relx=1/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                #Instrumental Only
+                self.options_inst_only_Checkbutton.configure(state=tk.NORMAL)
+                self.options_inst_only_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                            relx=1/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                # MDX-demucs Model
+                self.options_demucsmodel_Checkbutton.configure(state=tk.NORMAL)
+                self.options_demucsmodel_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                            relx=2/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                
+                # Split Mode
+                self.options_split_Checkbutton.configure(state=tk.NORMAL)
+                self.options_split_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                            relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                
+                #Ensemble Save Outputs
+                self.options_save_Checkbutton.configure(state=tk.NORMAL)
+                self.options_save_Checkbutton.place(x=35, y=21, width=0, height=5,
+                                            relx=2/3, rely=7/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
+                
+                # Forget widgets
+                # self.options_image_Checkbutton.configure(state=tk.DISABLED)
+                # self.options_image_Checkbutton.place_forget()
+                self.options_agg_Label.place_forget()
+                self.options_agg_Optionmenu.place_forget()
+                self.options_algo_Label.place_forget()
+                self.options_algo_Optionmenu.place_forget()
+                self.options_demucs_stems_Label.place_forget()
+                self.options_demucs_stems_Optionmenu.place_forget()
+                self.options_DemucsModel_Label.place_forget()
+                self.options_DemucsModel_Optionmenu.place_forget()
+                self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_instrumentalModel_Label.place_forget()
+                self.options_instrumentalModel_Optionmenu.place_forget()
+                self.options_mdxnetModel_Label.place_forget()
+                self.options_mdxnetModel_Optionmenu.place_forget()
+                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+                self.options_modelFolder_Checkbutton.place_forget() 
+                self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+                self.options_non_red_Checkbutton.place_forget()
+                self.options_overlap_b_Label.place_forget()
+                self.options_overlap_b_Optionmenu.place_forget()
+                self.options_postpro_Checkbutton.configure(state=tk.DISABLED)
+                self.options_postpro_Checkbutton.place_forget()
                 self.options_segment_Label.place_forget()
                 self.options_segment_Optionmenu.place_forget()
+                self.options_shifts_b_Label.place_forget()
+                self.options_shifts_b_Optionmenu.place_forget()
+                self.options_tta_Checkbutton.configure(state=tk.DISABLED)
+                self.options_tta_Checkbutton.place_forget()
+                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_voc_only_b_Checkbutton.place_forget()
+                self.options_winSize_Label.place_forget()
+                self.options_winSize_Optionmenu.place_forget()
             else:
                 # Choose Ensemble 
                 self.options_ensChoose_Label.place(x=0, y=19, width=0, height=-10,
@@ -1901,8 +2686,8 @@ class MainWindow(TkinterDnD.Tk):
                 self.options_tta_Checkbutton.place(x=35, y=21, width=0, height=5,
                                                 relx=2/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 #Post-Process
-                self.options_demucsmodelVR_Checkbutton.configure(state=tk.NORMAL)
-                self.options_demucsmodelVR_Checkbutton.place(x=35, y=21, width=0, height=5,
+                self.options_postpro_Checkbutton.configure(state=tk.NORMAL)
+                self.options_postpro_Checkbutton.place(x=35, y=21, width=0, height=5,
                                             relx=2/3, rely=6/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
                 #Save Image
                 # self.options_image_Checkbutton.configure(state=tk.NORMAL)
@@ -1915,39 +2700,38 @@ class MainWindow(TkinterDnD.Tk):
                 #Forget Widgets
                 self.options_algo_Label.place_forget()
                 self.options_algo_Optionmenu.place_forget()
-                self.options_instrumentalModel_Label.place_forget()
-                self.options_instrumentalModel_Optionmenu.place_forget()
                 self.options_chunks_Label.place_forget()
                 self.options_chunks_Optionmenu.place_forget()
-                self.options_noisereduc_s_Label.place_forget()
-                self.options_noisereduc_s_Optionmenu.place_forget()
-                self.options_mdxnetModel_Label.place_forget()
-                self.options_mdxnetModel_Optionmenu.place_forget()
-                self.options_modelFolder_Checkbutton.place_forget()
-                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
-                self.options_noisereduc_Checkbutton.place_forget()
-                self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
-                self.options_demucsmodel_Checkbutton.place_forget()
-                self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
-                self.options_non_red_Checkbutton.place_forget()
-                self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
-                self.options_DemucsModel_Label.place_forget()
-                self.options_DemucsModel_Optionmenu.place_forget()
                 self.options_demucs_stems_Label.place_forget()
                 self.options_demucs_stems_Optionmenu.place_forget()
-                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
-                self.options_voc_only_b_Checkbutton.place_forget()
+                self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
+                self.options_demucsmodel_Checkbutton.place_forget()
+                self.options_DemucsModel_Label.place_forget()
+                self.options_DemucsModel_Optionmenu.place_forget()
                 self.options_inst_only_b_Checkbutton.configure(state=tk.DISABLED)
                 self.options_inst_only_b_Checkbutton.place_forget()
                 self.options_inst_only_b_Checkbutton.place_forget()
+                self.options_instrumentalModel_Label.place_forget()
+                self.options_mdxnetModel_Label.place_forget()
+                self.options_mdxnetModel_Optionmenu.place_forget()
+                self.options_modelFolder_Checkbutton.configure(state=tk.DISABLED)
+                self.options_modelFolder_Checkbutton.place_forget()
+                self.options_noisereduc_Checkbutton.configure(state=tk.DISABLED)
+                self.options_noisereduc_Checkbutton.place_forget()
+                self.options_noisereduc_s_Label.place_forget()
+                self.options_noisereduc_s_Optionmenu.place_forget()
+                self.options_non_red_Checkbutton.configure(state=tk.DISABLED)
+                self.options_non_red_Checkbutton.place_forget()
                 self.options_overlap_b_Label.place_forget()
                 self.options_overlap_b_Optionmenu.place_forget()
+                self.options_segment_Label.place_forget()
+                self.options_segment_Optionmenu.place_forget()
                 self.options_shifts_b_Label.place_forget()
                 self.options_shifts_b_Optionmenu.place_forget()
                 self.options_split_Checkbutton.configure(state=tk.DISABLED)
                 self.options_split_Checkbutton.place_forget()
-                self.options_segment_Label.place_forget()
-                self.options_segment_Optionmenu.place_forget()
+                self.options_voc_only_b_Checkbutton.configure(state=tk.DISABLED)
+                self.options_voc_only_b_Checkbutton.place_forget()
                 
                 
         if self.inst_only_var.get() == True:
@@ -2118,13 +2902,42 @@ class MainWindow(TkinterDnD.Tk):
             except:
                 pass
 
+        if self.selectdownload_var.get() == 'VR Arc':
+            #self.modeldownload_var.clear()
+            self.modeldownload_mdx_var.set('No Model Selected')
+            self.modeldownload_demucs_var.set('No Model Selected')
+            try:
+                self.downloadmodelOptions.configure(state=tk.NORMAL)
+                self.downloadmodelOptions_mdx.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_demucs.configure(state=tk.DISABLED)
+            except:
+                pass
+        if self.selectdownload_var.get() == 'MDX-Net':
+            #self.modeldownload_mdx_var.set('Full Model Pack')
+            self.modeldownload_var.set('No Model Selected')
+            self.modeldownload_demucs_var.set('No Model Selected')
+            try:
+                self.downloadmodelOptions.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_demucs.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            except:
+                pass
+        if self.selectdownload_var.get() == 'Demucs':
+            #self.modeldownload_demucs_var.set('Demucs v3: mdx')
+            self.modeldownload_var.set('No Model Selected')
+            self.modeldownload_mdx_var.set('No Model Selected')
+            try:
+                self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+                self.downloadmodelOptions.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_mdx.configure(state=tk.DISABLED)
+            except:
+                pass
+
         if self.demucs_only_var.get() == True:
             self.demucsmodel_var.set(True)
             self.options_demucsmodel_Checkbutton.configure(state=tk.DISABLED)
         elif self.demucs_only_var.get() == False:
             self.options_demucsmodel_Checkbutton.configure(state=tk.NORMAL)
-
-
 
         self.update_inputPaths()
 
@@ -2164,10 +2977,17 @@ class MainWindow(TkinterDnD.Tk):
                 subprocess.Popen(f'python "{__file__}"', shell=True)
             exit()
         else:
+            self.settings()
             pass
+        
+    def shutdown(self):
+        """
+        Shuts down the application after asking for confirmation
+        """
+        exit()
 
     def open_newModel_filedialog(self):
-        """Let user paste an MDX-Net model to use for the vocal seperation"""
+        """Let user paste an MDX-Net model to use for the vocal Separation"""
         
         filename = 'models\MDX_Net_Models'
 
@@ -2177,14 +2997,173 @@ class MainWindow(TkinterDnD.Tk):
             opener = "open" if sys.platform == "darwin" else "xdg-open"
             subprocess.call([opener, filename])
             
+            
+    def delete_temps(self):  
+        try:
+            for basename in os.listdir(download_code_temp_dir):
+                if basename.endswith('.aes'):
+                    pathname = os.path.join(download_code_temp_dir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+                        
+        except:
+            pass
+        
+        try:
+                        
+            for basename in os.listdir(download_code_temp_dir):
+                if basename.endswith('.txt'):
+                    pathname = os.path.join(download_code_temp_dir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass
+        
+        try:
+            srcdir = "models/Demucs_Models"
+
+            for basename in os.listdir(srcdir):
+                if basename.endswith('.tmp'):
+                    pathname = os.path.join(srcdir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass   
+        
+        try:
+            srcdir = "models/Demucs_Models/v3_repo"
+
+            for basename in os.listdir(srcdir):
+                if basename.endswith('.tmp'):
+                    pathname = os.path.join(srcdir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass   
+
+        try:
+            srcdir = "models/Main_Models"
+
+            for basename in os.listdir(srcdir):
+                if basename.endswith('.tmp'):
+                    pathname = os.path.join(srcdir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass  
+
+        try:
+            srcdir = "models/MDX_Net_Models"
+
+            for basename in os.listdir(srcdir):
+                if basename.endswith('.tmp'):
+                    pathname = os.path.join(srcdir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass  
+        
+        try:
+            srcdir = os.path.dirname(os.path.realpath(__file__))
+
+            for basename in os.listdir(srcdir):
+                if basename.endswith('.tmp'):
+                    pathname = os.path.join(srcdir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        except:
+            pass  
+            
+    def reset_to_defaults(self):
+        self.agg_var.set(10)
+        self.algo_var.set('Instrumentals (Min Spec)')
+        self.appendensem_var.set(False)
+        self.audfile_var.set(True)
+        self.aud_mdx_var.set(True),
+        self.autocompensate_var.set(True)
+        self.channel_var.set(64)
+        self.chunks_var.set('Auto')
+        self.chunks_d_var.set('Full')
+        self.compensate_var.set(1.03597672895)
+        self.demucs_only_var.set(False)
+        self.demucs_stems_var.set('All Stems')
+        self.DemucsModel_var.set('mdx_extra')
+        self.demucsmodel_var.set(False)
+        self.DemucsModel_MDX_var.set('UVR_Demucs_Model_1')
+        self.demucsmodel_sel_VR_var.set('UVR_Demucs_Model_1')
+        self.demucsmodelVR_var.set(False)
+        self.dim_f_var.set(2048)
+        self.flactype_var.set('PCM_16')
+        self.gpuConversion_var.set(False)
+        self.inst_only_var.set(False)
+        self.inst_only_b_var.set(False)
+        self.margin_var.set(44100)
+        self.mdxensemchoose_var.set('MDX-Net: UVR-MDX-NET Main')
+        self.mdxensemchoose_b_var.set('No Model')
+        self.mdx_only_ensem_a_var.set('MDX-Net: UVR-MDX-NET Main')
+        self.mdx_only_ensem_b_var.set('MDX-Net: UVR-MDX-NET 1')
+        self.mdx_only_ensem_c_var.set('No Model')
+        self.mdx_only_ensem_d_var.set('No Model')
+        self.mdx_only_ensem_e_var.set('No Model')  
+        self.mdxnetModel_var.set('UVR-MDX-NET Main')        
+        self.mdxnetModeltype_var.set('Vocals (Custom)')
+        self.mixing_var.set('Default')
+        self.modelFolder_var.set(False)
+        self.instrumentalModel_var.set('')
+        self.ModelParams_var.set('Auto')           
+        self.mp3bit_var.set('320k')
+        self.n_fft_scale_var.set(6144)
+        self.noise_pro_select_var.set('Auto Select')
+        self.noisereduc_var.set(True)
+        self.noisereduc_s_var.set(3)
+        self.non_red_var.set(False)
+        self.nophaseinst_var.set(False)
+        self.normalize_var.set(False)
+        self.outputImage_var.set(False)
+        self.overlap_var.set(0.25)
+        self.overlap_b_var.set(0.25)
+        self.postprocessing_var.set(False)
+        self.save_var.set(True)
+        self.saveFormat_var.set('Wav')
+        self.segment_var.set(None)
+        self.settest_var.set(False)
+        self.shifts_var.set(2)
+        self.shifts_b_var.set(2)
+        self.split_mode_var.set(True)
+        self.tta_var.set(False)
+        self.voc_only_var.set(False)
+        self.voc_only_b_var.set(False)
+        self.vrensemchoose_var.set('2_HP-UVR')
+        self.vrensemchoose_a_var.set('1_HP-UVR')
+        self.vrensemchoose_b_var.set('2_HP-UVR')
+        self.vrensemchoose_c_var.set('No Model')
+        self.vrensemchoose_d_var.set('No Model')
+        self.vrensemchoose_e_var.set('No Model')    
+        self.vrensemchoose_mdx_a_var.set('No Model')
+        self.vrensemchoose_mdx_b_var.set('No Model')
+        self.vrensemchoose_mdx_c_var.set('No Model')
+        self.vr_multi_USER_model_param_1.set('Auto')
+        self.vr_multi_USER_model_param_2.set('Auto')
+        self.vr_multi_USER_model_param_3.set('Auto')
+        self.vr_multi_USER_model_param_4.set('Auto')
+        self.vr_basic_USER_model_param_1.set('Auto')
+        self.vr_basic_USER_model_param_2.set('Auto')
+        self.vr_basic_USER_model_param_3.set('Auto')
+        self.vr_basic_USER_model_param_4.set('Auto')
+        self.vr_basic_USER_model_param_5.set('Auto')
+        self.wavtype_var.set('PCM_16')
+        self.winSize_var.set('512')
+        
+    
+            
     def advanced_vr_options(self):
         """
         Open Advanced VR Options
-        """
+        """     
+           
         top=Toplevel(self)
 
-        top.geometry("600x500")
-        window_height = 600
+        window_height = 630
         window_width = 500
         
         top.title("Advanced VR Options")
@@ -2198,6 +3177,8 @@ class MainWindow(TkinterDnD.Tk):
         y_cordinate = int((screen_height/2) - (window_height/2))
 
         top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        
+        top.attributes("-topmost", True)
 
         # change title bar icon
         top.iconbitmap('img\\UVR-Icon-v2.ico')
@@ -2224,7 +3205,7 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=Label(frame0,text="Advanced VR Options",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Advanced VR Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
         l0=tk.Label(frame0, text='Window Size (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -2250,20 +3231,32 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Checkbutton(frame0, text='Save Output Image(s) of Spectrogram(s)', variable=self.outputImage_var) 
         l0.grid(row=8,column=0,padx=0,pady=0)
 
-        l0=ttk.Checkbutton(frame0, text='Post-Process', variable=self.postprocessing_var) 
+        l0=ttk.Checkbutton(frame0, text='Demucs Model', variable=self.demucsmodelVR_var) 
         l0.grid(row=9,column=0,padx=0,pady=0)
         
+        def clear_cache():
+            cachedir = "lib_v5/filelists/model_cache/vr_param_cache"
+
+            for basename in os.listdir(cachedir):
+                if basename.endswith('.txt'):
+                    pathname = os.path.join(cachedir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        
+        l0=ttk.Button(frame0,text='Clear Auto-Set Cache', command=clear_cache)
+        l0.grid(row=10,column=0,padx=0,pady=5)
+        
         l0=ttk.Button(frame0,text='Open VR Models Folder', command=self.open_Modelfolder_vr)
-        l0.grid(row=10,column=0,padx=0,pady=10)
+        l0.grid(row=11,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
-        l0.grid(row=11,column=0,padx=0,pady=0)
+        l0.grid(row=12,column=0,padx=0,pady=5)
         
         def close_win_self():
             top.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=12,column=0,padx=0,pady=10)
+        l0.grid(row=13,column=0,padx=0,pady=5)
         
         self.ModelParamsLabel_to_path = defaultdict(lambda: '')
         self.lastModelParams = []
@@ -2271,46 +3264,41 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=tk.Label(frame0,text='\nDemucs Model\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
-        l0.grid(row=1,column=0,padx=0,pady=0)
+        l0=tk.Label(frame0,text='Demucs Model',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=5)
         
         l0=ttk.OptionMenu(frame0, self.demucsmodel_sel_VR_var, None, 'UVR_Demucs_Model_1', 'UVR_Demucs_Model_2', 'UVR_Demucs_Model_Bag')
-        l0.grid(row=2,column=0,padx=0,pady=0) 
+        l0.grid(row=2,column=0,padx=0,pady=5) 
         
         l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=3,column=0,padx=0,pady=10)
+        l0.grid(row=3,column=0,padx=0,pady=5)
         
         l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
-        l0.grid(row=4,column=0,padx=0,pady=0)
+        l0.grid(row=4,column=0,padx=0,pady=5)
         
         l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=5,column=0,padx=0,pady=10)
+        l0.grid(row=5,column=0,padx=0,pady=5)
         
         l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
-        l0.grid(row=6,column=0,padx=0,pady=0)
+        l0.grid(row=6,column=0,padx=0,pady=5)
         
         l0=tk.Label(frame0, text='Segment', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=7,column=0,padx=0,pady=10)
+        l0.grid(row=7,column=0,padx=0,pady=5)
         
         l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
-        l0.grid(row=8,column=0,padx=0,pady=0)
+        l0.grid(row=8,column=0,padx=0,pady=5)
         
         l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
-        l0.grid(row=9,column=0,padx=0,pady=10)
-        
-        self.DemucsLabel_MDX_to_path = defaultdict(lambda: '')
-        self.lastDemucsModels_MDX = []
+        l0.grid(row=9,column=0,padx=0,pady=5)
         
         self.update_states()
-        
-        
+          
     def advanced_demucs_options(self):
         """
         Open Advanced Demucs Options
         """
         top= Toplevel(self)
 
-        top.geometry("750x500")
         window_height = 750
         window_width = 500
         
@@ -2325,6 +3313,8 @@ class MainWindow(TkinterDnD.Tk):
         y_cordinate = int((screen_height/2) - (window_height/2))
 
         top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        
+        top.attributes("-topmost", True)
 
         # change title bar icon
         top.iconbitmap('img\\UVR-Icon-v2.ico')
@@ -2347,7 +3337,7 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
         l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -2395,14 +3385,12 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=14,column=0,padx=0,pady=0)
         
-            
     def advanced_mdx_options(self):
         """
         Open Advanced MDX Options
         """
         top= Toplevel(self)
 
-        top.geometry("740x550")
         window_height = 740
         window_width = 550
         
@@ -2417,6 +3405,8 @@ class MainWindow(TkinterDnD.Tk):
         y_cordinate = int((screen_height/2) - (window_height/2))
 
         top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        
+        top.attributes("-topmost", True)
 
         # change title bar icon
         top.iconbitmap('img\\UVR-Icon-v2.ico')
@@ -2447,7 +3437,7 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=Label(frame0,text="Advanced MDX-Net Options",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Advanced MDX-Net Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
         l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -2540,10 +3530,10 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab3, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=tk.Label(frame0, text='Stem Type', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text=f'{space_small}Stem Type{space_small}', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.mdxnetModeltype_var, None, 'Vocals (Default)', 'Other (Default)', 'Bass (Default)', 'Drums (Default)', 'Vocals (Custom)', 'Other (Custom)', 'Bass (Custom)', 'Drums (Custom)')
+        l0=ttk.OptionMenu(frame0, self.mdxnetModeltype_var, None, 'Vocals (Custom)', 'Instrumental (Custom)', 'Other (Custom)', 'Bass (Custom)', 'Drums (Custom)')
         l0.grid(row=2,column=0,padx=0,pady=10)
 
         l0=tk.Label(frame0, text='N_FFT Scale', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -2578,25 +3568,42 @@ class MainWindow(TkinterDnD.Tk):
         self.options_dim_f_Entry
         l0.grid(row=6,column=1,padx=0,pady=0)
         
-        self.DemucsLabel_MDX_to_path = defaultdict(lambda: '')
-        self.lastDemucsModels_MDX = []
+        l0=ttk.Checkbutton(frame0, text='Auto-Set', variable=self.aud_mdx_var) 
+        l0.grid(row=7,column=0,padx=0,pady=10)
+        
+        
+        def clear_cache():
+            cachedir = "lib_v5/filelists/hashes/mdx_model_cache"
+
+            for basename in os.listdir(cachedir):
+                if basename.endswith('.json'):
+                    pathname = os.path.join(cachedir, basename)
+                    if os.path.isfile(pathname):
+                        os.remove(pathname)
+        
+        l0=ttk.Button(frame0, text='Clear Auto-Set Cache', command=clear_cache)
+        
+        l0.grid(row=8,column=0,padx=0,pady=10)
+        
+        self.DemucsLabel_to_path = defaultdict(lambda: '')
+        self.lastmdx_demuc_ensem = []
         
         self.update_states()
         
-
     def custom_ensemble(self):
         """
         Open Ensemble Custom
         """
         top= Toplevel(self)
 
-        top.geometry("800x680")
         window_height = 680
-        window_width = 800
+        window_width = 900
         
         top.title("Customize Ensemble")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        top.attributes("-topmost", True)
         
         screen_width = top.winfo_screenwidth()
         screen_height = top.winfo_screenheight()
@@ -2616,126 +3623,156 @@ class MainWindow(TkinterDnD.Tk):
         tabControl = ttk.Notebook(top)
   
         tab1 = ttk.Frame(tabControl)
+        tab2 = ttk.Frame(tabControl)
+        tab3 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='Ensemble Options')
+        tabControl.add(tab2, text ='More Options')
+        tabControl.add(tab3, text ='VR Model Param Settings')
 
         tabControl.pack(expand = 1, fill ="both")
         
         tab1.grid_rowconfigure(0, weight=1)
         tab1.grid_columnconfigure(0, weight=1)
+        
+        tab2.grid_rowconfigure(0, weight=1)
+        tab2.grid_columnconfigure(0, weight=1)
+        
+        tab3.grid_rowconfigure(0, weight=1)
+        tab3.grid_columnconfigure(0, weight=1)
+        
+        mdx_demuc_en = ''
+        mdx_demuc_en = lib_v5.filelist.get_mdx_demucs_en_list(mdx_demuc_en)
+        mdx_demuc_en_list = mdx_demuc_en
+        
+        vr_en = ''
+        vr_en = lib_v5.filelist.get_vr_en_list(vr_en)
+        vr_en_list = vr_en
 
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
 
-        l0=Label(frame0,text="Multi-AI Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+        mdx_only_ensem_a = self.mdx_only_ensem_a_var.get()
+        mdx_only_ensem_b = self.mdx_only_ensem_b_var.get()
+        mdx_only_ensem_c = self.mdx_only_ensem_c_var.get()
+        mdx_only_ensem_d = self.mdx_only_ensem_d_var.get()
+        mdx_only_ensem_e = self.mdx_only_ensem_e_var.get()
+        mdxensemchoose_b = self.mdxensemchoose_b_var.get()
+        mdxensemchoose = self.mdxensemchoose_var.get()
+        vrensemchoose_a = self.vrensemchoose_a_var.get()
+        vrensemchoose_b = self.vrensemchoose_b_var.get()
+        vrensemchoose_c = self.vrensemchoose_c_var.get()
+        vrensemchoose_d = self.vrensemchoose_d_var.get()
+        vrensemchoose_e = self.vrensemchoose_e_var.get()
+        vrensemchoose_mdx_a = self.vrensemchoose_mdx_a_var.get()
+        vrensemchoose_mdx_b = self.vrensemchoose_mdx_b_var.get()
+        vrensemchoose_mdx_c = self.vrensemchoose_mdx_c_var.get()
+        vrensemchoose = self.vrensemchoose_var.get()
+
+        l0=tk.Label(frame0,text="Multi-AI Ensemble Options",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
         l0.grid(row=1,column=0,padx=20,pady=10)
         
-        l0=tk.Label(frame0,text='MDX-Net or Demucs Model 1\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0=tk.Label(frame0,text=f"{space_small}MDX-Net or Demucs Model 1{space_small}\n",font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, None, 'UVR-MDX-NET Main', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
-                            'UVR-MDX-NET Karaoke', 'Demucs UVR Model 1', 'Demucs UVR Model 2', 'Demucs mdx_extra', 'Demucs mdx_extra_q')
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_var, *mdx_demuc_en_list)
         l0.grid(row=3,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=4,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, None, 'No Model', 'UVR-MDX-NET Main', 'UVR-MDX-NET 1', 'UVR-MDX-NET 2', 'UVR-MDX-NET 3', 
-                            'UVR-MDX-NET Karaoke', 'Demucs UVR Model 1', 'Demucs UVR Model 2', 'Demucs mdx_extra', 'Demucs mdx_extra_q')
+        l0=ttk.OptionMenu(frame0, self.mdxensemchoose_b_var, *mdx_demuc_en_list)
         l0.grid(row=5,column=0,padx=0,pady=0)
-        
+
         l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=6,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_var, *vr_en_list)
         l0.grid(row=7,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_a_var, *vr_en_list)
         l0.grid(row=9,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=10,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_b_var, *vr_en_list)
         l0.grid(row=11,column=0,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=12,column=0,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_mdx_c_var, *vr_en_list)
         l0.grid(row=13,column=0,padx=0,pady=0)
         
-        l0=Label(frame0,text="Basic VR Ensemble Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
+        l0=tk.Label(frame0,text="Basic VR Ensemble Options",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
         l0.grid(row=1,column=1,padx=20,pady=10)
         
-        l0=tk.Label(frame0,text='VR Model 1\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0=tk.Label(frame0,text=f'{space_medium}VR Model 1{space_medium}\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=2,column=1,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_a_var, *vr_en_list)
         l0.grid(row=3,column=1,padx=0,pady=0)
 
         l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=4,column=1,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, None, '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_b_var, *vr_en_list)
         l0.grid(row=5,column=1,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=6,column=1,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_c_var, *vr_en_list)
         l0.grid(row=7,column=1,padx=0,pady=0) 
         
         l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=8,column=1,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_d_var, *vr_en_list)
         l0.grid(row=9,column=1,padx=0,pady=0)
         
         l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
         l0.grid(row=10,column=1,padx=0,pady=0)
         
-        l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, None, 'No Model', '1_HP-UVR', '2_HP-UVR', '3_HP-Vocal-UVR', 
-                            '4_HP-Vocal-UVR', '5_HP-Karaoke-UVR', '6_HP-Karaoke-UVR', '7_HP2-UVR', '8_HP2-UVR', 
-                            '9_HP2-UVR', '10_SP-UVR-2B-32000-1', '11_SP-UVR-2B-32000-2', '12_SP-UVR-3B-44100', '13_SP-UVR-4B-44100-1',
-                            '14_SP-UVR-4B-44100-2', '15_SP-UVR-MID-44100-1', '16_SP-UVR-MID-44100-2',
-                            'MGM_MAIN_v4', 'MGM_HIGHEND_v4', 'MGM_LOWEND_A_v4', 'MGM_LOWEND_B_v4')
+        l0=ttk.OptionMenu(frame0, self.vrensemchoose_e_var, *vr_en_list)
         l0.grid(row=11,column=1,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text="Basic MD Ensemble Options",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=2,padx=20,pady=10)
+        
+        l0=tk.Label(frame0,text=f'{space_small}MDX-Net or Demucs Model 1{space_small}\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=2,column=2,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdx_only_ensem_a_var, *mdx_demuc_en_list)
+        l0.grid(row=3,column=2,padx=0,pady=0)
+
+        l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=4,column=2,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdx_only_ensem_b_var, *mdx_demuc_en_list)
+        l0.grid(row=5,column=2,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 3\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=6,column=2,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdx_only_ensem_c_var, *mdx_demuc_en_list)
+        l0.grid(row=7,column=2,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 4\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=8,column=2,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdx_only_ensem_d_var, *mdx_demuc_en_list)
+        l0.grid(row=9,column=2,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nMDX-Net or Demucs Model 5\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=10,column=2,padx=0,pady=0)
+        
+        l0=ttk.OptionMenu(frame0, self.mdx_only_ensem_e_var, *mdx_demuc_en_list)
+        l0.grid(row=11,column=2,padx=0,pady=0)
         
         def close_win_self():
             top.destroy()
@@ -2743,44 +3780,164 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=13,column=1,padx=20,pady=0)
         
-        l0=Label(frame0,text="Additional Options",font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
-        l0.grid(row=1,column=2,padx=0,pady=10)
+        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0.grid(row=13,column=2,padx=20,pady=0)
+        
+        self.mdx_only_ensem_a_var.set(mdx_only_ensem_a)
+        self.mdx_only_ensem_b_var.set(mdx_only_ensem_b)
+        self.mdx_only_ensem_c_var.set(mdx_only_ensem_c)
+        self.mdx_only_ensem_d_var.set(mdx_only_ensem_d)
+        self.mdx_only_ensem_e_var.set(mdx_only_ensem_e)
+        self.mdxensemchoose_b_var.set(mdxensemchoose_b)
+        self.mdxensemchoose_var.set(mdxensemchoose)
+        self.vrensemchoose_a_var.set(vrensemchoose_a)
+        self.vrensemchoose_b_var.set(vrensemchoose_b)
+        self.vrensemchoose_c_var.set(vrensemchoose_c)
+        self.vrensemchoose_d_var.set(vrensemchoose_d)
+        self.vrensemchoose_e_var.set(vrensemchoose_e)
+        self.vrensemchoose_mdx_a_var.set(vrensemchoose_mdx_a)
+        self.vrensemchoose_mdx_b_var.set(vrensemchoose_mdx_b)
+        self.vrensemchoose_mdx_c_var.set(vrensemchoose_mdx_c)
+        self.vrensemchoose_var.set(vrensemchoose)
+        
+        frame0=Frame(tab2, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+        
+        l0=tk.Label(frame0,text="Additional Options",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=1,padx=0,pady=10)
         
         l0=ttk.Checkbutton(frame0, text='Append Ensemble Name to Final Output', variable=self.appendensem_var) 
-        l0.grid(row=2,column=2,padx=0,pady=0)
+        l0.grid(row=2,column=1,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
-        l0.grid(row=3,column=2,padx=0,pady=0)
+        l0.grid(row=3,column=1,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
-        l0.grid(row=4,column=2,padx=0,pady=0)
-        
-        l0=tk.Label(frame0,text='Additional VR Architecture Options',font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
-        l0.grid(row=5,column=2,padx=0,pady=0)
+        l0=tk.Label(frame0,text='Additional VR Architecture Options',font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=5,column=1,padx=0,pady=5)
         
         l0=ttk.Checkbutton(frame0, text='Post-Process', variable=self.postprocessing_var) 
-        l0.grid(row=6,column=2,padx=0,pady=0)
+        l0.grid(row=6,column=1,padx=0,pady=5)
         
         l0=ttk.Checkbutton(frame0, text='Save Output Image(s) of Spectrogram(s)', variable=self.outputImage_var) 
-        l0.grid(row=7,column=2,padx=0,pady=0)
+        l0.grid(row=7,column=1,padx=0,pady=5)
         
-        l0=tk.Label(frame0,text='Additional Demucs v3 Options',font=("Century Gothic", "10", "bold", "underline"), justify="center", fg="#f4f4f4")
-        l0.grid(row=8,column=2,padx=0,pady=0)
+        l0=tk.Label(frame0,text='Additional Demucs Options',font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=8,column=1,padx=0,pady=5)
         
         l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources)', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=9,column=2,padx=0,pady=0)
+        l0.grid(row=9,column=1,padx=0,pady=5)
         
         l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
-        l0.grid(row=10,column=2,padx=0,pady=0)
+        l0.grid(row=10,column=1,padx=0,pady=5)
         
         l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
-        l0.grid(row=11,column=2,padx=0,pady=0)
+        l0.grid(row=11,column=1,padx=0,pady=5)
         
         l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
-        l0.grid(row=12,column=2,padx=0,pady=0)
+        l0.grid(row=12,column=1,padx=0,pady=5)
         
         l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
-        l0.grid(row=13,column=2,padx=0,pady=0)
+        l0.grid(row=13,column=1,padx=0,pady=0)
+        
+        frame0=Frame(tab3, highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=30)  
+
+        def set_auto():
+            self.vr_multi_USER_model_param_1.set('Auto')
+            self.vr_multi_USER_model_param_2.set('Auto')
+            self.vr_multi_USER_model_param_3.set('Auto')
+            self.vr_multi_USER_model_param_4.set('Auto')
+            self.vr_basic_USER_model_param_1.set('Auto')
+            self.vr_basic_USER_model_param_2.set('Auto')
+            self.vr_basic_USER_model_param_3.set('Auto')
+            self.vr_basic_USER_model_param_4.set('Auto')
+            self.vr_basic_USER_model_param_5.set('Auto')
+
+        l0=tk.Label(frame0,text="Multi-AI Ensemble VR Model Params",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=0,padx=20,pady=10)
+
+        l0=tk.Label(frame0,text='\nVR Model 1\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=2,column=0,padx=0,pady=0)
+        
+        self.options_ModelParams_a_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_multi_USER_model_param_1)
+        
+        self.options_ModelParams_a_Optionmenu
+        l0.grid(row=3,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=4,column=0,padx=0,pady=0)
+        
+        self.options_ModelParams_b_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_multi_USER_model_param_2)
+        
+        self.options_ModelParams_b_Optionmenu
+        l0.grid(row=5,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=6,column=0,padx=0,pady=0)
+        
+        self.options_ModelParams_c_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_multi_USER_model_param_3)
+        
+        self.options_ModelParams_c_Optionmenu
+        l0.grid(row=7,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=8,column=0,padx=0,pady=0)
+        
+        self.options_ModelParams_d_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_multi_USER_model_param_4)
+        
+        self.options_ModelParams_d_Optionmenu
+        l0.grid(row=9,column=0,padx=0,pady=0)
+        
+        l0=ttk.Button(frame0,text='Set All to Auto', command=set_auto)
+        l0.grid(row=11,column=0,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text="Basic VR Ensemble Model Params",font=("Century Gothic", "11", "underline"), justify="center", fg="#f4f4f4")
+        l0.grid(row=1,column=1,padx=20,pady=10)
+        
+        l0=tk.Label(frame0,text=f'{space_medium}VR Model 1{space_medium}\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=2,column=1,padx=0,pady=0)
+        
+        self.options_ModelParams_1_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_basic_USER_model_param_1)
+        
+        self.options_ModelParams_1_Optionmenu
+        l0.grid(row=3,column=1,padx=0,pady=0)
+
+        l0=tk.Label(frame0,text='\nVR Model 2\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=4,column=1,padx=0,pady=0)
+        
+        self.options_ModelParams_2_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_basic_USER_model_param_2)
+        
+        self.options_ModelParams_2_Optionmenu
+        l0.grid(row=5,column=1,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 3\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=6,column=1,padx=0,pady=0)
+        
+        self.options_ModelParams_3_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_basic_USER_model_param_3)
+        
+        self.options_ModelParams_3_Optionmenu
+        l0.grid(row=7,column=1,padx=0,pady=0) 
+        
+        l0=tk.Label(frame0,text='\nVR Model 4\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=8,column=1,padx=0,pady=0)
+        
+        self.options_ModelParams_4_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_basic_USER_model_param_4)
+        
+        self.options_ModelParams_4_Optionmenu
+        l0.grid(row=9,column=1,padx=0,pady=0)
+        
+        l0=tk.Label(frame0,text='\nVR Model 5\n',font=("Century Gothic", "9"), justify="center", foreground='#13a4c9')
+        l0.grid(row=10,column=1,padx=0,pady=0)
+        
+        self.options_ModelParams_5_Optionmenu = l0=ttk.OptionMenu(frame0, self.vr_basic_USER_model_param_5)
+        
+        self.options_ModelParams_5_Optionmenu
+        l0.grid(row=11,column=1,padx=0,pady=0)
+        
+        self.ModelParamsLabel_ens_to_path = defaultdict(lambda: '')
+        self.lastModelParams_ens = []
+        
+        self.update_states()
 
     def help(self):
         """
@@ -2788,20 +3945,19 @@ class MainWindow(TkinterDnD.Tk):
         """
         top= Toplevel(self)
         if GetSystemMetrics(1) >= 900:
-            top.geometry("1080x810")
             window_height = 810
             window_width = 1080
         elif GetSystemMetrics(1) <= 720:
-            top.geometry("930x640")
             window_height = 640
             window_width = 930
         else:
-            top.geometry("930x670")
             window_height = 670
             window_width = 930
         top.title("UVR Help Guide")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        top.attributes("-topmost", True)
         
         screen_width = top.winfo_screenwidth()
         screen_height = top.winfo_screenheight()
@@ -2828,7 +3984,6 @@ class MainWindow(TkinterDnD.Tk):
         tab6 = ttk.Frame(tabControl)
         tab7 = ttk.Frame(tabControl)
         tab8 = ttk.Frame(tabControl)
-        tab9 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='General')
         tabControl.add(tab2, text ='VR Architecture')
@@ -2838,7 +3993,6 @@ class MainWindow(TkinterDnD.Tk):
         tabControl.add(tab6, text ='Manual Ensemble')
         tabControl.add(tab7, text ='More Info')
         tabControl.add(tab8, text ='Credits')
-        tabControl.add(tab9, text ='Updates')
 
         tabControl.pack(expand = 1, fill ="both")
 
@@ -2849,9 +4003,6 @@ class MainWindow(TkinterDnD.Tk):
         
         tab8.grid_rowconfigure(0, weight=1)
         tab8.grid_columnconfigure(0, weight=1)
-        
-        tab9.grid_rowconfigure(0, weight=1)
-        tab9.grid_columnconfigure(0, weight=1)
         
         tk.Button(tab1, image=self.gen_opt_img, borderwidth=0, command=close_win).grid(column = 0,
                                     row = 0, 
@@ -2888,13 +4039,13 @@ class MainWindow(TkinterDnD.Tk):
         frame0.grid(row=0,column=0,padx=0,pady=30)  
 
         if GetSystemMetrics(1) >= 900:
-            l0=Label(frame0,text="Notes",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Notes",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=0,padx=20,pady=10)
 
-            l0=Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nAll the models provided as part of UVR were trained by its core developers.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nAll the models provided as part of UVR were trained by its core developers.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=2,column=0,padx=10,pady=7)
             
-            l0=Label(frame0,text="Resources",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Resources",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=3,column=0,padx=20,pady=7, sticky=N)
             
             link = Label(frame0, text="Ultimate Vocal Remover (Official GitHub)",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2902,7 +4053,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/Anjok07/ultimatevocalremovergui"))
             
-            l0=Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=5,column=0,padx=10,pady=7)
             
             link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2910,7 +4061,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
             
-            l0=Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=7,column=0,padx=10,pady=7)
             
             link = Label(frame0, text="FFmpeg",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2918,7 +4069,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
             
-            l0=Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIt's automatically included via the UVR installer but not the developer build.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIt's automatically included via the UVR installer but not the developer build.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=9,column=0,padx=10,pady=7)
 
             link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2926,7 +4077,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://x-minus.pro/ai"))
 
-            l0=Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=11,column=0,padx=10,pady=7)
             
             link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "14", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2934,7 +4085,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://www.patreon.com/uvr"))
             
-            l0=Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!\nOfficial UVR Patreons will receive VIP access to additional models as well as pre-releases.",font=("Century Gothic", "13"), justify="center", fg="#F6F6F7")
             l0.grid(row=13,column=0,padx=10,pady=7)
             
             frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
@@ -2942,22 +4093,22 @@ class MainWindow(TkinterDnD.Tk):
 
             #inside frame0    
             
-            l0=Label(frame0,text="Core UVR Developers",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Core UVR Developers",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=0,column=0,padx=20,pady=5, sticky=N)
             
-            l0=Label(frame0,image=self.credits_img,font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,image=self.credits_img,font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=1,column=0,padx=10,pady=5)
 
-            l0=Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=2,column=0,padx=10,pady=5)
 
-            l0=Label(frame0,text="Special Thanks",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Special Thanks",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=4,column=0,padx=20,pady=10)
 
-            l0=Label(frame0,text="DilanBoskan",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="DilanBoskan",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=5,column=0,padx=10,pady=5)
 
-            l0=Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=6,column=0,padx=0,pady=0)
 
             link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2965,7 +4116,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/tsurumeso/vocal-remover"))
             
-            l0=Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2973,13 +4124,13 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/kuielab"))
             
-            l0=Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=10,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Bas Curtiz",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Bas Curtiz",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=11,column=0,padx=10,pady=5)
             
-            l0=Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -2987,71 +4138,29 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/facebookresearch/demucs"))
             
-            l0=Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=14,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Audio Separation Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Audio Separation Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=15,column=0,padx=10,pady=5)
             
-            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=16,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="CC Karokee & Friends Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="CC Karokee & Friends Discord Community",font=("Century Gothic", "13", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=17,column=0,padx=10,pady=5)
             
-            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Thank you for the support!",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
             l0.grid(row=18,column=0,padx=0,pady=0)
             
-            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
-            frame0.grid(row=0,column=0,padx=0,pady=30)  
-            
-            l0=Label(frame0,text="Update Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=1,column=0,padx=20,pady=10)
-            
-            l0=Label(frame0,text="Installing Model Expansion Pack",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=2,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="1. Download the model expansion pack via the provided link below.\n2. Once the download has completed, click the \"Open Models Directory\" button below.\n3. Extract the \'Main Models\' folder within the downloaded archive to the opened \"models\" directory.\n4. Without restarting the application, you will now see the new models appear under the VR Architecture model selection list.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=3,column=0,padx=0,pady=0)
-            
-            link = Label(frame0, text="Model Expansion Pack",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-            link.grid(row=4,column=0,padx=10,pady=10)
-            link.bind("<Button-1>", lambda e:
-            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
-            
-            l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
-            l0.grid(row=5,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="\n\nBackward Compatibility",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=6,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=7,column=0,padx=0,pady=0)
-            
-            l0=ttk.Button(frame0,text='Open Models Directory', command=self.open_Modelfolder_filedialog)
-            l0.grid(row=8,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="\n\nInstalling Future Updates",font=("Century Gothic", "13", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=9,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="New updates and patches for this application can be found on the official UVR Releases GitHub page (link below).\nAny new update instructions will likely require the use of the \"Open Application Directory\" button below.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=10,column=0,padx=0,pady=0)
-            
-            link = Label(frame0, text="UVR Releases GitHub Page",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
-            link.grid(row=11,column=0,padx=10,pady=10)
-            link.bind("<Button-1>", lambda e:
-            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
-            
-            l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
-            l0.grid(row=12,column=0,padx=0,pady=0) 
         else:
-            l0=Label(frame0,text="Notes",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Notes",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=0,padx=5,pady=5)
 
-            l0=Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR is 100% free and open-source but MIT licensed.\nPlease credit the core UVR developers if you choose to use any of our models or code for projects unrelated to UVR.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=2,column=0,padx=5,pady=5)
             
-            l0=Label(frame0,text="Resources",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Resources",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=3,column=0,padx=5,pady=5, sticky=N)
             
             link = Label(frame0, text="Ultimate Vocal Remover (Official GitHub)",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3059,7 +4168,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/Anjok07/ultimatevocalremovergui"))
             
-            l0=Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=5,column=0,padx=5,pady=5)
             
             link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3067,7 +4176,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
             
-            l0=Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=7,column=0,padx=5,pady=5)
             
             link = Label(frame0, text="FFmpeg",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3075,7 +4184,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
             
-            l0=Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=9,column=0,padx=5,pady=5)
 
             link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3083,7 +4192,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://x-minus.pro/ai"))
 
-            l0=Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=11,column=0,padx=5,pady=5)
             
             link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3091,7 +4200,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://www.patreon.com/uvr"))
             
-            l0=Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=13,column=0,padx=5,pady=5)
             
             frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
@@ -3099,22 +4208,22 @@ class MainWindow(TkinterDnD.Tk):
 
             #inside frame0    
             
-            l0=Label(frame0,text="Core UVR Developers",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Core UVR Developers",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=0,column=0,padx=20,pady=5, sticky=N)
             
-            l0=Label(frame0,image=self.credits_img,font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,image=self.credits_img,font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=1,column=0,padx=5,pady=5)
 
-            l0=Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=2,column=0,padx=5,pady=5)
 
-            l0=Label(frame0,text="Special Thanks",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="Special Thanks",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=4,column=0,padx=20,pady=10)
 
-            l0=Label(frame0,text="DilanBoskan",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="DilanBoskan",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=5,column=0,padx=5,pady=5)
 
-            l0=Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=6,column=0,padx=0,pady=0)
 
             link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3122,7 +4231,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/tsurumeso/vocal-remover"))
             
-            l0=Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3130,13 +4239,13 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/kuielab"))
             
-            l0=Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=10,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Bas Curtiz",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Bas Curtiz",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=11,column=0,padx=5,pady=5)
             
-            l0=Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -3144,72 +4253,55 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/facebookresearch/demucs"))
             
-            l0=Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=14,column=0,padx=0,pady=0)
             
-            l0=Label(frame0,text="Audio Separation and CC Karokee & Friends Discord Communities",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
+            l0=tk.Label(frame0,text="Audio Separation and CC Karokee & Friends Discord Communities",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=15,column=0,padx=5,pady=5)
             
-            l0=Label(frame0,text="Thank you for the support!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
-            l0.grid(row=16,column=0,padx=0,pady=0)
+            l0=tk.Label(frame0,text="Thank you for the support!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0.grid(row=16,column=0,padx=0,pady=0)   
             
-            frame0=Frame(tab9,highlightbackground='red',highlightthicknes=0)
-            frame0.grid(row=0,column=0,padx=0,pady=30)  
-            
-            l0=Label(frame0,text="Update Details",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=1,column=0,padx=20,pady=5)
-            
-            l0=Label(frame0,text="Installing Model Expansion Pack",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=2,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="1. Download the model expansion pack via the provided link below.\n2. Once the download has completed, click the \"Open Models Directory\" button below.\n3. Extract the \'Main Models\' folder within the downloaded archive to the opened \"models\" directory.\n4. Without restarting the application, you will now see the new models appear under the VR Architecture model selection list.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=3,column=0,padx=0,pady=0)
-            
-            link = Label(frame0, text="Model Expansion Pack",font=("Century Gothic", "10", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
-            link.grid(row=4,column=0,padx=5,pady=5)
-            link.bind("<Button-1>", lambda e:
-            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.2.0"))
-            
-            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "8"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-            l0.grid(row=5,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="\nBackward Compatibility",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=6,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="The v4 Models are fully compatible with this GUI. \n1. If you already have them on your system, click the \"Open Models Directory\" button below. \n2. Place the files with extension \".pth\" into the \"Main Models\" directory. \n3. Now they will automatically appear in the VR Architecture model selection list.\n Note: The v2 models are not compatible with this GUI.\n",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=7,column=0,padx=0,pady=0)
-            
-            l0=Button(frame0,text='Open Models Directory',font=("Century Gothic", "8"), command=self.open_Modelfolder_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-            l0.grid(row=8,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="\nInstalling Future Updates",font=("Century Gothic", "11", "bold"), justify="center", fg="#f4f4f4")
-            l0.grid(row=9,column=0,padx=0,pady=0)
-            
-            l0=Label(frame0,text="New updates and patches for this application can be found on the official UVR Releases GitHub page (link below).\nAny new update instructions will likely require the use of the \"Open Application Directory\" button below.",font=("Century Gothic", "11"), justify="center", fg="#f4f4f4")
-            l0.grid(row=10,column=0,padx=0,pady=0)
-            
-            link = Label(frame0, text="UVR Releases GitHub Page",font=("Century Gothic", "10", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
-            link.grid(row=11,column=0,padx=5,pady=5)
-            link.bind("<Button-1>", lambda e:
-            callback("https://github.com/Anjok07/ultimatevocalremovergui/releases"))
-            
-            l0=Button(frame0,text='Open Application Directory',font=("Century Gothic", "8"), command=self.open_appdir_filedialog, justify="left", wraplength=1000, bg="black", relief="ridge")
-            l0.grid(row=12,column=0,padx=0,pady=0)
-            
-            
-    def settings(self):
+    def settings(self, choose=False):
         """
         Open Settings
         """
+        
+        self.delete_temps()
+
+        update_var = tk.StringVar(value='')
+        update_button_var = tk.StringVar(value='Check for Updates')
+        
+        try:
+            url_u = update_signal_url
+            file = urllib.request.urlopen(url_u)
+            for line in file:
+                patch_name = line.decode("utf-8")
+                if patch_name == current_version:
+                    update_var.set('UVR Version Current')
+                    update_button_var.set('Check for Updates')
+                else:
+                    label_set_a = f"Update Found: {patch_name}"
+                    update_var.set(str(label_set_a))
+                    update_button_var.set('Click Here to Update')
+            relf="ridge"
+        except:
+            relf="flat"
+            update_button_var.set('Check for Updates')
+            update_var.set('')
+
+        update_set_var = tk.StringVar(value='UVR Version Current')
+
         top= Toplevel(self)
 
-        top.geometry("600x500")
-        window_height = 600
+        window_height = 750
         window_width = 500
         
         top.title("Settings Guide")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        top.attributes("-topmost", True)
         
         screen_width = top.winfo_screenwidth()
         screen_height = top.winfo_screenheight()
@@ -3221,41 +4313,140 @@ class MainWindow(TkinterDnD.Tk):
 
         # change title bar icon
         top.iconbitmap('img\\UVR-Icon-v2.ico')
+
+        def askyesorno():
+            """
+            Ask to Update
+            """
+            
+            top_dialoge= Toplevel()
+
+            window_height = 250
+            window_width = 370
+            
+            top_dialoge.title("Update Found")
+            
+            top_dialoge.resizable(False, False)  # This code helps to disable windows from resizing
+            
+            top_dialoge.lift()
+            
+            top_dialoge.attributes("-topmost", True)
+            
+            top.attributes("-topmost", False)
+            
+            screen_width = top_dialoge.winfo_screenwidth()
+            screen_height = top_dialoge.winfo_screenheight()
+
+            x_cordinate = int((screen_width/2) - (window_width/2))
+            y_cordinate = int((screen_height/2) - (window_height/2))
+
+            top_dialoge.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+            # change title bar icon
+            top_dialoge.iconbitmap('img\\UVR-Icon-v2.ico')
+            
+            tabControl = ttk.Notebook(top_dialoge)
+            
+            tabControl.pack(expand = 1, fill ="both")
+            
+            tabControl.grid_rowconfigure(0, weight=1)
+            tabControl.grid_columnconfigure(0, weight=1)
+            
+            def no():
+                top.attributes("-topmost", True)
+                top_dialoge.destroy()
+                
+            def yes():
+                download_update()
+                top.attributes("-topmost", True)
+                top_dialoge.destroy()
+            
+            frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=0)  
+            
+            l0=tk.Label(frame0, text='Update Found', font=("Century Gothic", "13", "underline"), foreground='#13a4c9')
+            l0.grid(row=0,column=0,padx=0,pady=10)
+            
+            l0=tk.Label(frame0, text='Are you sure you want to continue?\n\nThe application will need to be restarted.\n', font=("Century Gothic", "11"), foreground='#13a4c9')
+            l0.grid(row=1,column=0,padx=0,pady=5)
+                    
+            l0=ttk.Button(frame0, text='Yes', command=yes)
+
+            l0.grid(row=2,column=0,padx=0,pady=5)
+
+            l0=ttk.Button(frame0, text='No', command=no)
+
+            l0.grid(row=3,column=0,padx=0,pady=5)
+           
+        def check_updates():
+
+            url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
+            file = urllib.request.urlopen(url)
+            for line in file:
+                patch_name = line.decode("utf-8")
+
+                if patch_name == current_version:
+                    update_var.set('UVR Version Current')
+                else:
+                    label_set = f"Update Found: {patch_name}"
+                    update_var.set(str(label_set))
+                    update_set_var.set(str(label_set))
+                    
+                    askyesorno()
+
+
+        def change_event():
+            self.delete_temps()
+            try:
+                stop_thread()
+            except:
+                pass
+            try:
+                top_code.destroy()
+            except:
+                pass
+            top.destroy()
         
         def close_win_custom_ensemble():
-            top.destroy()
+            change_event()
             self.custom_ensemble()
             
         def close_win_advanced_mdx_options():
-            top.destroy()
+            change_event()
             self.advanced_mdx_options()
             
         def close_win_advanced_demucs_options():
-            top.destroy()
+            change_event()
             self.advanced_demucs_options()
             
         def close_win_advanced_vr_options():
-            top.destroy()
+            change_event()
             self.advanced_vr_options()
             
         def close_win_error_log():
-            top.destroy()
+            change_event()
             self.error_log()
             
         def close_win_help():
-            top.destroy()
+            change_event()
             self.help()
             
         def close_win():
+            change_event()
+
+        def restart():
             top.destroy()
+            self.restart()
 
         tabControl = ttk.Notebook(top)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
+        tab3 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='Settings Guide')
         tabControl.add(tab2, text ='Audio Format Settings')
+        tabControl.add(tab3, text ='Download Center')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -3264,47 +4455,68 @@ class MainWindow(TkinterDnD.Tk):
         
         tab2.grid_rowconfigure(0, weight=1)
         tab2.grid_columnconfigure(0, weight=1)
+        
+        tab3.grid_rowconfigure(0, weight=1)
+        tab3.grid_columnconfigure(0, weight=1)
+
+        if choose:
+            tabControl.select(tab3)
 
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=Label(frame0,text="Main Menu",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Main Menu",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
         l0=ttk.Button(frame0,text="Ensemble Customization Options", command=close_win_custom_ensemble)
-        l0.grid(row=1,column=0,padx=20,pady=5)
+        l0.grid(row=1,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=close_win_advanced_mdx_options)
-        l0.grid(row=2,column=0,padx=20,pady=5)
+        l0.grid(row=2,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text="Advanced Demucs Options", command=close_win_advanced_demucs_options)
-        l0.grid(row=3,column=0,padx=20,pady=5)
+        l0.grid(row=3,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text="Advanced VR Options", command=close_win_advanced_vr_options)
-        l0.grid(row=4,column=0,padx=20,pady=5)
+        l0.grid(row=4,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text="Open Help Guide", command=close_win_help)
-        l0.grid(row=5,column=0,padx=20,pady=5)
+        l0.grid(row=5,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text='Open Error Log', command=close_win_error_log)
-        l0.grid(row=6,column=0,padx=20,pady=5)
+        l0.grid(row=6,column=0,padx=0,pady=5)
         
-        l0=Label(frame0,text="Additional Options",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Additional Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=7,column=0,padx=0,pady=10)
         
         l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.settest_var) 
         l0.grid(row=8,column=0,padx=0,pady=0)
         
+        l0=ttk.Button(frame0,text='Reset All Settings to Default', command=self.reset_to_defaults)
+        l0.grid(row=9,column=0,padx=0,pady=5)
+        
         l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
-        l0.grid(row=9,column=0,padx=20,pady=5)
+        l0.grid(row=10,column=0,padx=0,pady=5)
+        
+        l0=ttk.Button(frame0,text='Restart Application', command=restart)
+        l0.grid(row=11,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win)
-        l0.grid(row=10,column=0,padx=20,pady=5)
+        l0.grid(row=12,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0,text="Application Updates",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0.grid(row=13,column=0,padx=0,pady=10)
+        
+        l0=ttk.Button(frame0,text=update_button_var.get(), command=check_updates)
+        l0.grid(row=14,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief=relf, fg="#13a4c9")
+        l0.grid(row=15,column=0,padx=0,pady=5)
         
         frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=Label(frame0,text="Audio Format Settings",font=("Century Gothic", "13", "bold", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Audio Format Settings",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
         l0=tk.Label(frame0, text='Wav Type', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -3322,28 +4534,1430 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Checkbutton(frame0, text='Normalize Outputs\n(Prevents clipping)', variable=self.normalize_var) 
         l0.grid(row=7,column=0,padx=0,pady=10)
         
+        frame0=Frame(tab3,highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=0)  
         
+        l0=tk.Label(frame0,text="Application Download Center",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0.grid(row=0,column=0,padx=20,pady=10)
+        
+        def user_code():
+            """
+            Input Code
+            """
+            
+            okVar = tk.IntVar()
+            
+            try:
+                with open(user_code_file, "r") as f:
+                    code_read = f.read()
+                user_code_var = tk.StringVar(value=code_read)
+            except:
+                user_code_var = tk.StringVar(value='')
+                
+            try:
+                with open(download_code_file, "r") as f:
+                    code_download_read = f.read()
+                user_code_download_var = tk.StringVar(value=code_download_read)
+            except:
+                user_code_download_var = tk.StringVar(value='')
+            
+            global top_code
+            
+            top_code= Toplevel()
+
+            window_height = 300
+            window_width = 300
+            
+            top_code.title("User Download Codes")
+            
+            top_code.resizable(False, False)  # This code helps to disable windows from resizing
+            
+            top_code.attributes("-topmost", True)
+            
+            top.attributes("-topmost", False)
+            
+            screen_width = top_code.winfo_screenwidth()
+            screen_height = top_code.winfo_screenheight()
+
+            x_cordinate = int((screen_width/2) - (window_width/2))
+            y_cordinate = int((screen_height/2) - (window_height/2))
+
+            top_code.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+            # change title bar icon
+            top_code.iconbitmap('img\\UVR-Icon-v2.ico')
+            
+            tabControl = ttk.Notebook(top_code)
+            
+            tabControl.pack(expand = 1, fill ="both")
+            
+            tabControl.grid_rowconfigure(0, weight=1)
+            tabControl.grid_columnconfigure(0, weight=1)
+            
+            frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=0)  
+            
+            def write_code():
+                with open(user_code_file, 'w') as f:
+                    user_type_code = user_code_var.get()
+                    f.write(str(user_type_code))
+                with open(download_code_file, 'w') as f:
+                    user_download_code = user_code_download_var.get()
+                    f.write(str(user_download_code))
+                    top_code.destroy()
+                    if user_type_code == 'VIP':
+                        refresh_list_vip()
+                    elif user_type_code == 'Developer':
+                        refresh_list_dev()
+                    else:
+                        refresh_list()
+            
+            def quit():
+                top.attributes("-topmost", True)
+                top_code.destroy()
+            
+            l0=tk.Label(frame0, text=f'User Download Codes', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0.grid(row=0,column=0,padx=0,pady=10)    
+            
+            l0=tk.Label(frame0, text=f'{space_medium}User Code{space_medium}', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=1,column=0,padx=0,pady=5)       
+                    
+            l0=ttk.Entry(frame0, textvariable=user_code_var, justify='center')
+
+            l0.grid(row=2,column=0,padx=0,pady=5)
+            
+            l0=tk.Label(frame0, text=f'Download Code', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=3,column=0,padx=0,pady=5)       
+                    
+            l0=ttk.Entry(frame0, textvariable=user_code_download_var, justify='center')
+
+            l0.grid(row=4,column=0,padx=0,pady=5)
+
+            l0=ttk.Button(frame0, text='Confirm', command=write_code)
+
+            l0.grid(row=5,column=0,padx=0,pady=5)
+            
+            l0=ttk.Button(frame0, text='Cancel', command=quit)
+
+            l0.grid(row=6,column=0,padx=0,pady=5)
+            
+        def download_code():
+            """
+            Input Download Code
+            """
+                
+            try:
+                with open(download_code_file, "r") as f:
+                    code_download_read = f.read()
+                user_code_download_var = tk.StringVar(value=code_download_read)
+            except:
+                user_code_download_var = tk.StringVar(value='')
+            
+            top_code= Toplevel()
+
+            window_height = 300
+            window_width = 410
+            
+            top_code.title("Invalid Download Code")
+            
+            top_code.resizable(False, False)  # This code helps to disable windows from resizing
+            
+            top_code.attributes("-topmost", True)
+            
+            top.attributes("-topmost", False)
+            
+            screen_width = top_code.winfo_screenwidth()
+            screen_height = top_code.winfo_screenheight()
+
+            x_cordinate = int((screen_width/2) - (window_width/2))
+            y_cordinate = int((screen_height/2) - (window_height/2))
+
+            top_code.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+            # change title bar icon
+            top_code.iconbitmap('img\\UVR-Icon-v2.ico')
+            
+            tabControl = ttk.Notebook(top_code)
+            
+            tabControl.pack(expand = 1, fill ="both")
+            
+            tabControl.grid_rowconfigure(0, weight=1)
+            tabControl.grid_columnconfigure(0, weight=1)
+            
+            frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
+            frame0.grid(row=0,column=0,padx=0,pady=0)  
+            
+            def write_code_p():
+                with open(download_code_file, 'w') as f:
+                    user_download_code = user_code_download_var.get()
+                    f.write(str(user_download_code))
+                    download_model()
+                    top_code.destroy()
+                    
+            def quit():
+                top.attributes("-topmost", True)
+                top_code.destroy()
+            
+            l0=tk.Label(frame0, text=f'Invalid Download Code', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0.grid(row=0,column=0,padx=0,pady=10)    
+            
+            l0=tk.Label(frame0, text=f'Provide the correct code below or make another selection.\n', font=("Century Gothic", "10"), foreground='#13a4c9')
+            l0.grid(row=1,column=0,padx=0,pady=0)    
+            
+            l0=tk.Label(frame0, text=f'Download Code', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0.grid(row=2,column=0,padx=0,pady=5)       
+                    
+            l0=ttk.Entry(frame0, textvariable=user_code_download_var, justify='center')
+
+            l0.grid(row=3,column=0,padx=0,pady=5)
+
+            l0=ttk.Button(frame0, text='Confirm', command=write_code_p)
+
+            l0.grid(row=4,column=0,padx=0,pady=5)
+            
+            l0=ttk.Button(frame0, text='Cancel', command=quit)
+
+            l0.grid(row=5,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text=f"{space_fill_wide}Select Download{space_fill_wide}", font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=1,column=0,padx=0,pady=10)
+        
+        def download_progress_bar(current, total, width=80):
+
+            progress = ('%s' % (100 * current // total))
+
+            self.download_progress_bar_zip_var.set(int(progress))
+
+            self.download_progress_var.set(progress + ' %')
+
+        def change_state_complete():
+            download_button.configure(state=tk.NORMAL)
+            self.downloadmodelOptions.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+            stop_button.configure(state=tk.DISABLED)
+            self.download_stop_var.set(space_small)
+            self.download_progress_bar_var.set('Download Complete') 
+            self.delete_temps()
+            
+        def change_state_locked():
+            download_button.configure(state=tk.NORMAL)
+            self.downloadmodelOptions.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+            stop_button.configure(state=tk.DISABLED)
+            self.download_stop_var.set(space_small)
+            self.download_progress_bar_var.set('Invalid Download Code')
+            self.delete_temps()
+
+            
+        def change_state_already_found():
+            download_button.configure(state=tk.NORMAL)
+            self.downloadmodelOptions.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+            stop_button.configure(state=tk.DISABLED)
+            self.download_stop_var.set(space_small)
+            self.download_progress_bar_var.set('Download Stopped') 
+            self.delete_temps()
+            
+        def change_state_failed():
+            download_button.configure(state=tk.NORMAL)
+            self.downloadmodelOptions.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+            stop_button.configure(state=tk.DISABLED)
+            self.download_stop_var.set(space_small)
+            self.download_progress_bar_var.set('Download Failed')
+            self.delete_temps()
+
+        def download_model():
+            self.delete_temps()
+            
+            def begin_download_model():
+                
+                if not self.modeldownload_var.get() == 'No Model Selected':
+                    model = self.modeldownload_var.get()
+                    self.download_progress_bar_var.set('Downloading...')
+                elif not self.modeldownload_mdx_var.get() == 'No Model Selected':
+                    model = self.modeldownload_mdx_var.get()
+                    self.download_progress_bar_var.set('Downloading...')
+                elif not self.modeldownload_demucs_var.get() == 'No Model Selected':
+                    model = self.modeldownload_demucs_var.get()
+                    self.download_progress_bar_var.set('Downloading...')
+                elif not update_set_var.get() == 'UVR Version Current':
+                    model = update_set_var.get()
+                    self.download_progress_bar_var.set('Downloading Update...')
+                else:
+                    self.download_progress_bar_var.set('No Model Selected')
+                    
+                    return
+                   
+                self.downloadmodelOptions.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_mdx.configure(state=tk.DISABLED)
+                self.downloadmodelOptions_demucs.configure(state=tk.DISABLED)
+                download_button.configure(state=tk.DISABLED)
+                stop_button.configure(state=tk.NORMAL)
+                self.download_stop_var.set('Stop Download')
+                
+                if model == 'Demucs v3: mdx':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v3: mdx')
+                        
+                        url_1 = links[0]
+                        url_2 = links[1]
+                        url_3 = links[2]
+                        url_4 = links[3]
+                        url_5 = links[4]
+                        self.download_progress_bar_var.set('Downloading Model 1/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/0d19c1c6-0f06f20e.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_1, 'models/Demucs_Models/v3_repo/0d19c1c6-0f06f20e.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 2/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/7ecf8ec1-70f50cc9.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_2, 'models/Demucs_Models/v3_repo/7ecf8ec1-70f50cc9.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 3/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/c511e2ab-fe698775.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/v3_repo/c511e2ab-fe698775.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 4/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/7d865c68-3d5dd56b.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/v3_repo/7d865c68-3d5dd56b.th', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/v3_repo/mdx.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/v3_repo/mdx.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/mdx.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/mdx.yaml', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                if model == 'Demucs v3: mdx_q':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v3: mdx_q')
+                        
+                        url_1 = links[0]
+                        url_2 = links[1]
+                        url_3 = links[2]
+                        url_4 = links[3]
+                        url_5 = links[4]
+                        self.download_progress_bar_var.set('Downloading Model 1/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/6b9c2ca1-3fd82607.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_1, 'models/Demucs_Models/v3_repo/6b9c2ca1-3fd82607.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 2/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/b72baf4e-8778635e.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_2, 'models/Demucs_Models/v3_repo/b72baf4e-8778635e.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 3/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/42e558d4-196e0e1b.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/v3_repo/42e558d4-196e0e1b.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 4/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/305bc58f-18378783.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/v3_repo/305bc58f-18378783.th', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/v3_repo/mdx_q.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/v3_repo/mdx_q.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/mdx_q.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/mdx_q.yaml', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                            
+                            
+                if model == 'Demucs v3: mdx_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v3: mdx_extra')
+                        
+                        url_1 = links[0]
+                        url_2 = links[1]
+                        url_3 = links[2]
+                        url_4 = links[3]
+                        url_5 = links[4]
+                        self.download_progress_bar_var.set('Downloading Model 1/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/e51eebcc-c1b80bdd.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_1, 'models/Demucs_Models/v3_repo/e51eebcc-c1b80bdd.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 2/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/a1d90b5c-ae9d2452.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_2, 'models/Demucs_Models/v3_repo/a1d90b5c-ae9d2452.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 3/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/5d2d6c55-db83574e.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/v3_repo/5d2d6c55-db83574e.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 4/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/cfa93e08-61801ae1.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/v3_repo/cfa93e08-61801ae1.th', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/v3_repo/mdx_extra.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/v3_repo/mdx_extra.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/mdx_extra.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/mdx_extra.yaml', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v3: mdx_extra_q':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v3: mdx_extra_q')
+                        
+                        url_1 = links[0]
+                        url_2 = links[1]
+                        url_3 = links[2]
+                        url_4 = links[3]
+                        url_5 = links[4]
+                        self.download_progress_bar_var.set('Downloading Model 1/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/83fc094f-4a16d450.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_1, 'models/Demucs_Models/v3_repo/83fc094f-4a16d450.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 2/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/464b36d7-e5a9386e.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_2, 'models/Demucs_Models/v3_repo/464b36d7-e5a9386e.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 3/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/14fc6a69-a89dd0ee.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/v3_repo/14fc6a69-a89dd0ee.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 4/4...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/7fd6ef75-a905dd85.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/v3_repo/7fd6ef75-a905dd85.th', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/v3_repo/mdx_extra_q.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/v3_repo/mdx_extra_q.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/mdx_extra_q.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/mdx_extra_q.yaml', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                
+                if model == 'Demucs v3: UVR Models':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v3: UVR Models')
+                        
+                        url_1 = links[0]
+                        url_2 = links[1]
+                        url_3 = links[2]
+                        url_4 = links[3]
+                        url_5 = links[4]
+                        self.download_progress_bar_var.set('Downloading Model 1/2...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/ebf34a2d.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_1, 'models/Demucs_Models/v3_repo/ebf34a2d.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model 2/2...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/ebf34a2db.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_2, 'models/Demucs_Models/v3_repo/ebf34a2db.th', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/UVR_Demucs_Model_1.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/v3_repo/UVR_Demucs_Model_1.yaml', bar=download_progress_bar)
+                        self.download_progress_bar_var.set('Downloading Model...')
+                        if os.path.isfile('models/Demucs_Models/v3_repo/UVR_Demucs_Model_2.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/v3_repo/UVR_Demucs_Model_2.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/v3_repo/UVR_Demucs_Model_Bag.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/v3_repo/UVR_Demucs_Model_Bag.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/UVR_Demucs_Model_1.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_3, 'models/Demucs_Models/UVR_Demucs_Model_1.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/UVR_Demucs_Model_2.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_4, 'models/Demucs_Models/UVR_Demucs_Model_2.yaml', bar=download_progress_bar)
+                        if os.path.isfile('models/Demucs_Models/UVR_Demucs_Model_Bag.yaml'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url_5, 'models/Demucs_Models/UVR_Demucs_Model_Bag.yaml', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v2: demucs':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: demucs')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs-e07c671f.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs-e07c671f.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                if model == 'Demucs v2: demucs_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: demucs_extra')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs_extra-3646af93.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs_extra-3646af93.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v2: demucs48_hq':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: demucs48_hq')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs48_hq-28a1282c.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs48_hq-28a1282c.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v2: tasnet':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: tasnet')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/tasnet-beb46fac.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/tasnet-beb46fac.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v2: tasnet_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: tasnet_extra')
+                        
+                        url = links    
+                                            
+                        if os.path.isfile('models/Demucs_Models/tasnet_extra-df3777b2.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/tasnet_extra-df3777b2.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v2: demucs_unittest':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v2: demucs_unittest')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs_unittest-09ebc15f.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs_unittest-09ebc15f.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: demucs':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: demucs')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: demucs_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: demucs_extra')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/demucs_extra.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/demucs_extra.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: light':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: light')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/light.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/light.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: light_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: light_extra')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/light_extra.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/light_extra.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: tasnet':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: tasnet')
+                        
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/tasnet.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/tasnet.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'Demucs v1: tasnet_extra':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='Demucs v1: tasnet_extra')
+                        url = links                        
+                        if os.path.isfile('models/Demucs_Models/tasnet_extra.th'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Demucs_Models/tasnet_extra.th', bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+         
+                if model == 'VR Arch Model Pack v5: HP2 Models':
+                    try:
+                        links = []
+                        links = lib_v5.filelist.get_download_links(links, downloads='model_repo')
+                        url = f"{links}uvr_v5_hp2_models.zip"
+                        if os.path.isfile('models/Main_Models/uvr_v5_hp2_models.zip'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Main_Models/uvr_v5_hp2_models.zip', bar=download_progress_bar)
+                        with zipfile.ZipFile('models/Main_Models/uvr_v5_hp2_models.zip', 'r') as zip_ref:
+                            zip_ref.extractall('models/Main_Models')
+                        os.remove('models/Main_Models/uvr_v5_hp2_models.zip')
+                        change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if model == 'VR Arch Model Pack v4: Main Models':
+                    links = []
+                    links = lib_v5.filelist.get_download_links(links, downloads='model_repo')
+                    url = f"{links}uvr_v4_models.zip"
+                    try:
+                        if os.path.isfile('models/Main_Models/4_models.zip'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Main_Models/4_models.zip', bar=download_progress_bar)
+                        with zipfile.ZipFile('models/Main_Models/4_models.zip', 'r') as zip_ref:
+                            zip_ref.extractall('models/Main_Models')
+                        os.remove('models/Main_Models/4_models.zip')
+                        change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                if model == 'VR Arch Model Pack v5: SP Models':
+                    links = []
+                    links = lib_v5.filelist.get_download_links(links, downloads='model_repo')
+                    url = f"{links}uvr_v5_sp_models.zip"
+                    try:
+                        if os.path.isfile('models/Main_Models/uvr_v5_sp_models.zip'):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, 'models/Main_Models/uvr_v5_sp_models.zip', bar=download_progress_bar)
+                        with zipfile.ZipFile('models/Main_Models/uvr_v5_sp_models.zip', 'r') as zip_ref:
+                            zip_ref.extractall('models/Main_Models')
+                        os.remove('models/Main_Models/uvr_v5_sp_models.zip')
+                        change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                if 'VR Arch Single Model v5:' in model or 'VR Arch Single Model v4:' in model:
+                    
+                    if 'VR Arch Single Model v5:' in model:
+                        model_name = model
+                        head, sep, tail = model_name.partition('VR Arch Single Model v5: ')
+                        model_name = tail
+                    if 'VR Arch Single Model v4:' in model:
+                        model_name = model
+                        head, sep, tail = model_name.partition('VR Arch Single Model v4: ')
+                        model_name = tail
+                    if 'VR Arch Single Model v4:' in model:
+                        model_name = model
+                        head, sep, tail = model_name.partition('VR Arch Single Model v4: ')
+                        model_name = tail
+                        
+                    links = []
+                    links = lib_v5.filelist.get_download_links(links, downloads='single_model_repo')
+                    m_url = f"{links}{model_name}.pth"
+                    url = m_url
+                    
+                    try:
+                        if os.path.isfile(f"models/Main_Models/{model_name}.pth"):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, f"models/Main_Models/{model_name}.pth", bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                
+                if 'MDX-Net Model: ' in model:
+                    
+                    model_name = model
+                    head, sep, tail = model_name.partition('MDX-Net Model: ')
+                    model_name = tail
+                    links = []
+                    links = lib_v5.filelist.get_download_links(links, downloads='single_model_repo')
+                    m_url = f"{links}{model_name}.onnx"
+                    
+                    #print(m_url)
+                    url = m_url
+                    
+                    try:
+                        if os.path.isfile(f"models/MDX_Net_Models/{model_name}.onnx"):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(url, f"models/MDX_Net_Models/{model_name}.onnx", bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                            
+                if 'MDX-Net Model VIP:' in model:
+                    
+                    model_name = model
+                    head, sep, tail = model_name.partition('MDX-Net Model VIP: ')
+                    model_name = tail
+    
+                    url_code = f"https://github.com/TRvlvr/application_data/raw/main/filelists/aes_vip/{model_name}.txt.aes"
+                    
+                    encrypted_file_code_vip = f"lib_v5/filelists/download_codes/temp/{model_name}.aes"
+                    file_code_vip = f"lib_v5/filelists/download_codes/temp/{model_name}.txt"
+                    
+                    try:
+                        wget.download(url_code, encrypted_file_code_vip, bar=download_progress_bar)
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                            
+                    with open(download_code_file, "r") as f:
+                        user_download_code_read = f.read()
+                    
+                    bufferSize = 128 * 1024
+                    password = user_download_code_read
+                    
+                    try:
+                        pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
+                    except:
+                        try:
+                            url_v_key = f"https://github.com/TRvlvr/application_data/raw/main/filelists/aes_dev/vip_key.txt.aes"
+                            wget.download(url_v_key, 'lib_v5/filelists/download_codes/temp/vip_key.aes', bar=download_progress_bar)
+                            pyAesCrypt.decryptFile('lib_v5/filelists/download_codes/temp/vip_key.aes', 
+                                                'lib_v5/filelists/download_codes/temp/vip_key.txt', password, bufferSize)
+                            
+                            with open('lib_v5/filelists/download_codes/temp/vip_key.txt', "r") as f:
+                                vip_code_read = f.read()
+                            
+                            password = vip_code_read
+
+                            pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
+                        except:
+                            download_code()
+                            change_state_locked()
+                            return
+                    
+                    with open(file_code_vip, "r") as f:
+                        link=f.read()  
+                    
+                    m_url = link
+                    
+                    try:
+                        if os.path.isfile(f"models/MDX_Net_Models/{model_name}.onnx"):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(m_url, f"models/MDX_Net_Models/{model_name}.onnx", bar=download_progress_bar)
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                            
+                if 'Developer Pack:' in model:
+                        
+                    pack_name = model
+                    head, sep, tail = pack_name.partition('Developer Pack: ')
+                    pack_name = tail
+                    
+                    url_code = f"https://github.com/TRvlvr/application_data/raw/main/filelists/aes_dev/{pack_name}.txt.aes"
+                    
+                    #print(url_code)
+                    
+                    encrypted_file_code = f"lib_v5/filelists/download_codes/temp/{pack_name}.aes"
+                    file_code = f"lib_v5/filelists/download_codes/temp/{pack_name}.txt"
+                    
+                    try:
+                        wget.download(url_code, encrypted_file_code, bar=download_progress_bar)
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error) 
+                            
+                    with open(download_code_file, "r") as f:
+                        user_download_code_read = f.read()
+                    
+                    bufferSize = 128 * 1024
+                    password = user_download_code_read
+                    # encrypt
+                    
+                    try:
+                        pyAesCrypt.decryptFile(encrypted_file_code, file_code, password, bufferSize)
+                    except:
+                        download_code()
+                        change_state_locked()
+                        return
+                    
+                    with open(file_code, "r") as f:
+                        link=f.read()
+                        
+                    m_url = link
+                        
+                    try:
+                        if os.path.isfile(f"models/MDX_Net_Models/{pack_name}.zip"):
+                                self.download_progress_var.set('File already exists')
+                                change_state_already_found()
+                                pass
+                        else:
+                                wget.download(m_url, f"models/MDX_Net_Models/{pack_name}.zip", bar=download_progress_bar)
+                                with zipfile.ZipFile(f'models/MDX_Net_Models/{pack_name}.zip', 'r') as zip_ref:
+                                    zip_ref.extractall('models/MDX_Net_Models')
+                                try:
+                                    os.remove(f'models/MDX_Net_Models/{pack_name}.zip')
+                                except:
+                                    pass
+                                change_state_complete()
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error)            
+                            
+                if 'Update Found:' in model:
+                    pack_name = model
+                    head, sep, tail = pack_name.partition('Update Found: ')
+                    pack_name = tail
+                    cwd_path = os.path.dirname(os.path.realpath(__file__))
+                    #print('cwd_path ', cwd_path)
+                    
+                    links = []
+                    links = lib_v5.filelist.get_download_links(links, downloads='app_patch')
+                    url_link = f"{links}{pack_name}.exe"
+                    #print(url_link)
+                    top.attributes("-topmost", False)
+                    try:
+                        if os.path.isfile(f"{cwd_path}/{pack_name}.exe"):
+                                self.download_progress_var.set('File already exists')
+                                subprocess.Popen(f"{cwd_path}/{pack_name}.exe")
+                        else:
+                            wget.download(url_link, f"{cwd_path}/{pack_name}.exe", bar=download_progress_bar)
+                            subprocess.Popen(f"{cwd_path}/{pack_name}.exe")
+                    except Exception as e:
+                        short_error = f'{e}'
+                        change_state_failed()
+                        if '[Errno 11001] getaddrinfo failed' in short_error:
+                            self.download_progress_var.set('No Internet Connection Detected')
+                        else: 
+                            self.download_progress_var.set(short_error)
+
+                self.update_states()           
+        
+            global th
+            
+            th = KThread(target=begin_download_model)
+            th.start()
+    
+        def stop_thread():
+            th.kill()
+            download_button.configure(state=tk.NORMAL)
+            self.downloadmodelOptions.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_mdx.configure(state=tk.NORMAL)
+            self.downloadmodelOptions_demucs.configure(state=tk.NORMAL)
+            stop_button.configure(state=tk.DISABLED)
+            self.download_stop_var.set(space_small)
+            self.update_states()
+            self.download_progress_bar_var.set('Download Stopped')
+            self.delete_temps()
+            
+            
+        def download_update():
+            self.modeldownload_var.set('No Model Selected')
+            self.modeldownload_mdx_var.set('No Model Selected')
+            self.modeldownload_demucs_var.set('No Model Selected')
+            tabControl.select(tab3)
+            download_model()
+            
+        vr_download_list_file = "lib_v5/filelists/download_lists/vr_download_list.txt"
+        mdx_download_list_file = "lib_v5/filelists/download_lists/mdx_download_list.txt"
+        demucs_download_list_file = "lib_v5/filelists/download_lists/demucs_download_list.txt"
+        
+        vr_download_list_temp_file = "lib_v5/filelists/download_lists/temp/vr_download_list.txt"
+        mdx_download_list_temp_file = "lib_v5/filelists/download_lists/temp/mdx_download_list.txt"
+        demucs_download_list_temp_file = "lib_v5/filelists/download_lists/temp/demucs_download_list.txt"
+        
+        mdx_new_hashes = "lib_v5/filelists/hashes/mdx_new_hashes.txt"
+        mdx_new_inst_hashes = "lib_v5/filelists/hashes/mdx_new_inst_hashes.txt"
+        mdx_original_hashes = "lib_v5/filelists/hashes/mdx_original_hashes.txt"
+        download_links_file = "lib_v5/filelists/download_lists/download_links.json"
+        
+        mdx_new_hashes_temp = "lib_v5/filelists/hashes/temp/mdx_new_hashes.txt"
+        mdx_new_inst_hashes_temp = "lib_v5/filelists/hashes/temp/mdx_new_inst_hashes.txt"
+        mdx_original_hashes_temp = "lib_v5/filelists/hashes/temp/mdx_original_hashes.txt"
+        download_links_file_temp = "lib_v5/filelists/download_lists/temp/download_links.json"
+            
+        def move_lists_from():
+            shutil.move(vr_download_list_file, vr_download_list_temp_file)
+            shutil.move(mdx_download_list_file, mdx_download_list_temp_file)
+            shutil.move(demucs_download_list_file, demucs_download_list_temp_file)
+            shutil.move(mdx_new_hashes, mdx_new_hashes_temp)
+            shutil.move(mdx_new_inst_hashes, mdx_new_inst_hashes_temp)
+            shutil.move(mdx_original_hashes, mdx_original_hashes_temp)
+            shutil.move(download_links_file, download_links_file_temp)
+            
+        def move_lists_back():
+            shutil.move(vr_download_list_temp_file, vr_download_list_file)
+            shutil.move(mdx_download_list_temp_file, mdx_download_list_file)
+            shutil.move(demucs_download_list_temp_file, demucs_download_list_file)
+            shutil.move(mdx_new_hashes_temp, mdx_new_hashes)
+            shutil.move(mdx_new_inst_hashes_temp, mdx_new_inst_hashes)
+            shutil.move(mdx_original_hashes_temp, mdx_original_hashes)
+            shutil.move(download_links_file_temp, download_links_file)
+            
+        def remove_lists_temp():
+            os.remove(vr_download_list_temp_file)
+            os.remove(mdx_download_list_temp_file)
+            os.remove(demucs_download_list_temp_file)
+            os.remove(mdx_new_hashes_temp)
+            os.remove(mdx_new_inst_hashes_temp)
+            os.remove(mdx_original_hashes_temp)
+            os.remove(download_links_file_temp)
+            
+        def refresh_download_list_only():
+            download_links = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/download_links.json"
+            def begin_refresh_list():
+                try:
+                    url_1 = download_links
+                    shutil.move(download_links_file, download_links_file_temp)
+                    wget.download(url_1, download_links_file, bar=download_progress_bar)
+                    os.remove(download_links_file_temp)
+                except Exception as e:
+                    try:
+                        shutil.move(download_links_file_temp, download_links_file)
+                    except:
+                        pass
+            
+            rlg = KThread(target=begin_refresh_list)
+            rlg.start()
+            
+        def refresh_list():
+            download_links = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/download_links.json"
+            def begin_refresh_list():
+                try:
+                    url_1 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/gen_vr_download_list.txt'
+                    url_2 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/gen_mdx_download_list.txt'
+                    url_3 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/gen_demucs_download_list.txt'
+                    url_4 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_hashes.txt'
+                    url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
+                    url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
+                    url_7 = download_links
+                    move_lists_from()
+                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file, bar=download_progress_bar)
+                    remove_lists_temp()
+                    self.download_progress_bar_var.set('Download list\'s refreshed!')
+                    top.destroy()
+                    self.settings(choose=True)
+                except Exception as e:
+                    short_error = f'{e}'
+                    self.download_progress_bar_var.set('Refresh failed')
+                    if '[Errno 11001] getaddrinfo failed' in short_error:
+                        self.download_progress_var.set('No Internet Connection Detected')
+                    else: 
+                        self.download_progress_var.set(short_error)
+                    try:
+                        move_lists_back()
+                    except:
+                        pass
+            
+            rlg = KThread(target=begin_refresh_list)
+            rlg.start()
+                
+        def refresh_list_vip():
+            download_links = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/download_links.json"
+            def begin_refresh_list_vip():
+                try:
+                    url_1 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/vip_vr_download_list.txt'
+                    url_2 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/vip_mdx_download_list.txt'
+                    url_3 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/vip_demucs_download_list.txt'
+                    url_4 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_hashes.txt'
+                    url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
+                    url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
+                    url_7 = download_links
+                    move_lists_from()
+                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file, bar=download_progress_bar)
+                    remove_lists_temp()
+                    self.download_progress_bar_var.set('VIP: Download list\'s refreshed!')
+                    top.destroy()
+                    self.settings(choose=True)
+                except Exception as e:
+                    short_error = f'{e}'
+                    self.download_progress_bar_var.set('Refresh failed')
+                    if '[Errno 11001] getaddrinfo failed' in short_error:
+                        self.download_progress_var.set('No Internet Connection Detected')
+                    else: 
+                        self.download_progress_var.set(short_error)
+                    try:
+                        move_lists_back()
+                    except:
+                        pass
+            
+            rlv = KThread(target=begin_refresh_list_vip)
+            rlv.start()
+
+        vr_download_list_dev = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/dev_vr_download_list.txt'
+        mdx_download_list_dev = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/dev_mdx_download_list.txt'
+        demucs_download_list_dev = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/dev_demucs_download_list.txt'
+
+        def refresh_list_dev():
+            download_links = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/download_links.json"
+            def begin_refresh_list_dev():
+                try:
+                    url_1 = vr_download_list_dev
+                    url_2 = mdx_download_list_dev
+                    url_3 = demucs_download_list_dev
+                    url_4 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_hashes.txt'
+                    url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
+                    url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
+                    url_7 = download_links
+                    move_lists_from()
+                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file, bar=download_progress_bar)
+                    remove_lists_temp()
+                    self.download_progress_bar_var.set('Developer: Download list\'s refreshed!')
+                    top.destroy()
+                    self.settings(choose=True)
+                except Exception as e:
+                    short_error = f'{e}'
+                    self.download_progress_bar_var.set('Refresh failed')
+                    if '[Errno 11001] getaddrinfo failed' in short_error:
+                        self.download_progress_var.set('No Internet Connection Detected')
+                    else: 
+                        self.download_progress_var.set(short_error)
+                    try:
+                        move_lists_back()
+                    except:
+                        pass
+            
+            rld = KThread(target=begin_refresh_list_dev)
+            rld.start()
+            
+        vr_list = ''
+        vr_list = lib_v5.filelist.get_vr_download_list(vr_list)
+        vr_download_list = vr_list
+        
+        mdx_list = ''
+        mdx_list = lib_v5.filelist.get_mdx_download_list(mdx_list)
+        mdx_download_list = mdx_list
+        
+        demucs_list = ''
+        demucs_list = lib_v5.filelist.get_demucs_download_list(demucs_list)
+        demucs_download_list = demucs_list
+        
+        ach_radio = l0=ttk.Radiobutton(frame0, text='VR Arch', variable=self.selectdownload_var, value='VR Arc')
+        l0.grid(row=3,column=0,padx=0,pady=5)
+        
+        self.downloadmodelOptions = l0=ttk.OptionMenu(frame0, self.modeldownload_var, *vr_download_list)
+        l0.grid(row=4,column=0,padx=0,pady=5)
+        
+        mdx_radio = l0=ttk.Radiobutton(frame0, text='MDX-Net', variable=self.selectdownload_var, value='MDX-Net')
+        l0.grid(row=5,column=0,padx=0,pady=5)
+        
+        self.downloadmodelOptions_mdx = l0=ttk.OptionMenu(frame0, self.modeldownload_mdx_var, *mdx_download_list)
+        l0.grid(row=6,column=0,padx=0,pady=5)
+        
+        demucs_radio = l0=ttk.Radiobutton(frame0, text='Demucs', variable=self.selectdownload_var, value='Demucs')
+        l0.grid(row=7,column=0,padx=0,pady=5)
+        
+        self.downloadmodelOptions_demucs = l0=ttk.OptionMenu(frame0, self.modeldownload_demucs_var, *demucs_download_list)
+        l0.grid(row=8,column=0,padx=0,pady=5)
+        
+        download_button = l0=ttk.Button(frame0, image=self.download_img, command=download_model)
+        l0.grid(row=9,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, textvariable=self.download_progress_bar_var, font=("Century Gothic", "9"), foreground='#13a4c9', borderwidth=0)
+        l0.grid(row=10,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, textvariable=self.download_progress_var, font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=11,column=0,padx=0,pady=5)
+        
+        l0=ttk.Progressbar(frame0, variable=self.download_progress_bar_zip_var)
+        l0.grid(row=12,column=0,padx=0,pady=5)
+        
+        stop_button = l0=ttk.Button(frame0, textvariable=self.download_stop_var, command=stop_thread)
+        l0.grid(row=13,column=0,padx=0,pady=5)
+        
+        try:
+            with open(user_code_file, "r") as f:
+                code_read = f.read()
+                if code_read == 'VIP':
+                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list_vip)
+                elif code_read == 'Developer':
+                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list_dev)
+                else:
+                    code_read = 'None'
+                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list)
+        except:
+            code_read = 'None'
+            l0=ttk.Button(frame0, text='Refresh List', command=refresh_list)
+            
+        l0.grid(row=14,column=0,padx=0,pady=5)
+        
+        l0=ttk.Button(frame0, image=self.key_img, command=user_code)
+        l0.grid(row=15,column=0,padx=0,pady=5)
+        
+        stop_button.configure(state=tk.DISABLED)
+        
+        if choose:
+            pass
+        else:
+            self.download_progress_bar_var.set('')
+            
+        self.download_progress_var.set('')
+        self.download_stop_var.set(space_small)
+        
+        top.protocol("WM_DELETE_WINDOW", change_event)
+        
+        self.update_states()      
+
     def error_log(self):
         """
         Open Error Log
         """
         top= Toplevel(self)
         if GetSystemMetrics(1) >= 900:
-            top.geometry("1080x810")
             window_height = 810
             window_width = 1080
         elif GetSystemMetrics(1) <= 720:
-            top.geometry("930x640")
             window_height = 640
             window_width = 930
         else:
-            top.geometry("930x670")
             window_height = 670
             window_width = 930
             
         top.title("UVR Help Guide")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        top.attributes("-topmost", True)
         
         screen_width = top.winfo_screenwidth()
         screen_height = top.winfo_screenheight()
@@ -3377,13 +5991,13 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+        l0=tk.Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
         l0.grid(row=1,column=0,padx=20,pady=10)
         
-        l0=Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+        l0=tk.Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+        l0=tk.Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
         l0.grid(row=3,column=0,padx=0,pady=0)
         
         with open("errorlog.txt", "r") as f:
@@ -3396,12 +6010,17 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=6,column=0,padx=20,pady=0)
 
+
     def copy_clip(self):
             copy_t = open("errorlog.txt", "r").read()
             pyperclip.copy(copy_t)
             
+    def copy_vr_list(self):
+            copy_t = open("lib_v5/vr_download_list.txt", "r").read()
+            pyperclip.copy(copy_t)
+            
     def open_Modelfolder_filedialog(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal Separation"""
         filename = 'models'
 
         if sys.platform == "win32":
@@ -3411,7 +6030,7 @@ class MainWindow(TkinterDnD.Tk):
             subprocess.call([opener, filename])
             
     def open_Modelfolder_vr(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal Separation"""
         filename = 'models\Main_Models'
 
         if sys.platform == "win32":
@@ -3421,7 +6040,7 @@ class MainWindow(TkinterDnD.Tk):
             subprocess.call([opener, filename])
             
     def open_Modelfolder_de(self):
-        """Let user paste a ".pth" model to use for the vocal seperation"""
+        """Let user paste a ".pth" model to use for the vocal Separation"""
         filename = 'models\Demucs_Models'
 
         if sys.platform == "win32":
@@ -3433,8 +6052,6 @@ class MainWindow(TkinterDnD.Tk):
     def open_appdir_filedialog(self):
         
         pathname = '.'
-        
-        print(pathname)
         
         if sys.platform == "win32":
             os.startfile(pathname)
@@ -3463,9 +6080,75 @@ class MainWindow(TkinterDnD.Tk):
 
         # -Save Data-
         save_data(data={
+            'agg': agg,
+            'aiModel': self.aiModel_var.get(),
+            'algo': self.algo_var.get(),
+            'appendensem': self.appendensem_var.get(),
+            'audfile': self.audfile_var.get(),
+            'aud_mdx': self.aud_mdx_var.get(),
+            'autocompensate': self.autocompensate_var.get(),
+            'channel': self.channel_var.get(),
+            'chunks': chunks,
+            'chunks_d': self.chunks_d_var.get(),
+            'compensate': self.compensate_var.get(),
+            'demucs_only': self.demucs_only_var.get(),
+            'demucs_stems': self.demucs_stems_var.get(),
+            'DemucsModel': self.DemucsModel_var.get(),
+            'demucsmodel': self.demucsmodel_var.get(),
+            'DemucsModel_MDX': self.DemucsModel_MDX_var.get(),
+            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
+            'demucsmodelVR': self.demucsmodelVR_var.get(),
+            'dim_f': self.dim_f_var.get(),
+            'ensChoose': self.ensChoose_var.get(),
             'exportPath': self.exportPath_var.get(),
+            'flactype': self.flactype_var.get(),
+            'gpu': self.gpuConversion_var.get(),
             'inputPaths': self.inputPaths,
+            'inst_only': self.inst_only_var.get(),
+            'inst_only_b': self.inst_only_b_var.get(),
+            'lastDir': self.lastDir,
+            'margin': self.margin_var.get(),
+            'mdx_ensem': self.mdxensemchoose_var.get(),
+            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
+            'mdx_only_ensem_a': self.mdx_only_ensem_a_var.get(),
+            'mdx_only_ensem_b': self.mdx_only_ensem_b_var.get(),
+            'mdx_only_ensem_c': self.mdx_only_ensem_c_var.get(),
+            'mdx_only_ensem_d': self.mdx_only_ensem_d_var.get(),
+            'mdx_only_ensem_e': self.mdx_only_ensem_e_var.get(),
+            'mdxnetModel': self.mdxnetModel_var.get(),
+            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
+            'mixing': mixing,
+            'modeldownload': 'No Model Selected',
+            'modeldownload_mdx': 'No Model Selected',
+            'modeldownload_demucs': 'No Model Selected',
+            'modeldownload_type': 'VR Arc',
+            'modelFolder': self.modelFolder_var.get(),
+            'modelInstrumentalLabel': self.instrumentalModel_var.get(),
+            'ModelParams': self.ModelParams_var.get(),
+            'mp3bit': self.mp3bit_var.get(),
+            'n_fft_scale': self.n_fft_scale_var.get(),
+            'noise_pro_select': self.noise_pro_select_var.get(),
+            'noise_reduc': self.noisereduc_var.get(),
+            'noisereduc_s': noisereduc_s,
+            'non_red': self.non_red_var.get(),
+            'nophaseinst': self.nophaseinst_var.get(),
+            'normalize': self.normalize_var.get(),
+            'output_image': self.outputImage_var.get(),
+            'overlap': self.overlap_var.get(),
+            'overlap_b': self.overlap_b_var.get(),
+            'postprocess': self.postprocessing_var.get(),
+            'save': self.save_var.get(),
             'saveFormat': self.saveFormat_var.get(),
+            'selectdownload': self.selectdownload_var.get(),
+            'segment': self.segment_var.get(),
+            'settest': self.settest_var.get(),
+            'shifts': self.shifts_var.get(),
+            'shifts_b': self.shifts_b_var.get(),
+            'split_mode': self.split_mode_var.get(),
+            'tta': self.tta_var.get(),
+            'useModel': 'instrumental',
+            'voc_only': self.voc_only_var.get(),
+            'voc_only_b': self.voc_only_b_var.get(),
             'vr_ensem': self.vrensemchoose_var.get(),
             'vr_ensem_a': self.vrensemchoose_a_var.get(),
             'vr_ensem_b': self.vrensemchoose_b_var.get(),
@@ -3475,64 +6158,17 @@ class MainWindow(TkinterDnD.Tk):
             'vr_ensem_mdx_a': self.vrensemchoose_mdx_a_var.get(),
             'vr_ensem_mdx_b': self.vrensemchoose_mdx_b_var.get(),
             'vr_ensem_mdx_c': self.vrensemchoose_mdx_c_var.get(),
-            'mdx_ensem': self.mdxensemchoose_var.get(),
-            'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
-            'demucsmodel_sel_VR': self.demucsmodel_sel_VR_var.get(),
-            'gpu': self.gpuConversion_var.get(),
-            'appendensem': self.appendensem_var.get(),
-            'demucs_only': self.demucs_only_var.get(),
-            'split_mode': self.split_mode_var.get(),
-            'normalize': self.normalize_var.get(),
-            'postprocess': self.postprocessing_var.get(),
-            'tta': self.tta_var.get(),
-            'save': self.save_var.get(),
-            'output_image': self.outputImage_var.get(),
-            'window_size': window_size,
-            'agg': agg,
-            'useModel': 'instrumental',
-            'lastDir': self.lastDir,
-            'modelFolder': self.modelFolder_var.get(),
-            'modelInstrumentalLabel': self.instrumentalModel_var.get(),
-            'aiModel': self.aiModel_var.get(),
-            'algo': self.algo_var.get(),
-            'demucs_stems': self.demucs_stems_var.get(),
-            'ensChoose': self.ensChoose_var.get(),
-            'mdxnetModel': self.mdxnetModel_var.get(),
-            'DemucsModel': self.DemucsModel_var.get(),
-            'DemucsModel_MDX': self.DemucsModel_MDX_var.get(),
-            'ModelParams': self.ModelParams_var.get(),
-            #MDX-Net
-            'demucsmodel': self.demucsmodel_var.get(),
-            'demucsmodelVR': self.demucsmodelVR_var.get(),
-            'non_red': self.non_red_var.get(),
-            'nophaseinst': self.nophaseinst_var.get(),
-            'noise_reduc': self.noisereduc_var.get(),
-            'voc_only': self.voc_only_var.get(),
-            'inst_only': self.inst_only_var.get(),
-            'voc_only_b': self.voc_only_b_var.get(),
-            'inst_only_b': self.inst_only_b_var.get(),
-            'audfile': self.audfile_var.get(),
-            'autocompensate': self.autocompensate_var.get(),
-            'settest': self.settest_var.get(),
-            'chunks': chunks,
-            'chunks_d': self.chunks_d_var.get(),
-            'n_fft_scale': self.n_fft_scale_var.get(),
-            'segment': self.segment_var.get(),
-            'dim_f': self.dim_f_var.get(),
-            'noise_pro_select': self.noise_pro_select_var.get(),
+            'vr_multi_USER_model_param_1': self.vr_multi_USER_model_param_1.get(),
+            'vr_multi_USER_model_param_2': self.vr_multi_USER_model_param_2.get(),
+            'vr_multi_USER_model_param_3': self.vr_multi_USER_model_param_3.get(),
+            'vr_multi_USER_model_param_4': self.vr_multi_USER_model_param_4.get(),
+            'vr_basic_USER_model_param_1': self.vr_basic_USER_model_param_1.get(),
+            'vr_basic_USER_model_param_2': self.vr_basic_USER_model_param_2.get(),
+            'vr_basic_USER_model_param_3': self.vr_basic_USER_model_param_3.get(),
+            'vr_basic_USER_model_param_4': self.vr_basic_USER_model_param_4.get(),
+            'vr_basic_USER_model_param_5': self.vr_basic_USER_model_param_5.get(),
             'wavtype': self.wavtype_var.get(),
-            'flactype': self.flactype_var.get(),
-            'mp3bit': self.mp3bit_var.get(),
-            'overlap': self.overlap_var.get(),
-            'shifts': self.shifts_var.get(),
-            'overlap_b': self.overlap_b_var.get(),
-            'shifts_b': self.shifts_b_var.get(),
-            'margin': self.margin_var.get(),
-            'channel': self.channel_var.get(),
-            'compensate': self.compensate_var.get(),
-            'mdxnetModeltype': self.mdxnetModeltype_var.get(),
-            'noisereduc_s': noisereduc_s,
-            'mixing': mixing,
+            'window_size': window_size,
         }, 
         )
         

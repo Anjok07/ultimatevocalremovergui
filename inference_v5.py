@@ -1,34 +1,31 @@
-import os
-import importlib
-import pydub
-import shutil
-import hashlib
-
-import cv2
-import librosa
-import math
-import numpy as np
-import soundfile as sf
-from tqdm import tqdm
-
-from demucs.pretrained import get_model as _gm
-from demucs.hdemucs import HDemucs
+from collections import defaultdict
+from datetime import datetime
 from demucs.apply import BagOfModels, apply_model
-from pathlib import Path
-from models import stft, istft
-
+from demucs.hdemucs import HDemucs
+from demucs.pretrained import get_model as _gm
 from lib_v5 import dataset
 from lib_v5 import spec_utils
 from lib_v5.model_param_init import ModelParameters
-import torch
-from datetime import datetime
-
-# Command line text parsing and widget manipulation
-from collections import defaultdict
-import tkinter as tk
-import traceback  # Error Message Recent Calls
-import time  # Timer
+from models import stft, istft
+from pathlib import Path
 from random import randrange
+from tqdm import tqdm
+from tkinter import filedialog
+import lib_v5.filelist
+import cv2
+import hashlib
+import importlib
+import librosa
+import math
+import numpy as np
+import os
+import pydub
+import shutil
+import soundfile as sf
+import time  # Timer
+import tkinter as tk
+import torch
+import traceback  # Error Message Recent Calls
 
 class VocalRemover(object):
     
@@ -40,35 +37,31 @@ class VocalRemover(object):
         # self.offset = model.offset
         
 data = {
-    # Paths
-    'input_paths': None,
-    'export_path': None,
-    'saveFormat': 'wav',
-    # Processing Options
-    'gpu': -1,
-    'postprocess': True,
-    'tta': True,
-    'output_image': True,
-    'voc_only': False,
-    'inst_only': False,
-    # Models
-    'instrumentalModel': None,
-    'useModel': None,
-    # Constants
-    'window_size': 512,
     'agg': 10,
-    'high_end_process': 'mirroring',
-    'ModelParams': 'Auto',
     'demucsmodel_sel_VR': 'UVR_Demucs_Model_1',
-    'overlap': 0.5,
-    'shifts': 0,
-    'segment': 'None',
-    'split_mode': False,
-    'normalize': False,
     'demucsmodelVR': True,
-    'wavtype': 'PCM_16',
+    'export_path': None,
+    'gpu': -1,
+    'high_end_process': 'mirroring',
+    'input_paths': None,
+    'inst_only': False,
+    'instrumentalModel': None,
+    'ModelParams': 'Auto',
     'mp3bit': '320k',
+    'normalize': False,
+    'output_image': True,
+    'overlap': 0.5,
+    'postprocess': True,
+    'saveFormat': 'wav',
+    'segment': 'None',
     'settest': False,
+    'shifts': 0,
+    'split_mode': False,
+    'tta': True,
+    'useModel': None,
+    'voc_only': False,
+    'wavtype': 'PCM_16',
+    'window_size': 512,
 }
 
 default_window_size = data['window_size']
@@ -144,7 +137,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     nn_arch_sizes = [
         31191, # default
-        33966, 123821, 123812, 537238 # custom
+        33966, 123821, 123812, 129605, 537238 # custom
     ]
     
     nn_architecture = list('{}KB'.format(s) for s in nn_arch_sizes)
@@ -492,7 +485,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 return 
                 
                         #Load Model      
-                        text_widget.write(base_text + 'Loading models...')
+                        text_widget.write(base_text + 'Loading model...')
                         
                         model_size = math.ceil(os.stat(data['instrumentalModel']).st_size / 1024)
                         nn_architecture = '{}KB'.format(min(nn_arch_sizes, key=lambda x:abs(x-model_size)))
@@ -504,212 +497,77 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                         ModelName=(data['instrumentalModel'])
 
                         #Package Models
-                        
-                        model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
-                        print(model_hash)
-                        
-                        #v5 Models
-                        
-                        if model_hash == '47939caf0cfe52a0e81442b85b971dfd':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if model_hash == '4e4ecb9764c50a8c414fee6e10395bbe':  
-                            model_params_auto=str('lib_v5/modelparams/4band_v2.json')
-                            param_name_auto=str('4band_v2')
-                        if model_hash == 'e60a1e84803ce4efc0a6551206cc4b71':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if model_hash == 'a82f14e75892e55e994376edbf0c8435':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if model_hash == '6dd9eaa6f0420af9f1d403aaafa4cc06':   
-                            model_params_auto=str('lib_v5/modelparams/4band_v2_sn.json')
-                            param_name_auto=str('4band_v2_sn')
-                        if model_hash == '5c7bbca45a187e81abbbd351606164e5':    
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_msb2.json')
-                            param_name_auto=str('3band_44100_msb2')
-                        if model_hash == 'd6b2cb685a058a091e5e7098192d3233':    
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_msb2.json')
-                            param_name_auto=str('3band_44100_msb2')
-                        if model_hash == 'c1b9f38170a7c90e96f027992eb7c62b': 
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if model_hash == 'c3448ec923fa0edf3d03a19e633faa53':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if model_hash == '68aa2c8093d0080704b200d140f59e54':  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100.json')
-                            param_name_auto=str('3band_44100.json')
-                        if model_hash == 'fdc83be5b798e4bd29fe00fe6600e147':  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_mid.json')
-                            param_name_auto=str('3band_44100_mid.json')
-                        if model_hash == '2ce34bc92fd57f55db16b7a4def3d745':  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_mid.json')
-                            param_name_auto=str('3band_44100_mid.json')
-                        if model_hash == '52fdca89576f06cf4340b74a4730ee5f':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100.json')
-                        if model_hash == '41191165b05d38fc77f072fa9e8e8a30':  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100.json')
-                        if model_hash == '89e83b511ad474592689e562d5b1f80e':  
-                            model_params_auto=str('lib_v5/modelparams/2band_32000.json')
-                            param_name_auto=str('2band_32000.json')
-                        if model_hash == '0b954da81d453b716b114d6d7c95177f':  
-                            model_params_auto=str('lib_v5/modelparams/2band_32000.json')
-                            param_name_auto=str('2band_32000.json')
-                            
-                        #v4 Models
-                            
-                        if model_hash == '6a00461c51c2920fd68937d4609ed6c8':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr16000_hl512.json')
-                            param_name_auto=str('1band_sr16000_hl512')
-                        if model_hash == '0ab504864d20f1bd378fe9c81ef37140':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                            param_name_auto=str('1band_sr32000_hl512')
-                        if model_hash == '7dd21065bf91c10f7fccb57d7d83b07f':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                            param_name_auto=str('1band_sr32000_hl512')
-                        if model_hash == '80ab74d65e515caa3622728d2de07d23':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                            param_name_auto=str('1band_sr32000_hl512')
-                        if model_hash == 'edc115e7fc523245062200c00caa847f':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                            param_name_auto=str('1band_sr33075_hl384')
-                        if model_hash == '28063e9f6ab5b341c5f6d3c67f2045b7':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                            param_name_auto=str('1band_sr33075_hl384')
-                        if model_hash == 'b58090534c52cbc3e9b5104bad666ef2':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                            param_name_auto=str('1band_sr44100_hl512')
-                        if model_hash == '0cdab9947f1b0928705f518f3c78ea8f':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                            param_name_auto=str('1band_sr44100_hl512')
-                        if model_hash == 'ae702fed0238afb5346db8356fe25f13':  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl1024.json')
-                            param_name_auto=str('1band_sr44100_hl1024')
-                        
-                        #User Models
-  
-                        #1 Band
-                        if '1band_sr16000_hl512' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr16000_hl512.json')
-                            param_name_auto=str('1band_sr16000_hl512')
-                        if '1band_sr32000_hl512' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr32000_hl512.json')
-                            param_name_auto=str('1band_sr32000_hl512')
-                        if '1band_sr33075_hl384' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr33075_hl384.json')
-                            param_name_auto=str('1band_sr33075_hl384')
-                        if '1band_sr44100_hl256' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl256.json')
-                            param_name_auto=str('1band_sr44100_hl256')
-                        if '1band_sr44100_hl512' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl512.json')
-                            param_name_auto=str('1band_sr44100_hl512')
-                        if '1band_sr44100_hl1024' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/1band_sr44100_hl1024.json')
-                            param_name_auto=str('1band_sr44100_hl1024')
-                            
-                        #2 Band
-                        if '2band_44100_lofi' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/2band_44100_lofi.json')
-                            param_name_auto=str('2band_44100_lofi')
-                        if '2band_32000' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/2band_32000.json')
-                            param_name_auto=str('2band_32000')
-                        if '2band_48000' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/2band_48000.json')
-                            param_name_auto=str('2band_48000')
-                            
-                        #3 Band   
-                        if '3band_44100' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100.json')
-                            param_name_auto=str('3band_44100')
-                        if '3band_44100_mid' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_mid.json')
-                            param_name_auto=str('3band_44100_mid')
-                        if '3band_44100_msb2' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/3band_44100_msb2.json')
-                            param_name_auto=str('3band_44100_msb2')
-                            
-                        #4 Band    
-                        if '4band_44100' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100.json')
-                            param_name_auto=str('4band_44100')
-                        if '4band_44100_mid' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100_mid.json')
-                            param_name_auto=str('4band_44100_mid')
-                        if '4band_44100_msb' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100_msb.json')
-                            param_name_auto=str('4band_44100_msb')
-                        if '4band_44100_msb2' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100_msb2.json')
-                            param_name_auto=str('4band_44100_msb2')
-                        if '4band_44100_reverse' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100_reverse.json')
-                            param_name_auto=str('4band_44100_reverse')
-                        if '4band_44100_sw' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_44100_sw.json') 
-                            param_name_auto=str('4band_44100_sw')
-                        if '4band_v2' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_v2.json')
-                            param_name_auto=str('4band_v2')
-                        if '4band_v2_sn' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/4band_v2_sn.json')
-                            param_name_auto=str('4band_v2_sn')
-                        if 'tmodelparam' in ModelName:  
-                            model_params_auto=str('lib_v5/modelparams/tmodelparam.json')
-                            param_name_auto=str('User Model Param Set')
-  
-                        text_widget.write(' Done!\n')
-                        
+                        text_widget.write('Done!\n')
                         
                         if data['ModelParams'] == 'Auto':
-                            param_name = param_name_auto
-                            model_params_d = model_params_auto
+                            model_hash = hashlib.md5(open(ModelName,'rb').read()).hexdigest()
+                            model_params = []   
+                            model_params = lib_v5.filelist.provide_model_param_hash(model_hash)
+                            print(model_params)
+                            if model_params[0] == 'Not Found Using Hash':
+                                model_params = []   
+                                model_params = lib_v5.filelist.provide_model_param_name(ModelName)
+                            if model_params[0] == 'Not Found Using Name':
+                                text_widget.write(base_text + f'Unable to set model parameters automatically with the selected model.\n')
+                                confirm = tk.messagebox.askyesno(title='Unrecognized Model Detected',
+                                        message=f'\nThe application could not automatically set the model param for the selected model.\n\n' + 
+                                        f'Would you like to select the model param file for this model?\n\n')
+                                
+                                if confirm:
+                                    model_param_selection = filedialog.askopenfilename(initialdir='lib_v5/modelparams', 
+                                                                            title=f'Select Model Param', 
+                                                                            filetypes=[("Model Param", "*.json")])
+                                    
+                                    model_param_file_path = str(model_param_selection)
+                                    model_param_file = os.path.splitext(os.path.basename(model_param_file_path))[0] + '.json'
+                                    model_params = [model_param_file_path, model_param_file]
+                                    
+                                    with open(f"lib_v5/filelists/model_cache/vr_param_cache/{model_hash}.txt", 'w') as f:
+                                        f.write(model_param_file)
+                                        
+                                    
+                                    if model_params[0] == '':
+                                        text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+                                        text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+                                        text_widget.write(f'\nError Received:\n\n')
+                                        text_widget.write(f'Model parameters are missing.\n\n')
+                                        text_widget.write(f'Please check the following:\n')
+                                        text_widget.write(f'1. Make sure the model is still present.\n')
+                                        text_widget.write(f'2. If you are running a model that was not originally included in this package, \nplease append the modelparam name to the model name.\n')
+                                        text_widget.write(f'  - Example if using \"4band_v2.json\" modelparam: \"model_4band_v2.pth\"\n\n')
+                                        text_widget.write(f'Please address this and try again.\n\n')
+                                        text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                                        torch.cuda.empty_cache()
+                                        progress_var.set(0)
+                                        button_widget.configure(state=tk.NORMAL)  # Enable Button
+                                        return
+                                        
+                                    else:
+                                        pass
+                                else:
+                                    text_widget.write(base_text + f'Model param not selected.\n')
+                                    text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+                                    text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+                                    text_widget.write(f'\nError Received:\n\n')
+                                    text_widget.write(f'Model parameters are missing.\n\n')
+                                    text_widget.write(f'Please check the following:\n')
+                                    text_widget.write(f'1. Make sure the model is still present.\n')
+                                    text_widget.write(f'2. If you are running a model that was not originally included in this package, \nplease append the modelparam name to the model name.\n')
+                                    text_widget.write(f'  - Example if using \"4band_v2.json\" modelparam: \"model_4band_v2.pth\"\n\n')
+                                    text_widget.write(f'Please address this and try again.\n\n')
+                                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                                    torch.cuda.empty_cache()
+                                    progress_var.set(0)
+                                    button_widget.configure(state=tk.NORMAL)  # Enable Button
+                                    return
+
                         else:
-                            param_name = str(data['ModelParams'])
-                            model_params_d = str('lib_v5/modelparams/' + data['ModelParams'])
+                            param = data['ModelParams']
+                            model_param_file_path = f'lib_v5/modelparams/{param}'
+                            model_params = [model_param_file_path, param]
                         
-                        try:
-                            print('Model Parameters:', model_params_d)
-                            text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + param_name + '\"... ')
-                        except Exception as e:
-                            traceback_text = ''.join(traceback.format_tb(e.__traceback__))
-                            errmessage = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'
-                            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
-                            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
-                            text_widget.write(f'\nError Received:\n\n')
-                            text_widget.write(f'Model parameters are missing.\n\n')
-                            text_widget.write(f'Please check the following:\n')
-                            text_widget.write(f'1. Make sure the model is still present.\n')
-                            text_widget.write(f'2. If you are running a model that was not originally included in this package, \nplease append the modelparam name to the model name.\n')
-                            text_widget.write(f'  - Example if using \"4band_v2.json\" modelparam: \"model_4band_v2.pth\"\n\n')
-                            text_widget.write(f'Please address this and try again.\n\n')
-                            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
-                            try:
-                                with open('errorlog.txt', 'w') as f:
-                                    f.write(f'Last Error Received:\n\n' +
-                                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
-                                            f'Process Method: VR Architecture\n\n' +
-                                            f'Model parameters are missing.\n\n' + 
-                                            f'Please check the following:\n' + 
-                                            f'1. Make sure the model is still present.\n' +
-                                            f'2. If you are running a model that was not originally included in this package, please append the modelparam name to the model name.\n' + 
-                                            f'  - Example if using \"4band_v2.json\" modelparam: \"model_4band_v2.pth\"\n\n' +
-                                            f'Please address this and try again.\n\n' +
-                                            f'Raw error details:\n\n' +
-                                            errmessage + f'\nError Time Stamp: [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
-                            except:
-                                pass
-                            torch.cuda.empty_cache()
-                            progress_var.set(0)
-                            button_widget.configure(state=tk.NORMAL)  # Enable Button
-                            return
-                        
-                        
-                        mp = ModelParameters(model_params_d)
+                        text_widget.write(base_text + 'Loading assigned model parameters ' + '\"' + model_params[1] + '\"... ')
+                        mp = ModelParameters(model_params[0])
                         text_widget.write('Done!\n')
                         # -Instrumental-
                         if os.path.isfile(data['instrumentalModel']):
@@ -726,10 +584,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
                         
                         model_name = os.path.basename(data[f'{data["useModel"]}Model'])
-
-                        mp = ModelParameters(model_params_d)
                             
-                        # -Go through the different steps of seperation-
+                        # -Go through the different steps of Separation-
                         # Wave source
                         text_widget.write(base_text + 'Loading audio source...')
                         
@@ -921,12 +777,12 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             text_widget.write(base_text + 'Loading Demucs model... ')
                             update_progress(**progress_kwargs,
                             step=0.95)   
-                            path_d = Path('models/Demucs_Models')
-                            print('What Demucs model was chosen? ', demucs_model_set)
+                            path_d = Path('models/Demucs_Models/v3_repo')
+                            #print('What Demucs model was chosen? ', demucs_model_set)
                             demucs = _gm(name=demucs_model_set, repo=path_d)
                             text_widget.write('Done!\n')
                             
-                            print('segment: ', data['segment'])
+                            #print('segment: ', data['segment'])
                             
                             if data['segment'] == 'None':
                                 segment = None
@@ -958,7 +814,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                         if segment is not None:
                                             sub.segment = segment
                             
-                            print('segment port-process: ', segment)
+                            #print('segment port-process: ', segment)
                             
                             demucs.cpu()
                             demucs.eval()
@@ -1048,7 +904,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                                 bin_image.tofile(f)
            
 
-                        text_widget.write(base_text + 'Completed Seperation!\n\n')
+                        text_widget.write(base_text + 'Completed Separation!\n\n')
     except Exception as e:
         traceback_text = ''.join(traceback.format_tb(e.__traceback__))
         message = f'Traceback Error: "{traceback_text}"\n{type(e).__name__}: "{e}"\n'

@@ -82,10 +82,10 @@ def normalize(wave_res):
     """Save output music files"""
     maxv = np.abs(wave_res).max()
     if maxv > 1.0:
-        print(f"Input above threshold for clipping. The result was normalized. Max:{maxv}")
+        print(f"\nNormalization Set On: Input above threshold for clipping. The result was normalized. Max:{maxv}\n")
         wave_res /= maxv
     else:
-        print(f"Input not above threshold for clipping. Max:{maxv}")
+        print(f"\nNormalization Set On: Input not above threshold for clipping. Max:{maxv}\n")
     
     return wave_res
 
@@ -93,9 +93,9 @@ def nonormalize(wave_res):
     """Save output music files"""
     maxv = np.abs(wave_res).max()
     if maxv > 1.0:
-        print(f"Input above threshold for clipping. The result was not normalized. Max:{maxv}")
+        print(f"\nNormalization Set Off: Input above threshold for clipping. The result was not normalized. Max:{maxv}\n")
     else:
-        print(f"Input not above threshold for clipping. Max:{maxv}")
+        print(f"\nNormalization Set Off: Input not above threshold for clipping. Max:{maxv}\n")
     
     return wave_res
     
@@ -369,7 +369,7 @@ def cmb_spectrogram_to_wave_d(spec_m, mp, extra_bins_h=None, extra_bins=None, de
                 wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']))
                 wave = librosa.resample(wave2, bp['sr'], sr, res_type="sinc_fastest")
                 
-    print(demucs)
+    #print(demucs)
   
     if demucs == True:
         wave = librosa.resample(wave, bp['sr'], 44100, res_type="sinc_fastest")

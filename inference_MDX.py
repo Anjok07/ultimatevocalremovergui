@@ -1,82 +1,334 @@
-import os
-import subprocess
-from unittest import skip
-from pathlib import Path
-import os.path
 from datetime import datetime
-import pydub
-import shutil
-import hashlib
-
-#MDX-Net
-#----------------------------------------
-import soundfile as sf
-import torch
-import numpy as np
-
-from demucs.pretrained import get_model as _gm
-from demucs.hdemucs import HDemucs
 from demucs.apply import BagOfModels, apply_model
-from demucs.audio import AudioFile
-import pathlib
-
-from models import get_models, spec_effects
-import onnxruntime as ort
-import time
-import os
-from tqdm import tqdm
-import warnings
-import sys
-import librosa
-import psutil
-#----------------------------------------
+from demucs.hdemucs import HDemucs
+from demucs.model_v2 import Demucs
+from demucs.pretrained import get_model as _gm
+from demucs.tasnet_v2 import ConvTasNet
+from demucs.utils import apply_model_v1
+from demucs.utils import apply_model_v2
 from lib_v5 import spec_utils
 from lib_v5.model_param_init import ModelParameters
-import torch
-
-# Command line text parsing and widget manipulation
-import tkinter as tk
-import traceback  # Error Message Recent Calls
-import time  # Timer
+from models import get_models, spec_effects
+from pathlib import Path
 from random import randrange
+from tqdm import tqdm
+from unittest import skip
+import tkinter.ttk as ttk
+import tkinter.messagebox
+import tkinter.filedialog
+import tkinter.simpledialog
+import tkinter.font
+import tkinter as tk
+from tkinter import *
+from tkinter.tix import *
+import json
+import gzip
+import hashlib
+import librosa
+import numpy as np
+import onnxruntime as ort
+import os
+import os.path
+import pathlib
+import psutil
+import pydub
+import shutil
+import soundfile as sf
+import subprocess
+import sys
+import time
+import time  # Timer
+import tkinter as tk
+import torch
+import traceback  # Error Message Recent Calls
+import warnings
+import lib_v5.filelist
 
-from typing import Literal
+#from typing import Literal
     
 class Predictor():        
     def __init__(self):
         pass
     
+    def mdx_options(self):
+        """
+        Open Advanced MDX Options
+        """
+        self.okVar = tk.IntVar()
+        self.n_fft_scale_set_var = tk.StringVar(value='6144')
+        self.dim_f_set_var = tk.StringVar(value='2048')
+        self.mdxnetModeltype_var = tk.StringVar(value='Vocals')
+        self.noise_pro_select_set_var = tk.StringVar(value='MDX-NET_Noise_Profile_14_kHz')
+        self.compensate_v_var = tk.StringVar(value=1.03597672895)
+        
+        top= Toplevel()
+
+        top.geometry("740x550")
+        window_height = 740
+        window_width = 550
+        
+        top.title("Specify Parameters")
+        
+        top.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        top.attributes("-topmost", True)
+        
+        screen_width = top.winfo_screenwidth()
+        screen_height = top.winfo_screenheight()
+
+        x_cordinate = int((screen_width/2) - (window_width/2))
+        y_cordinate = int((screen_height/2) - (window_height/2))
+
+        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        # change title bar icon
+        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        
+        tabControl = ttk.Notebook(top)
+        
+        tabControl.pack(expand = 1, fill ="both")
+        
+        tabControl.grid_rowconfigure(0, weight=1)
+        tabControl.grid_columnconfigure(0, weight=1)
+        
+        frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
+        frame0.grid(row=0,column=0,padx=0,pady=0)  
+        
+        frame0.tkraise(frame0)
+        
+        space_small = '  '*20
+        space_small_1 = '  '*10
+        
+        l0=tk.Label(frame0, text=f'{space_small}Stem Type{space_small}', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=3,column=0,padx=0,pady=5)
+        
+        l0=ttk.OptionMenu(frame0, self.mdxnetModeltype_var, None, 'Vocals', 'Instrumental', 'Other', 'Bass', 'Drums')
+        l0.grid(row=4,column=0,padx=0,pady=5)
+
+        l0=tk.Label(frame0, text='N_FFT Scale', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text=f'{space_small_1}(Manual Set){space_small_1}', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=5,column=1,padx=0,pady=5)
+        
+        self.options_n_fft_scale_Opt = l0=ttk.OptionMenu(frame0, self.n_fft_scale_set_var, None, '4096', '6144', '7680', '8192', '16384')
+        
+        self.options_n_fft_scale_Opt
+        l0.grid(row=6,column=0,padx=0,pady=5)
+        
+        self.options_n_fft_scale_Entry = l0=ttk.Entry(frame0, textvariable=self.n_fft_scale_set_var, justify='center')
+        
+        self.options_n_fft_scale_Entry
+        l0.grid(row=6,column=1,padx=0,pady=5)
+
+        l0=tk.Label(frame0, text='Dim_f', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='(Manual Set)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=7,column=1,padx=0,pady=5)
+        
+        self.options_dim_f_Opt = l0=ttk.OptionMenu(frame0, self.dim_f_set_var, None, '2048', '3072', '4096')
+        
+        self.options_dim_f_Opt
+        l0.grid(row=8,column=0,padx=0,pady=5)
+        
+        self.options_dim_f_Entry = l0=ttk.Entry(frame0, textvariable=self.dim_f_set_var, justify='center')
+        
+        self.options_dim_f_Entry
+        l0.grid(row=8,column=1,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='Noise Profile', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=9,column=0,padx=0,pady=5)
+        
+        l0=ttk.OptionMenu(frame0, self.noise_pro_select_set_var, None, 'MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
+        l0.grid(row=10,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0, text='Volume Compensation', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0.grid(row=11,column=0,padx=0,pady=10)
+        
+        self.options_compensate = l0=ttk.Entry(frame0, textvariable=self.compensate_v_var, justify='center')
+        
+        self.options_compensate
+        l0.grid(row=12,column=0,padx=0,pady=0)
+        
+        l0=ttk.Button(frame0,text="Continue", command=lambda: self.okVar.set(1))
+        l0.grid(row=13,column=0,padx=0,pady=30)
+        
+        def stop():
+            widget_text.write(f'Please configure the ONNX model settings accordingly and try again.\n\n')
+            widget_text.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            torch.cuda.empty_cache()
+            gui_progress_bar.set(0)
+            widget_button.configure(state=tk.NORMAL)  # Enable Button
+            top.destroy()
+            return
+        
+        l0=ttk.Button(frame0,text="Stop Process", command=stop)
+        l0.grid(row=13,column=1,padx=0,pady=30)
+        
+        def change_event():
+            self.okVar.set(1)
+            #top.destroy()
+            pass
+        
+        top.protocol("WM_DELETE_WINDOW", change_event)
+        
+        frame0.wait_variable(self.okVar)
+        
+        global n_fft_scale_set
+        global dim_f_set
+        global modeltype
+        global stemset_n
+        global stem_text_a
+        global stem_text_b
+        global source_val
+        global noise_pro_set
+        global compensate
+        global demucs_model_set
+        
+        stemtype = self.mdxnetModeltype_var.get()
+        
+        if stemtype == 'Vocals':
+            modeltype = 'v'
+            stemset_n = '(Vocals)'
+            source_val = 3
+        if stemtype == 'Instrumental':
+            modeltype = 'v'
+            stemset_n = '(Instrumental)'
+            source_val = 0
+        if stemtype == 'Other':
+            modeltype = 'o'
+            stemset_n = '(Other)'
+            source_val = 2
+        if stemtype == 'Drums':
+            modeltype = 'd'
+            stemset_n = '(Drums)'
+            source_val = 1
+        if stemtype == 'Bass':
+            modeltype = 'b'
+            stemset_n = '(Bass)'
+            source_val = 0
+            
+        if stemset_n == '(Vocals)':
+            stem_text_a = 'Vocals'
+            stem_text_b = 'Instrumental'
+        elif stemset_n == '(Instrumental)':
+            stem_text_a = 'Instrumental'
+            stem_text_b = 'Vocals'
+        elif stemset_n == '(Other)':
+            stem_text_a = 'Other'
+            stem_text_b = 'the no \"Other\" track'
+        elif stemset_n == '(Drums)':
+            stem_text_a = 'Drums'
+            stem_text_b = 'no \"Drums\" track'
+        elif stemset_n == '(Bass)':
+            stem_text_a = 'Bass'
+            stem_text_b = 'No \"Bass\" track'
+        else: 
+            stem_text_a = 'Vocals'
+            stem_text_b = 'Instrumental'
+            
+        compensate = self.compensate_v_var.get()
+        n_fft_scale_set = int(self.n_fft_scale_set_var.get())
+        dim_f_set = int(self.dim_f_set_var.get())
+        noise_pro_set = self.noise_pro_select_set_var.get()
+        
+        mdx_model_params = {
+                'modeltype' : modeltype,
+                'stemset_n' : stemset_n,
+                'source_val' : source_val,
+                'compensate' : compensate,
+                'n_fft_scale_set' : n_fft_scale_set,
+                'dim_f_set' : dim_f_set,
+                'noise_pro' : noise_pro_set,
+                }
+        
+        mdx_model_params_r = json.dumps(mdx_model_params, indent=4)
+        
+        with open(f"lib_v5/filelists/model_cache/mdx_model_cache/{model_hash}.json", "w") as outfile:
+            outfile.write(mdx_model_params_r)
+            
+        if 'UVR' in demucs_model_set:
+            if stemset_n == '(Bass)' or stemset_n == '(Drums)' or stemset_n == '(Other)':
+                widget_text.write(base_text + 'The selected Demucs model can only be used with vocal or instrumental stems.\n')
+                widget_text.write(base_text + 'Please select a 4 stem Demucs model next time.\n')
+                widget_text.write(base_text + 'Setting Demucs Model to \"mdx_extra\"\n')
+                demucs_model_set = 'mdx_extra'
+
+            
+        if stemset_n == '(Instrumental)':
+            if not 'UVR' in demucs_model_set:
+                widget_text.write(base_text + 'The selected Demucs model cannot be used with this model.\n')
+                widget_text.write(base_text + 'Only 2 stem Demucs models are compatible with this model.\n')
+                widget_text.write(base_text + 'Setting Demucs model to \"UVR_Demucs_Model_1\".\n\n')
+                demucs_model_set = 'UVR_Demucs_Model_1'
+        
+        top.destroy()
+
     def prediction_setup(self):
         
         global device
-
-        print('Print the gpu setting: ', data['gpu'])
 
         if data['gpu'] >= 0:
             device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')   
         if data['gpu'] == -1:
             device = torch.device('cpu')
-        
+
         if data['demucsmodel']:
-            if 'UVR' in demucs_model_set:
-                self.demucs = HDemucs(sources=["other", "vocals"])
-            else:
-                self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
-            widget_text.write(base_text + 'Loading Demucs model...')
-            update_progress(**progress_kwargs,
-            step=0.05)   
-            path_d = Path('models/Demucs_Models')
-            self.demucs = _gm(name=demucs_model_set, repo=path_d)
-            self.demucs.to(device)
-            self.demucs.eval()
-            widget_text.write('Done!\n')
-            if isinstance(self.demucs, BagOfModels):
-                widget_text.write(base_text + f"Selected Demucs model is a bag of {len(self.demucs.models)} model(s).\n")
+            if demucs_model_version == 'v1':
+                load_from = "models/Demucs_Models/"f"{demucs_model_set}"
+                if str(load_from).endswith(".gz"):
+                    load_from = gzip.open(load_from, "rb")
+                klass, args, kwargs, state = torch.load(load_from)
+                self.demucs = klass(*args, **kwargs)
+                widget_text.write(base_text + 'Loading Demucs v1 model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                self.demucs.to(device) 
+                self.demucs.load_state_dict(state)
+                widget_text.write('Done!\n')
+                    
+            if demucs_model_version == 'v2':
+                if '48' in demucs_model_set:
+                    channels=48
+                elif 'unittest' in demucs_model_set:
+                    channels=4
+                else:
+                    channels=64
+                    
+                if 'tasnet' in demucs_model_set:
+                    self.demucs = ConvTasNet(sources=["drums", "bass", "other", "vocals"], X=10)
+                else:
+                    self.demucs = Demucs(sources=["drums", "bass", "other", "vocals"], channels=channels)
+                widget_text.write(base_text + 'Loading Demucs v2 model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                self.demucs.to(device) 
+                self.demucs.load_state_dict(torch.load("models/Demucs_Models/"f"{demucs_model_set}"))
+                widget_text.write('Done!\n')
+                self.demucs.eval()
+                
+            if demucs_model_version == 'v3':
+                if 'UVR' in demucs_model_set:
+                    self.demucs = HDemucs(sources=["other", "vocals"])
+                else:
+                    self.demucs = HDemucs(sources=["drums", "bass", "other", "vocals"])
+                widget_text.write(base_text + 'Loading Demucs model... ')
+                update_progress(**progress_kwargs,
+                step=0.05)   
+                path_d = Path('models/Demucs_Models/v3_repo')
+                #print('What Demucs model was chosen? ', demucs_model_set)
+                self.demucs = _gm(name=demucs_model_set, repo=path_d)
+                self.demucs.to(device)
+                self.demucs.eval()
+                widget_text.write('Done!\n')
+                if isinstance(self.demucs, BagOfModels):
+                    widget_text.write(base_text + f"Selected Demucs model is a bag of {len(self.demucs.models)} model(s).\n")
 
         self.onnx_models = {}
         c = 0
         
-        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype, n_fft_scale=n_fft_scale_set, dim_f=dim_f_set)
+        self.models = get_models('tdf_extra', load=False, device=cpu, stems=modeltype, n_fft_scale=int(n_fft_scale_set), dim_f=int(dim_f_set))
         if not data['demucs_only']:
             widget_text.write(base_text + 'Loading ONNX model... ')
         
@@ -94,15 +346,15 @@ class Predictor():
         elif data['gpu'] == -1:
             run_type = ['CPUExecutionProvider']
             
-        print('Selected Model: ', model_set)
-        self.onnx_models[c] = ort.InferenceSession(os.path.join('models/MDX_Net_Models', str(model_set) + '.onnx'), providers=run_type)
+        print('Selected Model: ', mdx_model_path)
+        self.onnx_models[c] = ort.InferenceSession(os.path.join(mdx_model_path), providers=run_type)
         
         if not data['demucs_only']:
             widget_text.write('Done!\n')
         
     def prediction(self, m):  
         mix, samplerate = librosa.load(m, mono=False, sr=44100)
-        print('print mix: ', mix)
+        #print('print mix: ', mix)
         if mix.ndim == 1:
             mix = np.asfortranarray([mix,mix])  
         samplerate = samplerate
@@ -114,11 +366,13 @@ class Predictor():
         #Main Save Path
         save_path = os.path.dirname(_basename)
         
-        print('stemset_n: ', stemset_n)
+        #print('stemset_n: ', stemset_n)
         
         #Vocal Path
         if stemset_n == '(Vocals)':
             vocal_name = '(Vocals)'
+        elif stemset_n == '(Instrumental)':
+            vocal_name = '(Instrumental)'
         elif stemset_n == '(Other)':
             vocal_name = '(Other)'
         elif stemset_n == '(Drums)':
@@ -151,6 +405,8 @@ class Predictor():
 
         if stemset_n == '(Vocals)':
             Instrumental_name = '(Instrumental)'
+        elif stemset_n == '(Instrumental)':
+            Instrumental_name = '(Vocals)'
         elif stemset_n == '(Other)':
             Instrumental_name = '(No_Other)'
         elif stemset_n == '(Drums)':
@@ -188,6 +444,8 @@ class Predictor():
             vocal_name = '(Drums)'
         elif stemset_n == '(Bass)':
             vocal_name = '(Bass)'
+        elif stemset_n == '(Instrumental)':
+            vocal_name = '(Instrumental)'
 
         if data['modelFolder']:
             non_reduced_vocal_path = '{save_path}/{file_name}.wav'.format(
@@ -247,16 +505,16 @@ class Predictor():
         else:
             file_exists_i = 'not_there'
 
-        print('Is there already a voc file there? ', file_exists_v)
+        #print('Is there already a voc file there? ', file_exists_v)
 
         if not data['noisereduc_s'] == 'None':
             c += 1
 
             if not data['demucsmodel']:
                 if data['inst_only']:
-                    widget_text.write(base_text + 'Preparing to save Instrumental...')
+                    widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
 
                 sf.write(non_reduced_vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
@@ -274,13 +532,16 @@ class Predictor():
                 step=(0.95))
             else:
                 if data['inst_only']:
-                    widget_text.write(base_text + 'Preparing Instrumental...')
+                    widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving Vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
 
                 if data['demucs_only']:
                     if 'UVR' in demucs_model_set:
-                        sf.write(non_reduced_vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
+                        if stemset_n == '(Instrumental)':
+                            sf.write(non_reduced_vocal_path, sources[0].T, samplerate, subtype=wav_type_set)
+                        else:
+                            sf.write(non_reduced_vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
                 else:
                     sf.write(non_reduced_vocal_path, sources[source_val].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
@@ -288,7 +549,7 @@ class Predictor():
                 widget_text.write('Done!\n')
                 widget_text.write(base_text + 'Performing Noise Reduction... ')
                 reduction_sen = float(data['noisereduc_s'])/10
-                print(noise_pro_set)
+                #print(noise_pro_set)
                 subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
                             f"{str(non_reduced_vocal_path)}"  + '" "' + f"{str(vocal_path)}" + '" ' + 
                             "noisered lib_v5\\sox\\" + noise_pro_set + ".prof " + f"{reduction_sen}", 
@@ -302,22 +563,25 @@ class Predictor():
 
             if not data['demucsmodel']:
                 if data['inst_only']:
-                    widget_text.write(base_text + 'Preparing Instrumental...')
+                    widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving Vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
                 sf.write(vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
                 widget_text.write('Done!\n')
             else:
                 if data['inst_only']:
-                    widget_text.write(base_text + 'Preparing Instrumental...')
+                    widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving Vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
                     
                 if data['demucs_only']:
                     if 'UVR' in demucs_model_set:
-                        sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
+                        if stemset_n == '(Instrumental)':
+                            sf.write(vocal_path, sources[0].T, samplerate, subtype=wav_type_set)
+                        else:
+                            sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
                     else:
                         sf.write(vocal_path, sources[source_val].T, samplerate, subtype=wav_type_set)
                 else:
@@ -353,7 +617,7 @@ class Predictor():
                     }
                 ]  
                    
-            widget_text.write(base_text + 'Saving Instrumental... ')      
+            widget_text.write(base_text + f'Saving {stem_text_b}... ')      
             for i, e in tqdm(enumerate(finalfiles)):
 
                 wave, specs = {}, {}
@@ -397,7 +661,7 @@ class Predictor():
                         sf.write(non_reduced_Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
                     
                         reduction_sen = float(data['noisereduc_s'])/10
-                        print(noise_pro_set)
+                        #print(noise_pro_set)
                         
                         subprocess.call("lib_v5\\sox\\sox.exe" + ' "' + 
                                     f"{str(non_reduced_Instrumental_path)}"  + '" "' + f"{str(Instrumental_path)}" + '" ' + 
@@ -640,7 +904,7 @@ class Predictor():
             except:
                 pass
         
-        widget_text.write(base_text + 'Completed Seperation!\n')
+        widget_text.write(base_text + 'Completed Separation!\n')
 
     def demix(self, mix):
         # 1 = demucs only
@@ -722,23 +986,34 @@ class Predictor():
                 sources = self.demix_demucs(segmented_mix, margin_size=margin)
         else: # both, apply spec effects
             base_out = self.demix_base(segmented_mix, margin_size=margin)
-            print(split_mode)
-            if split_mode == True:
-                demucs_out = self.demix_demucs_split(mix)
-            if split_mode == False:
-                demucs_out = self.demix_demucs(segmented_mix, margin_size=margin)
+            #print(split_mode)
+            
+            
+            if demucs_model_version == 'v1': 
+                demucs_out = self.demix_demucs_v1(segmented_mix, margin_size=margin)
+            if demucs_model_version == 'v2': 
+                demucs_out = self.demix_demucs_v2(segmented_mix, margin_size=margin)
+            if demucs_model_version == 'v3':
+                if split_mode == True:
+                    demucs_out = self.demix_demucs_split(mix)
+                if split_mode == False:
+                    demucs_out = self.demix_demucs(segmented_mix, margin_size=margin)
             nan_count = np.count_nonzero(np.isnan(demucs_out)) + np.count_nonzero(np.isnan(base_out))
             if nan_count > 0:
                 print('Warning: there are {} nan values in the array(s).'.format(nan_count))
                 demucs_out, base_out = np.nan_to_num(demucs_out), np.nan_to_num(base_out)
             sources = {}
-            print(data['mixing'])
+            #print(data['mixing'])
             
             if 'UVR' in demucs_model_set:
-                
-                sources[source_val] = (spec_effects(wave=[demucs_out[1],base_out[0]],
-                                            algorithm=data['mixing'],
-                                            value=b[source_val])*float(compensate)) # compensation
+                if stemset_n == '(Instrumental)':
+                    sources[source_val] = (spec_effects(wave=[demucs_out[0],base_out[0]],
+                                                algorithm=data['mixing'],
+                                                value=b[source_val])*float(compensate)) # compensation
+                else:
+                    sources[source_val] = (spec_effects(wave=[demucs_out[1],base_out[0]],
+                                                algorithm=data['mixing'],
+                                                value=b[source_val])*float(compensate)) # compensation
             else:
                 sources[source_val] = (spec_effects(wave=[demucs_out[source_val],base_out[0]],
                                             algorithm=data['mixing'],
@@ -806,7 +1081,7 @@ class Predictor():
         return _sources
     
     def demix_demucs(self, mix, margin_size):
-        print('shift_set ', shift_set)
+        #print('shift_set ', shift_set)
         processed = {}
         demucsitera = len(mix)
         demucsitera_calc = demucsitera * 2
@@ -824,7 +1099,7 @@ class Predictor():
             ref = cmix.mean(0)        
             cmix = (cmix - ref.mean()) / ref.std()
             with torch.no_grad():
-                print(split_mode)
+                #print(split_mode)
                 sources = apply_model(self.demucs, cmix[None], split=split_mode, device=device, overlap=overlap_set, shifts=shift_set, progress=False)[0]
             sources = (sources * ref.std() + ref.mean()).cpu().numpy()
             sources[[0,1]] = sources[[1,0]]
@@ -838,13 +1113,13 @@ class Predictor():
         sources = list(processed.values())
         sources = np.concatenate(sources, axis=-1)
         widget_text.write('Done!\n')
-        print('the demucs model is done running')
+        #print('the demucs model is done running')
 
         return sources
     
     def demix_demucs_split(self, mix):
 
-        print('shift_set ', shift_set)
+        #print('shift_set ', shift_set)
         widget_text.write(base_text + "Split Mode is on. (Chunks disabled for Demucs Model)\n")
         widget_text.write(base_text + "Running Demucs Inference...\n")
         widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
@@ -862,45 +1137,111 @@ class Predictor():
         sources = (sources * ref.std() + ref.mean()).cpu().numpy()
         sources[[0,1]] = sources[[1,0]]
     
-        print('the demucs model is done running')
+        #print('the demucs model is done running')
         
         return sources
+    
+    def demix_demucs_v1(self, mix, margin_size):
+        processed = {}
+        demucsitera = len(mix)
+        demucsitera_calc = demucsitera * 2
+        gui_progress_bar_demucs = 0
+        widget_text.write(base_text + "Running Demucs v1 Inference...\n")
+        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
+        print(' Running Demucs Inference...')
+        for nmix in mix:
+            gui_progress_bar_demucs += 1
+            update_progress(**progress_kwargs,
+                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+            cmix = mix[nmix]
+            cmix = torch.tensor(cmix, dtype=torch.float32)
+            ref = cmix.mean(0)        
+            cmix = (cmix - ref.mean()) / ref.std()
+            with torch.no_grad():
+                sources = apply_model_v1(self.demucs, cmix.to(device), split=split_mode, shifts=shift_set)
+            sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+            sources[[0,1]] = sources[[1,0]]
+
+            start = 0 if nmix == 0 else margin_size
+            end = None if nmix == list(mix.keys())[::-1][0] else -margin_size
+            if margin_size == 0:
+                end = None
+            processed[nmix] = sources[:,:,start:end].copy()
+
+        sources = list(processed.values())
+        sources = np.concatenate(sources, axis=-1)
+        widget_text.write('Done!\n')
+        return sources
+    
+    def demix_demucs_v2(self, mix, margin_size):
+        processed = {}
+        demucsitera = len(mix)
+        demucsitera_calc = demucsitera * 2
+        gui_progress_bar_demucs = 0
+        widget_text.write(base_text + "Running Demucs v2 Inference...\n")
+        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
+        print(' Running Demucs Inference...')
+        for nmix in mix:
+            gui_progress_bar_demucs += 1
+            update_progress(**progress_kwargs,
+                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+            cmix = mix[nmix]
+            cmix = torch.tensor(cmix, dtype=torch.float32)
+            ref = cmix.mean(0)        
+            cmix = (cmix - ref.mean()) / ref.std()
+            with torch.no_grad():
+                sources = apply_model_v2(self.demucs, cmix.to(device), split=split_mode, overlap=overlap_set, shifts=shift_set)
+            sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+            sources[[0,1]] = sources[[1,0]]
+
+            start = 0 if nmix == 0 else margin_size
+            end = None if nmix == list(mix.keys())[::-1][0] else -margin_size
+            if margin_size == 0:
+                end = None
+            processed[nmix] = sources[:,:,start:end].copy()
+
+        sources = list(processed.values())
+        sources = np.concatenate(sources, axis=-1)
+        widget_text.write('Done!\n')
+        return sources
+    
+
         
 data = {
-    # Paths
-    'input_paths': None,
-    'export_path': None,
-    'saveFormat': 'Wav',
-    # Processing Options
-    'demucsmodel': False,
-    'gpu': -1,
-    'chunks': 10,
-    'non_red': False,
-    'noisereduc_s': 3,
-    'modelFolder': False,
-    'voc_only': False,
-    'inst_only': False,
-    'n_fft_scale': 6144,
-    'dim_f': 2048,
-    'noise_pro_select': 'Auto Select',
-    'overlap': 0.5,
-    'shifts': 0,
-    'margin': 44100,
-    'split_mode': False,
-    'normalize': False,
-    'nophaseinst': True,
-    'compensate': 1.03597672895,
     'autocompensate': True,
+    'aud_mdx': True,
+    'bit': '',
+    'chunks': 10,
+    'compensate': 1.03597672895,
     'demucs_only': False,
-    'wavtype': 'PCM_16',
-    'flactype': 'PCM_16',
-    'mp3bit': '320k',
-    'mixing': 'Default',
+    'demucsmodel': False,
     'DemucsModel_MDX': 'UVR_Demucs_Model_1',
-    # Choose Model
+    'dim_f': 2048,
+    'export_path': None,
+    'flactype': 'PCM_16',
+    'gpu': -1,
+    'input_paths': None,
+    'inst_only': False,
+    'margin': 44100,
     'mdxnetModel': 'UVR-MDX-NET Main',
     'mdxnetModeltype': 'Vocals (Custom)',
+    'mixing': 'Default',
+    'modelFolder': False,
+    'mp3bit': '320k',
+    'n_fft_scale': 6144,
+    'noise_pro_select': 'Auto Select',
+    'noisereduc_s': 3,
+    'non_red': False,
+    'nophaseinst': True,
+    'normalize': False,
+    'overlap': 0.5,
+    'saveFormat': 'Wav',
+    'shifts': 0,
+    'split_mode': False,
+    'voc_only': False,
+    'wavtype': 'PCM_16',
 }
+
 default_chunks = data['chunks']
 default_noisereduc_s = data['noisereduc_s']
 
@@ -929,8 +1270,11 @@ def hide_opt():
             yield
         finally:
             sys.stdout = old_stdout
-
-def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
+            
+def main(window: tk.Wm, 
+         text_widget: tk.Text, 
+         button_widget: tk.Button, 
+         progress_var: tk.Variable,
          **kwargs: dict):
 
     global widget_text
@@ -945,9 +1289,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global dim_f_set
     global progress_kwargs
     global base_text
-    global model_set
     global model_set_name
     global stemset_n
+    global stem_text_a
+    global stem_text_b
     global noise_pro_set
     global demucs_model_set
     global autocompensate
@@ -963,6 +1308,11 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global flac_type_set
     global mp3_bit_set
     global normalization_set
+    global demucs_model_version
+    global mdx_model_path
+    global widget_button
+    global stime
+    global model_hash
     
     global demucs_switch
     
@@ -973,6 +1323,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     widget_text = text_widget
     gui_progress_bar = progress_var
+    widget_button = button_widget
     
     #Error Handling
     
@@ -997,171 +1348,154 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
     data.update(kwargs)
     
-    autocompensate = data['autocompensate']
-    
-    if data['mdxnetModeltype'] == 'Vocals (Custom)':
-        stemset = 'v'
-        source_val_set = 3
-        stem_name = '(Vocals)'
-    if data['mdxnetModeltype'] == 'Other (Custom)':
-        stemset = 'o'
-        source_val_set = 2
-        stem_name = '(Other)'
-    if data['mdxnetModeltype'] == 'Drums (Custom)':
-        stemset = 'd'
-        source_val_set = 1
-        stem_name = '(Drums)'
-    if data['mdxnetModeltype'] == 'Bass (Custom)':
-        stemset = 'b'
-        source_val_set = 0
-        stem_name = '(Bass)'
-    if data['mdxnetModeltype'] == 'Vocals (Default)':
-        stemset = 'v'
-        source_val_set = 3
-        stem_name = '(Vocals)'
-    if data['mdxnetModeltype'] == 'Other (Default)':
-        stemset = 'o'
-        source_val_set = 2
-        stem_name = '(Other)'
-    if data['mdxnetModeltype'] == 'Drums (Default)':
-        stemset = 'd'
-        source_val_set = 1
-        stem_name = '(Drums)'
-    if data['mdxnetModeltype'] == 'Bass (Default)':
-        stemset = 'b'
-        source_val_set = 0
-        stem_name = '(Bass)'
-        
-    if data['mdxnetModel'] == 'UVR-MDX-NET 1':
-        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_1_9703.onnx'):
-            model_set = 'UVR_MDXNET_1_9703'
-            model_set_name = 'UVR_MDXNET_1_9703'
-        else:
-            model_set = 'UVR_MDXNET_9703'
-            model_set_name = 'UVR_MDXNET_9703'
-        modeltype = 'v'
-        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-        stemset_n = '(Vocals)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET 2':
-        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_2_9682.onnx'):
-            model_set = 'UVR_MDXNET_2_9682'
-            model_set_name = 'UVR_MDXNET_2_9682'
-        else:
-            model_set = 'UVR_MDXNET_9682'
-            model_set_name = 'UVR_MDXNET_9682'
-        modeltype = 'v'
-        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-        stemset_n = '(Vocals)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET 3':
-        if os.path.isfile('models/MDX_Net_Models/UVR_MDXNET_3_9662.onnx'):
-            model_set = 'UVR_MDXNET_3_9662'
-            model_set_name = 'UVR_MDXNET_3_9662'
-        else:
-            model_set = 'UVR_MDXNET_9662'
-            model_set_name = 'UVR_MDXNET_9662'
-        modeltype = 'v'
-        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-        stemset_n = '(Vocals)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET Karaoke':
-        model_set = 'UVR_MDXNET_KARA'
-        model_set_name = 'UVR_MDXNET_Karaoke'
-        modeltype = 'v'
-        noise_pro = 'MDX-NET_Noise_Profile_14_kHz'
-        stemset_n = '(Vocals)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 3
-        n_fft_scale_set=6144 
-        dim_f_set=2048
-    elif data['mdxnetModel'] == 'UVR-MDX-NET Main':
-        model_set = 'UVR_MDXNET_Main'
-        model_set_name = 'UVR_MDXNET_Main'
-        modeltype = 'v'
-        noise_pro = 'MDX-NET_Noise_Profile_17_kHz'
-        stemset_n = '(Vocals)'
-        if autocompensate == True:
-            compensate = 1.08
-        else:
-            compensate = data['compensate']
-        source_val = 3
-        n_fft_scale_set=7680 
-        dim_f_set=3072
-    elif 'other' in data['mdxnetModel']:
-        model_set = 'other'
-        model_set_name = 'other'
-        modeltype = 'o'
-        noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
-        stemset_n = '(Other)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 2
-        n_fft_scale_set=8192 
-        dim_f_set=2048
-    elif 'drums' in data['mdxnetModel']:
-        model_set = 'drums'
-        model_set_name = 'drums'
-        modeltype = 'd'
-        noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
-        stemset_n = '(Drums)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 1
-        n_fft_scale_set=4096 
-        dim_f_set=2048
-    elif 'bass' in data['mdxnetModel']:
-        model_set = 'bass'
-        model_set_name = 'bass'
-        modeltype = 'b'
-        noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
-        stemset_n = '(Bass)'
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = 0
-        n_fft_scale_set=16384 
-        dim_f_set=2048
+    if data['DemucsModel_MDX'] == "Tasnet v1":
+        demucs_model_set_name = 'tasnet.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Tasnet_extra v1":
+        demucs_model_set_name = 'tasnet_extra.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Demucs v1":
+        demucs_model_set_name = 'demucs.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Demucs v1.gz":
+        demucs_model_set_name = 'demucs.th.gz'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v1":
+        demucs_model_set_name = 'demucs_extra.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v1.gz":
+        demucs_model_set_name = 'demucs_extra.th.gz'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Light v1":
+        demucs_model_set_name = 'light.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Light v1.gz":
+        demucs_model_set_name = 'light.th.gz'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Light_extra v1":
+        demucs_model_set_name = 'light_extra.th'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Light_extra v1.gz":
+        demucs_model_set_name = 'light_extra.th.gz'
+        demucs_model_version = 'v1'
+    elif data['DemucsModel_MDX'] == "Tasnet v2":
+        demucs_model_set_name = 'tasnet-beb46fac.th'
+        demucs_model_version = 'v2'
+    elif data['DemucsModel_MDX'] == "Tasnet_extra v2":
+        demucs_model_set_name = 'tasnet_extra-df3777b2.th'
+        demucs_model_version = 'v2'
+    elif data['DemucsModel_MDX'] == "Demucs48_hq v2":
+        demucs_model_set_name = 'demucs48_hq-28a1282c.th'
+        demucs_model_version = 'v2'
+    elif data['DemucsModel_MDX'] == "Demucs v2":
+        demucs_model_set_name = 'demucs-e07c671f.th'
+        demucs_model_version = 'v2'
+    elif data['DemucsModel_MDX'] == "Demucs_extra v2":
+        demucs_model_set_name = 'demucs_extra-3646af93.th'
+        demucs_model_version = 'v2'
+    elif data['DemucsModel_MDX'] == "Demucs_unittest v2":
+        demucs_model_set_name = 'demucs_unittest-09ebc15f.th'
+        demucs_model_version = 'v2'
+    elif '.ckpt' in data['DemucsModel_MDX'] and 'v2' in data['DemucsModel_MDX']:
+        demucs_model_set_name = data['DemucsModel_MDX']
+        demucs_model_version = 'v2'
+    elif '.ckpt' in data['DemucsModel_MDX'] and 'v1' in data['DemucsModel_MDX']:
+        demucs_model_set_name = data['DemucsModel_MDX']
+        demucs_model_version = 'v1'
+    elif '.gz' in data['DemucsModel_MDX']:
+        demucs_model_set_name = data['DemucsModel_MDX']
+        demucs_model_version = 'v1'
     else:
-        model_set = data['mdxnetModel']
-        model_set_name = data['mdxnetModel']
-        modeltype = stemset
-        noise_pro = 'MDX-NET_Noise_Profile_Full_Band'
-        stemset_n = stem_name
-        if autocompensate == True:
-            compensate = 1.03597672895
-        else:
-            compensate = data['compensate']
-        source_val = source_val_set
-        n_fft_scale_set=int(data['n_fft_scale'])
-        dim_f_set=int(data['dim_f'])
+        demucs_model_set_name = data['DemucsModel_MDX']
+        demucs_model_version = 'v3'
+    
+    autocompensate = data['autocompensate']
         
+    model_set_name = data['mdxnetModel']
+    
+    if model_set_name == 'UVR-MDX-NET 1':
+        mdx_model_name = 'UVR_MDXNET_1_9703'
+    elif model_set_name == 'UVR-MDX-NET 2':
+        mdx_model_name = 'UVR_MDXNET_2_9682'
+    elif model_set_name == 'UVR-MDX-NET 3':
+        mdx_model_name = 'UVR_MDXNET_3_9662'
+    elif model_set_name == 'UVR-MDX-NET Karaoke':
+        mdx_model_name = 'UVR_MDXNET_KARA'
+    elif model_set_name == 'UVR-MDX-NET Main':
+        mdx_model_name = 'UVR_MDXNET_Main'
+    else:
+        mdx_model_name = data['mdxnetModel']
+    
+    
+    mdx_model_path = f'models/MDX_Net_Models/{mdx_model_name}.onnx'
+    
+    model_hash = hashlib.md5(open(mdx_model_path,'rb').read()).hexdigest()
+    model_params = []   
+    model_params = lib_v5.filelist.provide_mdx_model_param_name(model_hash)
+    
+    modeltype = model_params[0]
+    noise_pro = model_params[1]
+    stemset_n = model_params[2]
+    compensate_set = model_params[3]
+    source_val = model_params[4]
+    n_fft_scale_set = model_params[5]
+    dim_f_set = model_params[6]
+    
+    if not data['aud_mdx']:
+        if data['mdxnetModeltype'] == 'Vocals (Custom)':
+            modeltype = 'v'
+            source_val = 3
+            stemset_n = '(Vocals)'
+            n_fft_scale_set = data['n_fft_scale']
+            dim_f_set = data['dim_f']
+        if data['mdxnetModeltype'] == 'Instrumental (Custom)':
+            modeltype = 'v'
+            source_val = 0
+            stemset_n = '(Instrumental)'
+            n_fft_scale_set = data['n_fft_scale']
+            dim_f_set = data['dim_f']
+        if data['mdxnetModeltype'] == 'Other (Custom)':
+            modeltype = 'v'
+            source_val = 2
+            stemset_n = '(Other)'
+            n_fft_scale_set = data['n_fft_scale']
+            dim_f_set = data['dim_f']
+        if data['mdxnetModeltype'] == 'Drums (Custom)':
+            modeltype = 'v'
+            source_val = 1
+            stemset_n = '(Drums)'
+            n_fft_scale_set = data['n_fft_scale']
+            dim_f_set = data['dim_f']
+        if data['mdxnetModeltype'] == 'Bass (Custom)':
+            modeltype = 'v'
+            source_val = 0
+            stemset_n = '(Bass)'
+            n_fft_scale_set = data['n_fft_scale']
+            dim_f_set = data['dim_f']
+            
+    if stemset_n == '(Vocals)':
+        stem_text_a = 'Vocals'
+        stem_text_b = 'Instrumental'
+    elif stemset_n == '(Instrumental)':
+        stem_text_a = 'Instrumental'
+        stem_text_b = 'Vocals'
+    elif stemset_n == '(Other)':
+        stem_text_a = 'Other'
+        stem_text_b = 'the no \"Other\" track'
+    elif stemset_n == '(Drums)':
+        stem_text_a = 'Drums'
+        stem_text_b = 'the no \"Drums\" track'
+    elif stemset_n == '(Bass)':
+        stem_text_a = 'Bass'
+        stem_text_b = 'the no \"Bass\" track'
+    else: 
+        stem_text_a = 'Vocals'
+        stem_text_b = 'Instrumental'
+      
+    if autocompensate:
+        compensate = compensate_set
+    else:
+        compensate = data['compensate']
         
     if data['noise_pro_select'] == 'Auto Select':
         noise_pro_set = noise_pro
@@ -1180,14 +1514,14 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
 
     if data['normalize'] == True:
         normalization_set = spec_utils.normalize
-        print('normalization on')
+        #print('normalization on')
     else:
         normalization_set = spec_utils.nonormalize
-        print('normalization off')
+        #print('normalization off')
 
-    print(n_fft_scale_set)
-    print(dim_f_set)
-    print(data['DemucsModel_MDX'])
+    #print(n_fft_scale_set)
+    #print(dim_f_set)
+    #print(demucs_model_set_name)
     
 
     stime = time.perf_counter()
@@ -1202,7 +1536,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             channel_set = int(data['channel'])
             margin_set = int(data['margin'])
             shift_set = int(data['shifts'])
-            demucs_model_set = data['DemucsModel_MDX']
+            demucs_model_set = demucs_model_set_name
             split_mode = data['split_mode']
             demucs_switch = data['demucsmodel']
             
@@ -1221,37 +1555,6 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     progress_var.set(0)
                     button_widget.configure(state=tk.NORMAL)  # Enable Button
                     return 
-            
-            if stemset_n == '(Bass)':
-                if 'UVR' in demucs_model_set:
-                    text_widget.write('The selected Demucs model can only be used with vocal stems.\n')
-                    text_widget.write('Please select a 4 stem Demucs model and try again.\n\n')
-                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
-                    progress_var.set(0)
-                    button_widget.configure(state=tk.NORMAL)  # Enable Button
-                    return 
-                else:
-                    pass
-            if stemset_n == '(Drums)':
-                if 'UVR' in demucs_model_set:
-                    text_widget.write('The selected Demucs model can only be used with vocal stems.\n')
-                    text_widget.write('Please select a 4 stem Demucs model and try again.\n\n')
-                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
-                    progress_var.set(0)
-                    button_widget.configure(state=tk.NORMAL)  # Enable Button
-                    return 
-                else:
-                    pass
-            if stemset_n == '(Other)':
-                if 'UVR' in demucs_model_set:
-                    text_widget.write('The selected Demucs model can only be used with vocal stems.\n')
-                    text_widget.write('Please select a 4 stem Demucs model and try again.\n\n')
-                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
-                    progress_var.set(0)
-                    button_widget.configure(state=tk.NORMAL)  # Enable Button
-                    return 
-                else:
-                    pass
 
             _mixture = f'{data["input_paths"]}'
             
@@ -1272,10 +1575,25 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             'total_files': len(data['input_paths']),
                             'file_num': file_num}
             
-            print(model_set)
+            
+            if 'UVR' in demucs_model_set:
+                if stemset_n == '(Bass)' or stemset_n == '(Drums)' or stemset_n == '(Other)':
+                    widget_text.write('The selected Demucs model can only be used with vocal or instrumental stems.\n')
+                    widget_text.write('Please select a 4 stem Demucs model and try again.\n\n')
+                    widget_text.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                    gui_progress_bar.set(0)
+                    widget_button.configure(state=tk.NORMAL)  # Enable Button
+                    return
+
+                
+            if stemset_n == '(Instrumental)':
+                if not 'UVR' in demucs_model_set:
+                    widget_text.write(base_text + 'The selected Demucs model cannot be used with this model.\n')
+                    widget_text.write(base_text + 'Only 2 stem Demucs models are compatible with this model.\n')
+                    widget_text.write(base_text + 'Setting Demucs model to \"UVR_Demucs_Model_1\".\n\n')
+                    demucs_model_set = 'UVR_Demucs_Model_1'
             
             try:
-                
                 if float(data['noisereduc_s']) >= 11:
                     text_widget.write('Error: Noise Reduction only supports values between 0-10.\nPlease set a value between 0-10 (with or without decimals) and try again.')
                     progress_var.set(0)
@@ -1325,9 +1643,40 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             demucsmodel = 'models/Demucs_Models/' + str(data['DemucsModel_MDX'])
 
             pred = Predictor()
+
+
+            print('\n\nmodeltype: ', modeltype)
+            print('noise_pro: ', noise_pro)
+            print('stemset_n: ', stemset_n)
+            print('compensate_set: ', compensate_set)
+            print('source_val: ', source_val)
+            print('n_fft_scale_set: ', n_fft_scale_set)
+            print('dim_f_set: ', dim_f_set, '\n')
+
+            if modeltype == 'Not Set' or \
+            noise_pro == 'Not Set' or \
+            stemset_n == 'Not Set' or \
+            compensate_set == 'Not Set' or \
+            source_val == 'Not Set' or \
+            n_fft_scale_set == 'Not Set' or \
+            dim_f_set == 'Not Set':
+                confirm = tk.messagebox.askyesno(title='Unrecognized Model Detected',
+                        message=f'\nWould you like to set the correct model parameters for this model before continuing?\n')
+                
+                if confirm:
+                    pred.mdx_options()
+                else:
+                    text_widget.write(f'An unrecognized model has been detected.\n\n')
+                    text_widget.write(f'Please configure the ONNX model settings accordingly and try again.\n\n')
+                    text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+                    torch.cuda.empty_cache()
+                    progress_var.set(0)
+                    button_widget.configure(state=tk.NORMAL)  # Enable Button
+                    return
+                
             pred.prediction_setup()
             
-            print(demucsmodel)
+            #print(demucsmodel)
             
             # split
             pred.prediction(

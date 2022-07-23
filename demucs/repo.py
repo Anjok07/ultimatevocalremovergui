@@ -88,6 +88,7 @@ class LocalRepo(ModelOnlyRepo):
                 else:
                     xp_sig = file.stem
                 if xp_sig in self._models:
+                    print('Whats xp? ', xp_sig)
                     raise ModelLoadingError(
                         f'Duplicate pre-trained model exist for signature {xp_sig}. '
                         'Please delete all but one.')

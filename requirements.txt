@@ -16,13 +16,8 @@ opencv-python
 openunmix
 Pillow
 psutil
+pyAesCrypt
 pydub
 pyglet
 pyperclip
 pyyaml
-resampy==0.2.2
-samplerate
-scipy
-SoundFile
-soundstretch
-tqdm==4.45.0

@@ -7,8 +7,6 @@ import librosa
 dim_c = 4
 model_path = 'model'
 
-#n_fft_scale = {'vocals-one':6144, 'vocals-two':7680,'*':2}
-
 class Conv_TDF_net_trim(nn.Module):
     def __init__(self, device, n_fft_scale, dim_f, load, model_name, target_name, 
                  L, dim_t, hop=1024):
@@ -20,9 +18,9 @@ class Conv_TDF_net_trim(nn.Module):
         self.hop = hop
         self.n_bins = self.n_fft//2+1
         self.chunk_size = hop * (self.dim_t-1)
-        self.window = torch.hann_window(window_length=self.n_fft, periodic=True).to(device)
+        self.window = torch.hann_window(window_length=self.n_fft, periodic=False).to(device)
         self.target_name = target_name
-        print(n_fft_scale)
+        #print(n_fft_scale)
         out_c = dim_c*4 if target_name=='*' else dim_c
         self.freq_pad = torch.zeros([1, out_c, self.n_bins-self.dim_f, self.dim_t]).to(device)
         
@@ -61,17 +59,21 @@ def istft(spec, hl):
     return wave
 
 def spec_effects(wave, algorithm='Default', value=None):
-    spec = [stft(wave[0],2048,1024),stft(wave[1],2048,1024)]
+    doubleout = spec = [stft(wave[0],2048,1024),stft(wave[1],2048,1024)]
     if algorithm == 'Min_Mag':
+        doubleout
         v_spec_m = np.where(np.abs(spec[1]) <= np.abs(spec[0]), spec[1], spec[0])
         wave = istft(v_spec_m,1024)
     elif algorithm == 'Max_Mag':
+        doubleout
         v_spec_m = np.where(np.abs(spec[1]) >= np.abs(spec[0]), spec[1], spec[0])
         wave = istft(v_spec_m,1024)
     elif algorithm == 'Default':
+        doubleout
         #wave = [istft(spec[0],1024),istft(spec[1],1024)]
         wave = (wave[1] * value) + (wave[0] * (1-value))
     elif algorithm == 'Invert_p':
+            doubleout
             X_mag = np.abs(spec[0])
             y_mag = np.abs(spec[1])            
             max_mag = np.where(X_mag >= y_mag, X_mag, y_mag)  

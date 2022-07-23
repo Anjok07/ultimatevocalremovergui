@@ -38,7 +38,7 @@ class BagOfModels(nn.Module):
                 be all ones, otherwise it should be a list of N list (N number of models),
                 each containing S floats (S number of sources).
             segment (None or float): overrides the `segment` attribute of each model
-                (this is performed inplace, be careful is you reuse the models passed).
+                (this is performed inplace, be careful if you reuse the models passed).
         """
         super().__init__()
         assert len(models) > 0

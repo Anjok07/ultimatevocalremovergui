@@ -16,19 +16,21 @@ This application uses state-of-the-art source separation models to remove vocals
 
 ### Windows Installation
 
-This installation bundle contains the UVR interface, Python (stripped to the bare essentials), PyTorch, and other dependencies needed to run the application effectively. No prerequisite installs required.
+This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites are required.
 
 - Please Note:
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
-    - Application functionality for Intel Pentium & Celeron CPU systems is not guaranteed.
+    - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
 
 - Download the UVR installer via the link below:
     - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4_setup.exe)
-    - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe) - This package is for those who have UVR v5.3 or lower already installed.
+- Update Package instructions for those who have UVR already installed:
+    - If updating from UVR v5.3 - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
+    - If updating from UVR v5.2 - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_From52_Package.exe)
 
 - **Optional**
-    - Additional models and application patches can be downloaded via the "Settings" menu.
+    - Additional models and application patches can be downloaded via the "Settings" menu within the application.
 
 - **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.4.0)
 

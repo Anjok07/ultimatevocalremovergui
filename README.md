@@ -26,11 +26,9 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
 
 - Download the UVR installer via the link below:
-    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4_setup.exe)
-- Update Package instructions for those who have UVR already installed:
-    - If updating from UVR v5.3 - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
-    - If updating from UVR v5.2 - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_From52_Package.exe)
-
+    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
+- For those who have UVR already installed:
+    - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
 - **Optional**
     - Additional models and application patches can be downloaded via the "Settings" menu within the application.
 

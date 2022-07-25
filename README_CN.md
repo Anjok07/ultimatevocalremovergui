@@ -26,7 +26,9 @@
     - 不保证英特尔奔腾和赛扬 CPU 的应用功能。
 
 - 通过以下链接下载UVR安装程序：
-    - [主要下载链接](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup)
+    - [主程序下载链接](https://uvr.uvr.workers.dev/UVR_v5.4_setup.exe)
+    - [主程序镜像链接](https://www.mediafire.com/file/cpuz4dg6aqo27xc/UVR_v5.4_setup.exe)
+    - [主程序百度网盘链接](https://pan.baidu.com/s/1LCC4ZwLr5ArYaz1ZO8cvhA?pwd=uva5)
 - 为已经安装了 UVR 的用户更新软件包的说明：
     - 如果从 UVR v5.3 更新 - [更新包](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
 

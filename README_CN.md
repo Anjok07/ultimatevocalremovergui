@@ -63,7 +63,7 @@
 
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/ense_opt.png?raw=true" />
 
-**用户合奏**
+**手动合奏**
 
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.png?raw=true" />
 

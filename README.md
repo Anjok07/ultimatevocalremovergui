@@ -143,6 +143,7 @@ The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE).
 - [tsurumeso](https://github.com/tsurumeso) - Developed the original VR Architecture code. 
 - [Kuielab & Woosung Choi](https://github.com/kuielab) - Developed the original MDX-Net AI code. 
 - [Adefossez & Demucs](https://github.com/facebookresearch/demucs) - Developed the original Demucs AI code. 
+- [KimberleyJSN](https://github.com/KimberleyJensen) - Advised and aided the implementation of the training scripts for MDX-Net and Demucs. Thank you!
 - [Hv](https://github.com/NaJeongMo/Colab-for-MDX_B) - Helped implement chunks into the MDX-Net AI code. Thank you!
 
 ## Contributing

@@ -659,8 +659,12 @@ class Predictor():
                 chunk_set = 0
             else:
                 widget_text.write(base_text + "Split Mode is off (Chunks enabled).\n")
-                chunk_set = int(data['chunks_d'])
-                widget_text.write(base_text + "Chunk size user-set to "f"{chunk_set}... \n")
+                if data['chunks_d'] == 'Full':
+                    chunk_set = int(0)
+                    widget_text.write(base_text + "Chunk size set to full... \n")
+                else:
+                    chunk_set = data['chunks_d']
+                    widget_text.write(base_text + "Chunk size user-set to "f"{chunk_set}... \n")
             
         samples = mix.shape[-1]
         margin = margin_set

@@ -98,9 +98,14 @@ else:
 
 os.chdir(base_path)  # Change the current working directory to the base path
 
-demucs_v3_repo_folder_path = 'models/Demucs_Models/v3_repo'
+demucs_v3_repo_folder_path = 'models/Demucs_Models'
+demucs_v3_repo_folder_path_b = 'models/Demucs_Models/v3_repo'
+
 if not os.path.isdir(demucs_v3_repo_folder_path):
     os.mkdir(demucs_v3_repo_folder_path)
+    
+if not os.path.isdir(demucs_v3_repo_folder_path_b):
+    os.mkdir(demucs_v3_repo_folder_path_b)
 
 try:
     shutil.move("models/Demucs_Models/5d2d6c55-db83574e.th", "models/Demucs_Models/v3_repo/5d2d6c55-db83574e.th")
@@ -241,7 +246,7 @@ DEFAULT_DATA = {
     'break': False,
     'channel': 64,
     'chunks': 'Auto',
-    'chunks_d': 'Full',
+    'chunks_d': 'Auto',
     'compensate': 1.03597672895,
     'demucs_only': False,
     'demucs_stems': 'All Stems',
@@ -1028,26 +1033,34 @@ class MainWindow(TkinterDnD.Tk):
         #self.command_Text.write(f'Ultimate Vocal Remover [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n')
         
         global current_version
-        global update_signal_url
-        
-        update_signal_url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
-        
+
         with open('uvr_patch_version.txt', 'r') as file :
             current_version = file.read()
-        
-        try:
-            url = update_signal_url
-            file = urllib.request.urlopen(url)
-            for line in file:
-                patch_name = line.decode("utf-8")
-                if patch_name == current_version:
-                    label_set = ''
-                else:
-                    label_set = f"New Update Found: {patch_name}\n\nClick the update button in the \"Settings\" menu to download and install!"
-        except:
-            label_set = " "
-        
-        self.command_Text.write(f'Ultimate Vocal Remover v5.4.0 [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n\n{label_set}')   
+
+        def start_target_update():
+            
+            def target_update():
+                update_signal_url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
+                url = update_signal_url
+                label_set = " "
+                try:
+                    file = urllib.request.urlopen(url)
+                    for line in file:
+                        patch_name = line.decode("utf-8")
+                        if patch_name == current_version:
+                            self.command_Text.write(f'Ultimate Vocal Remover v5.4.0 [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]')
+                        else:
+                            label_set = f"New Update Found: {patch_name}\n\nClick the update button in the \"Settings\" menu to download and install!"
+                
+                            self.command_Text.write(f'Ultimate Vocal Remover v5.4.0 [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n\n{label_set}')
+                except:
+                        self.command_Text.write(f'Ultimate Vocal Remover v5.4.0 [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]')
+                        
+            rlg = KThread(target=target_update)
+            rlg.start()
+
+        start_target_update()
+
 
     def bind_widgets(self):
         """Bind widgets to the drag & drop mechanic"""
@@ -4271,25 +4284,6 @@ class MainWindow(TkinterDnD.Tk):
 
         update_var = tk.StringVar(value='')
         update_button_var = tk.StringVar(value='Check for Updates')
-        
-        try:
-            url_u = update_signal_url
-            file = urllib.request.urlopen(url_u)
-            for line in file:
-                patch_name = line.decode("utf-8")
-                if patch_name == current_version:
-                    update_var.set('UVR Version Current')
-                    update_button_var.set('Check for Updates')
-                else:
-                    label_set_a = f"Update Found: {patch_name}"
-                    update_var.set(str(label_set_a))
-                    update_button_var.set('Click Here to Update')
-            relf="ridge"
-        except:
-            relf="flat"
-            update_button_var.set('Check for Updates')
-            update_var.set('')
-
         update_set_var = tk.StringVar(value='UVR Version Current')
 
         top= Toplevel(self)
@@ -4377,23 +4371,6 @@ class MainWindow(TkinterDnD.Tk):
             l0=ttk.Button(frame0, text='No', command=no)
 
             l0.grid(row=3,column=0,padx=0,pady=5)
-           
-        def check_updates():
-
-            url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
-            file = urllib.request.urlopen(url)
-            for line in file:
-                patch_name = line.decode("utf-8")
-
-                if patch_name == current_version:
-                    update_var.set('UVR Version Current')
-                else:
-                    label_set = f"Update Found: {patch_name}"
-                    update_var.set(str(label_set))
-                    update_set_var.set(str(label_set))
-                    
-                    askyesorno()
-
 
         def change_event():
             self.delete_temps()
@@ -4486,7 +4463,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Button(frame0,text='Open Error Log', command=close_win_error_log)
         l0.grid(row=6,column=0,padx=0,pady=5)
         
-        l0=tk.Label(frame0,text="Additional Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text=f"Additional Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=7,column=0,padx=0,pady=10)
         
         l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.settest_var) 
@@ -4504,14 +4481,62 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Button(frame0,text='Close Window', command=close_win)
         l0.grid(row=12,column=0,padx=0,pady=5)
         
+        def start_target_update():
+            def target_update():
+                update_var.set(' Loading version information... ')
+                update_signal_url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
+                url = update_signal_url
+                try:
+                    file = urllib.request.urlopen(url)
+                    for line in file:
+                        patch_name = line.decode("utf-8")
+                        if patch_name == current_version:
+                            update_var.set(' UVR Version Current ')
+                            update_button_var.set('Check for Updates')
+                        else:
+                            label_set_a = f" Update Found: {patch_name} "
+                            update_var.set(str(label_set_a))
+                            update_button_var.set('Click Here to Update')
+                except:
+                        update_var.set(' Version Status: No Internet Connection ') 
+            rlg = KThread(target=target_update)
+            rlg.start()
+
+        start_target_update()
+
         l0=tk.Label(frame0,text="Application Updates",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=13,column=0,padx=0,pady=10)
         
-        l0=ttk.Button(frame0,text=update_button_var.get(), command=check_updates)
+        def start_check_updates():
+            def check_updates():
+                try:
+                    url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
+                    file = urllib.request.urlopen(url)
+                    for line in file:
+                        patch_name = line.decode("utf-8")
+                        if patch_name == current_version:
+                            update_var.set(' UVR Version Current ')
+                            update_button_var.set('Check for Updates')
+                        else:
+                            label_set = f"Update Found: {patch_name}"
+                            update_button_var.set('Click Here to Update')
+                            update_var.set(str(label_set))
+                            update_set_var.set(str(label_set))
+                            askyesorno()
+                except:
+                        update_var.set(' Version Status: No Internet Connection ') 
+
+            rlg = KThread(target=check_updates)
+            rlg.start()
+        
+        l0=ttk.Button(frame0,text=update_button_var.get(), command=start_check_updates)
         l0.grid(row=14,column=0,padx=0,pady=5)
         
-        l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief=relf, fg="#13a4c9")
+        l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief="ridge", fg="#13a4c9")
         l0.grid(row=15,column=0,padx=0,pady=5)
+        
+        l0=tk.Label(frame0,text=f"{space_small}{space_small}{space_small}{space_small}",font=("Century Gothic", "13"), justify="center", relief="flat", fg="#13a4c9")
+        l0.grid(row=16,column=0,padx=0,pady=0)
         
         frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
@@ -4565,8 +4590,8 @@ class MainWindow(TkinterDnD.Tk):
             
             top_code= Toplevel()
 
-            window_height = 300
-            window_width = 300
+            window_height = 440
+            window_width = 320
             
             top_code.title("User Download Codes")
             
@@ -4612,12 +4637,16 @@ class MainWindow(TkinterDnD.Tk):
                     else:
                         refresh_list()
             
+            def open_patreon():
+                top_code.attributes("-topmost", False)
+                callback("https://www.patreon.com/uvr")
+            
             def quit():
                 top.attributes("-topmost", True)
                 top_code.destroy()
             
             l0=tk.Label(frame0, text=f'User Download Codes', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
-            l0.grid(row=0,column=0,padx=0,pady=10)    
+            l0.grid(row=0,column=0,padx=0,pady=5)    
             
             l0=tk.Label(frame0, text=f'{space_medium}User Code{space_medium}', font=("Century Gothic", "9"), foreground='#13a4c9')
             l0.grid(row=1,column=0,padx=0,pady=5)       
@@ -4640,6 +4669,16 @@ class MainWindow(TkinterDnD.Tk):
             l0=ttk.Button(frame0, text='Cancel', command=quit)
 
             l0.grid(row=6,column=0,padx=0,pady=5)
+            
+            l0=tk.Label(frame0, text=f'UVR Patreon', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0.grid(row=7,column=0,padx=0,pady=5)    
+            
+            l0=tk.Label(frame0, text=f'Obtain codes by becoming an official Patreon.\nClick the button below to open the UVR Patreon link.', font=("Century Gothic", "8"), foreground='#13a4c9')
+            l0.grid(row=8,column=0,padx=0,pady=5)
+            
+            l0=ttk.Button(frame0, text='UVR Patreon Link', command=open_patreon)
+
+            l0.grid(row=9,column=0,padx=0,pady=5)
             
         def download_code():
             """
@@ -5505,6 +5544,31 @@ class MainWindow(TkinterDnD.Tk):
                     
                     try:
                         wget.download(url_code, encrypted_file_code_vip, bar=download_progress_bar)
+                        with open(download_code_file, "r") as f:
+                            user_download_code_read = f.read()
+                        
+                        bufferSize = 128 * 1024
+                        password = user_download_code_read
+                        
+                        try:
+                            pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
+                        except:
+                            try:
+                                url_v_key = f"https://github.com/TRvlvr/application_data/raw/main/filelists/aes_dev/vip_key.txt.aes"
+                                wget.download(url_v_key, 'lib_v5/filelists/download_codes/temp/vip_key.aes', bar=download_progress_bar)
+                                pyAesCrypt.decryptFile('lib_v5/filelists/download_codes/temp/vip_key.aes', 
+                                                    'lib_v5/filelists/download_codes/temp/vip_key.txt', password, bufferSize)
+                                
+                                with open('lib_v5/filelists/download_codes/temp/vip_key.txt', "r") as f:
+                                    vip_code_read = f.read()
+                                
+                                password = vip_code_read
+
+                                pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
+                            except:
+                                download_code()
+                                change_state_locked()
+                                return
                     except Exception as e:
                         short_error = f'{e}'
                         change_state_failed()
@@ -5512,33 +5576,6 @@ class MainWindow(TkinterDnD.Tk):
                             self.download_progress_var.set('No Internet Connection Detected')
                         else: 
                             self.download_progress_var.set(short_error) 
-                            
-                            
-                    with open(download_code_file, "r") as f:
-                        user_download_code_read = f.read()
-                    
-                    bufferSize = 128 * 1024
-                    password = user_download_code_read
-                    
-                    try:
-                        pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
-                    except:
-                        try:
-                            url_v_key = f"https://github.com/TRvlvr/application_data/raw/main/filelists/aes_dev/vip_key.txt.aes"
-                            wget.download(url_v_key, 'lib_v5/filelists/download_codes/temp/vip_key.aes', bar=download_progress_bar)
-                            pyAesCrypt.decryptFile('lib_v5/filelists/download_codes/temp/vip_key.aes', 
-                                                'lib_v5/filelists/download_codes/temp/vip_key.txt', password, bufferSize)
-                            
-                            with open('lib_v5/filelists/download_codes/temp/vip_key.txt', "r") as f:
-                                vip_code_read = f.read()
-                            
-                            password = vip_code_read
-
-                            pyAesCrypt.decryptFile(encrypted_file_code_vip, file_code_vip, password, bufferSize)
-                        except:
-                            download_code()
-                            change_state_locked()
-                            return
                     
                     with open(file_code_vip, "r") as f:
                         link=f.read()  
@@ -5577,6 +5614,20 @@ class MainWindow(TkinterDnD.Tk):
                     
                     try:
                         wget.download(url_code, encrypted_file_code, bar=download_progress_bar)
+                        with open(download_code_file, "r") as f:
+                            user_download_code_read = f.read()
+                        
+                        bufferSize = 128 * 1024
+                        password = user_download_code_read
+                        # encrypt
+                        
+                        try:
+                            pyAesCrypt.decryptFile(encrypted_file_code, file_code, password, bufferSize)
+                        except:
+                            download_code()
+                            change_state_locked()
+                            return
+                        
                     except Exception as e:
                         short_error = f'{e}'
                         change_state_failed()
@@ -5584,20 +5635,6 @@ class MainWindow(TkinterDnD.Tk):
                             self.download_progress_var.set('No Internet Connection Detected')
                         else: 
                             self.download_progress_var.set(short_error) 
-                            
-                    with open(download_code_file, "r") as f:
-                        user_download_code_read = f.read()
-                    
-                    bufferSize = 128 * 1024
-                    password = user_download_code_read
-                    # encrypt
-                    
-                    try:
-                        pyAesCrypt.decryptFile(encrypted_file_code, file_code, password, bufferSize)
-                    except:
-                        download_code()
-                        change_state_locked()
-                        return
                     
                     with open(file_code, "r") as f:
                         link=f.read()
@@ -5698,32 +5735,29 @@ class MainWindow(TkinterDnD.Tk):
         mdx_original_hashes_temp = "lib_v5/filelists/hashes/temp/mdx_original_hashes.txt"
         download_links_file_temp = "lib_v5/filelists/download_lists/temp/download_links.json"
             
-        def move_lists_from():
-            shutil.move(vr_download_list_file, vr_download_list_temp_file)
-            shutil.move(mdx_download_list_file, mdx_download_list_temp_file)
-            shutil.move(demucs_download_list_file, demucs_download_list_temp_file)
-            shutil.move(mdx_new_hashes, mdx_new_hashes_temp)
-            shutil.move(mdx_new_inst_hashes, mdx_new_inst_hashes_temp)
-            shutil.move(mdx_original_hashes, mdx_original_hashes_temp)
-            shutil.move(download_links_file, download_links_file_temp)
-            
-        def move_lists_back():
-            shutil.move(vr_download_list_temp_file, vr_download_list_file)
-            shutil.move(mdx_download_list_temp_file, mdx_download_list_file)
-            shutil.move(demucs_download_list_temp_file, demucs_download_list_file)
-            shutil.move(mdx_new_hashes_temp, mdx_new_hashes)
-            shutil.move(mdx_new_inst_hashes_temp, mdx_new_inst_hashes)
-            shutil.move(mdx_original_hashes_temp, mdx_original_hashes)
-            shutil.move(download_links_file_temp, download_links_file)
+        def move_lists_from_temp():
+            try:
+                shutil.move(vr_download_list_temp_file, vr_download_list_file)
+                shutil.move(mdx_download_list_temp_file, mdx_download_list_file)
+                shutil.move(demucs_download_list_temp_file, demucs_download_list_file)
+                shutil.move(mdx_new_hashes_temp, mdx_new_hashes)
+                shutil.move(mdx_new_inst_hashes_temp, mdx_new_inst_hashes)
+                shutil.move(mdx_original_hashes_temp, mdx_original_hashes)
+                shutil.move(download_links_file_temp, download_links_file)
+            except:
+                pass
             
         def remove_lists_temp():
-            os.remove(vr_download_list_temp_file)
-            os.remove(mdx_download_list_temp_file)
-            os.remove(demucs_download_list_temp_file)
-            os.remove(mdx_new_hashes_temp)
-            os.remove(mdx_new_inst_hashes_temp)
-            os.remove(mdx_original_hashes_temp)
-            os.remove(download_links_file_temp)
+            try:
+                os.remove(vr_download_list_temp_file)
+                os.remove(mdx_download_list_temp_file)
+                os.remove(demucs_download_list_temp_file)
+                os.remove(mdx_new_hashes_temp)
+                os.remove(mdx_new_inst_hashes_temp)
+                os.remove(mdx_original_hashes_temp)
+                os.remove(download_links_file_temp)
+            except:
+                pass
             
         def refresh_download_list_only():
             download_links = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_lists/download_links.json"
@@ -5753,15 +5787,14 @@ class MainWindow(TkinterDnD.Tk):
                     url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
                     url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
                     url_7 = download_links
-                    move_lists_from()
-                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
-                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
-                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
-                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
-                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
-                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
-                    wget.download(url_7, download_links_file, bar=download_progress_bar)
-                    remove_lists_temp()
+                    wget.download(url_1, vr_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
+                    move_lists_from_temp()
                     self.download_progress_bar_var.set('Download list\'s refreshed!')
                     top.destroy()
                     self.settings(choose=True)
@@ -5773,7 +5806,7 @@ class MainWindow(TkinterDnD.Tk):
                     else: 
                         self.download_progress_var.set(short_error)
                     try:
-                        move_lists_back()
+                        remove_lists_temp()
                     except:
                         pass
             
@@ -5791,15 +5824,14 @@ class MainWindow(TkinterDnD.Tk):
                     url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
                     url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
                     url_7 = download_links
-                    move_lists_from()
-                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
-                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
-                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
-                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
-                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
-                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
-                    wget.download(url_7, download_links_file, bar=download_progress_bar)
-                    remove_lists_temp()
+                    wget.download(url_1, vr_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
+                    move_lists_from_temp()
                     self.download_progress_bar_var.set('VIP: Download list\'s refreshed!')
                     top.destroy()
                     self.settings(choose=True)
@@ -5811,7 +5843,7 @@ class MainWindow(TkinterDnD.Tk):
                     else: 
                         self.download_progress_var.set(short_error)
                     try:
-                        move_lists_back()
+                        remove_lists_temp()
                     except:
                         pass
             
@@ -5833,15 +5865,14 @@ class MainWindow(TkinterDnD.Tk):
                     url_5 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_new_inst_hashes.txt'
                     url_6 = 'https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/hashes/mdx_original_hashes.txt'
                     url_7 = download_links
-                    move_lists_from()
-                    wget.download(url_1, vr_download_list_file, bar=download_progress_bar)
-                    wget.download(url_2, mdx_download_list_file, bar=download_progress_bar)
-                    wget.download(url_3, demucs_download_list_file, bar=download_progress_bar)
-                    wget.download(url_4, mdx_new_hashes, bar=download_progress_bar)
-                    wget.download(url_5, mdx_new_inst_hashes, bar=download_progress_bar)
-                    wget.download(url_6, mdx_original_hashes, bar=download_progress_bar)
-                    wget.download(url_7, download_links_file, bar=download_progress_bar)
-                    remove_lists_temp()
+                    wget.download(url_1, vr_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_2, mdx_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_3, demucs_download_list_temp_file, bar=download_progress_bar)
+                    wget.download(url_4, mdx_new_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_5, mdx_new_inst_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_6, mdx_original_hashes_temp, bar=download_progress_bar)
+                    wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
+                    move_lists_from_temp()
                     self.download_progress_bar_var.set('Developer: Download list\'s refreshed!')
                     top.destroy()
                     self.settings(choose=True)
@@ -5853,7 +5884,7 @@ class MainWindow(TkinterDnD.Tk):
                     else: 
                         self.download_progress_var.set(short_error)
                     try:
-                        move_lists_back()
+                        remove_lists_temp()
                     except:
                         pass
             
@@ -5896,7 +5927,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0, textvariable=self.download_progress_bar_var, font=("Century Gothic", "9"), foreground='#13a4c9', borderwidth=0)
         l0.grid(row=10,column=0,padx=0,pady=5)
         
-        l0=tk.Label(frame0, textvariable=self.download_progress_var, font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, textvariable=self.download_progress_var, font=("Century Gothic", "9"), wraplength=350, foreground='#13a4c9')
         l0.grid(row=11,column=0,padx=0,pady=5)
         
         l0=ttk.Progressbar(frame0, variable=self.download_progress_bar_zip_var)

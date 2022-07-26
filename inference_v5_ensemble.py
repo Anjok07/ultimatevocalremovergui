@@ -366,6 +366,15 @@ class Predictor():
         #Main Save Path
         save_path = os.path.dirname(base_name)
         
+        #Write name
+        
+        if stemset_n == '(Vocals)':
+            stem_text_a = 'Vocals'
+            stem_text_b = 'Instrumental'
+        elif stemset_n == '(Instrumental)':
+            stem_text_a = 'Instrumental'
+            stem_text_b = 'Vocals'
+        
         #Vocal Path
 
         if stemset_n == '(Vocals)':
@@ -429,9 +438,9 @@ class Predictor():
             c += 1
             if demucs_switch == 'off':
                 if data['inst_only'] and not data['voc_only']:
-                    widget_text.write(base_text + 'Preparing to save Instrumental...')
+                    widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
                 sf.write(non_reduced_vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
@@ -448,9 +457,9 @@ class Predictor():
                 step=(0.95))
             else:
                 if data['inst_only'] and not data['voc_only']:
-                    widget_text.write(base_text + 'Preparing Instrumental...')
+                    widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
-                    widget_text.write(base_text + 'Saving Vocals... ')
+                    widget_text.write(base_text + f'Saving {stem_text_a}... ')
                 if demucs_only == 'on':
                     if 'UVR' in model_set_name:
                         sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
@@ -480,13 +489,13 @@ class Predictor():
         else:
             c += 1
             if demucs_switch == 'off':
-                widget_text.write(base_text + 'Saving Vocals..')
+                widget_text.write(base_text + f'Saving {stem_text_a}... ')
                 sf.write(vocal_path, sources[c].T, samplerate, subtype=wav_type_set)
                 update_progress(**progress_kwargs,
                 step=(0.9))
                 widget_text.write('Done!\n')
             else:
-                widget_text.write(base_text + 'Saving Vocals... ')
+                widget_text.write(base_text + f'Saving {stem_text_a}... ')
                 if demucs_only == 'on':
                     if 'UVR' in model_set_name:
                         sf.write(vocal_path, sources[1].T, samplerate, subtype=wav_type_set)
@@ -507,7 +516,7 @@ class Predictor():
                     'files':[str(music_file), vocal_path],
                 }
             ]         
-            widget_text.write(base_text + 'Saving Instrumental... ')      
+            widget_text.write(base_text + f'Saving {stem_text_b}... ')      
             for i, e in tqdm(enumerate(finalfiles)):
 
                 wave, specs = {}, {}
@@ -1958,6 +1967,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     
                 if data['mdx_ensem'] == 'No Model':
                     mdx_ensem = 'pass'
+                    mdx_model_run_mul_a = 'pass'
 
                 #MDX-Net/Demucs Model 2
                 
@@ -2273,6 +2283,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_only_ensem_a = demucs_model_set_name_a
                     
                 if data['mdx_only_ensem_a'] == 'No Model':
+                    mdx_model_run_a = 'no'
                     mdx_only_ensem_a = 'pass'
 
                 #MDX-Net/Demucs Model 2
@@ -2310,6 +2321,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_only_ensem_b = demucs_model_set_name_b
                     
                 if data['mdx_only_ensem_b'] == 'No Model':
+                    mdx_model_run_b = 'no'
                     mdx_only_ensem_b = 'pass'
                     
                 #MDX-Net/Demucs Model 3
@@ -2347,6 +2359,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_only_ensem_c = demucs_model_set_name_c
                     
                 if data['mdx_only_ensem_c'] == 'No Model':
+                    mdx_model_run_c = 'no'
                     mdx_only_ensem_c = 'pass'
                     
                 #MDX-Net/Demucs Model 4
@@ -2384,6 +2397,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_only_ensem_d = demucs_model_set_name_d
                     
                 if data['mdx_only_ensem_d'] == 'No Model':
+                    mdx_model_run_d = 'no'
                     mdx_only_ensem_d = 'pass'
                     
                 #MDX-Net/Demucs Model 5
@@ -2421,6 +2435,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                     mdx_only_ensem_e = demucs_model_set_name_e
                     
                 if data['mdx_only_ensem_e'] == 'No Model':
+                    mdx_model_run_e = 'no'
                     mdx_only_ensem_e = 'pass'
                       
                     

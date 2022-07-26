@@ -1,3 +1,4 @@
+pyAesCrypt
 asteroid>=0.5.0
 audioread
 audiosegment

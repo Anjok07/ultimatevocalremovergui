@@ -30,7 +30,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 - Download the UVR installer via the link below:
     - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file/cpuz4dg6aqo27xc/UVR_v5.4_setup.exe)
+    - [Main Download Link mirror](https://www.mediafire.com/file/7ugm0lo8sec7rwr/UVR_v5.4.0_setup.exe)
 - Update Package instructions for those who have UVR already installed:
     - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
 - **Optional**

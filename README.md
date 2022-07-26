@@ -14,6 +14,9 @@ This application uses state-of-the-art source separation models to remove vocals
     - [Anjok07](https://github.com/anjok07)
     - [aufr33](https://github.com/aufr33)
 
+- **Support the Project**
+    - If you enjoy UVR and want to support the project you can donate via Patreon! [Click here for more information.](https://www.patreon.com/uvr)
+
 ## Installation
 
 ### Windows Installation

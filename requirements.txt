@@ -28,6 +28,5 @@ resampy==0.2.2
 samplerate
 scipy
 SoundFile
-SoundFile
 soundstretch
 wget

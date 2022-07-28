@@ -66,10 +66,10 @@ def get_download_links(links, downloads=''):
         
     if downloads == 'Demucs v3: mdx_extra':
         url_1 = download_links['Demucs_v3_mdx_extra_url_1']
-        url_2 = download_links['Demucs_v3_mdx_extra_url_1']
-        url_3 = download_links['Demucs_v3_mdx_extra_url_1']
-        url_4 = download_links['Demucs_v3_mdx_extra_url_1']
-        url_5 = download_links['Demucs_v3_mdx_extra_url_1']
+        url_2 = download_links['Demucs_v3_mdx_extra_url_2']
+        url_3 = download_links['Demucs_v3_mdx_extra_url_3']
+        url_4 = download_links['Demucs_v3_mdx_extra_url_4']
+        url_5 = download_links['Demucs_v3_mdx_extra_url_5']
         
         links = url_1, url_2, url_3, url_4, url_5
         

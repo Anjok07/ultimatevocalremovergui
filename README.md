@@ -8,7 +8,7 @@ English | [简体中文](README_zh_CN.md)
 
 ## About
 
-This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs v3 4-stem models).
+This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all the models provided in this package (except for the Demucs v3 4-stem models).
 
 - **Core Developers**
     - [Anjok07](https://github.com/anjok07)
@@ -40,7 +40,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### Other Platforms
 
-This application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
+UVR can run on macOS & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
 
 ## Application Manual
 
@@ -66,17 +66,18 @@ This application can be run on Mac & Linux by performing a manual install (see t
 
 **User Ensemble**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.pngf?raw=true" />
 
 ### Other Application Notes
 
-- Nvidia GPUs with at least 8GBs of V-RAM are recommended.
-- This application is only compatible with 64-bit platforms. 
-- This application relies on Sox - Sound Exchange for Noise Reduction.
-- This application relies on FFmpeg to process non-wav audio files.
-- The application will automatically remember your settings when closed.
-- Conversion times will significantly depend on your hardware. 
-- These models are computationally intensive. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- UVR only supports 64-bit platforms.
+- NVIDIA GPUs with at least 8GBs of V-RAM are recommended.
+- Additional pakages are required for certain functions:
+  - SoX (Sound eXchange) is required for noise reduction.
+  - FFmpeg is required to process non-wav audio files.
+- Settings will be automatically saved on quitting.
+- Time of processing significantly depends on your hardware spec. 
+- These models are computationally intensive. Please proceed with caution and pay attention to your computer to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
 
 ## Change Log
 
@@ -86,10 +87,10 @@ This application can be run on Mac & Linux by performing a manual install (see t
    - All v2 and v4 models have been removed.
    - Ensemble Mode added - This allows the user to get the most robust result from each model.
    - Stacked models have been entirely removed.
-     The new aggression setting and model ensembling have replaced the stacked model feature.
+     The new aggression setting and model ensemble have replaced the stacked model feature.
    - The NFFT, HOP_SIZE, and SR values are now set internally.
    - The MDX-NET AI engine and models have been added.
-     - This is a brand new feature added to the UVR GUI. 
+     - This is a brand-new feature added to the UVR GUI. 
      - 4 MDX-Net models are included in this package.
      - The MDX-Net models provided were trained by the core UVR developers
      - This network is less resource-intensive but incredibly powerful.
@@ -112,10 +113,24 @@ If possible, click the "Settings Button" to the left of the "Start Processing" b
 
 ## Manual Installation (For Developers)
 
-These instructions are for those installing UVR v5.2.0 **manually** only.
+These instructions are for those installing UVR v5.4.0 **manually** only.
+
+### Prerequisites
+
+- FFmpeg
+
+   FFmpeg must be installed and configured for the application to process any non-WAV track. You will need to look up instructions on how to configure it on your operating system.
+
+
+- **(Windows Only)** Microsoft Visual C++ Build Tools
+
+    VS C++ Build Tools will be required when you use `pip install` certain pakages. You will need to install Visual C++ Build Tools in the first place, otherwise, `Microsoft Visual C++ 14.0 is required. Get it with “Microsoft Visual C++ Build Tools”` error will be thrown.
+
+
+### Steps
 
 1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
-    - **Note:** Ensure the *"Add Python to PATH"* box is checked
+    - **Note:** Ensure the *"Add Python to PATH"* box is checked.
 2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 3. Download the models via the "Settings" menu within the application.
 4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
@@ -130,10 +145,6 @@ pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f ht
 ```
 
 From here you should be able to open and run the UVR.py file
-
-- FFmpeg 
-
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction on how to configure it on your operating system.
 
 ## License
 

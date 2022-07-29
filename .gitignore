@@ -4,3 +4,7 @@ data.pkl
 model_iter26_sr33075_hl384_w512.pth
 baseline.pth
 temp.wav
+
+#IDE
+venv
+.idea

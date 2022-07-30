@@ -18,7 +18,6 @@ opencv-python
 openunmix
 Pillow
 psutil
-pyAesCrypt
 pydub
 pyglet
 pyperclip

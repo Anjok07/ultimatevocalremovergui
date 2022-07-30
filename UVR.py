@@ -53,6 +53,8 @@ import importlib
 import urllib.request
 import pyAesCrypt
 from __version__ import VERSION
+import locale   # Get system language
+from i18n import i18n
 from win32api import GetSystemMetrics
 
 try:
@@ -263,6 +265,7 @@ DEFAULT_DATA = {
     'inputPaths': [],
     'inst_only': False,
     'inst_only_b': False,
+    'language': 'en',
     'lastDir': None,
     'margin': 44100,
     'mdx_ensem': 'MDX-Net: UVR-MDX-NET Main',
@@ -458,6 +461,8 @@ class ThreadSafeConsole(tk.Text):
         self.configure(state=tk.DISABLED)
         self.after(100, self.update_me)
 
+
+
 class MainWindow(TkinterDnD.Tk):
     # --Constants--
     # Layout
@@ -591,6 +596,17 @@ class MainWindow(TkinterDnD.Tk):
         # -Tkinter Value Holders-
         data = load_data()
         data_alt = load_data_alt()
+
+        # i18n string
+
+        try:
+            self.lang_code = data['language']
+        except:
+            self.lang_code = data_alt['language']
+
+
+        self.i18n = i18n.I18N(self.lang_code)
+        self.lang_var = tk.StringVar(value=self.i18n.get_cur_lang())
 
         try:
             self.agg_var = tk.StringVar(value=data['agg'])
@@ -1108,7 +1124,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # Save To Option
         self.filePaths_saveTo_Button = ttk.Button(master=self.filePaths_Frame,
-                                                  text='Select output',
+                                                  text=self.i18n.get_str("select-output"),
                                                   command=self.open_export_filedialog)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame,
 
@@ -1117,7 +1133,7 @@ class MainWindow(TkinterDnD.Tk):
                                                 )
         # Select Music Files Option
         self.filePaths_musicFile_Button = ttk.Button(master=self.filePaths_Frame,
-                                                     text='Select input',
+                                                     text=self.i18n.get_str("select-input"),
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
                                                    textvariable=self.inputPathsEntry_var,
@@ -1206,7 +1222,7 @@ class MainWindow(TkinterDnD.Tk):
                                                           self.ensChoose_var,
                                                           None, 'Multi-AI Ensemble', 'Basic VR Ensemble', 'Basic MD Ensemble', 'Manual Ensemble')
         
-        # Choose Agorithim
+        # Choose Algorithm
         self.options_algo_Label = tk.Label(master=self.options_Frame,
                                                text='Choose Algorithm', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9')
@@ -2992,7 +3008,8 @@ class MainWindow(TkinterDnD.Tk):
         else:
             self.settings()
             pass
-        
+
+
     def shutdown(self):
         """
         Shuts down the application after asking for confirmation
@@ -4288,10 +4305,10 @@ class MainWindow(TkinterDnD.Tk):
 
         top= Toplevel(self)
 
-        window_height = 750
+        window_height = 820
         window_width = 500
         
-        top.title("Settings Guide")
+        top.title("Settings")
         
         top.resizable(False, False)  # This code helps to disable windows from resizing
         
@@ -4318,7 +4335,7 @@ class MainWindow(TkinterDnD.Tk):
             window_height = 250
             window_width = 370
             
-            top_dialoge.title("Update Found")
+            top_dialoge.title("New Update Available!")
             
             top_dialoge.resizable(False, False)  # This code helps to disable windows from resizing
             
@@ -4415,13 +4432,23 @@ class MainWindow(TkinterDnD.Tk):
             top.destroy()
             self.restart()
 
+        def set_language(lang_name):
+            top.destroy()
+            self.lang_code = self.i18n.get_lang_code_by_name(lang_name)
+            self.save_values()
+            # try:
+            #     subprocess.Popen(f'UVR_Launcher.exe')
+            # except:
+            #     subprocess.Popen(f'python "{__file__}"', shell=True)
+            exit()
+
         tabControl = ttk.Notebook(top)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Settings Guide')
+        tabControl.add(tab1, text ='General')
         tabControl.add(tab2, text ='Audio Format Settings')
         tabControl.add(tab3, text ='Download Center')
 
@@ -4440,50 +4467,55 @@ class MainWindow(TkinterDnD.Tk):
             tabControl.select(tab3)
 
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
-        frame0.grid(row=0,column=0,padx=0,pady=0)  
-        
+        frame0.grid(row=0,column=0,padx=0,pady=0)
+
+        l0=tk.Label(frame0,text="Language",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0.grid(row=0, column=0, padx=10, pady=10)
+        l0=ttk.OptionMenu(frame0, self.lang_var, None, *(self.i18n.get_lang_list()), command=set_language)
+        l0.grid(row=1, column=0, padx=10, pady=5)
+
         l0=tk.Label(frame0,text="Main Menu",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
-        l0.grid(row=0,column=0,padx=0,pady=10)
-        
+        l0.grid(row=2,column=0,padx=0,pady=10)
+
         l0=ttk.Button(frame0,text="Ensemble Customization Options", command=close_win_custom_ensemble)
-        l0.grid(row=1,column=0,padx=0,pady=5)
-        
-        l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=close_win_advanced_mdx_options)
-        l0.grid(row=2,column=0,padx=0,pady=5)
-        
-        l0=ttk.Button(frame0,text="Advanced Demucs Options", command=close_win_advanced_demucs_options)
         l0.grid(row=3,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Advanced VR Options", command=close_win_advanced_vr_options)
+        l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=close_win_advanced_mdx_options)
         l0.grid(row=4,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Open Help Guide", command=close_win_help)
+        l0=ttk.Button(frame0,text="Advanced Demucs Options", command=close_win_advanced_demucs_options)
         l0.grid(row=5,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Open Error Log', command=close_win_error_log)
+        l0=ttk.Button(frame0,text="Advanced VR Options", command=close_win_advanced_vr_options)
         l0.grid(row=6,column=0,padx=0,pady=5)
         
+        l0=ttk.Button(frame0,text="Open Help Guide", command=close_win_help)
+        l0.grid(row=7,column=0,padx=0,pady=5)
+        
+        l0=ttk.Button(frame0,text='Open Error Log', command=close_win_error_log)
+        l0.grid(row=8,column=0,padx=0,pady=5)
+        
         l0=tk.Label(frame0,text=f"Additional Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
-        l0.grid(row=7,column=0,padx=0,pady=10)
+        l0.grid(row=9,column=0,padx=0,pady=10)
         
         l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.settest_var) 
-        l0.grid(row=8,column=0,padx=0,pady=0)
+        l0.grid(row=10,column=0,padx=0,pady=0)
         
         l0=ttk.Button(frame0,text='Reset All Settings to Default', command=self.reset_to_defaults)
-        l0.grid(row=9,column=0,padx=0,pady=5)
-        
-        l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
         l0.grid(row=10,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Restart Application', command=restart)
+        l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
         l0.grid(row=11,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Close Window', command=close_win)
+        l0=ttk.Button(frame0,text='Restart Application', command=restart)
         l0.grid(row=12,column=0,padx=0,pady=5)
+        
+        l0=ttk.Button(frame0,text='Close Window', command=close_win)
+        l0.grid(row=13,column=0,padx=0,pady=5)
         
         def start_target_update():
             def target_update():
-                update_var.set(' Loading version information... ')
+                update_var.set(' Looking Up... ')
                 update_signal_url = "https://raw.githubusercontent.com/TRvlvr/application_data/main/update_patches.txt"
                 url = update_signal_url
                 try:
@@ -4504,8 +4536,8 @@ class MainWindow(TkinterDnD.Tk):
 
         start_target_update()
 
-        l0=tk.Label(frame0,text="Application Updates",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
-        l0.grid(row=13,column=0,padx=0,pady=10)
+        l0=tk.Label(frame0,text="Updates",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0.grid(row=14,column=0,padx=0,pady=10)
         
         def start_check_updates():
             def check_updates():
@@ -4515,7 +4547,7 @@ class MainWindow(TkinterDnD.Tk):
                     for line in file:
                         patch_name = line.decode("utf-8")
                         if patch_name == current_version:
-                            update_var.set(' UVR Version Current ')
+                            update_var.set('UVR is up-to-date.')
                             update_button_var.set('Check for Updates')
                         else:
                             label_set = f"Update Found: {patch_name}"
@@ -4524,19 +4556,19 @@ class MainWindow(TkinterDnD.Tk):
                             update_set_var.set(str(label_set))
                             askyesorno()
                 except:
-                        update_var.set(' Version Status: No Internet Connection ') 
+                        update_var.set(' No Internet Connection ')
 
             rlg = KThread(target=check_updates)
             rlg.start()
         
         l0=ttk.Button(frame0,text=update_button_var.get(), command=start_check_updates)
-        l0.grid(row=14,column=0,padx=0,pady=5)
-        
-        l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief="ridge", fg="#13a4c9")
         l0.grid(row=15,column=0,padx=0,pady=5)
         
+        l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief="ridge", fg="#13a4c9")
+        l0.grid(row=16,column=0,padx=0,pady=5)
+        
         l0=tk.Label(frame0,text=f"{space_small}{space_small}{space_small}{space_small}",font=("Century Gothic", "13"), justify="center", relief="flat", fg="#13a4c9")
-        l0.grid(row=16,column=0,padx=0,pady=0)
+        l0.grid(row=17,column=0,padx=0,pady=0)
         
         frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
@@ -4544,13 +4576,13 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0,text="Audio Format Settings",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='Wav Type', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='WAV Type', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
         l0=ttk.OptionMenu(frame0, self.wavtype_var, None, 'PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
         l0.grid(row=2,column=0,padx=20,pady=0)
         
-        l0=tk.Label(frame0, text='Mp3 Bitrate', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='MP3 Bitrate', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=5,column=0,padx=0,pady=10)
         
         l0=ttk.OptionMenu(frame0, self.mp3bit_var, None, '96k', '128k', '160k', '224k', '256k', '320k')
@@ -6137,6 +6169,7 @@ class MainWindow(TkinterDnD.Tk):
             'inputPaths': self.inputPaths,
             'inst_only': self.inst_only_var.get(),
             'inst_only_b': self.inst_only_b_var.get(),
+            'language': self.lang_code,
             'lastDir': self.lastDir,
             'margin': self.margin_var.get(),
             'mdx_ensem': self.mdxensemchoose_var.get(),

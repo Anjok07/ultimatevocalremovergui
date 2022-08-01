@@ -8,28 +8,31 @@
 
 ## 关于
 
-本程序使用了最先进的音源分离模型，以去除音频文件中的人声。UVR 的核心开发人员训练了这个软件包中提供的所有模型（除了 Demucs 的辅助模型）。
+本程序使用了最先进的音源分离模型，以去除音频文件中的人声。 UVR 的核心开发人员训练了本软件包中提供的所有模型（除了 Demucs v3 的四声部分离模型）。
 
 - **核心开发者**
     - [Anjok07](https://github.com/anjok07)
     - [aufr33](https://github.com/aufr33)
+    - 
+- **支持本项目**
+  - [捐赠](https://www.buymeacoffee.com/uvr5)
 
 ## 安装
 
-### Windows 安装
+### Windows
 
-该安装包包含 UVR 接口、Python、PyTorch 和其他有效运行应用程序所需的依赖项。不需要任何先决条件，即装即用。
+本程序的安装器已包含 UVR 的图形界面、Python、PyTorch 及其他所需的依赖项。无需任何先决条件，即装即用。
 
 - 请注意：
-    - 该安装程序适用于 Windows 10 或更高版本。
+    - 本程序的安装器适用于 Windows 10 或更高版本。
     - 不保证在 Windows 7 或更低版本时的应用功能。
-    - 不保证英特尔奔腾和赛扬 CPU 的应用功能。
+    - 不保证在英特尔奔腾和赛扬 CPU 平台上的应用功能。
 
 - 通过以下链接下载UVR安装程序：
     - [主程序下载链接](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
     - [主程序镜像链接](https://www.mediafire.com/file/nrakuh8t8p993y8/UVR_v5.4.0_setup.exe)
 - 为已经安装了 UVR 的用户更新软件包的说明：
-    - 从 UVR v5.4 更新 - [更新包](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
+    - [更新包](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
 
 - **可选项**
     - 额外的模型和程序补丁可以通过程序内的 "Settings" 菜单下载。
@@ -38,11 +41,11 @@
 
 ### 其他平台
 
-本程序可以在Mac和Linux上手动安装并运行（更多信息请参见下面的**手动开发者安装**部分）。有些功能在非Windows平台上可能无法使用。
+本程序可以在 macOS 和 Linux 上手动安装并运行（更多信息请参见下面的 **手动安装（针对开发者）** 部分）。部分功能在非Windows平台上可能无法使用。
 
 ## 应用手册
 
-**一般选项**
+**主界面**
 
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt.png?raw=true" />
 
@@ -68,19 +71,19 @@
 
 ### 其他应用说明
 
-- 建议使用至少有 8GB 显存的 nVidia GPU。
 - 该应用程序只兼容 64 位平台。
-- 该应用程序依赖于 Sox - Sound Exchange 的降噪。
+- 建议使用至少有 8GB 显存的 nVidia GPU。
+- 该应用程序的“噪声消除”功能依赖于 Sox - Sound Exchange。
 - 该应用程序依赖于 FFmpeg 来处理非 wav 格式的音频文件。
-- 应用程序将在关闭时自动记住你的设置。
-- 转换时间将在很大程度上取决于你的硬件。
-- 程序所采用的模型是计算密集型的，请谨慎行事，并在程序运行时时刻关注你的电脑，确保它不会过热。***我们不对任何硬件损坏负责。***
+- 应用程序在退出时会自动保存你的设置。
+- 转换时间在很大程度上取决于你的硬件配置。
+- 本程序采用了计算密集型模型，因此在程序运行时请谨慎行事，并时刻关注你的电脑，确保它不会过热。***我们不对任何硬件损坏负责。***
 
 ## 更新日志
 
 - **v4 对比 v5**
    - v5 模型的表现明显优于 v4 模型。
-   - 音频提取的力度 (Agreesiveness) 可以通过 "Aggression Setting." 来调整。默认值为10，对大多数音频来说是最佳的。
+   - 音频提取的力度 (Aggressiveness) 可以通过 "Aggression Setting." 来调整。默认值为10，是大多数音频的最佳选择。
    - 所有 V2 和 V4 模型已被移除。
    - 增加了“混合模式” -- 这使用户能够从每个模型中得到最为稳健的结果。
    - “模型堆叠”选项已被完全移除，以新的“力度选项”以及模型混合模式取代之。
@@ -101,7 +104,7 @@
 - 若没有正确安装并配置 FFmpeg，并试图转换一个非 WAV 文件，本程序将抛出一个错误。
 - 内存分配错误通常可以通过降低 "Chunk Size" （分块大小）来解决。
 
-### 问题报告
+### 问题反馈
 
 在发布新 Issue 时，请尽可能详细描述。
 
@@ -109,10 +112,20 @@
 
 ## 手动安装（针对开发者）
 
-这些说明只适用于**手动**安装UVR v5.2.0 的人。
+这些说明只适用于**手动**安装UVR v5.4.0 的人。
 
+### 预先准备
+
+- FFmpeg 
+
+    - 必须预先安装并配置好FFmpeg ，以便本程序能够处理非 *.wav* 文件的轨道。请查阅相关资料，并在你所使用的操作系统上配置好该工具库。
+  
+- **（仅限Windows）** Microsoft Visual C++ Build Tools
+  - 在使用`pip install`安装依赖项时，部分软件包会使用 Visual C++ Build Tools进行编译。你需要先安装好 Visual C++ Build Tools，不然安装时会报错 — `Microsoft Visual C++ 14.0 is required. Get it with “Microsoft Visual C++ Build Tools”`
+
+### 步骤
 1. 下载并安装Python 3.9或更低版本（但不低于3.6）[Python](https://www.python.org/downloads/)
-    - **注意:** 确保 *"Add Python to PATH"* 选框被选中
+    - **注意:** 确保安装时勾选 *"Add Python to PATH"*
 2. 下载源代码 [Github](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 3. 通过应用程序内的 "Settings" 菜单下载模型。
 4. 提取 ultimatevocalremovergui-master.zip 中的 *ultimatevocalremovergui-master* 文件夹至任意位置。
@@ -125,11 +138,9 @@ pip install --no-cache-dir -r requirements.txt
 pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
 ```
 
-从这里你应该能够打开并运行 UVR.py 文件
+完成以上步骤后，你应该能够打开并运行 UVR.py。
 
-- FFmpeg 
 
-    - 必须预先安装并配置好FFmpeg ，以便本程序能够处理非 *.wav* 文件的轨道。请查阅相关资料，并在你所使用的操作系统上配置好该工具库。
 
 ## 许可证
 

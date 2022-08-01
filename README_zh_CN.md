@@ -28,9 +28,9 @@
     - 不保证在 Windows 7 或更低版本时的应用功能。
     - 不保证在英特尔奔腾和赛扬 CPU 平台上的应用功能。
 
-- 通过以下链接下载 UVR 安装器：
-    - [主链接](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
-    - [镜像链接](https://www.mediafire.com/file/7ugm0lo8sec7rwr/UVR_v5.4.0_setup.exe)
+- 通过以下链接下载UVR安装程序：
+    - [主程序下载链接](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
+    - [主程序镜像链接](https://www.mediafire.com/file/nrakuh8t8p993y8/UVR_v5.4.0_setup.exe)
 - 为已经安装了 UVR 的用户更新软件包的说明：
     - [更新包](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
 

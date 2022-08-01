@@ -36,7 +36,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 - **Optional**
     - Additional models and application patches can be downloaded via the "Settings" menu within the application.
 
-- **Please Note:** Please install UVR to the main c:/ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
+- **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
 
 ### Other Platforms
 

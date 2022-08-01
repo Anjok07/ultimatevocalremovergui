@@ -36,7 +36,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 - **Optional**
     - Additional models and application patches can be downloaded via the "Settings" menu within the application.
 
-- **Please Note:** See the latest release page for more recent updates [here](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.4.0)
+- **Please Note:** Please install UVR to the main c:/ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
 
 ### Other Platforms
 

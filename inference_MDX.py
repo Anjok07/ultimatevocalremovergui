@@ -366,7 +366,18 @@ class Predictor():
         #Main Save Path
         save_path = os.path.dirname(_basename)
         
+        inst_only = data['inst_only']
+        voc_only = data['voc_only']
+        
         #print('stemset_n: ', stemset_n)
+        
+        if stemset_n == '(Instrumental)':
+            if data['inst_only'] == True:
+                voc_only = True
+                inst_only = False
+            if data['voc_only'] == True:
+                inst_only = True
+                voc_only = False
         
         #Vocal Path
         if stemset_n == '(Vocals)':
@@ -511,7 +522,7 @@ class Predictor():
             c += 1
 
             if not data['demucsmodel']:
-                if data['inst_only']:
+                if inst_only:
                     widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -531,7 +542,7 @@ class Predictor():
                 update_progress(**progress_kwargs,
                 step=(0.95))
             else:
-                if data['inst_only']:
+                if inst_only:
                     widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -562,7 +573,7 @@ class Predictor():
             c += 1
 
             if not data['demucsmodel']:
-                if data['inst_only']:
+                if inst_only:
                     widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -571,7 +582,7 @@ class Predictor():
                 step=(0.9))
                 widget_text.write('Done!\n')
             else:
-                if data['inst_only']:
+                if inst_only:
                     widget_text.write(base_text + f'Preparing {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -591,7 +602,7 @@ class Predictor():
                 step=(0.9))
                 widget_text.write('Done!\n')
         
-        if data['voc_only'] and not data['inst_only']:
+        if voc_only and not inst_only:
             pass
         else:
             if not data['noisereduc_s'] == 'None':
@@ -673,7 +684,7 @@ class Predictor():
                 else:
                     sf.write(Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
                 
-                if data['inst_only']:
+                if inst_only:
                     if file_exists_v == 'there':
                         pass
                     else:
@@ -687,7 +698,7 @@ class Predictor():
         if data['saveFormat'] == 'Mp3':
             try:
                 
-                if data['inst_only'] == True:
+                if inst_only == True:
                     if data['non_red'] == True:
                         if not data['nophaseinst']:
                             pass
@@ -713,7 +724,7 @@ class Predictor():
                         if not data['nophaseinst']:
                             pass
                         else:
-                            if data['voc_only'] == True:
+                            if voc_only == True:
                                 pass
                             else:
                                 musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
@@ -725,7 +736,7 @@ class Predictor():
                                         os.remove(non_reduced_Instrumental_path)
                                     except:
                                         pass
-                if data['voc_only'] == True:
+                if voc_only == True:
                     if data['non_red'] == True:
                         musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
                         musfile.export(non_reduced_vocal_path_mp3, format="mp3", bitrate=mp3_bit_set) 
@@ -745,7 +756,7 @@ class Predictor():
                         except:
                             pass  
                     if data['non_red'] == True:
-                        if data['inst_only'] == True:
+                        if inst_only == True:
                             pass
                         else:
                             musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
@@ -783,7 +794,7 @@ class Predictor():
             
         if data['saveFormat'] == 'Flac':
             try:
-                if data['inst_only'] == True:
+                if inst_only == True:
                     if data['non_red'] == True:
                         if not data['nophaseinst']:
                             pass
@@ -809,7 +820,7 @@ class Predictor():
                         if not data['nophaseinst']:
                             pass
                         else:
-                            if data['voc_only'] == True:
+                            if voc_only == True:
                                 pass
                             else:
                                 musfile = pydub.AudioSegment.from_wav(non_reduced_Instrumental_path)
@@ -821,7 +832,7 @@ class Predictor():
                                         os.remove(non_reduced_Instrumental_path)
                                     except:
                                         pass
-                if data['voc_only'] == True:
+                if voc_only == True:
                     if data['non_red'] == True:
                         musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
                         musfile.export(non_reduced_vocal_path_flac, format="flac") 
@@ -841,7 +852,7 @@ class Predictor():
                         except:
                             pass  
                     if data['non_red'] == True:
-                        if data['inst_only'] == True:
+                        if inst_only == True:
                             pass
                         else:
                             musfile = pydub.AudioSegment.from_wav(non_reduced_vocal_path)
@@ -880,7 +891,7 @@ class Predictor():
         if data['noisereduc_s'] == 'None':
             pass
         elif data['non_red'] == True:
-            if data['inst_only']:
+            if inst_only:
                 if file_exists_n == 'there':
                     pass
                 else:
@@ -889,7 +900,7 @@ class Predictor():
                     except:
                         pass
             pass
-        elif data['inst_only']:
+        elif inst_only:
             if file_exists_n == 'there':
                 pass
             else:
@@ -1313,8 +1324,9 @@ def main(window: tk.Wm,
     global widget_button
     global stime
     global model_hash
-    
     global demucs_switch
+    global inst_only
+    global voc_only
     
     
     # Update default settings
@@ -1338,6 +1350,7 @@ def main(window: tk.Wm,
     ffmp_err = """audioread\__init__.py", line 116, in audio_open"""
     sf_write_err = "sf.write"
     model_adv_set_err = "Got invalid dimensions for input"
+    demucs_model_missing_err = "is neither a single pre-trained model or a bag of models."
     
     try:
         with open('errorlog.txt', 'w') as f:
@@ -1523,6 +1536,8 @@ def main(window: tk.Wm,
     #print(dim_f_set)
     #print(demucs_model_set_name)
     
+    inst_only = data['inst_only']
+    voc_only = data['voc_only']
 
     stime = time.perf_counter()
     progress_var.set(0)
@@ -1948,6 +1963,28 @@ def main(window: tk.Wm,
                             f'Process Method: MDX-Net\n\n' +
                             f'The current ONNX model settings are not compatible with the selected model.\n\n' + 
                             f'Please re-configure the advanced ONNX model settings accordingly and try again.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if demucs_model_missing_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The selected Demucs model is missing.\n\n')
+            text_widget.write(f'Please download the model or make sure it is in the correct directory.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: MDX-Net\n\n' +
+                            f'The selected Demucs model is missing.\n\n' + 
+                            f'Please download the model or make sure it is in the correct directory.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

@@ -216,6 +216,7 @@ except:
 banner_path = os.path.join(base_path, 'img', 'UVR-banner.png')
 credits_path = os.path.join(base_path, 'img', 'credits.png')
 demucs_opt_path = os.path.join(base_path, 'img', 'demucs_opt.png')
+donate_path = os.path.join(base_path, 'img', 'donate.png')
 download_path = os.path.join(base_path, 'img', 'download.png')
 efile_path = os.path.join(base_path, 'img', 'file.png')
 ense_opt_path = os.path.join(base_path, 'img', 'ense_opt.png')
@@ -527,6 +528,8 @@ class MainWindow(TkinterDnD.Tk):
                                       size=(20, 20))
         self.download_img = open_image(path=download_path,
                                 size=(30, 30))       
+        self.donate_img = open_image(path=donate_path,
+                                size=(30, 30))    
         self.key_img = open_image(path=key_path,
                                 size=(30, 30))     
         if GetSystemMetrics(1) >= 900:
@@ -4288,7 +4291,7 @@ class MainWindow(TkinterDnD.Tk):
 
         top= Toplevel(self)
 
-        window_height = 750
+        window_height = 780
         window_width = 500
         
         top.title("Settings Guide")
@@ -4529,14 +4532,21 @@ class MainWindow(TkinterDnD.Tk):
             rlg = KThread(target=check_updates)
             rlg.start()
         
+        def open_bmac_m():
+            top.attributes("-topmost", False)
+            callback("https://www.buymeacoffee.com/uvr5")  
+        
         l0=ttk.Button(frame0,text=update_button_var.get(), command=start_check_updates)
         l0.grid(row=14,column=0,padx=0,pady=5)
         
         l0=tk.Label(frame0,textvariable=update_var,font=("Century Gothic", "12"), justify="center", relief="ridge", fg="#13a4c9")
         l0.grid(row=15,column=0,padx=0,pady=5)
         
+        l0=ttk.Button(frame0, image=self.donate_img, command=open_bmac_m)
+        l0.grid(row=16,column=0,padx=0,pady=5)
+        
         l0=tk.Label(frame0,text=f"{space_small}{space_small}{space_small}{space_small}",font=("Century Gothic", "13"), justify="center", relief="flat", fg="#13a4c9")
-        l0.grid(row=16,column=0,padx=0,pady=0)
+        l0.grid(row=17,column=0,padx=0,pady=0)
         
         frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
@@ -4590,7 +4600,7 @@ class MainWindow(TkinterDnD.Tk):
             
             top_code= Toplevel()
 
-            window_height = 440
+            window_height = 480
             window_width = 320
             
             top_code.title("User Download Codes")
@@ -4639,8 +4649,12 @@ class MainWindow(TkinterDnD.Tk):
             
             def open_patreon():
                 top_code.attributes("-topmost", False)
-                callback("https://www.patreon.com/uvr")
-            
+                callback("https://www.patreon.com/uvr") 
+                
+            def open_bmac():
+                top_code.attributes("-topmost", False)
+                callback("https://www.buymeacoffee.com/uvr5")  
+                         
             def quit():
                 top.attributes("-topmost", True)
                 top_code.destroy()
@@ -4670,15 +4684,19 @@ class MainWindow(TkinterDnD.Tk):
 
             l0.grid(row=6,column=0,padx=0,pady=5)
             
-            l0=tk.Label(frame0, text=f'UVR Patreon', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'Support UVR', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
             l0.grid(row=7,column=0,padx=0,pady=5)    
             
-            l0=tk.Label(frame0, text=f'Obtain codes by becoming an official Patreon.\nClick the button below to open the UVR Patreon link.', font=("Century Gothic", "8"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'Obtain codes by making a one-time donation\n via \"Buy Me a Coffee\" or by becoming a Patreon.\nClick one of the buttons below to donate or pledge!', font=("Century Gothic", "8"), foreground='#13a4c9')
             l0.grid(row=8,column=0,padx=0,pady=5)
             
             l0=ttk.Button(frame0, text='UVR Patreon Link', command=open_patreon)
 
             l0.grid(row=9,column=0,padx=0,pady=5)
+            
+            l0=ttk.Button(frame0, text='UVR \"Buy Me a Coffee\" Link', command=open_bmac)
+
+            l0.grid(row=10,column=0,padx=0,pady=5)
             
         def download_code():
             """

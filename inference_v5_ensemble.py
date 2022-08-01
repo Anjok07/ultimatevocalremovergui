@@ -363,6 +363,17 @@ class Predictor():
         
         c = -1
     
+        inst_only = data['inst_only']
+        voc_only = data['voc_only']
+    
+        if stemset_n == '(Instrumental)':
+            if data['inst_only'] == True:
+                voc_only = True
+                inst_only = False
+            if data['voc_only'] == True:
+                inst_only = True
+                voc_only = False
+    
         #Main Save Path
         save_path = os.path.dirname(base_name)
         
@@ -437,7 +448,7 @@ class Predictor():
         if not data['noisereduc_s'] == 'None':
             c += 1
             if demucs_switch == 'off':
-                if data['inst_only'] and not data['voc_only']:
+                if inst_only and not voc_only:
                     widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -456,7 +467,7 @@ class Predictor():
                 update_progress(**progress_kwargs,
                 step=(0.95))
             else:
-                if data['inst_only'] and not data['voc_only']:
+                if inst_only and not voc_only:
                     widget_text.write(base_text + f'Preparing to save {stem_text_b}...')
                 else:
                     widget_text.write(base_text + f'Saving {stem_text_a}... ')
@@ -507,7 +518,7 @@ class Predictor():
                 step=(0.9))
                 widget_text.write('Done!\n')
         
-        if data['voc_only'] and not data['inst_only']:
+        if voc_only and not inst_only:
             pass
         else:
             finalfiles = [
@@ -554,7 +565,7 @@ class Predictor():
                 update_progress(**progress_kwargs,
                 step=(0.95))
                 sf.write(Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
-                if data['inst_only']:
+                if inst_only:
                     if file_exists == 'there':
                         pass
                     else:
@@ -567,7 +578,7 @@ class Predictor():
           
         if data['noisereduc_s'] == 'None':
             pass
-        elif data['inst_only']:
+        elif inst_only:
             if file_exists_n == 'there':
                 pass
             else:
@@ -1113,6 +1124,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     file_err = "FileNotFoundError"
     ffmp_err = """audioread\__init__.py", line 116, in audio_open"""
     sf_write_err = "sf.write"
+    demucs_model_missing_err = "is neither a single pre-trained model or a bag of models."
     
     try:
         with open('errorlog.txt', 'w') as f:
@@ -4252,6 +4264,28 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                             f'The application was unable to locate a model you selected for this ensemble.\n' + 
                             f'\nPlease do the following to use all compatible models:\n\n1. Navigate to the \"Updates\" tab in the Help Guide.\n2. Download and install the model expansion pack.\n3. Then try again.\n\n' + 
                             f'If the error persists, please verify all models are present.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if demucs_model_missing_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The selected Demucs model is missing.\n\n')
+            text_widget.write(f'Please download the model or make sure it is in the correct directory.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Ensemble Mode\n\n' +
+                            f'The selected Demucs model is missing.\n\n' + 
+                            f'Please download the model or make sure it is in the correct directory.\n\n' + 
                             message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
             except:
                 pass

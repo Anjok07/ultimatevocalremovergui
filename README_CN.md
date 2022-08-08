@@ -44,11 +44,11 @@
 
 **一般选项**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt.png?raw=true" />
+<img src="https://github.com/miria0/ultimatevocalremovergui/blob/master/img/gen_opt_CN.png?raw=true" />
 
 **VR 架构选项**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt.png?raw=true" />
+<img src="https://github.com/miria0/ultimatevocalremovergui/blob/master/vr_opt_CN.png?raw=true" />
 
 **MDX-Net 选项**
 

@@ -44,7 +44,7 @@
 
 **一般选项**
 
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt.png?raw=true" />
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/4962473b339d4b21a671210427e740ab3a932eff/gen_opt_zh_CN.png" />
 
 **VR 架构选项**
 

@@ -1009,7 +1009,7 @@ class MainWindow(TkinterDnD.Tk):
         self.fill_options_Frame()
 
         self.conversion_Button = ttk.Button(master=self,
-                                            text='Start Processing',
+                                            text='起飞！',
                                             command=self.start_conversion)
         self.stop_Button = ttk.Button(master=self,
                                          image=self.stop_img,
@@ -1111,7 +1111,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # Save To Option
         self.filePaths_saveTo_Button = ttk.Button(master=self.filePaths_Frame,
-                                                  text='Select output',
+                                                  text='输出目录',
                                                   command=self.open_export_filedialog)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame,
 
@@ -1120,7 +1120,7 @@ class MainWindow(TkinterDnD.Tk):
                                                 )
         # Select Music Files Option
         self.filePaths_musicFile_Button = ttk.Button(master=self.filePaths_Frame,
-                                                     text='Select input',
+                                                     text='选择[多个]文件',
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
                                                    textvariable=self.inputPathsEntry_var,
@@ -1173,7 +1173,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Choose Conversion Method
         self.options_aiModel_Label = tk.Button(master=self.options_Frame,
-                                               text='Choose Process Method', anchor=tk.CENTER,
+                                               text='选择消音方式', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_appdir_filedialog)
         self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                           self.aiModel_var, 
@@ -1181,7 +1181,7 @@ class MainWindow(TkinterDnD.Tk):
         
         #  Choose Instrumental Model
         self.options_instrumentalModel_Label = tk.Button(master=self.options_Frame,
-                                                        text='Choose Main Model',
+                                                        text='选择主模型',
                                                         background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_Modelfolder_vr)
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
@@ -1230,7 +1230,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # WINDOW SIZE
         self.options_winSize_Label = tk.Button(master=self.options_Frame,
-                                              text='Window Size', anchor=tk.CENTER,
+                                              text='窗口大小', anchor=tk.CENTER,
                                               background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                               borderwidth=0, command=self.advanced_vr_options)
         self.options_winSize_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1238,7 +1238,7 @@ class MainWindow(TkinterDnD.Tk):
                                                          None, '320', '512','1024')
         # MDX-chunks
         self.options_chunks_Label = tk.Label(master=self.options_Frame,
-                                           text='Chunks',
+                                           text='最大运行内存',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_chunks_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.chunks_var,
@@ -1281,18 +1281,18 @@ class MainWindow(TkinterDnD.Tk):
         #Checkboxes
         # GPU Selection
         self.options_gpu_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='GPU Conversion',
+                                                       text='GPU运算',
                                                        variable=self.gpuConversion_var,
                                                        )
         
         # Vocal Only
         self.options_voc_only_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Save Vocals Only',
+                                                text='仅保存人声',
                                                 variable=self.voc_only_var,
                                                 )
         # Instrumental Only 
         self.options_inst_only_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Save Instrumental Only',
+                                                text='仅保存伴奏',
                                                 variable=self.inst_only_var,
                                                 )
         
@@ -1309,19 +1309,19 @@ class MainWindow(TkinterDnD.Tk):
         
         # TTA
         self.options_tta_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='TTA',
+                                                       text='增强',
                                                        variable=self.tta_var,
                                                        )
 
         # MDX-Auto-Chunk
         self.options_non_red_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Save Noisey Output',
+                                                text='保存噪音',
                                                 variable=self.non_red_var,
                                                 )
 
         # Demucs Model VR
         self.options_postpro_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                        text='Post-Process',
+                                                        text='建议不要点',
                                                         variable=self.postprocessing_var,
                                                         )
         
@@ -1335,7 +1335,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # AGG
         self.options_agg_Label = tk.Button(master=self.options_Frame,
-                                           text='Aggression Setting',
+                                           text='消除等级',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                            borderwidth=0, command=self.advanced_vr_options)
         self.options_agg_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1347,7 +1347,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # MDX-noisereduc_s
         self.options_noisereduc_s_Label = tk.Button(master=self.options_Frame,
-                                           text='Noise Reduction',
+                                           text='降噪',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                            borderwidth=0, command=self.advanced_mdx_options)
         self.options_noisereduc_s_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1364,25 +1364,25 @@ class MainWindow(TkinterDnD.Tk):
 
         # MDX-Enable Demucs Model
         self.options_demucsmodel_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                               text='Demucs Model',
+                                                               text='开源模型',
                                                                variable=self.demucsmodel_var,
                                                                )
 
         # MDX-Noise Reduction
         self.options_noisereduc_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Noise Reduction',
+                                                text='降噪',
                                                 variable=self.noisereduc_var,
                                                 )
         
         # Ensemble Save Ensemble Outputs
         self.options_save_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='Save All Outputs',
+                                                       text='保存所有输出',
                                                        variable=self.save_var,
                                                        )
         
         # Model Test Mode
         self.options_modelFolder_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                               text='Model Test Mode',
+                                                               text='模型试用模式',
                                                                variable=self.modelFolder_var,
                                                                )
 
@@ -1704,7 +1704,7 @@ class MainWindow(TkinterDnD.Tk):
             if not os.path.isfile(path):
                     tk.messagebox.showwarning(master=self,
                                             title='Drag and Drop Feature Failed or Invalid Input',
-                                            message='The input is invalid, or the drag and drop feature failed to select your files properly.\n\nPlease try the following:\n\n1. Select your inputs using the \"Select Input\" button\n2. Verify the input is valid.\n3. Then try again.')
+                                            message='The input is invalid, or the drag and drop feature failed to select your files properly.\n\nPlease try the following:\n\n1. Select your inputs using the \"选择「多个」文件\" button\n2. Verify the input is valid.\n3. Then try again.')
                     return 
 
 
@@ -3356,7 +3356,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='最大内存 (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.chunks_d_var, justify='center')
@@ -3462,7 +3462,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Entry(frame0, textvariable=self.chunks_var, justify='center')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Noise Reduction (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='降噪 (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=3,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.noisereduc_s_var, justify='center')
@@ -4002,10 +4002,10 @@ class MainWindow(TkinterDnD.Tk):
         tab8 = ttk.Frame(tabControl)
 
         tabControl.add(tab1, text ='General')
-        tabControl.add(tab2, text ='VR Architecture')
-        tabControl.add(tab3, text ='MDX-Net')
+        tabControl.add(tab2, text ='强度频谱/源分离')
+        tabControl.add(tab3, text ='混合频谱')
         tabControl.add(tab4, text ='Demucs v3')
-        tabControl.add(tab5, text ='Ensemble Mode')
+        tabControl.add(tab5, text ='融合模式')
         tabControl.add(tab6, text ='Manual Ensemble')
         tabControl.add(tab7, text ='More Info')
         tabControl.add(tab8, text ='Credits')
@@ -4424,9 +4424,9 @@ class MainWindow(TkinterDnD.Tk):
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Settings Guide')
-        tabControl.add(tab2, text ='Audio Format Settings')
-        tabControl.add(tab3, text ='Download Center')
+        tabControl.add(tab1, text ='设置')
+        tabControl.add(tab2, text ='音频格式设置')
+        tabControl.add(tab3, text ='Download by子阳')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -4445,10 +4445,10 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=tk.Label(frame0,text="Main Menu",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="主菜单",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=ttk.Button(frame0,text="Ensemble Customization Options", command=close_win_custom_ensemble)
+        l0=ttk.Button(frame0,text="自定义选项", command=close_win_custom_ensemble)
         l0.grid(row=1,column=0,padx=0,pady=5)
         
         l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=close_win_advanced_mdx_options)

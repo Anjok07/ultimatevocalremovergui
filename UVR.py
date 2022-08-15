@@ -1111,7 +1111,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # Save To Option
         self.filePaths_saveTo_Button = ttk.Button(master=self.filePaths_Frame,
-                                                  text='输出目录',
+                                                  text='选择输出位置',
                                                   command=self.open_export_filedialog)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame,
 
@@ -1120,7 +1120,7 @@ class MainWindow(TkinterDnD.Tk):
                                                 )
         # Select Music Files Option
         self.filePaths_musicFile_Button = ttk.Button(master=self.filePaths_Frame,
-                                                     text='选择[多个]文件',
+                                                     text='选择输入文件',
                                                      command=self.open_file_filedialog)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame,
                                                    textvariable=self.inputPathsEntry_var,
@@ -1173,7 +1173,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Choose Conversion Method
         self.options_aiModel_Label = tk.Button(master=self.options_Frame,
-                                               text='选择消音方式', anchor=tk.CENTER,
+                                               text='选择运算方式', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_appdir_filedialog)
         self.options_aiModel_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                           self.aiModel_var, 
@@ -1181,21 +1181,21 @@ class MainWindow(TkinterDnD.Tk):
         
         #  Choose Instrumental Model
         self.options_instrumentalModel_Label = tk.Button(master=self.options_Frame,
-                                                        text='选择主模型',
+                                                        text='选择主要模式',
                                                         background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_Modelfolder_vr)
         self.options_instrumentalModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.instrumentalModel_var)
         
         #  Choose Demucs Model
         self.options_DemucsModel_Label = tk.Button(master=self.options_Frame,
-                                                        text='Choose Demucs Model',
+                                                        text='选择Demucs模型',
                                                         background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_Modelfolder_de)
         self.options_DemucsModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                                    self.DemucsModel_var)
         
         #  Choose MDX-Net Model
         self.options_mdxnetModel_Label = tk.Button(master=self.options_Frame,
-                                                        text='Choose MDX-Net Model', anchor=tk.CENTER,
+                                                        text='选择MDX-Net模型', anchor=tk.CENTER,
                                                         background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.open_newModel_filedialog)
         
         self.options_mdxnetModel_Optionmenu = ttk.OptionMenu(self.options_Frame,
@@ -1203,7 +1203,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Ensemble Mode
         self.options_ensChoose_Label = tk.Button(master=self.options_Frame,
-                                               text='Choose Ensemble', anchor=tk.CENTER,
+                                               text='选择Ensemble', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.custom_ensemble)
         self.options_ensChoose_Optionmenu = ttk.OptionMenu(self.options_Frame,
                                                           self.ensChoose_var,
@@ -1211,7 +1211,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Choose Agorithim
         self.options_algo_Label = tk.Label(master=self.options_Frame,
-                                               text='Choose Algorithm', anchor=tk.CENTER,
+                                               text='选择Algorithm', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_algo_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                           self.algo_var, 
@@ -1219,7 +1219,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Choose Demucs Stems
         self.options_demucs_stems_Label = tk.Button(master=self.options_Frame,
-                                               text='Choose Stem(s)', anchor=tk.CENTER,
+                                               text='选择Stem(s)', anchor=tk.CENTER,
                                                background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=self.advanced_demucs_options)
         self.options_demucs_stems_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                           self.demucs_stems_var, 
@@ -1230,7 +1230,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # WINDOW SIZE
         self.options_winSize_Label = tk.Button(master=self.options_Frame,
-                                              text='窗口大小', anchor=tk.CENTER,
+                                              text='计算精度', anchor=tk.CENTER,
                                               background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                               borderwidth=0, command=self.advanced_vr_options)
         self.options_winSize_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1238,7 +1238,7 @@ class MainWindow(TkinterDnD.Tk):
                                                          None, '320', '512','1024')
         # MDX-chunks
         self.options_chunks_Label = tk.Label(master=self.options_Frame,
-                                           text='最大运行内存',
+                                           text='Chunks',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_chunks_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.chunks_var,
@@ -1249,7 +1249,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Demucs-Segment
         self.options_segment_Label = tk.Label(master=self.options_Frame,
-                                           text='Segment',
+                                           text='分段',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_segment_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.segment_var,
@@ -1261,7 +1261,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Overlap
         self.options_overlap_b_Label = tk.Label(master=self.options_Frame,
-                                              text='Overlap', anchor=tk.CENTER,
+                                              text='重叠', anchor=tk.CENTER,
                                               background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_overlap_b_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.overlap_b_var,
@@ -1269,7 +1269,7 @@ class MainWindow(TkinterDnD.Tk):
         
         # Shifts
         self.options_shifts_b_Label = tk.Label(master=self.options_Frame,
-                                              text='Shifts', anchor=tk.CENTER,
+                                              text='轮换', anchor=tk.CENTER,
                                               background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_shifts_b_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.shifts_b_var,
@@ -1281,24 +1281,24 @@ class MainWindow(TkinterDnD.Tk):
         #Checkboxes
         # GPU Selection
         self.options_gpu_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='GPU运算',
+                                                       text='GPU 运算',
                                                        variable=self.gpuConversion_var,
                                                        )
         
         # Vocal Only
         self.options_voc_only_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='仅保存人声',
+                                                text='仅保留人声',
                                                 variable=self.voc_only_var,
                                                 )
         # Instrumental Only 
         self.options_inst_only_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='仅保存伴奏',
+                                                text='仅保留伴奏',
                                                 variable=self.inst_only_var,
                                                 )
         
         # Vocal Only
         self.options_voc_only_b_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='Stem Only',
+                                                text='仅保留',
                                                 variable=self.voc_only_b_var,
                                                 )
         # Instrumental Only 
@@ -1309,25 +1309,25 @@ class MainWindow(TkinterDnD.Tk):
         
         # TTA
         self.options_tta_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='增强',
+                                                       text='增强（建议不要点）',
                                                        variable=self.tta_var,
                                                        )
 
         # MDX-Auto-Chunk
         self.options_non_red_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='保存噪音',
+                                                text='保存Noisey输出',
                                                 variable=self.non_red_var,
                                                 )
 
         # Demucs Model VR
         self.options_postpro_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                        text='建议不要点',
+                                                        text='后期处理',
                                                         variable=self.postprocessing_var,
                                                         )
         
         # Split Mode
         self.options_split_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                        text='Split Mode',
+                                                        text='分离模式',
                                                         variable=self.split_mode_var,
                                                         )
 
@@ -1335,7 +1335,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # AGG
         self.options_agg_Label = tk.Button(master=self.options_Frame,
-                                           text='消除等级',
+                                           text='进阶设置',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                            borderwidth=0, command=self.advanced_vr_options)
         self.options_agg_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1347,7 +1347,7 @@ class MainWindow(TkinterDnD.Tk):
 
         # MDX-noisereduc_s
         self.options_noisereduc_s_Label = tk.Button(master=self.options_Frame,
-                                           text='降噪',
+                                           text='减少噪音',
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9', 
                                            borderwidth=0, command=self.advanced_mdx_options)
         self.options_noisereduc_s_Optionmenu = ttk.OptionMenu(self.options_Frame, 
@@ -1358,31 +1358,31 @@ class MainWindow(TkinterDnD.Tk):
 
         # Save Image
         self.options_image_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                         text='Output Image',
+                                                         text='输出图像',
                                                          variable=self.outputImage_var,
                                                          )
 
         # MDX-Enable Demucs Model
         self.options_demucsmodel_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                               text='开源模型',
+                                                               text='Demucs模式',
                                                                variable=self.demucsmodel_var,
                                                                )
 
         # MDX-Noise Reduction
         self.options_noisereduc_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                text='降噪',
+                                                text='降低噪音',
                                                 variable=self.noisereduc_var,
                                                 )
         
         # Ensemble Save Ensemble Outputs
         self.options_save_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                       text='保存所有输出',
+                                                       text='保存所有输出文件',
                                                        variable=self.save_var,
                                                        )
         
         # Model Test Mode
         self.options_modelFolder_Checkbutton = ttk.Checkbutton(master=self.options_Frame,
-                                                               text='模型试用模式',
+                                                               text='模型测试模式',
                                                                variable=self.modelFolder_var,
                                                                )
 
@@ -1704,7 +1704,7 @@ class MainWindow(TkinterDnD.Tk):
             if not os.path.isfile(path):
                     tk.messagebox.showwarning(master=self,
                                             title='Drag and Drop Feature Failed or Invalid Input',
-                                            message='The input is invalid, or the drag and drop feature failed to select your files properly.\n\nPlease try the following:\n\n1. Select your inputs using the \"选择「多个」文件\" button\n2. Verify the input is valid.\n3. Then try again.')
+                                            message='The input is invalid, or the drag and drop feature failed to select your files properly.\n\nPlease try the following:\n\n1. Select your inputs using the \"Select Input\" button\n2. Verify the input is valid.\n3. Then try again.')
                     return 
 
 
@@ -3208,8 +3208,8 @@ class MainWindow(TkinterDnD.Tk):
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Advanced Settings')
-        tabControl.add(tab2, text ='Demucs Settings')
+        tabControl.add(tab1, text ='高级设置')
+        tabControl.add(tab2, text ='Demucs设置')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -3221,16 +3221,16 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=tk.Label(frame0,text="Advanced VR Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="高级VR选项",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='Window Size (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='窗口尺寸 (手动设置)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.winSize_var, justify="center")
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Aggression Setting (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='进阶设置 (手动设置)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=3,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.agg_var, justify="center")
@@ -3343,7 +3343,7 @@ class MainWindow(TkinterDnD.Tk):
   
         tab1 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Advanced Settings')
+        tabControl.add(tab1, text ='高级设置')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -3356,7 +3356,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='最大内存 (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.chunks_d_var, justify='center')
@@ -3437,9 +3437,9 @@ class MainWindow(TkinterDnD.Tk):
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Advanced Settings')
-        tabControl.add(tab2, text ='Demucs Settings')
-        tabControl.add(tab3, text ='Advanced ONNX Model Settings')
+        tabControl.add(tab1, text ='高级设置')
+        tabControl.add(tab2, text ='Demucs设置')
+        tabControl.add(tab3, text ='高级ONNX模型设置')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -3462,7 +3462,7 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Entry(frame0, textvariable=self.chunks_var, justify='center')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='降噪 (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Noise Reduction (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=3,column=0,padx=0,pady=10)
         
         l0=ttk.Entry(frame0, textvariable=self.noisereduc_s_var, justify='center')
@@ -3642,9 +3642,9 @@ class MainWindow(TkinterDnD.Tk):
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Ensemble Options')
-        tabControl.add(tab2, text ='More Options')
-        tabControl.add(tab3, text ='VR Model Param Settings')
+        tabControl.add(tab1, text ='选项包')
+        tabControl.add(tab2, text ='更多选择')
+        tabControl.add(tab3, text ='VR模型参数设置')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -4001,11 +4001,11 @@ class MainWindow(TkinterDnD.Tk):
         tab7 = ttk.Frame(tabControl)
         tab8 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='General')
-        tabControl.add(tab2, text ='强度频谱/源分离')
-        tabControl.add(tab3, text ='混合频谱')
+        tabControl.add(tab1, text ='一般')
+        tabControl.add(tab2, text ='VR架构')
+        tabControl.add(tab3, text ='MDX-Net')
         tabControl.add(tab4, text ='Demucs v3')
-        tabControl.add(tab5, text ='融合模式')
+        tabControl.add(tab5, text ='Ensemble Mode')
         tabControl.add(tab6, text ='Manual Ensemble')
         tabControl.add(tab7, text ='More Info')
         tabControl.add(tab8, text ='Credits')
@@ -4184,7 +4184,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/Anjok07/ultimatevocalremovergui"))
             
-            l0=tk.Label(frame0,text="You can find updates, report issues, and give us a shout via our official GitHub.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="你可以通过我们的官方GitHub找到更新，报告问题，并给我们一个呼声.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=5,column=0,padx=5,pady=5)
             
             link = Label(frame0, text="SoX - Sound eXchange",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4192,7 +4192,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download"))
             
-            l0=tk.Label(frame0,text="UVR relies on SoX for Noise Reduction. It's automatically included via the UVR installer but not the developer build.\nIf you are missing SoX, please download it via the link and extract the SoX archive to the following directory - lib_v5/sox",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR依靠SoX进行降噪。如果你缺少SoX，请通过链接下载它，并将SoX压缩包解压到以下目录 - lib_v5/sox",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=7,column=0,padx=5,pady=5)
             
             link = Label(frame0, text="FFmpeg",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4200,7 +4200,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://www.wikihow.com/Install-FFmpeg-on-Windows"))
             
-            l0=tk.Label(frame0,text="UVR relies on FFmpeg for processing non-wav audio files.\nIf you are missing FFmpeg, please see the installation guide via the link provided.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="UVR依靠FFmpeg来处理非wav音频文件。\n如果你缺少FFmpeg，请通过提供的链接查看安装指南。",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=9,column=0,padx=5,pady=5)
 
             link = Label(frame0, text="X-Minus AI",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4208,15 +4208,15 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://x-minus.pro/ai"))
 
-            l0=tk.Label(frame0,text="Many of the models provided are also on X-Minus.\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="提供的许多模型也在X-Minus上。\nThis resource primarily benefits users without the computing resources to run the GUI or models locally.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=11,column=0,padx=5,pady=5)
             
-            link = Label(frame0, text="Official UVR Patreon",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
+            link = Label(frame0, text="UVR官方Patreon",font=("Century Gothic", "11", "underline"), justify="center", fg="#13a4c9", cursor="hand2")
             link.grid(row=12,column=0,padx=5,pady=5)
             link.bind("<Button-1>", lambda e:
             callback("https://www.patreon.com/uvr"))
             
-            l0=tk.Label(frame0,text="If you wish to support and donate to this project, click the link above and become a Patreon!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="如果你想支持和捐助这个项目，请点击上面的链接，成为Patreon的一员",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=13,column=0,padx=5,pady=5)
             
             frame0=Frame(tab8,highlightbackground='red',highlightthicknes=0)
@@ -4224,7 +4224,7 @@ class MainWindow(TkinterDnD.Tk):
 
             #inside frame0    
             
-            l0=tk.Label(frame0,text="Core UVR Developers",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="核心UVR开发者",font=("Century Gothic", "12", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=0,column=0,padx=20,pady=5, sticky=N)
             
             l0=tk.Label(frame0,image=self.credits_img,font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
@@ -4233,13 +4233,13 @@ class MainWindow(TkinterDnD.Tk):
             l0=tk.Label(frame0,text="Anjok07\nAufr33",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=2,column=0,padx=5,pady=5)
 
-            l0=tk.Label(frame0,text="Special Thanks",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
+            l0=tk.Label(frame0,text="特别感谢",font=("Century Gothic", "10", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=4,column=0,padx=20,pady=10)
 
             l0=tk.Label(frame0,text="DilanBoskan",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=5,column=0,padx=5,pady=5)
 
-            l0=tk.Label(frame0,text="Your contributions at the start of this project were essential to the success of UVR. Thank you!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="你在这个项目开始时的贡献对UVR的成功至关重要。谢谢你们!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=6,column=0,padx=0,pady=0)
 
             link = Label(frame0, text="Tsurumeso",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4247,7 +4247,7 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/tsurumeso/vocal-remover"))
             
-            l0=tk.Label(frame0,text="Developed the original VR Architecture AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="开发了原始的VR架构AI代码.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=8,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Kuielab & Woosung Choi",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4255,13 +4255,13 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/kuielab"))
             
-            l0=tk.Label(frame0,text="Developed the original MDX-Net AI code.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="开发了最初的MDX-Net人工智能代码.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=10,column=0,padx=0,pady=0)
             
             l0=tk.Label(frame0,text="Bas Curtiz",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=11,column=0,padx=5,pady=5)
             
-            l0=tk.Label(frame0,text="Designed the official UVR logo, icon, banner, splash screen, and interface.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="设计了UVR的官方标志、图标、横幅、闪屏和界面。",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=12,column=0,padx=0,pady=0)
             
             link = Label(frame0, text="Adefossez & Demucs",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9", cursor="hand2")
@@ -4269,13 +4269,13 @@ class MainWindow(TkinterDnD.Tk):
             link.bind("<Button-1>", lambda e:
             callback("https://github.com/facebookresearch/demucs"))
             
-            l0=tk.Label(frame0,text="Core developer of Facebook's Demucs Music Source Separation.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="Facebook的Demucs音乐源分离的核心开发者.",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=14,column=0,padx=0,pady=0)
             
             l0=tk.Label(frame0,text="Audio Separation and CC Karokee & Friends Discord Communities",font=("Century Gothic", "11", "bold"), justify="center", fg="#13a4c9")
             l0.grid(row=15,column=0,padx=5,pady=5)
             
-            l0=tk.Label(frame0,text="Thank you for the support!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+            l0=tk.Label(frame0,text="谢谢你的支持!",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
             l0.grid(row=16,column=0,padx=0,pady=0)   
             
     def settings(self, choose=False):
@@ -4361,10 +4361,10 @@ class MainWindow(TkinterDnD.Tk):
             frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
             frame0.grid(row=0,column=0,padx=0,pady=0)  
             
-            l0=tk.Label(frame0, text='Update Found', font=("Century Gothic", "13", "underline"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text='最新发现', font=("Century Gothic", "13", "underline"), foreground='#13a4c9')
             l0.grid(row=0,column=0,padx=0,pady=10)
             
-            l0=tk.Label(frame0, text='Are you sure you want to continue?\n\nThe application will need to be restarted.\n', font=("Century Gothic", "11"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text='你确定要重新启动么？\n\nThe application will need to be restarted.\n', font=("Century Gothic", "11"), foreground='#13a4c9')
             l0.grid(row=1,column=0,padx=0,pady=5)
                     
             l0=ttk.Button(frame0, text='Yes', command=yes)
@@ -4424,9 +4424,9 @@ class MainWindow(TkinterDnD.Tk):
         tab2 = ttk.Frame(tabControl)
         tab3 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='设置')
+        tabControl.add(tab1, text ='设置指南')
         tabControl.add(tab2, text ='音频格式设置')
-        tabControl.add(tab3, text ='Download by子阳')
+        tabControl.add(tab3, text ='下载中心')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -4448,40 +4448,40 @@ class MainWindow(TkinterDnD.Tk):
         l0=tk.Label(frame0,text="主菜单",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=ttk.Button(frame0,text="自定义选项", command=close_win_custom_ensemble)
+        l0=ttk.Button(frame0,text="综合定制选项", command=close_win_custom_ensemble)
         l0.grid(row=1,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Advanced MDX-Net Options", command=close_win_advanced_mdx_options)
+        l0=ttk.Button(frame0,text="高级MDX-Net选项", command=close_win_advanced_mdx_options)
         l0.grid(row=2,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Advanced Demucs Options", command=close_win_advanced_demucs_options)
+        l0=ttk.Button(frame0,text="高级Demucs选项", command=close_win_advanced_demucs_options)
         l0.grid(row=3,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Advanced VR Options", command=close_win_advanced_vr_options)
+        l0=ttk.Button(frame0,text="高级VR选项", command=close_win_advanced_vr_options)
         l0.grid(row=4,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text="Open Help Guide", command=close_win_help)
+        l0=ttk.Button(frame0,text="打开帮助指南", command=close_win_help)
         l0.grid(row=5,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Open Error Log', command=close_win_error_log)
+        l0=ttk.Button(frame0,text='打开错误日志', command=close_win_error_log)
         l0.grid(row=6,column=0,padx=0,pady=5)
         
-        l0=tk.Label(frame0,text=f"Additional Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text=f"附加选项",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=7,column=0,padx=0,pady=10)
         
-        l0=ttk.Checkbutton(frame0, text='Settings Test Mode', variable=self.settest_var) 
+        l0=ttk.Checkbutton(frame0, text='设置 测试模式', variable=self.settest_var) 
         l0.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=ttk.Button(frame0,text='Reset All Settings to Default', command=self.reset_to_defaults)
+        l0=ttk.Button(frame0,text='将所有设置重置为默认值', command=self.reset_to_defaults)
         l0.grid(row=9,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Open Application Directory', command=self.open_appdir_filedialog)
+        l0=ttk.Button(frame0,text='打开应用目录', command=self.open_appdir_filedialog)
         l0.grid(row=10,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Restart Application', command=restart)
+        l0=ttk.Button(frame0,text='重新启动应用程序', command=restart)
         l0.grid(row=11,column=0,padx=0,pady=5)
         
-        l0=ttk.Button(frame0,text='Close Window', command=close_win)
+        l0=ttk.Button(frame0,text='关闭窗口', command=close_win)
         l0.grid(row=12,column=0,padx=0,pady=5)
         
         def start_target_update():
@@ -4507,7 +4507,7 @@ class MainWindow(TkinterDnD.Tk):
 
         start_target_update()
 
-        l0=tk.Label(frame0,text="Application Updates",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="应用程序更新",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=13,column=0,padx=0,pady=10)
         
         def start_check_updates():
@@ -4551,28 +4551,28 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab2,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=tk.Label(frame0,text="Audio Format Settings",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="音频格式设置",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='Wav Type', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Wav类型', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
         l0=ttk.OptionMenu(frame0, self.wavtype_var, None, 'PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
         l0.grid(row=2,column=0,padx=20,pady=0)
         
-        l0=tk.Label(frame0, text='Mp3 Bitrate', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Mp3比特率', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=5,column=0,padx=0,pady=10)
         
         l0=ttk.OptionMenu(frame0, self.mp3bit_var, None, '96k', '128k', '160k', '224k', '256k', '320k')
         l0.grid(row=6,column=0,padx=20,pady=0)
         
-        l0=ttk.Checkbutton(frame0, text='Normalize Outputs\n(Prevents clipping)', variable=self.normalize_var) 
+        l0=ttk.Checkbutton(frame0, text='正常化输出\n(Prevents clipping)', variable=self.normalize_var) 
         l0.grid(row=7,column=0,padx=0,pady=10)
         
         frame0=Frame(tab3,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=tk.Label(frame0,text="Application Download Center",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="应用程序下载中心",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
         l0.grid(row=0,column=0,padx=20,pady=10)
         
         def user_code():
@@ -4659,7 +4659,7 @@ class MainWindow(TkinterDnD.Tk):
                 top.attributes("-topmost", True)
                 top_code.destroy()
             
-            l0=tk.Label(frame0, text=f'User Download Codes', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'用户下载代码', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
             l0.grid(row=0,column=0,padx=0,pady=5)    
             
             l0=tk.Label(frame0, text=f'{space_medium}User Code{space_medium}', font=("Century Gothic", "9"), foreground='#13a4c9')
@@ -4669,18 +4669,18 @@ class MainWindow(TkinterDnD.Tk):
 
             l0.grid(row=2,column=0,padx=0,pady=5)
             
-            l0=tk.Label(frame0, text=f'Download Code', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'下载代码', font=("Century Gothic", "9"), foreground='#13a4c9')
             l0.grid(row=3,column=0,padx=0,pady=5)       
                     
             l0=ttk.Entry(frame0, textvariable=user_code_download_var, justify='center')
 
             l0.grid(row=4,column=0,padx=0,pady=5)
 
-            l0=ttk.Button(frame0, text='Confirm', command=write_code)
+            l0=ttk.Button(frame0, text='确认', command=write_code)
 
             l0.grid(row=5,column=0,padx=0,pady=5)
             
-            l0=ttk.Button(frame0, text='Cancel', command=quit)
+            l0=ttk.Button(frame0, text='取消', command=quit)
 
             l0.grid(row=6,column=0,padx=0,pady=5)
             
@@ -4755,24 +4755,24 @@ class MainWindow(TkinterDnD.Tk):
                 top.attributes("-topmost", True)
                 top_code.destroy()
             
-            l0=tk.Label(frame0, text=f'Invalid Download Code', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'无效的下载代码', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
             l0.grid(row=0,column=0,padx=0,pady=10)    
             
-            l0=tk.Label(frame0, text=f'Provide the correct code below or make another selection.\n', font=("Century Gothic", "10"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'请在下面提供正确的代码或进行其他选择.\n', font=("Century Gothic", "10"), foreground='#13a4c9')
             l0.grid(row=1,column=0,padx=0,pady=0)    
             
-            l0=tk.Label(frame0, text=f'Download Code', font=("Century Gothic", "9"), foreground='#13a4c9')
+            l0=tk.Label(frame0, text=f'下载代码', font=("Century Gothic", "9"), foreground='#13a4c9')
             l0.grid(row=2,column=0,padx=0,pady=5)       
                     
             l0=ttk.Entry(frame0, textvariable=user_code_download_var, justify='center')
 
             l0.grid(row=3,column=0,padx=0,pady=5)
 
-            l0=ttk.Button(frame0, text='Confirm', command=write_code_p)
+            l0=ttk.Button(frame0, text='确认', command=write_code_p)
 
             l0.grid(row=4,column=0,padx=0,pady=5)
             
-            l0=ttk.Button(frame0, text='Cancel', command=quit)
+            l0=ttk.Button(frame0, text='取消', command=quit)
 
             l0.grid(row=5,column=0,padx=0,pady=5)
         
@@ -5958,15 +5958,15 @@ class MainWindow(TkinterDnD.Tk):
             with open(user_code_file, "r") as f:
                 code_read = f.read()
                 if code_read == 'VIP':
-                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list_vip)
+                    l0=ttk.Button(frame0, text='刷新列表', command=refresh_list_vip)
                 elif code_read == 'Developer':
-                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list_dev)
+                    l0=ttk.Button(frame0, text='刷新列表', command=refresh_list_dev)
                 else:
                     code_read = 'None'
-                    l0=ttk.Button(frame0, text='Refresh List', command=refresh_list)
+                    l0=ttk.Button(frame0, text='刷新列表', command=refresh_list)
         except:
             code_read = 'None'
-            l0=ttk.Button(frame0, text='Refresh List', command=refresh_list)
+            l0=ttk.Button(frame0, text='刷新列表', command=refresh_list)
             
         l0.grid(row=14,column=0,padx=0,pady=5)
         
@@ -6030,7 +6030,7 @@ class MainWindow(TkinterDnD.Tk):
   
         tab1 = ttk.Frame(tabControl)
 
-        tabControl.add(tab1, text ='Error Log')
+        tabControl.add(tab1, text ='错误日志')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -6040,23 +6040,23 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab1,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=0)  
         
-        l0=tk.Label(frame0,text="Error Details",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
+        l0=tk.Label(frame0,text="错误详情",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
         l0.grid(row=1,column=0,padx=20,pady=10)
         
-        l0=tk.Label(frame0,text="This tab will show the raw details of the last error received.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
+        l0=tk.Label(frame0,text="这个标签将显示最后收到的错误的原始细节.",font=("Century Gothic", "12"), justify="center", fg="#F6F6F7")
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0,text="(Click the error console below to copy the error)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
+        l0=tk.Label(frame0,text="(点击下面的错误控制台，复制该错误)\n",font=("Century Gothic", "10"), justify="center", fg="#F6F6F7")
         l0.grid(row=3,column=0,padx=0,pady=0)
         
         with open("errorlog.txt", "r") as f:
             l0=Button(frame0,text=f.read(),font=("Century Gothic", "7"), command=self.copy_clip, justify="left", wraplength=1000, fg="#FF0000", bg="black", relief="sunken")
             l0.grid(row=4,column=0,padx=0,pady=0)
         
-        l0=ttk.Button(frame0,text="Back to Main Menu", command=close_win)
+        l0=ttk.Button(frame0,text="返回主菜单", command=close_win)
         l0.grid(row=5,column=0,padx=20,pady=10)
         
-        l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
+        l0=ttk.Button(frame0,text='关闭窗口', command=close_win_self)
         l0.grid(row=6,column=0,padx=20,pady=0)
 
 

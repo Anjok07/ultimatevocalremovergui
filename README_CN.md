@@ -44,27 +44,27 @@
 
 **一般选项**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/gen_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt_cn.png?raw=true" />
 
 **VR 架构选项**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/vr_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt_cn.png?raw=true" />
 
 **MDX-Net 选项**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/mdx_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/mdx_opt_cn.png?raw=true" />
 
 **Demucs v3 选项**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/demucs_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt_cn.png?raw=true" />
 
 **合奏选项**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/ense_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/ense_opt_cn.png?raw=true" />
 
 **手动合奏**
 
-<img src="https://github.com/henji-henji/UVR/blob/master/img/user_ens_opt_cn.png?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt_cn.png?raw=true" />
 
 ### 其他应用说明
 

@@ -40,7 +40,7 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### Other Platforms
 
-This application can be run on Mac & Linux by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms.
+This application does not currently run efficiently on Mac & Linux platforms yet. However, you can experiment with is by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms. An all-in-one version for MacOS will be coming soon.
 
 ## Application Manual
 

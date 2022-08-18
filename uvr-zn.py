@@ -1,4 +1,3 @@
-@@ -0,0 +1,6244 @@
 # GUI modules
 import os
 import glob

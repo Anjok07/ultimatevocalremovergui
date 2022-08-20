@@ -22,10 +22,10 @@ pyAesCrypt
 pydub
 pyglet
 pyperclip
-pywin32
 pyyaml
 resampy==0.2.2
 samplerate
+screeninfo
 scipy
 screeninfo
 SoundFile

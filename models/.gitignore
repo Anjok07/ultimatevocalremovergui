@@ -1,0 +1,4 @@
+*.onnx
+*.pth
+*.th
+*.yaml

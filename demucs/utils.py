@@ -22,6 +22,7 @@ import socket
 import tempfile
 import warnings
 import zlib
+import tkinter as tk
 
 from diffq import UniformQuantizer, DiffQuantizer
 import torch as th
@@ -228,7 +229,7 @@ def tensor_chunk(tensor_or_chunk):
         return TensorChunk(tensor_or_chunk)
 
 
-def apply_model_v1(model, mix, shifts=None, split=False, progress=False):
+def apply_model_v1(model, mix, gui_progress_bar: tk.Variable, widget_text: tk.Text, update_prog, total_files, file_num, inference_type, shifts=None, split=False, progress=False, segmen=True):
     """
     Apply model to a given mixture.
 
@@ -242,6 +243,10 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False):
             Useful for model with large memory footprint like Tasnet.
         progress (bool): if True, show a progress bar (requires split=True)
     """
+        
+    base_text = 'File {file_num}/{total_files} '.format(file_num=file_num,
+                                                total_files=total_files)
+    
     channels, length = mix.size()
     device = mix.device
     if split:
@@ -249,11 +254,31 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False):
         shift = model.samplerate * 10
         offsets = range(0, length, shift)
         scale = 10
+        progress_bar = 0
+        prog_bar = 0
         if progress:
             offsets = tqdm.tqdm(offsets, unit_scale=scale, ncols=120, unit='seconds')
         for offset in offsets:
+            if segmen:
+                fut_length = len(offsets)
+                send_back = fut_length * 2
+                progress_bar += 100
+                prog_bar += 1
+                if inference_type == 'demucs_only':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.1 + (1.7/send_back * prog_bar)))
+                elif inference_type == 'inference_mdx':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.35 + (1.05/send_back * prog_bar)))
+                elif inference_type == 'inference_vr':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.6 + (0.7/send_back * prog_bar)))
+                step = (progress_bar / fut_length)
+                percent_prog = f"{base_text}Demucs v1 Inference Progress: {prog_bar}/{fut_length} | {round(step)}%"
+                widget_text.percentage(percent_prog)
+                #gui_progress_bar.set(step)
             chunk = mix[..., offset:offset + shift]
-            chunk_out = apply_model_v1(model, chunk, shifts=shifts)
+            chunk_out = apply_model_v1(model, chunk, gui_progress_bar, widget_text, update_prog, total_files, file_num, inference_type, shifts=shifts)
             out[..., offset:offset + shift] = chunk_out
             offset += shift
         return out
@@ -265,7 +290,7 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False):
         out = 0
         for offset in offsets[:shifts]:
             shifted = mix[..., offset:offset + length + max_shift]
-            shifted_out = apply_model_v1(model, shifted)
+            shifted_out = apply_model_v1(model, shifted, gui_progress_bar, widget_text, update_prog, total_files, file_num, inference_type)
             out += shifted_out[..., max_shift - offset:max_shift - offset + length]
         out /= shifts
         return out
@@ -277,8 +302,8 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False):
             out = model(padded.unsqueeze(0))[0]
         return center_trim(out, mix)
 
-def apply_model_v2(model, mix, shifts=None, split=False,
-                overlap=0.25, transition_power=1., progress=False):
+def apply_model_v2(model, mix, gui_progress_bar: tk.Variable, widget_text: tk.Text, update_prog, total_files, file_num, inference_type, shifts=None, split=False,
+                overlap=0.25, transition_power=1., progress=False, segmen=True):
     """
     Apply model to a given mixture.
 
@@ -292,6 +317,16 @@ def apply_model_v2(model, mix, shifts=None, split=False,
             Useful for model with large memory footprint like Tasnet.
         progress (bool): if True, show a progress bar (requires split=True)
     """
+    
+    global prog_space
+    global percent_prog
+    
+    percent_prog = 0
+        
+    base_text = 'File {file_num}/{total_files} '.format(file_num=file_num,
+                                                total_files=total_files)
+    
+    #widget_text.remove(percent_prog)
     assert transition_power >= 1, "transition_power < 1 leads to weird behavior."
     device = mix.device
     channels, length = mix.shape
@@ -313,9 +348,30 @@ def apply_model_v2(model, mix, shifts=None, split=False,
         # If the overlap < 50%, this will translate to linear transition when
         # transition_power is 1.
         weight = (weight / weight.max())**transition_power
+        progress_bar = 0
+        prog_bar = 0
         for offset in offsets:
+            if segmen:
+                fut_length = len(offsets)
+                send_back = fut_length * 2
+                progress_bar += 100
+                prog_bar += 1
+                if inference_type == 'demucs_only':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.1 + (1.7/send_back * prog_bar)))
+                elif inference_type == 'inference_mdx':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.35 + (1.05/send_back * prog_bar)))
+                elif inference_type == 'inference_vr':
+                    update_prog(gui_progress_bar, total_files, file_num,
+                        step=(0.6 + (0.7/send_back * prog_bar)))
+                step = (progress_bar / fut_length)
+                percent_prog = f"{base_text}Demucs v2 Inference Progress: {prog_bar}/{fut_length} | {round(step)}%"
+                prog_space = len(percent_prog)
+                prog_space = prog_bar*prog_space
+                widget_text.percentage(percent_prog)
             chunk = TensorChunk(mix, offset, segment)
-            chunk_out = apply_model_v2(model, chunk, shifts=shifts)
+            chunk_out = apply_model_v2(model, chunk, gui_progress_bar, widget_text, update_prog, total_files, file_num, inference_type, shifts=shifts)
             chunk_length = chunk_out.shape[-1]
             out[..., offset:offset + segment] += weight[:chunk_length] * chunk_out
             sum_weight[offset:offset + segment] += weight[:chunk_length]
@@ -331,7 +387,7 @@ def apply_model_v2(model, mix, shifts=None, split=False,
         for _ in range(shifts):
             offset = random.randint(0, max_shift)
             shifted = TensorChunk(padded_mix, offset, length + max_shift - offset)
-            shifted_out = apply_model_v2(model, shifted)
+            shifted_out = apply_model_v2(model, shifted, gui_progress_bar, widget_text, update_prog, total_files, file_num, inference_type)
             out += shifted_out[..., max_shift - offset:]
         out /= shifts
         return out

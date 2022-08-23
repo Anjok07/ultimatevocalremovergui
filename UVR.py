@@ -266,6 +266,7 @@ DEFAULT_DATA = {
     'inst_only_b': False,
     'lastDir': None,
     'margin': 44100,
+    'margin_d': 44100,
     'mdx_ensem': 'MDX-Net: UVR-MDX-NET Main',
     'mdx_ensem_b': 'No Model',
     'mdx_only_ensem_a': 'MDX-Net: UVR-MDX-NET Main',
@@ -285,6 +286,8 @@ DEFAULT_DATA = {
     'ModelParams': 'Auto',
     'mp3bit': '320k',
     'n_fft_scale': 6144,
+    'no_chunk': False,
+    'no_chunk_d': False,
     'noise_pro_select': 'Auto Select',
     'noise_reduc': True,
     'noisereduc_s': '3',
@@ -298,7 +301,7 @@ DEFAULT_DATA = {
     'save': True,
     'saveFormat': 'Wav',
     'selectdownload': 'VR Arc',
-    'segment': 'None',
+    'segment': 'Default',
     'settest': False,
     'shifts': 2,
     'shifts_b': 2,
@@ -432,12 +435,22 @@ class ThreadSafeConsole(tk.Text):
     """
     Text Widget which is thread safe for tkinter
     """
+    
     def __init__(self, master, **options):
         tk.Text.__init__(self, master, **options)
         self.queue = queue.Queue()
         self.update_me()
+        
 
     def write(self, line):
+        self.queue.put(line)
+        
+    def percentage(self, line):
+        line = f"percentage_value_{line}"
+        self.queue.put(line)
+        
+    def remove(self, line):
+        line = f"remove_line_{line}"
         self.queue.put(line)
 
     def clear(self):
@@ -445,13 +458,28 @@ class ThreadSafeConsole(tk.Text):
 
     def update_me(self):
         self.configure(state=tk.NORMAL)
+        
         try:
             while 1:
                 line = self.queue.get_nowait()
+                
                 if line is None:
                     self.delete(1.0, tk.END)
                 else:
-                    self.insert(tk.END, str(line))
+                    if "percentage_value_" in str(line):
+                        line = str(line)
+                        line = line.replace("percentage_value_", "")
+                        string_len = len(str(line))
+                        self.delete(f"end-{string_len + 1}c", tk.END)
+                        self.insert(tk.END, f"\n{line}")
+                    elif "remove_line_" in str(line):
+                        line = str(line)
+                        line = line.replace("remove_line_", "")
+                        string_len = len(str(line))
+                        self.delete(f"end-{string_len}c", tk.END)
+                    else:
+                        self.insert(tk.END, str(line))
+
                 self.see(tk.END)
                 self.update_idletasks()
         except queue.Empty:
@@ -712,6 +740,10 @@ class MainWindow(TkinterDnD.Tk):
         except:
             self.margin_var = tk.StringVar(value=data_alt['margin'])
         try:
+            self.margin_d_var = tk.StringVar(value=data['margin_d'])
+        except:
+            self.margin_d_var = tk.StringVar(value=data_alt['margin_d'])
+        try:
             self.mdx_only_ensem_a_var = tk.StringVar(value=data['mdx_only_ensem_a'])
         except:
             self.mdx_only_ensem_a_var = tk.StringVar(value=data_alt['mdx_only_ensem_a'])
@@ -783,6 +815,14 @@ class MainWindow(TkinterDnD.Tk):
             self.n_fft_scale_var = tk.StringVar(value=data['n_fft_scale'])
         except:
             self.n_fft_scale_var = tk.StringVar(value=data_alt['n_fft_scale'])
+        try:
+            self.no_chunk_var = tk.BooleanVar(value=data['no_chunk'])
+        except:
+            self.no_chunk_var = tk.BooleanVar(value=data_alt['no_chunk'])
+        try:
+            self.no_chunk_d_var = tk.BooleanVar(value=data['no_chunk_d'])
+        except:
+            self.no_chunk_d_var = tk.BooleanVar(value=data_alt['no_chunk_d'])
         try:
             self.noise_pro_select_var = tk.StringVar(value=data['noise_pro_select'])
         except:
@@ -1012,6 +1052,9 @@ class MainWindow(TkinterDnD.Tk):
                                             text='Start Processing',
                                             command=self.start_conversion)
         self.stop_Button = ttk.Button(master=self,
+                                         image=self.stop_img,
+                                         command=self.stop_inf)
+        self.mdx_stop_Button = ttk.Button(master=self,
                                          image=self.stop_img,
                                          command=self.stop_inf)
         self.settings_Button = ttk.Button(master=self,
@@ -1253,7 +1296,7 @@ class MainWindow(TkinterDnD.Tk):
                                            background='#0e0e0f', font=self.font, foreground='#13a4c9')
         self.options_segment_Optionmenu = ttk.OptionMenu(self.options_Frame, 
                                                          self.segment_var,
-                                                         None, 'None', '1', '5', '10', '15', '20', 
+                                                         None, 'Default', '1', '5', '10', '15', '20', 
                                                          '25', '30', '35', '40', '45', '50', 
                                                          '55', '60', '65', '70', '75', '80', 
                                                          '85', '90', '95', '100')
@@ -1583,6 +1626,15 @@ class MainWindow(TkinterDnD.Tk):
         self.chunks_var.trace_add('write',
                     lambda *args: self.update_states())
         
+        self.chunks_d_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.margin_d_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
+        self.no_chunk_d_var.trace_add('write',
+                    lambda *args: self.update_states())
+        
         self.autocompensate_var.trace_add('write',
                     lambda *args: self.update_states())
         
@@ -1668,6 +1720,10 @@ class MainWindow(TkinterDnD.Tk):
         """
         Start the conversion for all the given mp3 and wav files
         """
+
+        global stop_inf
+        
+        stop_inf = self.stop_inf_mdx
 
         # -Get all variables-
         export_path = self.exportPath_var.get()
@@ -1769,6 +1825,7 @@ class MainWindow(TkinterDnD.Tk):
                             'inst_only_b': self.inst_only_b_var.get(),
                             'instrumentalModel': instrumentalModel_path,
                             'margin': self.margin_var.get(),
+                            'margin_d': self.margin_d_var.get(),
                             'mdx_ensem': self.mdxensemchoose_var.get(),
                             'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
                             'mdx_only_ensem_a': self.mdx_only_ensem_a_var.get(),
@@ -1783,6 +1840,8 @@ class MainWindow(TkinterDnD.Tk):
                             'ModelParams': self.ModelParams_var.get(),
                             'mp3bit': self.mp3bit_var.get(),
                             'n_fft_scale': self.n_fft_scale_var.get(),
+                            'no_chunk': self.no_chunk_var.get(),
+                            'no_chunk_d': self.no_chunk_d_var.get(),
                             'noise_pro_select': self.noise_pro_select_var.get(),
                             'noise_reduc': self.noisereduc_var.get(),
                             'noisereduc_s': noisereduc_s,
@@ -1829,6 +1888,7 @@ class MainWindow(TkinterDnD.Tk):
                             'wavtype': self.wavtype_var.get(),
                             'window': self,
                             'window_size': window_size,
+                            'stop_thread': stop_inf,
                         },
                         daemon=True
                         )
@@ -1839,16 +1899,7 @@ class MainWindow(TkinterDnD.Tk):
         
         confirm = tk.messagebox.askyesno(title='Confirmation',
                 message='You are about to stop all active processes.\n\nAre you sure you wish to continue?')
-        
-        # if self.aiModel_var.get() == 'VR Architecture':
-        #     inference = inference_v5
-        # elif self.aiModel_var.get() == 'Ensemble Mode':
-        #     inference = inference_v5_ensemble
-        # elif self.aiModel_var.get() == 'MDX-Net':
-        #     inference = inference_MDX
-        # elif self.aiModel_var.get() == 'Demucs v3':
-        #     inference = inference_demucs
-        
+
         if confirm:
             inf.kill()
             button_widget = self.conversion_Button
@@ -1863,6 +1914,18 @@ class MainWindow(TkinterDnD.Tk):
             self.progress_var.set(0)
         else:
             pass
+        
+    def stop_inf_mdx(self):
+        inf.kill()
+        button_widget = self.conversion_Button
+        button_widget.configure(state=tk.NORMAL)
+        #text = self.command_Text
+        #text.write('\n\nProcess stopped by user.')
+        torch.cuda.empty_cache()
+        importlib.reload(inference_v5)
+        importlib.reload(inference_v5_ensemble)
+        importlib.reload(inference_MDX)
+        importlib.reload(inference_demucs)
         
     # Models
     def update_inputPaths(self):
@@ -1980,6 +2043,14 @@ class MainWindow(TkinterDnD.Tk):
                     j = ["UVR_MDXNET_Main"]
                     for char in j:
                         file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Main") 
+                        
+                    k = ["UVR_MDXNET_Inst_1"]
+                    for char in k:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Inst 1") 
+                        
+                    l = ["UVR_MDXNET_Inst_2"]
+                    for char in l:
+                        file_name_1 = file_name_1.replace(char, "UVR-MDX-NET Inst 2") 
                     
                     self.options_mdxnetModel_Optionmenu['menu'].add_radiobutton(label=file_name_1,
                                                                         command=tk._setit(self.mdxnetModel_var, file_name_1))
@@ -2948,6 +3019,19 @@ class MainWindow(TkinterDnD.Tk):
                 self.downloadmodelOptions_mdx.configure(state=tk.DISABLED)
             except:
                 pass
+            
+        if self.no_chunk_d_var.get() == False:
+            try:
+                self.chunk_d_entry.configure(state=tk.DISABLED)
+                self.margin_d_entry.configure(state=tk.DISABLED)
+            except:
+                pass
+        elif self.no_chunk_d_var.get() == True:
+            try:
+                self.chunk_d_entry.configure(state=tk.NORMAL)
+                self.margin_d_entry.configure(state=tk.NORMAL)
+            except:
+                pass
 
         if self.demucs_only_var.get() == True:
             self.demucsmodel_var.set(True)
@@ -3114,6 +3198,7 @@ class MainWindow(TkinterDnD.Tk):
         self.inst_only_var.set(False)
         self.inst_only_b_var.set(False)
         self.margin_var.set(44100)
+        self.margin_d_var.set(44100)
         self.mdxensemchoose_var.set('MDX-Net: UVR-MDX-NET Main')
         self.mdxensemchoose_b_var.set('No Model')
         self.mdx_only_ensem_a_var.set('MDX-Net: UVR-MDX-NET Main')
@@ -3129,6 +3214,8 @@ class MainWindow(TkinterDnD.Tk):
         self.ModelParams_var.set('Auto')           
         self.mp3bit_var.set('320k')
         self.n_fft_scale_var.set(6144)
+        self.no_chunk_var.set(False)
+        self.no_chunk_d_var.set(True)
         self.noise_pro_select_var.set('Auto Select')
         self.noisereduc_var.set(True)
         self.noisereduc_s_var.set(3)
@@ -3169,41 +3256,44 @@ class MainWindow(TkinterDnD.Tk):
         self.vr_basic_USER_model_param_5.set('Auto')
         self.wavtype_var.set('PCM_16')
         self.winSize_var.set('512')
-        
-    
-            
+          
     def advanced_vr_options(self):
         """
         Open Advanced VR Options
         """     
            
-        top=Toplevel(self)
+        vr_opt=Toplevel(root)
 
         window_height = 630
         window_width = 500
         
-        top.title("Advanced VR Options")
-        
-        top.resizable(False, False)  # This code helps to disable windows from resizing
-        
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = vr_opt.winfo_screenwidth()
+        screen_height = vr_opt.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        vr_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
         
-        top.attributes("-topmost", True)
+        vr_opt.resizable(False, False)  # This code helps to disable windows from resizing
+        
+        x = root.winfo_x()
+        y = root.winfo_y()
+        vr_opt.geometry("+%d+%d" %(x+57,y+110))
+        vr_opt.wm_transient(root)
+        
+        vr_opt.title("Advanced VR Options")
+        
+        #vr_opt.attributes("-topmost", True)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        vr_opt.iconbitmap('img\\UVR-Icon-v2.ico')
 
         def close_win():
-            top.destroy()
+            vr_opt.destroy()
             self.settings()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(vr_opt)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
@@ -3269,7 +3359,7 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=12,column=0,padx=0,pady=5)
         
         def close_win_self():
-            top.destroy()
+            vr_opt.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=13,column=0,padx=0,pady=5)
@@ -3307,131 +3397,143 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
         l0.grid(row=9,column=0,padx=0,pady=5)
         
-        self.update_states()
+        #self.update_states()
           
     def advanced_demucs_options(self):
         """
         Open Advanced Demucs Options
         """
-        top= Toplevel(self)
+        demuc_opt= Toplevel(root)
 
         window_height = 750
         window_width = 500
         
-        top.title("Advanced Demucs Options")
+        demuc_opt.title("Advanced Demucs Options")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        demuc_opt.resizable(False, False)  # This code helps to disable windows from resizing
         
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = demuc_opt.winfo_screenwidth()
+        screen_height = demuc_opt.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        demuc_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
         
-        top.attributes("-topmost", True)
+        #demuc_opt.attributes("-topmost", True)
+        
+        x = root.winfo_x()
+        y = root.winfo_y()
+        demuc_opt.geometry("+%d+%d" %(x+57,y+45))
+        demuc_opt.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        demuc_opt.iconbitmap('img\\UVR-Icon-v2.ico')
         
         def close_win():
-            top.destroy()
+            demuc_opt.destroy()
             self.settings()
 
-        tabControl = ttk.Notebook(top)
-  
-        tab1 = ttk.Frame(tabControl)
-
-        tabControl.add(tab1, text ='Advanced Settings')
-
+        tabControl = ttk.Notebook(demuc_opt)
+        
         tabControl.pack(expand = 1, fill ="both")
         
-        tab1.grid_rowconfigure(0, weight=1)
-        tab1.grid_columnconfigure(0, weight=1)
+        tabControl.grid_rowconfigure(0, weight=1)
+        tabControl.grid_columnconfigure(0, weight=1)
 
-        frame0=Frame(tab1, highlightbackground='red',highlightthicknes=0)
+        frame0=Frame(tabControl, highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
         
-        l0=tk.Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9")
+        l0=tk.Label(frame0,text="Advanced Demucs Options",font=("Century Gothic", "13", "underline"), justify="center", fg="#13a4c9", width=50)
         l0.grid(row=0,column=0,padx=0,pady=10)
         
-        l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=1,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.chunks_d_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.shifts_b_var, justify='center')
         l0.grid(row=2,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Chunk Margin', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=3,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.margin_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.overlap_b_var, justify='center')
         l0.grid(row=4,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Segment', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=5,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.shifts_b_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
         l0.grid(row=6,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Chunks (Set Manually)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=7,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.overlap_b_var, justify='center')
-        l0.grid(row=8,column=0,padx=0,pady=0)
+        self.chunk_d_entry=ttk.Entry(frame0, textvariable=self.chunks_d_var, justify='center')
+        self.chunk_d_entry.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Segment', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Chunk Margin', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=9,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
-        l0.grid(row=10,column=0,padx=0,pady=0)
+        self.margin_d_entry=ttk.Entry(frame0, textvariable=self.margin_d_var, justify='center')
+        self.margin_d_entry.grid(row=10,column=0,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Enable Chunks', variable=self.no_chunk_d_var) 
+        l0.grid(row=11,column=0,padx=0,pady=10)
         
         l0=ttk.Checkbutton(frame0, text='Save Stems to Model & Track Name Directory', variable=self.audfile_var) 
-        l0.grid(row=11,column=0,padx=0,pady=5)
-        
-        l0=ttk.Button(frame0,text='Open Demucs Model Folder', command=self.open_Modelfolder_de)
         l0.grid(row=12,column=0,padx=0,pady=0)
         
-        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0=ttk.Button(frame0,text='Open Demucs Model Folder', command=self.open_Modelfolder_de)
         l0.grid(row=13,column=0,padx=0,pady=10)
         
+        l0=ttk.Button(frame0,text='Back to Main Menu', command=close_win)
+        l0.grid(row=14,column=0,padx=0,pady=0)
+        
         def close_win_self():
-            top.destroy()
+            demuc_opt.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
-        l0.grid(row=14,column=0,padx=0,pady=0)
+        l0.grid(row=15,column=0,padx=0,pady=10)
+        
+        l0=ttk.Label(frame0,text='\n')
+        l0.grid(row=16,column=0,padx=0,pady=50)
+        
+        self.update_states()
         
     def advanced_mdx_options(self):
         """
         Open Advanced MDX Options
         """
-        top= Toplevel(self)
+        mdx_net_opt= Toplevel(root)
 
         window_height = 740
         window_width = 550
         
-        top.title("Advanced MDX-Net Options")
+        mdx_net_opt.title("Advanced MDX-Net Options")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        mdx_net_opt.resizable(False, False)  # This code helps to disable windows from resizing
         
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = mdx_net_opt.winfo_screenwidth()
+        screen_height = mdx_net_opt.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        mdx_net_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
         
-        top.attributes("-topmost", True)
+        x = root.winfo_x()
+        y = root.winfo_y()
+        mdx_net_opt.geometry("+%d+%d" %(x+35,y+45))
+        mdx_net_opt.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        mdx_net_opt.iconbitmap('img\\UVR-Icon-v2.ico')
         
         def close_win():
-            top.destroy()
+            mdx_net_opt.destroy()
             self.settings()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(mdx_net_opt)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
@@ -3501,7 +3603,7 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=14,column=0,padx=0,pady=0)
         
         def close_win_self():
-            top.destroy()
+            mdx_net_opt.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=15,column=0,padx=0,pady=10)
@@ -3526,20 +3628,29 @@ class MainWindow(TkinterDnD.Tk):
         l0=ttk.OptionMenu(frame0, self.mixing_var, None, 'Default', 'Min_Mag', 'Max_Mag', 'Invert_p')   
         l0.grid(row=4,column=0,padx=0,pady=0) 
         
-        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Segments\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=5,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.segment_var, justify='center')
         l0.grid(row=6,column=0,padx=0,pady=0)
         
-        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
+        l0=tk.Label(frame0, text='Shifts\n(Higher values use more resources and increase processing times)', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=7,column=0,padx=0,pady=10)
         
-        l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
+        l0=ttk.Entry(frame0, textvariable=self.shifts_var, justify='center')
         l0.grid(row=8,column=0,padx=0,pady=0)
         
-        l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
+        l0=tk.Label(frame0, text='Overlap', font=("Century Gothic", "9"), foreground='#13a4c9')
         l0.grid(row=9,column=0,padx=0,pady=10)
+        
+        l0=ttk.Entry(frame0, textvariable=self.overlap_var, justify='center')
+        l0.grid(row=10,column=0,padx=0,pady=0)
+        
+        l0=ttk.Checkbutton(frame0, text='Split Mode', variable=self.split_mode_var) 
+        l0.grid(row=11,column=0,padx=0,pady=10)
+        
+        l0=ttk.Checkbutton(frame0, text='Enable Chunks', variable=self.no_chunk_var) 
+        l0.grid(row=12,column=0,padx=0,pady=0)
         
         self.update_states()
         
@@ -3589,7 +3700,7 @@ class MainWindow(TkinterDnD.Tk):
         
         
         def clear_cache():
-            cachedir = "lib_v5/filelists/hashes/mdx_model_cache"
+            cachedir = "lib_v5/filelists/model_cache/mdx_model_cache"
 
             for basename in os.listdir(cachedir):
                 if basename.endswith('.json'):
@@ -3610,33 +3721,41 @@ class MainWindow(TkinterDnD.Tk):
         """
         Open Ensemble Custom
         """
-        top= Toplevel(self)
+        custom_ens_opt= Toplevel(root)
 
         window_height = 680
         window_width = 900
         
-        top.title("Customize Ensemble")
+        custom_ens_opt.title("Customize Ensemble")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        custom_ens_opt.resizable(False, False)  # This code helps to disable windows from resizing
         
-        top.attributes("-topmost", True)
+        x = root.winfo_x()
+        y = root.winfo_y()
+        custom_ens_opt.geometry("+%d+%d" %(x+57,y+100))
+        custom_ens_opt.wm_transient(root)
         
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = custom_ens_opt.winfo_screenwidth()
+        screen_height = custom_ens_opt.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        custom_ens_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        x = root.winfo_x()
+        y = root.winfo_y()
+        custom_ens_opt.geometry("+%d+%d" %(x-140,y+70))
+        custom_ens_opt.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        custom_ens_opt.iconbitmap('img\\UVR-Icon-v2.ico')
         
         def close_win():
-            top.destroy()
+            custom_ens_opt.destroy()
             self.settings()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(custom_ens_opt)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
@@ -3791,7 +3910,7 @@ class MainWindow(TkinterDnD.Tk):
         l0.grid(row=11,column=2,padx=0,pady=0)
         
         def close_win_self():
-            top.destroy()
+            custom_ens_opt.destroy()
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=13,column=1,padx=20,pady=0)
@@ -3959,7 +4078,7 @@ class MainWindow(TkinterDnD.Tk):
         """
         Open Help Guide
         """
-        top= Toplevel(self)
+        help_guide_opt = Toplevel(self)
         if GetSystemMetrics(1) >= 900:
             window_height = 810
             window_width = 1080
@@ -3969,28 +4088,32 @@ class MainWindow(TkinterDnD.Tk):
         else:
             window_height = 670
             window_width = 930
-        top.title("UVR Help Guide")
+        help_guide_opt.title("UVR Help Guide")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        help_guide_opt.resizable(False, False)  # This code helps to disable windows from resizing
         
-        top.attributes("-topmost", True)
-        
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = help_guide_opt.winfo_screenwidth()
+        screen_height = help_guide_opt.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        help_guide_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        if GetSystemMetrics(1) >= 900:
+            x = root.winfo_x()
+            y = root.winfo_y()
+            help_guide_opt.geometry("+%d+%d" %(x-220,y+5))
+            help_guide_opt.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        help_guide_opt.iconbitmap('img\\UVR-Icon-v2.ico')
         
         def close_win():
-            top.destroy()
+            help_guide_opt.destroy()
             self.settings()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(help_guide_opt)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
@@ -4289,34 +4412,37 @@ class MainWindow(TkinterDnD.Tk):
         update_button_var = tk.StringVar(value='Check for Updates')
         update_set_var = tk.StringVar(value='UVR Version Current')
 
-        top= Toplevel(self)
+        settings_menu = Toplevel(self)
 
         window_height = 780
         window_width = 500
         
-        top.title("Settings Guide")
+        settings_menu.title("Settings Guide")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        settings_menu.resizable(False, False)  # This code helps to disable windows from resizing
         
-        top.attributes("-topmost", True)
-        
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = settings_menu.winfo_screenwidth()
+        screen_height = settings_menu.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        settings_menu.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        x = root.winfo_x()
+        y = root.winfo_y()
+        settings_menu.geometry("+%d+%d" %(x+57,y+15))
+        settings_menu.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        settings_menu.iconbitmap('img\\UVR-Icon-v2.ico')
 
         def askyesorno():
             """
             Ask to Update
             """
             
-            top_dialoge= Toplevel()
+            top_dialoge = Toplevel()
 
             window_height = 250
             window_width = 370
@@ -4329,7 +4455,7 @@ class MainWindow(TkinterDnD.Tk):
             
             top_dialoge.attributes("-topmost", True)
             
-            top.attributes("-topmost", False)
+            settings_menu.attributes("-topmost", False)
             
             screen_width = top_dialoge.winfo_screenwidth()
             screen_height = top_dialoge.winfo_screenheight()
@@ -4350,12 +4476,12 @@ class MainWindow(TkinterDnD.Tk):
             tabControl.grid_columnconfigure(0, weight=1)
             
             def no():
-                top.attributes("-topmost", True)
+                settings_menu.attributes("-topmost", True)
                 top_dialoge.destroy()
                 
             def yes():
                 download_update()
-                top.attributes("-topmost", True)
+                settings_menu.attributes("-topmost", True)
                 top_dialoge.destroy()
             
             frame0=Frame(tabControl,highlightbackground='red',highlightthicknes=0)
@@ -4385,7 +4511,7 @@ class MainWindow(TkinterDnD.Tk):
                 top_code.destroy()
             except:
                 pass
-            top.destroy()
+            settings_menu.destroy()
         
         def close_win_custom_ensemble():
             change_event()
@@ -4415,10 +4541,10 @@ class MainWindow(TkinterDnD.Tk):
             change_event()
 
         def restart():
-            top.destroy()
+            settings_menu.destroy()
             self.restart()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(settings_menu)
   
         tab1 = ttk.Frame(tabControl)
         tab2 = ttk.Frame(tabControl)
@@ -4533,7 +4659,7 @@ class MainWindow(TkinterDnD.Tk):
             rlg.start()
         
         def open_bmac_m():
-            top.attributes("-topmost", False)
+            settings_menu.attributes("-topmost", False)
             callback("https://www.buymeacoffee.com/uvr5")  
         
         l0=ttk.Button(frame0,text=update_button_var.get(), command=start_check_updates)
@@ -4598,7 +4724,7 @@ class MainWindow(TkinterDnD.Tk):
             
             global top_code
             
-            top_code= Toplevel()
+            top_code = Toplevel(settings_menu)
 
             window_height = 480
             window_width = 320
@@ -4607,9 +4733,9 @@ class MainWindow(TkinterDnD.Tk):
             
             top_code.resizable(False, False)  # This code helps to disable windows from resizing
             
-            top_code.attributes("-topmost", True)
+            # top_code.attributes("-topmost", True)
             
-            top.attributes("-topmost", False)
+            # settings_menu.attributes("-topmost", False)
             
             screen_width = top_code.winfo_screenwidth()
             screen_height = top_code.winfo_screenheight()
@@ -4618,6 +4744,11 @@ class MainWindow(TkinterDnD.Tk):
             y_cordinate = int((screen_height/2) - (window_height/2))
 
             top_code.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+            x = settings_menu.winfo_x()
+            y = settings_menu.winfo_y()
+            top_code.geometry("+%d+%d" %(x+90,y+135))
+            top_code.wm_transient(settings_menu)
 
             # change title bar icon
             top_code.iconbitmap('img\\UVR-Icon-v2.ico')
@@ -4656,7 +4787,7 @@ class MainWindow(TkinterDnD.Tk):
                 callback("https://www.buymeacoffee.com/uvr5")  
                          
             def quit():
-                top.attributes("-topmost", True)
+                settings_menu.attributes("-topmost", True)
                 top_code.destroy()
             
             l0=tk.Label(frame0, text=f'User Download Codes', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
@@ -4719,10 +4850,6 @@ class MainWindow(TkinterDnD.Tk):
             
             top_code.resizable(False, False)  # This code helps to disable windows from resizing
             
-            top_code.attributes("-topmost", True)
-            
-            top.attributes("-topmost", False)
-            
             screen_width = top_code.winfo_screenwidth()
             screen_height = top_code.winfo_screenheight()
 
@@ -4730,6 +4857,11 @@ class MainWindow(TkinterDnD.Tk):
             y_cordinate = int((screen_height/2) - (window_height/2))
 
             top_code.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+            x = settings_menu.winfo_x()
+            y = settings_menu.winfo_y()
+            top_code.geometry("+%d+%d" %(x+43,y+220))
+            top_code.wm_transient(settings_menu)
 
             # change title bar icon
             top_code.iconbitmap('img\\UVR-Icon-v2.ico')
@@ -4752,7 +4884,7 @@ class MainWindow(TkinterDnD.Tk):
                     top_code.destroy()
                     
             def quit():
-                top.attributes("-topmost", True)
+                settings_menu.attributes("-topmost", True)
                 top_code.destroy()
             
             l0=tk.Label(frame0, text=f'Invalid Download Code', font=("Century Gothic", "11", "underline"), foreground='#13a4c9')
@@ -5692,7 +5824,7 @@ class MainWindow(TkinterDnD.Tk):
                     links = lib_v5.filelist.get_download_links(links, downloads='app_patch')
                     url_link = f"{links}{pack_name}.exe"
                     #print(url_link)
-                    top.attributes("-topmost", False)
+                    settings_menu.attributes("-topmost", False)
                     try:
                         if os.path.isfile(f"{cwd_path}/{pack_name}.exe"):
                                 self.download_progress_var.set('File already exists')
@@ -5814,7 +5946,7 @@ class MainWindow(TkinterDnD.Tk):
                     wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
                     move_lists_from_temp()
                     self.download_progress_bar_var.set('Download list\'s refreshed!')
-                    top.destroy()
+                    settings_menu.destroy()
                     self.settings(choose=True)
                 except Exception as e:
                     short_error = f'{e}'
@@ -5851,7 +5983,7 @@ class MainWindow(TkinterDnD.Tk):
                     wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
                     move_lists_from_temp()
                     self.download_progress_bar_var.set('VIP: Download list\'s refreshed!')
-                    top.destroy()
+                    settings_menu.destroy()
                     self.settings(choose=True)
                 except Exception as e:
                     short_error = f'{e}'
@@ -5892,7 +6024,7 @@ class MainWindow(TkinterDnD.Tk):
                     wget.download(url_7, download_links_file_temp, bar=download_progress_bar)
                     move_lists_from_temp()
                     self.download_progress_bar_var.set('Developer: Download list\'s refreshed!')
-                    top.destroy()
+                    settings_menu.destroy()
                     self.settings(choose=True)
                 except Exception as e:
                     short_error = f'{e}'
@@ -5983,7 +6115,7 @@ class MainWindow(TkinterDnD.Tk):
         self.download_progress_var.set('')
         self.download_stop_var.set(space_small)
         
-        top.protocol("WM_DELETE_WINDOW", change_event)
+        settings_menu.protocol("WM_DELETE_WINDOW", change_event)
         
         self.update_states()      
 
@@ -5991,7 +6123,8 @@ class MainWindow(TkinterDnD.Tk):
         """
         Open Error Log
         """
-        top= Toplevel(self)
+        error_log_screen= Toplevel(root)
+        
         if GetSystemMetrics(1) >= 900:
             window_height = 810
             window_width = 1080
@@ -6002,31 +6135,42 @@ class MainWindow(TkinterDnD.Tk):
             window_height = 670
             window_width = 930
             
-        top.title("UVR Help Guide")
+        error_log_screen.title("UVR Help Guide")
         
-        top.resizable(False, False)  # This code helps to disable windows from resizing
+        error_log_screen.resizable(False, False)  # This code helps to disable windows from resizing
         
-        top.attributes("-topmost", True)
+        #error_log_screen.attributes("-topmost", True)
         
-        screen_width = top.winfo_screenwidth()
-        screen_height = top.winfo_screenheight()
+        screen_width = error_log_screen.winfo_screenwidth()
+        screen_height = error_log_screen.winfo_screenheight()
 
         x_cordinate = int((screen_width/2) - (window_width/2))
         y_cordinate = int((screen_height/2) - (window_height/2))
 
-        top.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+        error_log_screen.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
+
+        if GetSystemMetrics(1) >= 900:
+            x = root.winfo_x()
+            y = root.winfo_y()
+            error_log_screen.geometry("+%d+%d" %(x-220,y+5))
+            error_log_screen.wm_transient(root)
+
+        # x = root.winfo_x()
+        # y = root.winfo_y()
+        # error_log_screen.geometry("+%d+%d" %(x+43,y+220))
+        # error_log_screen.wm_transient(root)
 
         # change title bar icon
-        top.iconbitmap('img\\UVR-Icon-v2.ico')
+        error_log_screen.iconbitmap('img\\UVR-Icon-v2.ico')
         
         def close_win():
-            top.destroy()
+            error_log_screen.destroy()
             self.settings()
             
         def close_win_self():
-            top.destroy()
+            error_log_screen.destroy()
 
-        tabControl = ttk.Notebook(top)
+        tabControl = ttk.Notebook(error_log_screen)
   
         tab1 = ttk.Frame(tabControl)
 
@@ -6058,7 +6202,6 @@ class MainWindow(TkinterDnD.Tk):
         
         l0=ttk.Button(frame0,text='Close Window', command=close_win_self)
         l0.grid(row=6,column=0,padx=20,pady=0)
-
 
     def copy_clip(self):
             copy_t = open("errorlog.txt", "r").read()
@@ -6157,6 +6300,7 @@ class MainWindow(TkinterDnD.Tk):
             'inst_only_b': self.inst_only_b_var.get(),
             'lastDir': self.lastDir,
             'margin': self.margin_var.get(),
+            'margin_d': self.margin_d_var.get(),
             'mdx_ensem': self.mdxensemchoose_var.get(),
             'mdx_ensem_b': self.mdxensemchoose_b_var.get(),
             'mdx_only_ensem_a': self.mdx_only_ensem_a_var.get(),
@@ -6176,6 +6320,8 @@ class MainWindow(TkinterDnD.Tk):
             'ModelParams': self.ModelParams_var.get(),
             'mp3bit': self.mp3bit_var.get(),
             'n_fft_scale': self.n_fft_scale_var.get(),
+            'no_chunk': self.no_chunk_var.get(),
+            'no_chunk_d': self.no_chunk_d_var.get(),
             'noise_pro_select': self.noise_pro_select_var.get(),
             'noise_reduc': self.noisereduc_var.get(),
             'noisereduc_s': noisereduc_s,

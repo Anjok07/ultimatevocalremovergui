@@ -6,6 +6,7 @@ from demucs.pretrained import get_model as _gm
 from demucs.tasnet_v2 import ConvTasNet
 from demucs.utils import apply_model_v1
 from demucs.utils import apply_model_v2
+import demucs.apply
 from diffq import DiffQuantizer
 from lib_v5 import spec_utils
 from lib_v5.model_param_init import ModelParameters
@@ -30,6 +31,7 @@ import tkinter as tk
 import torch
 import torch.hub
 import traceback  # Error Message Recent Calls
+import threading
 import warnings
 import zlib
     
@@ -58,8 +60,8 @@ class Predictor():
             self.demucs.to(device) 
             self.demucs.load_state_dict(state)
             widget_text.write('Done!\n')
-            if not data['segment'] == 'None':
-                widget_text.write(base_text + 'Segments is only available in Demucs v3. Please use \"Chunks\" instead.\n')
+            if not data['segment'] == 'Default':
+                widget_text.write(base_text + 'Note: Segments only available for Demucs v3\n')
             else:
                 pass
                 
@@ -81,8 +83,8 @@ class Predictor():
             self.demucs.to(device) 
             self.demucs.load_state_dict(torch.load("models/Demucs_Models/"f"{demucs_model_set_name}"))
             widget_text.write('Done!\n')
-            if not data['segment'] == 'None':
-                widget_text.write(base_text + 'Segments is only available in Demucs v3. Please use \"Chunks\" instead.\n')
+            if not data['segment'] == 'Default':
+                widget_text.write(base_text + 'Note: Segments only available for Demucs v3\n')
             else:
                 pass
             self.demucs.eval()
@@ -101,7 +103,7 @@ class Predictor():
             if isinstance(self.demucs, BagOfModels):
                 widget_text.write(base_text + f"Selected model is a bag of {len(self.demucs.models)} models.\n") 
             
-            if data['segment'] == 'None':
+            if data['segment'] == 'Default':
                 segment = None
                 if isinstance(self.demucs, BagOfModels):
                     if segment is not None:
@@ -120,7 +122,8 @@ class Predictor():
                     else:
                         if segment is not None:
                             sub.segment = segment
-                    widget_text.write(base_text + "Segments set to "f"{segment}.\n")
+                    if split_mode:
+                        widget_text.write(base_text + "Segments set to "f"{segment}.\n")
                 except:
                     segment = None
                     if isinstance(self.demucs, BagOfModels):
@@ -145,7 +148,7 @@ class Predictor():
         
         mix = mix.T
         sources = self.demix(mix.T)
-        widget_text.write(base_text + 'Inferences complete!\n')
+        widget_text.write(base_text + 'Inference complete!\n')
     
         #Main Save Path
         save_path = os.path.dirname(_basename)
@@ -154,6 +157,25 @@ class Predictor():
         other_name = '(Other)'
         drums_name = '(Drums)'
         bass_name = '(Bass)'
+              
+        if stemset_n == '(Vocals)':
+            stem_text_a = 'Vocals'
+            stem_text_b = 'Instrumental'
+        elif stemset_n == '(Instrumental)':
+            stem_text_a = 'Instrumental'
+            stem_text_b = 'Vocals'
+        elif stemset_n == '(Other)':
+            stem_text_a = 'Other'
+            stem_text_b = 'mixture without selected stem'
+        elif stemset_n == '(Drums)':
+            stem_text_a = 'Drums'
+            stem_text_b = 'mixture without selected stem'
+        elif stemset_n == '(Bass)':
+            stem_text_a = 'Bass'
+            stem_text_b = 'mixture without selected stem'
+        else: 
+            stem_text_a = 'Vocals'
+            stem_text_b = 'Instrumental'
               
         vocals_path = '{save_path}/{file_name}.wav'.format(
             save_path=save_path,
@@ -201,8 +223,6 @@ class Predictor():
         bass_path_flac = '{save_path}/{file_name}.flac'.format(
             save_path=save_path,
             file_name = f'{os.path.basename(_basename)}_{bass_name}',)
-                
-        
                 
         #If not 'All Stems'
 
@@ -273,7 +293,7 @@ class Predictor():
 
         if not data['demucs_stems'] == 'All Stems':
             if data['inst_only_b']:
-                widget_text.write(base_text + 'Preparing mixture without selected stem...')
+                widget_text.write(base_text + 'Preparing mixture without selected stem... ')
             else:
                 widget_text.write(base_text + 'Saving Stem(s)... ')
         else:
@@ -415,7 +435,7 @@ class Predictor():
             widget_text.write('Done!\n')
         
         update_progress(**progress_kwargs,
-        step=(0.9))
+        step=(1))
         
         if data['demucs_stems'] == 'All Stems':
             pass
@@ -430,7 +450,7 @@ class Predictor():
                         'files':[str(music_file), vocal_path],
                     }
                 ]         
-                widget_text.write(base_text + 'Saving Instrumental... ')      
+                widget_text.write(base_text + f'Saving {stem_text_b}... ')      
                 for i, e in tqdm(enumerate(finalfiles)):
 
                     wave, specs = {}, {}
@@ -469,7 +489,6 @@ class Predictor():
                     step=(1))
                     
                     sf.write(Instrumental_path, normalization_set(spec_utils.cmb_spectrogram_to_wave(-v_spec, mp)), mp.param['sr'], subtype=wav_type_set)
-                
                     
                 if data['inst_only_b']:
                     if file_exists_v == 'there':
@@ -482,7 +501,6 @@ class Predictor():
      
                 widget_text.write('Done!\n')
           
-        
         if not data['demucs_stems'] == 'All Stems':
             
             if data['saveFormat'] == 'Mp3':
@@ -604,75 +622,64 @@ class Predictor():
         widget_text.write(base_text + 'Completed Separation!\n')
 
     def demix(self, mix):
-
+        global chunk_set
         # 1 = demucs only
         # 0 = onnx only
+        
         if data['chunks_d'] == 'Full':
-            if split_mode == True:
-                chunk_set = 0
-            else:
-                widget_text.write(base_text + "Chunk size set to full... \n")
-                chunk_set = 0
-        else: 
-            chunk_set = data['chunks']
-
-        if data['chunks_d'] == 'Auto':
-            if split_mode == True:
-                widget_text.write(base_text + "Split Mode is on (Chunks disabled).\n")
-                chunk_set = 0
-            else:
-                widget_text.write(base_text + "Split Mode is off (Chunks enabled).\n")
-                if data['gpu'] == 0:
-                    try:
-                        gpu_mem = round(torch.cuda.get_device_properties(0).total_memory/1.074e+9)
-                    except:
-                        widget_text.write(base_text + 'NVIDIA GPU Required for conversion!\n')
-                    if int(gpu_mem) <= int(6):
-                        chunk_set = int(10)
-                        widget_text.write(base_text + 'Chunk size auto-set to 10... \n')
-                    if gpu_mem in [7, 8, 9]:
-                        chunk_set = int(30)
-                        widget_text.write(base_text + 'Chunk size auto-set to 30... \n')
-                    if gpu_mem in [10, 11, 12, 13, 14, 15]:
-                        chunk_set = int(50)
-                        widget_text.write(base_text + 'Chunk size auto-set to 50... \n')
-                    if int(gpu_mem) >= int(16):
-                        chunk_set = int(0)
-                        widget_text.write(base_text + 'Chunk size auto-set to Full... \n')
-                if data['gpu'] == -1:
-                    sys_mem = psutil.virtual_memory().total >> 30
-                    if int(sys_mem) <= int(4):
-                        chunk_set = int(5)
+            chunk_set = 0
+        elif data['chunks_d'] == 'Auto':
+            if data['gpu'] == 0:
+                try:
+                    gpu_mem = round(torch.cuda.get_device_properties(0).total_memory/1.074e+9)
+                except:
+                    widget_text.write(base_text + 'NVIDIA GPU Required for conversion!\n')
+                if int(gpu_mem) <= int(6):
+                    chunk_set = int(5)
+                    if no_chunk_demucs:
                         widget_text.write(base_text + 'Chunk size auto-set to 5... \n')
-                    if sys_mem in [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]:
-                        chunk_set = int(10)
+                if gpu_mem in [7, 8, 9, 10, 11, 12, 13, 14, 15]:
+                    chunk_set = int(10)
+                    if no_chunk_demucs:
                         widget_text.write(base_text + 'Chunk size auto-set to 10... \n')
-                    if sys_mem in [17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32]:
-                        chunk_set = int(40)
+                if int(gpu_mem) >= int(16):
+                    chunk_set = int(40)
+                    if no_chunk_demucs:
                         widget_text.write(base_text + 'Chunk size auto-set to 40... \n')
-                    if int(sys_mem) >= int(33):
-                        chunk_set = int(0)
-                        widget_text.write(base_text + 'Chunk size auto-set to Full... \n')
+            if data['gpu'] == -1:
+                sys_mem = psutil.virtual_memory().total >> 30
+                if int(sys_mem) <= int(4):
+                    chunk_set = int(1)
+                    if no_chunk_demucs:
+                        widget_text.write(base_text + 'Chunk size auto-set to 1... \n')
+                if sys_mem in [5, 6, 7, 8]:
+                    chunk_set = int(10)
+                    if no_chunk_demucs:
+                        widget_text.write(base_text + 'Chunk size auto-set to 10... \n')
+                if sys_mem in [9, 10, 11, 12, 13, 14, 15, 16]:
+                    chunk_set = int(25)
+                    if no_chunk_demucs:
+                        widget_text.write(base_text + 'Chunk size auto-set to 25... \n')
+                if int(sys_mem) >= int(17):
+                    chunk_set = int(60)
+                    if no_chunk_demucs:
+                        widget_text.write(base_text + 'Chunk size auto-set to 60... \n')
+        elif data['chunks_d'] == str(0):
+            chunk_set = 0
+            if no_chunk_demucs:
+                widget_text.write(base_text + "Chunk size set to full... \n")
         else:
-            if split_mode == True:
-                widget_text.write(base_text + "Split Mode is on (Chunks disabled).\n")
-                chunk_set = 0
-            else:
-                widget_text.write(base_text + "Split Mode is off (Chunks enabled).\n")
-                if data['chunks_d'] == 'Full':
-                    chunk_set = int(0)
-                    widget_text.write(base_text + "Chunk size set to full... \n")
-                else:
-                    chunk_set = data['chunks_d']
-                    widget_text.write(base_text + "Chunk size user-set to "f"{chunk_set}... \n")
+            chunk_set = int(data['chunks_d'])
+            if no_chunk_demucs:
+                widget_text.write(base_text + "Chunk size user-set to "f"{chunk_set}... \n")
             
         samples = mix.shape[-1]
         margin = margin_set
         chunk_size = chunk_set*44100
         assert not margin == 0, 'margin cannot be zero!'
+        
         if margin > chunk_size:
             margin = chunk_size
-
 
         segmented_mix = {}
         
@@ -692,27 +699,45 @@ class Predictor():
             if end == samples:
                 break
         
-        if demucs_model_version == 'v1':
-            sources = self.demix_demucs_v1(segmented_mix, margin_size=margin)
-        if demucs_model_version == 'v2':
-            sources = self.demix_demucs_v2(segmented_mix, margin_size=margin)
+        if demucs_model_version == 'v1': 
+            if no_chunk_demucs == False:
+                sources = self.demix_demucs_v1_split(mix)
+            if no_chunk_demucs == True:
+                sources = self.demix_demucs_v1(segmented_mix, margin_size=margin)
+        if demucs_model_version == 'v2': 
+            if no_chunk_demucs == False:
+                sources = self.demix_demucs_v2_split(mix)
+            if no_chunk_demucs == True:
+                sources = self.demix_demucs_v2(segmented_mix, margin_size=margin)
         if demucs_model_version == 'v3':
-            sources = self.demix_demucs(segmented_mix, margin_size=margin)
+            if no_chunk_demucs == False:
+                sources = self.demix_demucs_split(mix)
+            if no_chunk_demucs == True:
+                sources = self.demix_demucs(segmented_mix, margin_size=margin)
 
-        return sources
-    
-    def demix_demucs(self, mix, margin_size):
+        return sources   
         
+    def demix_demucs(self, mix, margin_size):
         processed = {}
         demucsitera = len(mix)
         demucsitera_calc = demucsitera * 2
         gui_progress_bar_demucs = 0
+        progress_bar = 0
+        if demucsitera == 1:
+            widget_text.write(base_text + f"Running Demucs Inference... ")
+        else:
+            widget_text.write(base_text + f"Running Demucs Inference...{space}\n")
             
-        widget_text.write(base_text + "Running Demucs Inference...\n")
-        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
         print(' Running Demucs Inference...')
         for nmix in mix:
             gui_progress_bar_demucs += 1
+            progress_bar += 100
+            step = (progress_bar / demucsitera)
+            if demucsitera == 1:
+                pass
+            else:
+                percent_prog = f"{base_text}Demucs Inference Progress: {gui_progress_bar_demucs}/{demucsitera} | {round(step)}%"
+                widget_text.percentage(percent_prog)
             update_progress(**progress_kwargs,
                 step=(0.1 + (1.7/demucsitera_calc * gui_progress_bar_demucs)))
             cmix = mix[nmix]
@@ -720,7 +745,17 @@ class Predictor():
             ref = cmix.mean(0)        
             cmix = (cmix - ref.mean()) / ref.std()
             with torch.no_grad():
-                sources = apply_model(self.demucs, cmix[None], split=split_mode, device=device, overlap=overlap_set, shifts=shift_set, progress=False)[0]
+                sources = apply_model(self.demucs, cmix[None], 
+                                      gui_progress_bar, 
+                                      widget_text,
+                                      update_prog,
+                                      split=split_mode, 
+                                      device=device, 
+                                      overlap=overlap_set, 
+                                      shifts=shift_set, 
+                                      progress=False, 
+                                      segmen=False,
+                                      **progress_demucs_kwargs)[0]
             sources = (sources * ref.std() + ref.mean()).cpu().numpy()
             sources[[0,1]] = sources[[1,0]]
 
@@ -732,7 +767,49 @@ class Predictor():
 
         sources = list(processed.values())
         sources = np.concatenate(sources, axis=-1)
-        widget_text.write('Done!\n')
+        
+        if demucsitera == 1:
+            widget_text.write('Done!\n')
+        else:
+            widget_text.write('\n')
+        #print('the demucs model is done running')
+
+        return sources
+    
+    def demix_demucs_split(self, mix):
+        
+        if split_mode:
+            widget_text.write(base_text + f"Running Demucs Inference...{space}\n")
+        else:
+            widget_text.write(base_text + f"Running Demucs Inference... ")
+        print(' Running Demucs Inference...')
+          
+        mix = torch.tensor(mix, dtype=torch.float32)
+        ref = mix.mean(0)        
+        mix = (mix - ref.mean()) / ref.std()
+        
+        with torch.no_grad():
+            sources = apply_model(self.demucs, 
+                                  mix[None], 
+                                  gui_progress_bar,
+                                  widget_text,
+                                  update_prog,
+                                  split=split_mode,
+                                  device=device, 
+                                  overlap=overlap_set, 
+                                  shifts=shift_set, 
+                                  progress=False,
+                                  segmen=True,
+                                  **progress_demucs_kwargs)[0]
+            
+        if split_mode:
+            widget_text.write('\n')
+        else:
+            widget_text.write('Done!\n')
+            
+        sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+        sources[[0,1]] = sources[[1,0]]
+        
         return sources
     
     def demix_demucs_v1(self, mix, margin_size):
@@ -740,19 +817,37 @@ class Predictor():
         demucsitera = len(mix)
         demucsitera_calc = demucsitera * 2
         gui_progress_bar_demucs = 0
-        widget_text.write(base_text + "Running Demucs v1 Inference...\n")
-        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
+        progress_bar = 0
         print(' Running Demucs Inference...')
+        if demucsitera == 1:
+            widget_text.write(base_text + f"Running Demucs v1 Inference... ")
+        else:
+            widget_text.write(base_text + f"Running Demucs v1 Inference...{space}\n")
         for nmix in mix:
             gui_progress_bar_demucs += 1
+            progress_bar += 100
+            step = (progress_bar / demucsitera)
+            if demucsitera == 1:
+                pass
+            else:
+                percent_prog = f"{base_text}Demucs v1 Inference Progress: {gui_progress_bar_demucs}/{demucsitera} | {round(step)}%"
+                widget_text.percentage(percent_prog)
             update_progress(**progress_kwargs,
-                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+                step=(0.1 + (1.7/demucsitera_calc * gui_progress_bar_demucs)))
             cmix = mix[nmix]
             cmix = torch.tensor(cmix, dtype=torch.float32)
             ref = cmix.mean(0)        
             cmix = (cmix - ref.mean()) / ref.std()
             with torch.no_grad():
-                sources = apply_model_v1(self.demucs, cmix.to(device), split=split_mode, shifts=shift_set)
+                sources = apply_model_v1(self.demucs, 
+                                         cmix.to(device), 
+                                         gui_progress_bar, 
+                                         widget_text,
+                                         update_prog,
+                                         split=split_mode, 
+                                         segmen=False,
+                                         shifts=shift_set,
+                                         **progress_demucs_kwargs)
             sources = (sources * ref.std() + ref.mean()).cpu().numpy()
             sources[[0,1]] = sources[[1,0]]
 
@@ -764,7 +859,44 @@ class Predictor():
 
         sources = list(processed.values())
         sources = np.concatenate(sources, axis=-1)
-        widget_text.write('Done!\n')
+
+        if demucsitera == 1:
+            widget_text.write('Done!\n')
+        else:
+            widget_text.write('\n')
+
+        return sources
+    
+    def demix_demucs_v1_split(self, mix):
+
+        print(' Running Demucs Inference...')
+        if split_mode:
+            widget_text.write(base_text + f"Running Demucs v1 Inference...{space}\n")
+        else:
+            widget_text.write(base_text + f"Running Demucs v1 Inference... ")
+        
+        mix = torch.tensor(mix, dtype=torch.float32)
+        ref = mix.mean(0)        
+        mix = (mix - ref.mean()) / ref.std()
+
+        with torch.no_grad():
+            sources = apply_model_v1(self.demucs, 
+                                        mix.to(device), 
+                                        gui_progress_bar, 
+                                        widget_text,
+                                        update_prog,
+                                        split=split_mode, 
+                                        segmen=True,
+                                        shifts=shift_set,
+                                        **progress_demucs_kwargs)
+        sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+        sources[[0,1]] = sources[[1,0]]
+
+        if split_mode:
+            widget_text.write('\n')
+        else:
+            widget_text.write('Done!\n')
+            
         return sources
     
     def demix_demucs_v2(self, mix, margin_size):
@@ -772,20 +904,39 @@ class Predictor():
         demucsitera = len(mix)
         demucsitera_calc = demucsitera * 2
         gui_progress_bar_demucs = 0
-        widget_text.write(base_text + "Running Demucs v2 Inference...\n")
-        widget_text.write(base_text + "Processing "f"{len(mix)} slices... ")
-        print(' Running Demucs Inference...')
+        progress_bar = 0
+        if demucsitera == 1:
+            widget_text.write(base_text + f"Running Demucs v2 Inference... ")
+        else:
+            widget_text.write(base_text + f"Running Demucs v2 Inference...{space}\n")
+            
         for nmix in mix:
             gui_progress_bar_demucs += 1
+            progress_bar += 100
+            step = (progress_bar / demucsitera)
+            if demucsitera == 1:
+                pass
+            else:
+                percent_prog = f"{base_text}Demucs v2 Inference Progress: {gui_progress_bar_demucs}/{demucsitera} | {round(step)}%"
+                widget_text.percentage(percent_prog)
+
             update_progress(**progress_kwargs,
-                step=(0.35 + (1.05/demucsitera_calc * gui_progress_bar_demucs)))
+                step=(0.1 + (1.7/demucsitera_calc * gui_progress_bar_demucs)))
             cmix = mix[nmix]
             cmix = torch.tensor(cmix, dtype=torch.float32)
             ref = cmix.mean(0)        
             cmix = (cmix - ref.mean()) / ref.std()
-            shift_set = 0
             with torch.no_grad():
-                sources = apply_model_v2(self.demucs, cmix.to(device), split=split_mode, overlap=overlap_set, shifts=shift_set)
+                sources = apply_model_v2(self.demucs, 
+                                         cmix.to(device), 
+                                         gui_progress_bar, 
+                                         widget_text,
+                                         update_prog,
+                                         split=split_mode, 
+                                         segmen=False,
+                                         overlap=overlap_set, 
+                                         shifts=shift_set,
+                                         **progress_demucs_kwargs)
             sources = (sources * ref.std() + ref.mean()).cpu().numpy()
             sources[[0,1]] = sources[[1,0]]
 
@@ -797,8 +948,47 @@ class Predictor():
 
         sources = list(processed.values())
         sources = np.concatenate(sources, axis=-1)
-        widget_text.write('Done!\n')
+
+        if demucsitera == 1:
+            widget_text.write('Done!\n')
+        else:
+            widget_text.write('\n')
+
         return sources
+    
+    def demix_demucs_v2_split(self, mix):
+        print(' Running Demucs Inference...')
+        
+        if split_mode:
+            widget_text.write(base_text + f"Running Demucs v2 Inference...{space}\n")
+        else:
+            widget_text.write(base_text + f"Running Demucs v2 Inference... ")
+            
+        mix = torch.tensor(mix, dtype=torch.float32)
+        ref = mix.mean(0)        
+        mix = (mix - ref.mean()) / ref.std()
+        with torch.no_grad():
+            sources = apply_model_v2(self.demucs, 
+                                        mix.to(device), 
+                                        gui_progress_bar, 
+                                        widget_text,
+                                        update_prog,
+                                        split=split_mode, 
+                                        segmen=True,
+                                        overlap=overlap_set, 
+                                        shifts=shift_set,
+                                        **progress_demucs_kwargs)
+            
+        sources = (sources * ref.std() + ref.mean()).cpu().numpy()
+        sources[[0,1]] = sources[[1,0]]
+
+        if split_mode:
+            widget_text.write('\n')
+        else:
+            widget_text.write('Done!\n')
+            
+        return sources
+        
         
 data = {
     'audfile': True,
@@ -811,19 +1001,19 @@ data = {
     'gpu': -1,
     'input_paths': None,
     'inst_only_b': False,
-    'margin': 44100,
+    'margin_d': 44100,
     'mp3bit': '320k',
+    'no_chunk_d': False,
     'normalize': False,
     'overlap_b': 0.25,
     'saveFormat': 'Wav',
-    'segment': 'None',
+    'segment': 'Default',
     'settest': False,
     'shifts_b': 2,
     'split_mode': False,
     'voc_only_b': False,
     'wavtype': 'PCM_16',
 }
-default_chunks = data['chunks_d']
 
 def update_progress(progress_var, total_files, file_num, step: float = 1):
     """Calculate the progress for the progress widget in the GUI"""
@@ -850,7 +1040,7 @@ def hide_opt():
             yield
         finally:
             sys.stdout = old_stdout
-
+            
 def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress_var: tk.Variable,
          **kwargs: dict):
 
@@ -861,6 +1051,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global _basename
     global _mixture
     global progress_kwargs
+    global progress_demucs_kwargs
     global base_text
     global model_set_name
     global stemset_n
@@ -872,11 +1063,15 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     global split_mode
     global demucs_model_set_name
     global demucs_model_version
-    
     global wav_type_set
+    global no_chunk_demucs
+    global space
     global flac_type_set
     global mp3_bit_set
     global normalization_set
+    global update_prog
+    
+    update_prog = update_progress
     
     wav_type_set = data['wavtype']
         
@@ -899,6 +1094,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     ffmp_err = """audioread\__init__.py", line 116, in audio_open"""
     sf_write_err = "sf.write"
     model_adv_set_err = "Got invalid dimensions for input"
+    demucs_model_missing_err = "is neither a single pre-trained model or a bag of models."
     
     try:
         with open('errorlog.txt', 'w') as f:
@@ -911,7 +1107,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     randomnum = randrange(100000, 1000000)
     
     data.update(kwargs)
-        
+ 
     if data['wavtype'] == '32-bit Float':
         wav_type_set = 'FLOAT'
     elif data['wavtype'] == '64-bit Float':
@@ -921,6 +1117,9 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         
     flac_type_set = data['flactype']
     mp3_bit_set = data['mp3bit']
+    default_chunks = data['chunks_d']
+    no_chunk_demucs = data['no_chunk_d']
+    
     
     if data['normalize'] == True:
         normalization_set = spec_utils.normalize
@@ -1057,10 +1256,10 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
     
             overlap_set = float(data['overlap_b'])
             channel_set = int(data['channel'])
-            margin_set = int(data['margin'])
+            margin_set = int(data['margin_d'])
             shift_set = int(data['shifts_b'])
-            
             split_mode = data['split_mode']
+            space = ' '*90
                 
             #print('Split? ', split_mode)
             
@@ -1133,6 +1332,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
                 
                 #if ('models/MDX_Net_Models/' + model_set + '.onnx')
                 
+            inference_type = 'demucs_only'
                 
             # -Get text and update progress-
             base_text = get_baseText(total_files=len(data['input_paths']),
@@ -1140,6 +1340,8 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             progress_kwargs = {'progress_var': progress_var,
                             'total_files': len(data['input_paths']),
                             'file_num': file_num}
+            progress_demucs_kwargs = {'total_files': len(data['input_paths']),
+                            'file_num': file_num, 'inference_type': inference_type}
             
             try:
                 
@@ -1389,7 +1591,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             text_widget.write(f'\nError Received:\n\n')
             text_widget.write(f'Could not write audio file.\n')
             text_widget.write(f'This could be due to low storage on target device or a system permissions issue.\n')
-            text_widget.write(f"\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
+            text_widget.write(f"\nGo to the Settings Menu and click \"Open Error Log\" for raw error details.\n")
             text_widget.write(f'\nIf the error persists, please contact the developers.\n\n')
             text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
             try:
@@ -1456,6 +1658,50 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
             button_widget.configure(state=tk.NORMAL)  # Enable Button
             return 
         
+        if model_adv_set_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The current ONNX model settings are not compatible with the selected \nmodel.\n\n')
+            text_widget.write(f'Please re-configure the advanced ONNX model settings accordingly and try \nagain.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Demucs v3\n\n' +
+                            f'The current ONNX model settings are not compatible with the selected model.\n\n' + 
+                            f'Please re-configure the advanced ONNX model settings accordingly and try again.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
+        if demucs_model_missing_err in message:
+            text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
+            text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
+            text_widget.write(f'\nError Received:\n\n')
+            text_widget.write(f'The selected Demucs model is missing.\n\n')
+            text_widget.write(f'Please download the model or make sure it is in the correct directory.\n\n')
+            text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
+            try:
+                with open('errorlog.txt', 'w') as f:
+                    f.write(f'Last Error Received:\n\n' +
+                            f'Error Received while processing "{os.path.basename(music_file)}":\n' + 
+                            f'Process Method: Demucs v3\n\n' +
+                            f'The selected Demucs model is missing.\n\n' + 
+                            f'Please download the model or make sure it is in the correct directory.\n\n' + 
+                            message + f'\nError Time Stamp [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]\n') 
+            except:
+                pass
+            torch.cuda.empty_cache()
+            progress_var.set(0)
+            button_widget.configure(state=tk.NORMAL)  # Enable Button
+            return 
+        
         
         print(traceback_text)
         print(type(e).__name__, e)
@@ -1476,7 +1722,7 @@ def main(window: tk.Wm, text_widget: tk.Text, button_widget: tk.Button, progress
         text_widget.write("\n" + base_text + f'Separation failed for the following audio file:\n')
         text_widget.write(base_text + f'"{os.path.basename(music_file)}"\n')
         text_widget.write(f'\nError Received:\n')
-        text_widget.write("\nFor raw error details, go to the Error Log tab in the Help Guide.\n")
+        text_widget.write("\nGo to the Settings Menu and click \"Open Error Log\" for raw error details.\n")
         text_widget.write("\n" + f'Please address the error and try again.' + "\n")
         text_widget.write(f'If this error persists, please contact the developers with the error details.\n\n')
         text_widget.write(f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}')
@@ -1500,3 +1746,17 @@ if __name__ == '__main__':
     main()
     print("Successfully completed music demixing.");print('Total time: {0:.{1}f}s'.format(time.time() - start_time, 1))
 
+## Grave yard
+
+            # def prog_val():
+            #     def thread():
+            #         global source
+            #         source = apply_model(self.demucs, cmix[None], split=split_mode, device=device, overlap=overlap_set, shifts=shift_set, progress=True, )[0]
+            #     th = threading.Thread(target=thread)
+            #     th.start()
+            #     print('wait')
+            #     val = demucs.apply.progress_bar_num
+            #     th.join()
+            #     print('continue')
+                
+            #     return source

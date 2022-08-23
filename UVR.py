@@ -53,7 +53,13 @@ import importlib
 import urllib.request
 import pyAesCrypt
 from __version__ import VERSION
-from win32api import GetSystemMetrics
+from screeninfo import get_monitors
+
+def get_screen_height():
+    monitors = get_monitors()
+    if len(monitors) == 0:
+        raise Exception("Failed to get screen height")
+    return monitors[0].height
 
 try:
     with open(os.path.join(os.getcwd(), 'tmp', 'splash.txt'), 'w') as f:
@@ -491,7 +497,7 @@ class MainWindow(TkinterDnD.Tk):
     # --Constants--
     # Layout
     
-    if GetSystemMetrics(1) >= 900:
+    if get_screen_height() >= 900:
         IMAGE_HEIGHT = 140
         FILEPATHS_HEIGHT = 85
         OPTIONS_HEIGHT = 275
@@ -499,7 +505,7 @@ class MainWindow(TkinterDnD.Tk):
         COMMAND_HEIGHT = 200
         PROGRESS_HEIGHT = 30
         PADDING = 10
-    elif GetSystemMetrics(1) <= 720:
+    elif get_screen_height() <= 720:
         IMAGE_HEIGHT = 135
         FILEPATHS_HEIGHT = 85
         OPTIONS_HEIGHT = 274
@@ -536,7 +542,7 @@ class MainWindow(TkinterDnD.Tk):
             height=height,
             xpad=int(self.winfo_screenwidth()/2 - 635/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             pass
         else:
             self.tk.call('tk', 'scaling', 1.1)
@@ -560,7 +566,7 @@ class MainWindow(TkinterDnD.Tk):
                                 size=(30, 30))    
         self.key_img = open_image(path=key_path,
                                 size=(30, 30))     
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             self.gen_opt_img = open_image(path=gen_opt_path,
                                         size=(900, 826))
             self.mdx_opt_img = open_image(path=mdx_opt_path,
@@ -575,7 +581,7 @@ class MainWindow(TkinterDnD.Tk):
                                         size=(900, 826))
             self.credits_img = open_image(path=credits_path,
                                         size=(100, 100))
-        elif GetSystemMetrics(1) <= 720:
+        elif get_screen_height() <= 720:
             self.gen_opt_img = open_image(path=gen_opt_path,
                                         size=(740, 826))
             self.mdx_opt_img = open_image(path=mdx_opt_path,
@@ -4079,10 +4085,10 @@ class MainWindow(TkinterDnD.Tk):
         Open Help Guide
         """
         help_guide_opt = Toplevel(self)
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             window_height = 810
             window_width = 1080
-        elif GetSystemMetrics(1) <= 720:
+        elif get_screen_height() <= 720:
             window_height = 640
             window_width = 930
         else:
@@ -4100,7 +4106,7 @@ class MainWindow(TkinterDnD.Tk):
 
         help_guide_opt.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
 
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             x = root.winfo_x()
             y = root.winfo_y()
             help_guide_opt.geometry("+%d+%d" %(x-220,y+5))
@@ -4177,7 +4183,7 @@ class MainWindow(TkinterDnD.Tk):
         frame0=Frame(tab7,highlightbackground='red',highlightthicknes=0)
         frame0.grid(row=0,column=0,padx=0,pady=30)  
 
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             l0=tk.Label(frame0,text="Notes",font=("Century Gothic", "16", "bold"), justify="center", fg="#f4f4f4")
             l0.grid(row=1,column=0,padx=20,pady=10)
 
@@ -6125,10 +6131,10 @@ class MainWindow(TkinterDnD.Tk):
         """
         error_log_screen= Toplevel(root)
         
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             window_height = 810
             window_width = 1080
-        elif GetSystemMetrics(1) <= 720:
+        elif get_screen_height() <= 720:
             window_height = 640
             window_width = 930
         else:
@@ -6149,7 +6155,7 @@ class MainWindow(TkinterDnD.Tk):
 
         error_log_screen.geometry("{}x{}+{}+{}".format(window_width, window_height, x_cordinate, y_cordinate))
 
-        if GetSystemMetrics(1) >= 900:
+        if get_screen_height() >= 900:
             x = root.winfo_x()
             y = root.winfo_y()
             error_log_screen.geometry("+%d+%d" %(x-220,y+5))

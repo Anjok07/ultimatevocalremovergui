@@ -27,6 +27,7 @@ pyyaml
 resampy==0.2.2
 samplerate
 scipy
+screeninfo
 SoundFile
 soundstretch
 wget

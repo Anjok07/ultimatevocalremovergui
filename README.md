@@ -112,6 +112,8 @@ If possible, click the "Settings Button" to the left of the "Start Processing" b
 
 ## Manual Installation (For Developers)
 
+**PLEASE NOTE:** Manual installs are **not** recommended at this time! I am rewriting UVR's entire codebase for better readability, optimized application performance, enhanced features, and streamlined cross-platform compatibility. The new code will be released **before** Halloween 2022.
+
 These instructions are for those installing UVR v5.2.0 **manually** only.
 
 1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)

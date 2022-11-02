@@ -112,30 +112,7 @@ If possible, click the "Settings Button" to the left of the "Start Processing" b
 
 ## Manual Installation (For Developers)
 
-**PLEASE NOTE:** Manual installs are **not** recommended at this time! I am rewriting UVR's entire codebase for better readability, optimized application performance, enhanced features, and streamlined cross-platform compatibility. The new code will be released **before** Halloween 2022.
-
-These instructions are for those installing UVR v5.2.0 **manually** only.
-
-1. Download & install Python 3.9 or lower (but no lower than 3.6) [here](https://www.python.org/downloads/)
-    - **Note:** Ensure the *"Add Python to PATH"* box is checked
-2. Download the Source code [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-3. Download the models via the "Settings" menu within the application.
-4. Extract the *ultimatevocalremovergui-master* folder within ultimatevocalremovergui-master.zip where ever you wish.
-5. Download the SoX archive [here](https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2-win32.zip/download) and extract the contents into the *ultimatevocalremovergui-master/lib_v5/sox* directory.
-6. Open the command prompt from the ultimatevocalremovergui-master directory and run the following commands, separately - 
-
-```
-pip install --no-cache-dir -r requirements.txt
-```
-```
-pip install torch==1.9.0+cu111 torchvision==0.10.0+cu111 torchaudio==0.9.0 -f https://download.pytorch.org/whl/torch_stable.html
-```
-
-From here you should be able to open and run the UVR.py file
-
-- FFmpeg 
-
-    - FFmpeg must be installed and configured for the application to process any track that isn't a *.wav* file. You will need to look up instruction on how to configure it on your operating system.
+**PLEASE NOTE:** Manual installs are **not** possible at this time! I am rewriting UVR's entire codebase for better readability, optimized application performance, enhanced features, and streamlined cross-platform compatibility. The new code will be released **before** the end of 2022.
 
 ## License
 

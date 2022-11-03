@@ -1,5 +1,6 @@
 __pycache__
 data.pkl
+errorlog.txt
 # Testing models
 model_iter26_sr33075_hl384_w512.pth
 baseline.pth

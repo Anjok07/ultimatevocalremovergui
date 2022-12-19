@@ -1,14 +1,12 @@
-# Ultimate Vocal Remover GUI v5.4.0
+# Ultimate Vocal Remover GUI v5.5.0
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/img/UVR_v54.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
 
-English | [简体中文](README_CN.md)
-
 ## About
 
-This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs v3 4-stem models).
+This application uses state-of-the-art source separation models to remove vocals from audio files. UVR's core developers trained all of the models provided in this package (except for the Demucs v3 and v4 4-stem models).
 
 - **Core Developers**
     - [Anjok07](https://github.com/anjok07)
@@ -29,10 +27,10 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
 
 - Download the UVR installer via the link below:
-    - [Main Download Link](https://uvr.uvr.workers.dev/UVR_v5.4.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file/nrakuh8t8p993y8/UVR_v5.4.0_setup.exe)
+    - [Main Download Link]()
+    - [Main Download Link mirror]()
 - Update Package instructions for those who have UVR already installed:
-    - [Update Package](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.4.0/UVR_v5.4_Update_Package.exe)
+    - Please download the patch straight through the application.
 - **Optional**
     - Additional models and application patches can be downloaded via the "Settings" menu within the application.
 
@@ -40,33 +38,8 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### Other Platforms
 
-This application does not currently run efficiently on Mac & Linux platforms yet. However, you can experiment with it by performing a manual install (see the **Manual Developer Installation** section below for more information). Some features may not be available on non-Windows platforms. An all-in-one version for MacOS will be coming soon.
-
-## Application Manual
-
-**General Options**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/gen_opt.png?raw=true" />
-
-**VR Architecture Options**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/vr_opt.png?raw=true" />
-
-**MDX-Net Options**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/mdx_opt.png?raw=true" />
-
-**Demucs v3 Options**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/demucs_opt.png?raw=true" />
-
-**Ensemble Options**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/ense_opt.png?raw=true" />
-
-**User Ensemble**
-
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/img/user_ens_opt.png?raw=true" />
+- MacOS: A fully compatible version for Mac is currently in the works and will be released soon.
+- Linux: Linux installs will need to be done manually. See the Manual install section for more information.
 
 ### Other Application Notes
 
@@ -80,22 +53,64 @@ This application does not currently run efficiently on Mac & Linux platforms yet
 
 ## Change Log
 
-- **v4 vs. v5**
-   - The v5 models significantly outperform the v4 models.
-   - The extraction's aggressiveness can be adjusted using the "Aggression Setting." The default value of 10 is optimal for most tracks.
-   - All v2 and v4 models have been removed.
-   - Ensemble Mode added - This allows the user to get the most robust result from each model.
-   - Stacked models have been entirely removed.
-     The new aggression setting and model ensembling have replaced the stacked model feature.
-   - The NFFT, HOP_SIZE, and SR values are now set internally.
-   - The MDX-NET AI engine and models have been added.
-     - This is a brand new feature added to the UVR GUI. 
-     - 4 MDX-Net models are included in this package.
-     - The MDX-Net models provided were trained by the core UVR developers
-     - This network is less resource-intensive but incredibly powerful.
-     - MDX-Net is a Hybrid Waveform/Spectrogram network.
-   - The Demucs v3 AI engine and models have been added.
-   - The ability to separate all 4 stems through Demucs v3.
+### Patch Version: 
+
+- UVR_Patch_12_18_22_6_41
+
+### Fixes & Changes:
+
+- The progress bar is now fully synced up with every process in the application.
+- Drag-n-drop feature should now work every time.
+- Users can now drop massive amounts of files and directories as inputs, and the application will add them to the conversion list.
+- Various bug fixes for the Download Center.
+- Various design changes.
+
+### Performance:
+
+- Model load times are faster.
+- Importing/exporting audio files is faster.
+
+### New Options:
+
+- "Select Saved Settings" option - Allows the user to save the current settings of the whole application or reset them to the default.
+- "Right-click" menu - Allows for quick access to important options.
+- "Help Hints" option - When enabled, users can hover over options to see pop-up text that describes that option. The right-clicking option also allows copying the "Help Hint" text.
+- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option that was only available to MDX-Net. Except now, this option is available in all three AI Networks and stems. Any model can now be Secondary, and the user can choose the amount of influence the Secondary model has, unlike before.
+- Robust caching for ensemble mode, allowing for much faster processing times.
+- You can now drag and drop as many files/folders as inputs. The application willautomatically go through each selected directory for audio files.
+- Clicking the "Input" field will pop-up a new window that allows the user to go through all of the selected audio inputs and remove some, if desired.
+- "Sample Mode" option - Allows the user to process only part of a track to sample settings or a model without running a full conversion.
+    - The number in the parentheses is the current number of seconds the generated sample will be.
+    - You can choose the number of seconds to extract from the track in the "Additional Settings" menu.
+
+### VR Architecture:
+
+- Support for the latest VR architecture
+    - Crop Size and Batch Size are specifically for models using the latest architecture only.
+    - Ability to toggle "High-End Processing."
+
+### MDX-NET:
+
+- "Denoise Output" option - When enabled, this option results in cleaner results, but the processing time will be longer. This option has replaced Noise Reduction.
+- "Spectral Inversion" option - This option uses inversion techniques for a cleaner secondary stem result. This option may slow down the audio export process.
+- Secondary stem now has the same frequency cut-off as the main stem.
+
+### Demucs:
+
+- Demucs v4 models are now supported, including the 6 stem models.
+- Ability to combine remaining stems instead of inverting selected stems with the 
+mixture only when a user selects 2 stems.
+- A "Pre-process" model that allows the user to run an inference through a robust vocal or instrumental model and separate the remaining stems from its generated instrumental mix. This option can significantly reduce vocal bleed in other Demucs-generated non-vocal stems. 
+
+### Ensemble Mode: 
+
+- Ensemble Mode has been extended to include the following:
+    - "Averaging" is a new algorithm that averages the final results.
+    - Unlimited models in the ensemble.
+    - Ability to save different ensembles.
+    - Ability to ensemble outputs for all individual stem types.
+    - Ability to choose unique ensemble algorithms.
+    - Ability to ensemble all 4 Demucs stems at once.
 
 ## Troubleshooting
 
@@ -112,7 +127,7 @@ If possible, click the "Settings Button" to the left of the "Start Processing" b
 
 ## Manual Installation (For Developers)
 
-**PLEASE NOTE:** Manual installs are **not** possible at this time! I am rewriting UVR's entire codebase for better readability, optimized application performance, enhanced features, and streamlined cross-platform compatibility. The new code will be released **before** the end of 2022.
+**PLEASE NOTE:** Manual installs are **not** possible at this time! The new manual install instructions will be updated before the end of the year.
 
 ## License
 

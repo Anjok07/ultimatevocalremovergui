@@ -1317,7 +1317,6 @@ class MainWindow(TkinterDnD.Tk):
     def bind_widgets(self):
         """Bind widgets to the drag & drop mechanic"""
         
-        #print(self.chosen_audio_tool_Option.option_get())
         self.chosen_audio_tool_align = tk.BooleanVar(value=True)
         add_align = lambda e:(self.chosen_audio_tool_Option['menu'].add_radiobutton(label=ALIGN_INPUTS, command=tk._setit(self.chosen_audio_tool_var, ALIGN_INPUTS)), self.chosen_audio_tool_align.set(False)) if self.chosen_audio_tool_align else None
         
@@ -1538,10 +1537,6 @@ class MainWindow(TkinterDnD.Tk):
 
     def cached_sources_clear(self):
 
-        # print('\n==================================\n', 'vr_cache_source_mapper: \n\n', self.vr_cache_source_mapper, '\n==================================\n')
-        # print('\n==================================\n', 'mdx_cache_source_mapper: \n\n', self.mdx_cache_source_mapper, '\n==================================\n')
-        # print('\n==================================\n', 'demucs_cache_source_mapper: \n\n', self.demucs_cache_source_mapper, '\n==================================\n')
-
         self.vr_cache_source_mapper = {}
         self.mdx_cache_source_mapper = {}
         self.demucs_cache_source_mapper = {}
@@ -1644,12 +1639,9 @@ class MainWindow(TkinterDnD.Tk):
             offset_cut, clip_duration = 0, track_length
             name_apped = ''
 
-        #if not track_length <= clip_duration:
         sample = librosa.load(audio_file, offset=offset_cut, duration=clip_duration, mono=False, sr=44100)[0].T
         audio_sample = os.path.join(sample_path, f'{os.path.splitext(os.path.basename(audio_file))[0]}_{name_apped}sample.wav')
         sf.write(audio_sample, sample, 44100)
-        # else:
-        #     audio_sample = audio_file
         
         return audio_sample
 
@@ -4450,7 +4442,7 @@ class MainWindow(TkinterDnD.Tk):
             self.process_end()
                 
         except Exception as e:
-            self.error_log_var.set(error_text(self.chosen_process_method_var.get(), e))
+            self.error_log_var.set("{}{}".format(error_text(self.chosen_process_method_var.get(), e), self.get_settings_list()))
             self.command_Text.write(f'\n\n{PROCESS_FAILED}')
             self.command_Text.write(time_elapsed())
             playsound(FAIL_CHIME) if self.is_task_complete_var.get() else None
@@ -4689,7 +4681,6 @@ class MainWindow(TkinterDnD.Tk):
             'vr_other_secondary_model_scale': self.vr_other_secondary_model_scale_var.get(),
             'vr_bass_secondary_model_scale': self.vr_bass_secondary_model_scale_var.get(),
             'vr_drums_secondary_model_scale': self.vr_drums_secondary_model_scale_var.get(),
-            
             'demucs_model': self.demucs_model_var.get(),
             'segment': self.segment_var.get(),
             'overlap': self.overlap_var.get(),
@@ -4713,7 +4704,6 @@ class MainWindow(TkinterDnD.Tk):
             'demucs_pre_proc_model': self.demucs_pre_proc_model_var.get(),
             'is_demucs_pre_proc_model_activate': self.is_demucs_pre_proc_model_activate_var.get(),
             'is_demucs_pre_proc_model_inst_mix': self.is_demucs_pre_proc_model_inst_mix_var.get(),
-            
             'mdx_net_model': self.mdx_net_model_var.get(),
             'chunks': self.chunks_var.get(),
             'margin': self.margin_var.get(),
@@ -4729,7 +4719,6 @@ class MainWindow(TkinterDnD.Tk):
             'mdx_other_secondary_model_scale': self.mdx_other_secondary_model_scale_var.get(),
             'mdx_bass_secondary_model_scale': self.mdx_bass_secondary_model_scale_var.get(),
             'mdx_drums_secondary_model_scale': self.mdx_drums_secondary_model_scale_var.get(),
-            
             'is_save_all_outputs_ensemble': self.is_save_all_outputs_ensemble_var.get(),
             'is_append_ensemble_name': self.is_append_ensemble_name_var.get(),
             'chosen_audio_tool': self.chosen_audio_tool_var.get(),
@@ -4787,6 +4776,13 @@ class MainWindow(TkinterDnD.Tk):
         else:
             return {**main_settings, **user_saved_extras}
 
+    def get_settings_list(self):
+        
+        settings_dict = self.save_values(app_close=False)
+        settings_list = '\n'.join(''.join(f"{key}: {value}") for key, value in settings_dict.items() if not key == 'user_code')
+
+        return f"\nFull Application Settings:\n\n{settings_list}"
+        
 def secondary_stem(stem):
     """Determines secondary stem"""
     
@@ -4820,7 +4816,6 @@ if __name__ == "__main__":
         windll.user32.SetThreadDpiAwarenessContext(wintypes.HANDLE(-1))
     except Exception as e:
         print(e)
-        pass
 
     root = MainWindow()
         

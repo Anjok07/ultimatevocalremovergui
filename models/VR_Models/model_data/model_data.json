@@ -1,0 +1,94 @@
+{
+    "0d0e6d143046b0eecc41a22e60224582": {
+        "vr_model_param": "3band_44100_mid",
+        "primary_stem": "Instrumental"
+    },
+    "18b52f873021a0af556fb4ecd552bb8e": {
+        "vr_model_param": "2band_32000",
+        "primary_stem": "Instrumental"
+    },
+    "1fc66027c82b499c7d8f55f79e64cadc": {
+        "vr_model_param": "2band_32000",
+        "primary_stem": "Instrumental"
+    },
+    "2aa34fbc01f8e6d2bf509726481e7142": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Other"
+    },
+    "3e18f639b11abea7361db1a4a91c2559": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "570b5f50054609a17741369a35007ddd": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "Instrumental"
+    },
+    "5a6e24c1b530f2dab045a522ef89b751": {
+        "vr_model_param": "1band_sr44100_hl512",
+        "primary_stem": "Instrumental"
+    },
+    "6b5916069a49be3fe29d4397ecfd73fa": {
+        "vr_model_param": "3band_44100_msb2",
+        "primary_stem": "Instrumental"
+    },
+    "74b3bc5fa2b69f29baf7839b858bc679": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "827213b316df36b52a1f3d04fec89369": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "911d4048eee7223eca4ee0efb7d29256": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Vocals"
+    },
+    "941f3f7f0b0341f12087aacdfef644b1": {
+        "vr_model_param": "4band_v2",
+        "primary_stem": "Instrumental"
+    },
+    "a02827cf69d75781a35c0e8a327f3195": {
+        "vr_model_param": "1band_sr33075_hl384",
+        "primary_stem": "Instrumental"
+    },
+    "b165fbff113c959dba5303b74c6484bc": {
+        "vr_model_param": "3band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "b5f988cd3e891dca7253bf5f0f3427c7": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "b99c35723bc35cb11ed14a4780006a80": {
+        "vr_model_param": "1band_sr44100_hl1024",
+        "primary_stem": "Instrumental"
+    },
+    "ba02fd25b71d620eebbdb49e18e4c336": {
+        "vr_model_param": "3band_44100_mid",
+        "primary_stem": "Instrumental"
+    },
+    "c4476ef424d8cba65f38d8d04e8514e2": {
+        "vr_model_param": "3band_44100_msb2",
+        "primary_stem": "Instrumental"
+    },
+    "da2d37b8be2972e550a409bae08335aa": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Vocals"
+    },
+    "db57205d3133e39df8e050b435a78c80": {
+        "vr_model_param": "4band_44100",
+        "primary_stem": "Instrumental"
+    },
+    "ea83b08e32ec2303456fe50659035f69": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "Instrumental"
+    },
+    "f6ea8473ff86017b5ebd586ccacf156b": {
+        "vr_model_param": "4band_v2_sn",
+        "primary_stem": "Instrumental"
+    },
+    "fd297a61eafc9d829033f8b987c39a3d": {
+        "vr_model_param": "1band_sr32000_hl512",
+        "primary_stem": "Instrumental"
+    }
+}

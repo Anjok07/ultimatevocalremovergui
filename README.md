@@ -21,7 +21,24 @@ This application uses state-of-the-art source separation models to remove vocals
 
 **This version is still a work in progress! Some features may not be available. A completed stand a lone version will be released soon.**
 
+- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/uvr_5_5_MacOS.zip)
 - Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
+- From the saved directory run the following - 
+
+```
+pip3 install -r requirements.txt
+```
+
+- Once complete, download and unzip the ffmpeg to the UVR directory [here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
+
+This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
+
+**PLEASE NOTE:**
+
+- The Download Center will not work out of the box. You will need to update and install a certificate (instructions for that coming soon).
+- GPU selection does not work. However, if you are running a MacBook Pro running the M2 processor, you can get MPS acceleration on the VR Models **only!** It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M2 processing is available and should work out of the box if it is.
+- Drag-n-drop currently does not work for this build. It might come in a future update.
+- So far everthing else is working as expected.
 
 ### Other Application Notes
 

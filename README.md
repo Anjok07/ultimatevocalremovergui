@@ -36,10 +36,14 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 - **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
 
-### Other Platforms
+### MacOS Installation
 
-- MacOS: A fully compatible version for Mac is currently in the works and will be released soon.
-- Linux: Linux installs will need to be done manually. See the Manual install section for more information.
+- The stand alone version will be coming soon!
+- If you wish to run UVR on MacOS at this time, you can manually install the UVR Mac build [here]( https://github.com/Anjok07/ultimatevocalremovergui/tree/uvr_5_5_MacOS)
+
+### Linux Installation
+
+- Linux installs will need to be done manually. See the Manual install section, or try the Mac Build above.
 
 ### Other Application Notes
 

@@ -591,10 +591,11 @@ class SeperateVR(SeperateAttributes):
             self.primary_source, self.secondary_source = self.load_cached_sources()
         else:
             self.start_inference()
-            if self.is_gpu_conversion >= 0:
-                device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
-            else:
-                device = torch.device('cpu')
+            # if self.is_gpu_conversion >= 0:
+            #     #device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
+            # else:
+            #     device = torch.device('cpu')
+            device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu') #MACOS_COMMENT
             
             nn_arch_sizes = [
                 31191, # default
@@ -671,12 +672,12 @@ class SeperateVR(SeperateAttributes):
         
             if d == bands_n: # high-end band
                 X_wave[d], _ = librosa.load(
-                    self.audio_file, bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
+                    self.audio_file, bp['sr'], False, dtype=np.float32, res_type='polyphase') #MACOS_COMMENT
                     
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else: # lower bands
-                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type='polyphase') #MACOS_COMMENT
                 
             X_spec_s[d] = spec_utils.wave_to_spectrogram_mt(X_wave[d], bp['hl'], bp['n_fft'], self.mp.param['mid_side'], 
                                                             self.mp.param['mid_side_b2'], self.mp.param['reverse'])
@@ -908,8 +909,11 @@ def save_format(audio_path, save_format, mp3_bit_set):
     
     if not save_format == WAV:
         
-        musfile = pydub.AudioSegment.from_wav(audio_path)
+        FFMPEG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ffmpeg')
         
+        pydub.AudioSegment.converter = FFMPEG_PATH
+        musfile = pydub.AudioSegment.from_wav(audio_path)
+
         if save_format == FLAC:
             audio_path_flac = audio_path.replace(".wav", ".flac")
             musfile.export(audio_path_flac, format="flac")  

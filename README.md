@@ -29,7 +29,7 @@ This application uses state-of-the-art source separation models to remove vocals
 pip3 install -r requirements.txt
 ```
 
-- Once complete, download and unzip the ffmpeg to the UVR directory [here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
+- Once complete, download and unzip the archive containing ffmpeg to the UVR directory. Archive [download here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
 

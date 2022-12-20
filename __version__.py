@@ -1,2 +1,2 @@
 VERSION = 'v5.5.0'
-PATCH = 'UVR_Patch_12_16_22_3_30'
+PATCH = 'UVR_Patch_12_18_22_6_41'

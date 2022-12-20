@@ -329,12 +329,12 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
             sr = mp.param['band'][d+1]['sr']
             if d == 1: # lower
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
-                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']), bp['sr'], sr, res_type="sinc_fastest")
+                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']), bp['sr'], sr, res_type="polyphase")
             else: # mid
                 spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
                 wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']))
-                wave = librosa.resample(wave2, bp['sr'], sr, res_type="sinc_fastest")
+                wave = librosa.resample(wave2, bp['sr'], sr, res_type="polyphase")
         
     return wave
 

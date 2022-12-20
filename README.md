@@ -1,5 +1,5 @@
 # Ultimate Vocal Remover GUI v5.5.0
-<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_5_5.jpg?raw=true" />
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/uvr_5_5_MacOS/gui_data/img/UVR_5_5_MacOS.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
@@ -17,29 +17,11 @@ This application uses state-of-the-art source separation models to remove vocals
 
 ## Installation
 
-### Windows Installation
+### MacOS Only
 
-This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites are required.
+**This version is still a work in progress! Some features may not be available. A completed stand a lone version will be released soon.**
 
-- Please Note:
-    - This installer is intended for those running Windows 10 or higher. 
-    - Application functionality for systems running Windows 7 or lower is not guaranteed.
-    - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
-
-- Download the UVR installer via the link below:
-    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file/59n8g1sa47ji91n/UVR_v5.5.0_setup.exe/file)
-- Update Package instructions for those who have UVR already installed:
-    - Please download the patch straight through the application.
-- **Optional**
-    - Additional models and application patches can be downloaded via the "Settings" menu within the application.
-
-- **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
-
-### Other Platforms
-
-- MacOS: A fully compatible version for Mac is currently in the works and will be released soon.
-- Linux: Linux installs will need to be done manually. See the Manual install section for more information.
+- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
 
 ### Other Application Notes
 

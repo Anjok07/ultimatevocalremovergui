@@ -260,6 +260,7 @@ VR_AGGRESSION = (1, 2, 3, 4, 5,
 VR_WINDOW = ('320', '512','1024')
 VR_CROP = ('256', '512', '1024')
 VR_BATCH = ('4', '6', '8')
+POST_PROCESSES_THREASHOLD_VALUES = ('0.1', '0.2', '0.3')
 
 MDX_POP_PRO = ('MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
 MDX_POP_STEMS = ('Vocals', 'Instrumental', 'Other', 'Drums', 'Bass')
@@ -325,7 +326,7 @@ PITCH_TEXT = '_pitch_shifted'
 
 REG_TIME_PITCH = r'^[-+]?(1[0]|[0-9]([.][0-9]*)?)$'
 REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
-REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
+REG_THES_POSTPORCESS = r'\b^([0]([.][0-9]{0,6})?)$\b'
 REG_CHUNKS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Auto|Full)$\b'
 REG_MARGIN = r'\b^[0-9]*$\b'
 REG_SEGMENTS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Default)$\b'
@@ -334,6 +335,7 @@ REG_AGGRESSION = r'^[-+]?[0-9]\d*?$'
 REG_WINDOW = r'\b^[0-9]{0,4}$\b'
 REG_SHIFTS = r'\b^[0-9]*$\b'
 REG_OVERLAP = r'\b^([0]([.][0-9]{0,6})?|None)$\b'
+
 
 # Sub Menu
 
@@ -400,6 +402,7 @@ DEFAULT_DATA = {
         'is_output_image': False,
         'is_post_process': False,
         'is_high_end_process': False,
+        'post_process_threshold': 0.2,
         'vr_voc_inst_secondary_model': NO_MODEL,
         'vr_other_secondary_model': NO_MODEL,
         'vr_bass_secondary_model': NO_MODEL,
@@ -477,6 +480,84 @@ DEFAULT_DATA = {
         'model_sample_mode': False,
         'model_sample_mode_duration': 30
 }
+
+SETTING_CHECK = ('vr_model',
+               'aggression_setting',
+               'window_size',
+               'batch_size',
+               'crop_size',
+               'is_tta',
+               'is_output_image',
+               'is_post_process',
+               'is_high_end_process',
+               'post_process_threshold',
+               'vr_voc_inst_secondary_model',
+               'vr_other_secondary_model',
+               'vr_bass_secondary_model',
+               'vr_drums_secondary_model',
+               'vr_is_secondary_model_activate',
+               'vr_voc_inst_secondary_model_scale',
+               'vr_other_secondary_model_scale',
+               'vr_bass_secondary_model_scale',
+               'vr_drums_secondary_model_scale',
+               'demucs_model',
+               'segment',
+               'overlap',
+               'shifts',
+               'chunks_demucs',
+               'margin_demucs',
+               'is_chunk_demucs',
+               'is_primary_stem_only_Demucs',
+               'is_secondary_stem_only_Demucs',
+               'is_split_mode',
+               'is_demucs_combine_stems',
+               'demucs_voc_inst_secondary_model',
+               'demucs_other_secondary_model',
+               'demucs_bass_secondary_model',
+               'demucs_drums_secondary_model',
+               'demucs_is_secondary_model_activate',
+               'demucs_voc_inst_secondary_model_scale',
+               'demucs_other_secondary_model_scale',
+               'demucs_bass_secondary_model_scale',
+               'demucs_drums_secondary_model_scale',
+               'demucs_stems',
+               'mdx_net_model',
+               'chunks',
+               'margin',
+               'compensate',
+               'is_denoise',
+               'is_invert_spec',
+               'mdx_voc_inst_secondary_model',
+               'mdx_other_secondary_model',
+               'mdx_bass_secondary_model',
+               'mdx_drums_secondary_model',
+               'mdx_is_secondary_model_activate',
+               'mdx_voc_inst_secondary_model_scale',
+               'mdx_other_secondary_model_scale',
+               'mdx_bass_secondary_model_scale',
+               'mdx_drums_secondary_model_scale',
+               'is_save_all_outputs_ensemble',
+               'is_append_ensemble_name',
+               'chosen_audio_tool',
+               'choose_algorithm',
+               'time_stretch_rate',
+               'pitch_rate',
+               'is_primary_stem_only',
+               'is_secondary_stem_only',
+               'is_testing_audio',
+               'is_add_model_name',
+               "is_accept_any_input",
+               'is_task_complete',
+               'is_create_model_folder',
+               'mp3_bit_set',
+               'save_format',
+               'wav_type_set',
+               'user_code',
+               'is_gpu_conversion',
+               'is_normalization',
+               'help_hints_var',
+               'model_sample_mode',
+               'model_sample_mode_duration')
 
 # Message Box Text
 
@@ -563,7 +644,7 @@ IS_SPLIT_MODE_HELP = ('• Enables \"Segments\". \n• We recommend you not enab
                       '• Deselecting this option is only recommended for those with powerful PCs or if using \"Chunk\" mode instead.')
 IS_DEMUCS_COMBINE_STEMS_HELP = 'The application will create the secondary stem by combining the remaining stems \ninstead of inverting the primary stem with the mixture.'
 COMPENSATE_HELP = 'Compensates the audio of the primary stems to allow for a better secondary stem.'
-IS_DENOISE_HELP = '\n• This option removes a majority of the noise generated by the MDX-Net models.\n• The conversion will take nearly twice as long with this enabled.'
+IS_DENOISE_HELP = '• This option removes a majority of the noise generated by the MDX-Net models.\n• The conversion will take nearly twice as long with this enabled.'
 CLEAR_CACHE_HELP = 'Clears any user selected model settings for previously unrecognized models.'
 IS_SAVE_ALL_OUTPUTS_ENSEMBLE_HELP = 'Enabling this option will keep all indivudual outputs generated by an ensemble.'
 IS_APPEND_ENSEMBLE_NAME_HELP = 'The application will append the ensemble name to the final output \nwhen this option is enabled.'
@@ -624,6 +705,10 @@ PRE_PROC_MODEL_INST_MIX_HELP = 'When enabled, the application will generate a th
 MODEL_SAMPLE_MODE_HELP = 'Allows the user to process only part of a track to sample settings or a model without \nrunning a full conversion.\n\nNotes:\n\n' +\
                          '• The number in the parentheses is the current number of seconds the generated sample will be.\n' +\
                          '• You can choose the number of seconds to extract from the track in the \"Additional Settings\" menu.'
+                    
+POST_PROCESS_THREASHOLD_HELP = 'Allows the user to control the intensity of the Post_process option.\n\nNotes:\n\n' +\
+                               '• Higher values potentially remove more artifacts. However, bleed might increase.\n' +\
+                               '• Lower values limit artifact removal.'
                          
 # Warning Messages
 
@@ -692,42 +777,237 @@ OTHER_PAIR_PLACEMENT = 5, 6, 7, 8
 BASS_PAIR_PLACEMENT = 9, 10, 11, 12
 DRUMS_PAIR_PLACEMENT = 13, 14, 15, 16
 LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
-                f'Current Patch Version: {p}\n\n' +\
-                'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
-                'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
-                'models or code for projects unrelated to UVR.\n\n' +\
-                '• This application is intended for those running Windows 10 or higher.\n' +\
-                '• Application functionality for systems running Windows 7 or lower.\n' +\
-                '• Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.\n\n' +\
-                'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
-                'dependencies needed to run the application effectively.\n\n' +\
-                'Website Links: This application, System or Service(s) may contain links to\n' +\
-                'other websites and downloads, and they are solely provided to you as an\n' +\
-                'additional convenience. You understand and acknowledge that by clicking\n' +\
-                'or activating such links you are accessing a site or service outside of\n' +\
-                'this application, and that we do not screen, review, approve, or otherwise\n' +\
-                'endorse any content or information contained in these linked websites.\n' +\
-                'You acknowledge and agree that we, our affiliates and partners are not\n' +\
-                'responsible for the contents of any of these linked websites, including\n' +\
-                'the accuracy or availability of information provided by the linked websites,\n' +\
-                'and we make no representations or warranties regarding your use of\n' +\
-                'the linked websites.\n\n' +\
-                'This application is MIT Licensed\n\n' +\
-                'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
-                'of this software and associated documentation files (the "Software"), to deal\n' +\
-                'in the Software without restriction, including without limitation the rights\n' +\
-                'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
-                'copies of the Software, and to permit persons to whom the Software is\n' +\
-                'furnished to do so, subject to the following conditions:\n\n' +\
-                'The above copyright notice and this permission notice shall be included in all\n' +\
-                'copies or substantial portions of the Software.\n\n' +\
-                'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
-                'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
-                'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
-                'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
-                'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
-                'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
-                'SOFTWARE.'
+                           f'Current Patch Version: {p}\n\n' +\
+                           'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
+                           'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
+                           'models or code for projects unrelated to UVR.\n\n' +\
+                           '• This application is intended for those running Windows 10 or higher.\n' +\
+                           '• Application functionality for systems running Windows 7 or lower.\n' +\
+                           '• Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.\n\n' +\
+                           'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
+                           'dependencies needed to run the application effectively.\n\n' +\
+                           'Website Links: This application, System or Service(s) may contain links to\n' +\
+                           'other websites and downloads, and they are solely provided to you as an\n' +\
+                           'additional convenience. You understand and acknowledge that by clicking\n' +\
+                           'or activating such links you are accessing a site or service outside of\n' +\
+                           'this application, and that we do not screen, review, approve, or otherwise\n' +\
+                           'endorse any content or information contained in these linked websites.\n' +\
+                           'You acknowledge and agree that we, our affiliates and partners are not\n' +\
+                           'responsible for the contents of any of these linked websites, including\n' +\
+                           'the accuracy or availability of information provided by the linked websites,\n' +\
+                           'and we make no representations or warranties regarding your use of\n' +\
+                           'the linked websites.\n\n' +\
+                           'This application is MIT Licensed\n\n' +\
+                           'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
+                           'of this software and associated documentation files (the "Software"), to deal\n' +\
+                           'in the Software without restriction, including without limitation the rights\n' +\
+                           'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
+                           'copies of the Software, and to permit persons to whom the Software is\n' +\
+                           'furnished to do so, subject to the following conditions:\n\n' +\
+                           'The above copyright notice and this permission notice shall be included in all\n' +\
+                           'copies or substantial portions of the Software.\n\n' +\
+                           'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
+                           'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
+                           'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
+                           'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
+                           'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
+                           'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
+                           'SOFTWARE.'
+
+FONT_SIZE_0 = 7
+FONT_SIZE_1 = 8
+FONT_SIZE_2 = 9
+FONT_SIZE_3 = 10
+FONT_SIZE_4 = 11
+FONT_SIZE_5 = 12
+FONT_SIZE_6 = 15
+
+GEN_SETTINGS_WIDTH = 23
+
+# Drag n Drop String Checks
+
+DOUBLE_BRACKET = "} {"
+RIGHT_BRACKET = "}"
+LEFT_BRACKET = "{"
+
+# Manual Downloads
+
+VR_PLACEMENT_TEXT = 'Place models in \"models/VR_Models\" directory.'
+MDX_PLACEMENT_TEXT = 'Place models in \"models/MDX_Net_Models\" directory.'
+DEMUCS_PLACEMENT_TEXT = 'Place models in \"models/Demucs_Models\" directory.'
+DEMUCS_V3_V4_PLACEMENT_TEXT = 'Place items in \"models/Demucs_Models/v3_v4_repo\" directory.'
+
+FULL_DOWNLOAD_LIST_VR = {
+                    "VR Arch Single Model v5: 1_HP-UVR": "1_HP-UVR.pth",
+                    "VR Arch Single Model v5: 2_HP-UVR": "2_HP-UVR.pth",
+                    "VR Arch Single Model v5: 3_HP-Vocal-UVR": "3_HP-Vocal-UVR.pth",
+                    "VR Arch Single Model v5: 4_HP-Vocal-UVR": "4_HP-Vocal-UVR.pth",
+                    "VR Arch Single Model v5: 5_HP-Karaoke-UVR": "5_HP-Karaoke-UVR.pth",
+                    "VR Arch Single Model v5: 6_HP-Karaoke-UVR": "6_HP-Karaoke-UVR.pth",
+                    "VR Arch Single Model v5: 7_HP2-UVR": "7_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 8_HP2-UVR": "8_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 9_HP2-UVR": "9_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 10_SP-UVR-2B-32000-1": "10_SP-UVR-2B-32000-1.pth",
+                    "VR Arch Single Model v5: 11_SP-UVR-2B-32000-2": "11_SP-UVR-2B-32000-2.pth",
+                    "VR Arch Single Model v5: 12_SP-UVR-3B-44100": "12_SP-UVR-3B-44100.pth",
+                    "VR Arch Single Model v5: 13_SP-UVR-4B-44100-1": "13_SP-UVR-4B-44100-1.pth",
+                    "VR Arch Single Model v5: 14_SP-UVR-4B-44100-2": "14_SP-UVR-4B-44100-2.pth",
+                    "VR Arch Single Model v5: 15_SP-UVR-MID-44100-1": "15_SP-UVR-MID-44100-1.pth",
+                    "VR Arch Single Model v5: 16_SP-UVR-MID-44100-2": "16_SP-UVR-MID-44100-2.pth",
+                    "VR Arch Single Model v4: MGM_HIGHEND_v4": "MGM_HIGHEND_v4.pth",
+                    "VR Arch Single Model v4: MGM_LOWEND_A_v4": "MGM_LOWEND_A_v4.pth",
+                    "VR Arch Single Model v4: MGM_LOWEND_B_v4": "MGM_LOWEND_B_v4.pth",
+                    "VR Arch Single Model v4: MGM_MAIN_v4": "MGM_MAIN_v4.pth"
+                  }
+
+FULL_DOWNLOAD_LIST_MDX = {
+                    "MDX-Net Model: UVR-MDX-NET Main": "UVR_MDXNET_Main.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst Main": "UVR-MDX-NET-Inst_Main.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 1": "UVR_MDXNET_1_9703.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 2": "UVR_MDXNET_2_9682.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 3": "UVR_MDXNET_3_9662.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 1": "UVR-MDX-NET-Inst_1.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 2": "UVR-MDX-NET-Inst_2.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 3": "UVR-MDX-NET-Inst_3.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Karaoke": "UVR_MDXNET_KARA.onnx",
+                    "MDX-Net Model: UVR_MDXNET_9482": "UVR_MDXNET_9482.onnx",
+                    "MDX-Net Model: kuielab_a_vocals": "kuielab_a_vocals.onnx",
+                    "MDX-Net Model: kuielab_a_other": "kuielab_a_other.onnx",
+                    "MDX-Net Model: kuielab_a_bass": "kuielab_a_bass.onnx",
+                    "MDX-Net Model: kuielab_a_drums": "kuielab_a_drums.onnx",
+                    "MDX-Net Model: kuielab_b_vocals": "kuielab_b_vocals.onnx",
+                    "MDX-Net Model: kuielab_b_other": "kuielab_b_other.onnx",
+                    "MDX-Net Model: kuielab_b_bass": "kuielab_b_bass.onnx",
+                    "MDX-Net Model: kuielab_b_drums": "kuielab_b_drums.onnx"}
+                    
+FULL_DOWNLOAD_LIST_DEMUCS = {
+                    
+	                "Demucs v4: htdemucs_ft":{
+	                                "f7e0c4bc-ba3fe64a.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/f7e0c4bc-ba3fe64a.th",
+	                                "d12395a8-e57c48e6.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/d12395a8-e57c48e6.th",
+	                                "92cfc3b6-ef3bcb9c.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/92cfc3b6-ef3bcb9c.th",
+	                                "04573f0d-f3cf25b2.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/04573f0d-f3cf25b2.th",
+	                                "htdemucs_ft.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs_ft.yaml"
+	                                },
+
+	                "Demucs v4: htdemucs":{
+	                                "955717e8-8726e21a.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th",
+	                                "htdemucs.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs.yaml"
+	                                },
+
+	                "Demucs v4: hdemucs_mmi":{
+	                                "75fc33f5-1941ce65.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/75fc33f5-1941ce65.th",
+	                                "hdemucs_mmi.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/hdemucs_mmi.yaml"
+	                                },
+	                "Demucs v4: htdemucs_6s":{
+	                                "5c90dfd2-34c22ccb.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/5c90dfd2-34c22ccb.th",
+	                                "htdemucs_6s.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs_6s.yaml"
+	                                },
+	                "Demucs v3: mdx":{
+	                                "0d19c1c6-0f06f20e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/0d19c1c6-0f06f20e.th", 
+	                                "7ecf8ec1-70f50cc9.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7ecf8ec1-70f50cc9.th",
+	                                "c511e2ab-fe698775.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/c511e2ab-fe698775.th",
+	                                "7d865c68-3d5dd56b.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7d865c68-3d5dd56b.th",
+	                                "mdx.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_q":{
+	                                "6b9c2ca1-3fd82607.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/6b9c2ca1-3fd82607.th",
+	                                "b72baf4e-8778635e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/b72baf4e-8778635e.th",
+	                                "42e558d4-196e0e1b.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/42e558d4-196e0e1b.th",
+	                                "305bc58f-18378783.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/305bc58f-18378783.th",
+	                                "mdx_q.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_q.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_extra":{
+	                                "e51eebcc-c1b80bdd.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/e51eebcc-c1b80bdd.th",
+	                                "a1d90b5c-ae9d2452.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/a1d90b5c-ae9d2452.th",
+	                                "5d2d6c55-db83574e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/5d2d6c55-db83574e.th",
+	                                "cfa93e08-61801ae1.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/cfa93e08-61801ae1.th",
+	                                "mdx_extra.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_extra.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_extra_q": {
+	                                "83fc094f-4a16d450.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/83fc094f-4a16d450.th",
+	                                "464b36d7-e5a9386e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/464b36d7-e5a9386e.th",
+	                                "14fc6a69-a89dd0ee.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/14fc6a69-a89dd0ee.th",
+	                                "7fd6ef75-a905dd85.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7fd6ef75-a905dd85.th",
+	                                "mdx_extra_q.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_extra_q.yaml"
+	                                },
+	                
+	                "Demucs v3: UVR Model":{
+	                                "ebf34a2db.th": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/ebf34a2db.th",
+	                                "UVR_Demucs_Model_1.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_Demucs_Model_1.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a":{
+	                                "9a6b4851-03af0aa6.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/9a6b4851-03af0aa6.th", 
+	                                "1ef250f1-592467ce.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/1ef250f1-592467ce.th",
+	                                "fa0cb7f9-100d8bf4.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/fa0cb7f9-100d8bf4.th",
+	                                "902315c2-b39ce9c9.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/902315c2-b39ce9c9.th",
+	                                "repro_mdx_a.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a_time_only":{
+	                                "9a6b4851-03af0aa6.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/9a6b4851-03af0aa6.th",
+	                                "1ef250f1-592467ce.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/1ef250f1-592467ce.th",
+	                                "repro_mdx_a_time_only.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a_time_only.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a_hybrid_only":{
+	                                "fa0cb7f9-100d8bf4.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/fa0cb7f9-100d8bf4.th",
+	                                "902315c2-b39ce9c9.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/902315c2-b39ce9c9.th",
+	                                "repro_mdx_a_hybrid_only.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a_hybrid_only.yaml"
+	                                },
+
+	                "Demucs v2: demucs": {
+	                                "demucs-e07c671f.th": "https://dl.fbaipublicfiles.com/demucs/v3.0/demucs-e07c671f.th"
+	                                },
+
+	                "Demucs v2: demucs_extra": {
+	                                "demucs_extra-3646af93.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs_extra-3646af93.th"
+	                                },
+
+	                "Demucs v2: demucs48_hq": {
+	                                "demucs48_hq-28a1282c.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs48_hq-28a1282c.th"
+	                                },
+
+	                "Demucs v2: tasnet": {
+	                                "tasnet-beb46fac.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/tasnet-beb46fac.th"
+	                                },
+
+	                "Demucs v2: tasnet_extra": {
+	                                "tasnet_extra-df3777b2.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/tasnet_extra-df3777b2.th"
+	                                },
+	                                
+	                "Demucs v2: demucs_unittest": {
+	                                "demucs_unittest-09ebc15f.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs_unittest-09ebc15f.th"
+	                                },
+
+	                "Demucs v1: demucs": {
+	                                "demucs.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/demucs.th"
+	                                },
+
+	                "Demucs v1: demucs_extra": {
+	                                "demucs_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/demucs_extra.th"
+	                                },
+
+	                "Demucs v1: light": {
+	                                "light.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/light.th"
+	                                },
+
+	                "Demucs v1: light_extra": {
+	                                "light_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/light_extra.th"
+	                                },
+
+	                "Demucs v1: tasnet": {
+	                                "tasnet.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/tasnet.th"
+	                                },
+	                                
+	                "Demucs v1: tasnet_extra": {
+	                                "tasnet_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/tasnet_extra.th"
+	                                }
+                }
 
 # INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'
 # STOP_HELP = '停止任何正在运行的进程 \n 弹出窗口将要求用户确认操作'

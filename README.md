@@ -79,9 +79,9 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 - "Select Saved Settings" option - Allows the user to save the current settings of the whole application or reset them to the default.
 - "Right-click" menu - Allows for quick access to important options.
 - "Help Hints" option - When enabled, users can hover over options to see pop-up text that describes that option. The right-clicking option also allows copying the "Help Hint" text.
-- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option that was only available to MDX-Net. Except now, this option is available in all three AI Networks and stems. Any model can now be Secondary, and the user can choose the amount of influence the Secondary model has, unlike before.
+- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option that was only available to MDX-Net. Except now, this option is available in all three AI Networks and for all stems. Any model can now be a Secondary, and the user can choose the amount of influence the Secondary model has, unlike before.
 - Robust caching for ensemble mode, allowing for much faster processing times.
-- You can now drag and drop as many files/folders as inputs. The application willautomatically go through each selected directory for audio files.
+- You can now drag and drop as many files/folders as inputs. The application will automatically go through each selected directory for audio files.
 - Clicking the "Input" field will pop-up a new window that allows the user to go through all of the selected audio inputs and remove some, if desired.
 - "Sample Mode" option - Allows the user to process only part of a track to sample settings or a model without running a full conversion.
     - The number in the parentheses is the current number of seconds the generated sample will be.
@@ -101,9 +101,9 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### Demucs:
 
-- Demucs v4 models are now supported, including the 6 stem models.
-- Ability to combine remaining stems instead of inverting selected stems with the 
-mixture only when a user selects 2 stems.
+- Demucs v4 models are now supported, including the 6 stem model.
+- Ability to combine remaining stems instead of inverting selected stem with the 
+mixture.
 - A "Pre-process" model that allows the user to run an inference through a robust vocal or instrumental model and separate the remaining stems from its generated instrumental mix. This option can significantly reduce vocal bleed in other Demucs-generated non-vocal stems. 
 
 ### Ensemble Mode: 

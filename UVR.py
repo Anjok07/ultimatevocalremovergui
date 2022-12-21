@@ -1048,7 +1048,7 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.help_hints(self.mp3_button, text=f'{FORMAT_SETTING_HELP}{MP3}')
 
         # Choose Conversion Method
-        self.chosen_process_method_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Process Method')#tk.Button(master=self.options_Frame, text='Choose Process Method', anchor=tk.CENTER, background='#0e0e0f', font=self.font, foreground='#13a4c9', borderwidth=0, command=lambda:self.pop_up_vr_param('ihbuhb'))
+        self.chosen_process_method_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Process Method')
         self.chosen_process_method_Label.place(x=0, y=MAIN_ROW_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.chosen_process_method_Option = ttk.OptionMenu(self.options_Frame, self.chosen_process_method_var, None, *PROCESS_METHODS, command=lambda s:self.selection_action_process_method(s, from_widget=True))
         self.chosen_process_method_Option.place(x=0, y=MAIN_ROW_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -2254,6 +2254,9 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         
         if self.is_online:
             self.download_list_fill()
+        else:
+            self.manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text='Try Manual Download', command=self.menu_manual_downloads)
+            self.manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
 
         self.menu_placement(settings_menu, "Settings Guide", is_help_hints=True, close_function=lambda:close_window())
 
@@ -2906,6 +2909,87 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         
         change_state_lambda()
         
+    def menu_manual_downloads(self):
+        
+        manual_downloads_menu = Toplevel()
+        model_selection_var = tk.StringVar(value='Select Model')
+        info_text_var = tk.StringVar(value='')
+
+        def create_link(link):
+            final_link = lambda:webbrowser.open_new_tab(link)
+            return final_link
+            
+        def get_links():
+            
+            for widgets in manual_downloads_link_Frame.winfo_children():
+                widgets.destroy()
+                
+            main_selection = model_selection_var.get()
+            
+            MAIN_ROW = 0
+            
+            self.menu_sub_LABEL_SET(manual_downloads_link_Frame, 'Download Link(s)').grid(row=0,column=0,padx=0,pady=3)
+            
+            if VR_ARCH_TYPE in main_selection:
+                placement_text = VR_PLACEMENT_TEXT
+                main_selection = FULL_DOWNLOAD_LIST_VR[main_selection]
+            elif MDX_ARCH_TYPE in main_selection:
+                placement_text = MDX_PLACEMENT_TEXT
+                main_selection = FULL_DOWNLOAD_LIST_MDX[main_selection]
+            elif DEMUCS_ARCH_TYPE in main_selection:
+                placement_text = DEMUCS_V3_V4_PLACEMENT_TEXT if 'v3' in main_selection or 'v4' in main_selection else DEMUCS_PLACEMENT_TEXT
+                main_selection = FULL_DOWNLOAD_LIST_DEMUCS[main_selection]
+            
+            info_text_var.set(placement_text)
+            
+            if type(main_selection) is dict:
+                for links in main_selection.values():
+                    MAIN_ROW += 1
+                    button_text = f" - Item {MAIN_ROW}" if len(main_selection.keys()) >= 2 else ''
+                    link = create_link(links)
+                    link_button = ttk.Button(manual_downloads_link_Frame, text=f"Open Link to Model{button_text}", command=link).grid(row=MAIN_ROW,column=0,padx=0,pady=5)
+            else:
+                link = f"{NORMAL_REPO}{main_selection}"
+                link_button = ttk.Button(manual_downloads_link_Frame, text="Open Link to Model", command=lambda:webbrowser.open_new_tab(link))
+                link_button.grid(row=1,column=0,padx=0,pady=10)
+        
+            self.menu_sub_LABEL_SET(manual_downloads_link_Frame, '').grid(row=MAIN_ROW+2,column=0,padx=0,pady=10)
+        
+        manual_downloads_menu_Frame = self.menu_FRAME_SET(manual_downloads_menu)
+        manual_downloads_menu_Frame.grid(row=0,column=0,padx=0,pady=0)  
+
+        manual_downloads_link_Frame = self.menu_FRAME_SET(manual_downloads_menu, thickness=5)
+        manual_downloads_link_Frame.grid(row=1,column=0,padx=0,pady=0)  
+
+        manual_downloads_menu_title_Label = self.menu_title_LABEL_SET(manual_downloads_menu_Frame, "Manual Downloads", width=45)
+        manual_downloads_menu_title_Label.grid(row=0,column=0,padx=0,pady=15)
+        
+        manual_downloads_menu_select_Label = self.menu_sub_LABEL_SET(manual_downloads_menu_Frame, 'Select Model')
+        manual_downloads_menu_select_Label.grid(row=1,column=0,padx=0,pady=5)
+        
+        manual_downloads_menu_select_Option = ttk.OptionMenu(manual_downloads_menu_Frame, model_selection_var)
+        manual_downloads_menu_select_VR_Option = tk.Menu(manual_downloads_menu_select_Option['menu'])
+        manual_downloads_menu_select_MDX_Option = tk.Menu(manual_downloads_menu_select_Option['menu'])
+        manual_downloads_menu_select_DEMUCS_Option = tk.Menu(manual_downloads_menu_select_Option['menu'])
+        manual_downloads_menu_select_Option['menu'].add_cascade(label='VR Models', menu= manual_downloads_menu_select_VR_Option)
+        manual_downloads_menu_select_Option['menu'].add_cascade(label='MDX-Net Models', menu= manual_downloads_menu_select_MDX_Option)
+        manual_downloads_menu_select_Option['menu'].add_cascade(label='Demucs Models', menu= manual_downloads_menu_select_DEMUCS_Option)
+        
+        for model_selection_vr in FULL_DOWNLOAD_LIST_VR.keys():
+            manual_downloads_menu_select_VR_Option.add_radiobutton(label=model_selection_vr, variable=model_selection_var, command=get_links)
+            
+        for model_selection_mdx in FULL_DOWNLOAD_LIST_MDX.keys():
+            manual_downloads_menu_select_MDX_Option.add_radiobutton(label=model_selection_mdx, variable=model_selection_var, command=get_links)
+            
+        for model_selection_demucs in FULL_DOWNLOAD_LIST_DEMUCS.keys():
+            manual_downloads_menu_select_DEMUCS_Option.add_radiobutton(label=model_selection_demucs, variable=model_selection_var, command=get_links)
+            
+        manual_downloads_menu_select_Option.grid(row=2,column=0,padx=0,pady=5)
+        
+        tk.Label(manual_downloads_menu_Frame, textvariable=info_text_var, font=("Century Gothic", f"{FONT_SIZE_2}"), foreground='#868687', justify="left").grid(row=3,column=0,padx=0,pady=5)
+        
+        self.menu_placement(manual_downloads_menu, "Manual Downloads", pop_up=True, close_function=lambda:manual_downloads_menu.destroy())
+       
     def pop_up_save_current_settings(self):
         """Save current application settings as..."""
         
@@ -3017,9 +3101,9 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         support_title_Label = self.menu_title_LABEL_SET(user_code_Frame, text='Support UVR', width=20)
         support_title_Label.grid(row=6,column=0,padx=0,pady=5)    
         
-        support_sub_Label = tk.Label(user_code_Frame, text="Obtain codes by visiting the following\n \"Buy Me a Coffee\" " +\
-                                                            "or \"Patreon\".\nClick one of the buttons below to\n donate, " +\
-                                                            "pledge or just obatain the code!\n (Donations are not required to obtain VIP code).", 
+        support_sub_Label = tk.Label(user_code_Frame, text="Obtain codes by visiting one of the following links below." +\
+                                                            "\nFrom there you can donate, pledge, " +\
+                                                            "or just obatain the code!\n (Donations are not required to obtain VIP code)", 
                                                             font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9')
         support_sub_Label.grid(row=7,column=0,padx=0,pady=5)
         

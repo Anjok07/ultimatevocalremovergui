@@ -275,6 +275,7 @@ class ModelData():
             self.batch_size = int(root.batch_size_var.get())
             self.crop_size = int(root.crop_size_var.get())
             self.is_high_end_process = 'mirroring' if root.is_high_end_process_var.get() else 'None'
+            self.post_process_threshold = float(root.post_process_threshold_var.get())
             self.model_path = os.path.join(VR_MODELS_DIR, f"{self.model_name}.pth")
             self.get_model_hash()
             if self.model_hash:
@@ -2252,11 +2253,14 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.online_data_refresh()
         self.download_list_state()
         
+        def load_manual_download_button():
+            manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text='Try Manual Download', command=self.menu_manual_downloads)
+            manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
+            settings_menu_download_center_Frame.update()
         if self.is_online:
             self.download_list_fill()
         else:
-            self.manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text='Try Manual Download', command=self.menu_manual_downloads)
-            self.manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
+            load_manual_download_button()
 
         self.menu_placement(settings_menu, "Settings Guide", is_help_hints=True, close_function=lambda:close_window())
 
@@ -2270,6 +2274,8 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
             self.active_download_thread.terminate() if self.thread_check(self.active_download_thread) else None
             self.is_menu_settings_open = False
             settings_menu.destroy()
+            
+        settings_menu.bind("<m> <Return>", lambda e:load_manual_download_button())
 
         settings_menu.protocol("WM_DELETE_WINDOW", close_window)
 
@@ -2323,30 +2329,37 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.combobox_entry_validation(self.batch_size_Option, self.batch_size_var, REG_WINDOW, VR_BATCH)
         self.help_hints(self.batch_size_Label, text=BATCH_SIZE_HELP)
         
+        self.post_process_threshold_Label = self.menu_sub_LABEL_SET(vr_opt_frame, 'Post-process Threshold')
+        self.post_process_threshold_Label.grid(row=11,column=0,padx=0,pady=5)
+        self.post_process_threshold_Option = ttk.Combobox(vr_opt_frame, value=POST_PROCESSES_THREASHOLD_VALUES, width=MENU_COMBOBOX_WIDTH, textvariable=self.post_process_threshold_var)
+        self.post_process_threshold_Option.grid(row=12,column=0,padx=0,pady=5)
+        self.combobox_entry_validation(self.post_process_threshold_Option, self.post_process_threshold_var, REG_THES_POSTPORCESS, POST_PROCESSES_THREASHOLD_VALUES)
+        self.help_hints(self.post_process_threshold_Label, text=POST_PROCESS_THREASHOLD_HELP)
+        
         self.is_tta_Option = ttk.Checkbutton(vr_opt_frame, text='Enable TTA', width=16, variable=self.is_tta_var) 
-        self.is_tta_Option.grid(row=11,column=0,padx=0,pady=0)
+        self.is_tta_Option.grid(row=13,column=0,padx=0,pady=0)
         self.help_hints(self.is_tta_Option, text=IS_TTA_HELP)
         
         self.is_post_process_Option = ttk.Checkbutton(vr_opt_frame, text='Post-Process', width=16, variable=self.is_post_process_var) 
-        self.is_post_process_Option.grid(row=12,column=0,padx=0,pady=0)
+        self.is_post_process_Option.grid(row=14,column=0,padx=0,pady=0)
         self.help_hints(self.is_post_process_Option, text=IS_POST_PROCESS_HELP)
         
         self.is_high_end_process_Option = ttk.Checkbutton(vr_opt_frame, text='High-End Process', width=16, variable=self.is_high_end_process_var) 
-        self.is_high_end_process_Option.grid(row=13,column=0,padx=0,pady=0)
+        self.is_high_end_process_Option.grid(row=15,column=0,padx=0,pady=0)
         self.help_hints(self.is_high_end_process_Option, text=IS_HIGH_END_PROCESS_HELP)
         
         self.vr_clear_cache_Button = ttk.Button(vr_opt_frame, text='Clear Auto-Set Cache', command=lambda:self.clear_cache(VR_ARCH_TYPE))
-        self.vr_clear_cache_Button.grid(row=14,column=0,padx=0,pady=5)
+        self.vr_clear_cache_Button.grid(row=16,column=0,padx=0,pady=5)
         self.help_hints(self.vr_clear_cache_Button, text=CLEAR_CACHE_HELP)
         
         self.open_vr_model_dir_Button = ttk.Button(vr_opt_frame, text='Open VR Models Folder', command=lambda:subprocess.Popen(["open", VR_MODELS_DIR])) #MACOS_COMMENT
-        self.open_vr_model_dir_Button.grid(row=15,column=0,padx=0,pady=5)
+        self.open_vr_model_dir_Button.grid(row=17,column=0,padx=0,pady=5)
         
         self.vr_return_Button=ttk.Button(vr_opt_frame, text=BACK_TO_MAIN_MENU, command=lambda:(self.menu_advanced_vr_options_close_window(), self.check_is_menu_settings_open()))
-        self.vr_return_Button.grid(row=16,column=0,padx=0,pady=5)
+        self.vr_return_Button.grid(row=18,column=0,padx=0,pady=5)
         
         self.vr_close_Button = ttk.Button(vr_opt_frame, text='Close Window', command=lambda:self.menu_advanced_vr_options_close_window())
-        self.vr_close_Button.grid(row=17,column=0,padx=0,pady=5)
+        self.vr_close_Button.grid(row=19,column=0,padx=0,pady=5)
         
         self.menu_placement(vr_opt, "Advanced VR Options", is_help_hints=True, close_function=self.menu_advanced_vr_options_close_window)
 
@@ -4556,6 +4569,11 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
     def load_saved_vars(self, data):
         """Initializes primary Tkinter vars"""
         
+        for key, value in DEFAULT_DATA.items():
+            if not key in data.keys():
+                data = {**data, **{key:value}}
+                print('missing setting: ', key)
+                
         ## ADD_BUTTON
         self.chosen_process_method_var = tk.StringVar(value=data['chosen_process_method'])
         
@@ -4569,6 +4587,7 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.is_output_image_var = tk.BooleanVar(value=data['is_output_image'])
         self.is_post_process_var = tk.BooleanVar(value=data['is_post_process'])
         self.is_high_end_process_var = tk.BooleanVar(value=data['is_high_end_process'])
+        self.post_process_threshold_var = tk.StringVar(value=data['post_process_threshold'])
         self.vr_voc_inst_secondary_model_var = tk.StringVar(value=data['vr_voc_inst_secondary_model'])
         self.vr_other_secondary_model_var = tk.StringVar(value=data['vr_other_secondary_model'])
         self.vr_bass_secondary_model_var = tk.StringVar(value=data['vr_bass_secondary_model'])
@@ -4658,6 +4677,11 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
     def load_saved_settings(self, loaded_setting: dict, process_method=None):
         """Loads user saved application settings or resets to default"""
         
+        for key, value in DEFAULT_DATA.items():
+            if not key in loaded_setting.keys():
+                loaded_setting = {**loaded_setting, **{key:value}}
+                print('missing setting: ', key)
+                
         if not process_method or process_method == VR_ARCH_PM:
             self.vr_model_var.set(loaded_setting['vr_model'])
             self.aggression_setting_var.set(loaded_setting['aggression_setting'])
@@ -4668,6 +4692,7 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
             self.is_output_image_var.set(loaded_setting['is_output_image'])
             self.is_post_process_var.set(loaded_setting['is_post_process'])
             self.is_high_end_process_var.set(loaded_setting['is_high_end_process'])
+            self.post_process_threshold_var.set(loaded_setting['post_process_threshold'])
             self.vr_voc_inst_secondary_model_var.set(loaded_setting['vr_voc_inst_secondary_model'])
             self.vr_other_secondary_model_var.set(loaded_setting['vr_other_secondary_model'])
             self.vr_bass_secondary_model_var.set(loaded_setting['vr_bass_secondary_model'])
@@ -4763,6 +4788,7 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
             'is_output_image': self.is_output_image_var.get(),
             'is_post_process': self.is_post_process_var.get(),
             'is_high_end_process': self.is_high_end_process_var.get(),
+            'post_process_threshold': self.post_process_threshold_var.get(),
             'vr_voc_inst_secondary_model': self.vr_voc_inst_secondary_model_var.get(),
             'vr_other_secondary_model': self.vr_other_secondary_model_var.get(),
             'vr_bass_secondary_model': self.vr_bass_secondary_model_var.get(),

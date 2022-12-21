@@ -260,6 +260,7 @@ VR_AGGRESSION = (1, 2, 3, 4, 5,
 VR_WINDOW = ('320', '512','1024')
 VR_CROP = ('256', '512', '1024')
 VR_BATCH = ('4', '6', '8')
+POST_PROCESSES_THREASHOLD_VALUES = ('0.1', '0.2', '0.3')
 
 MDX_POP_PRO = ('MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
 MDX_POP_STEMS = ('Vocals', 'Instrumental', 'Other', 'Drums', 'Bass')
@@ -325,7 +326,7 @@ PITCH_TEXT = '_pitch_shifted'
 
 REG_TIME_PITCH = r'^[-+]?(1[0]|[0-9]([.][0-9]*)?)$'
 REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
-REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
+REG_THES_POSTPORCESS = r'\b^([0]([.][0-9]{0,6})?)$\b'
 REG_CHUNKS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Auto|Full)$\b'
 REG_MARGIN = r'\b^[0-9]*$\b'
 REG_SEGMENTS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Default)$\b'
@@ -334,6 +335,7 @@ REG_AGGRESSION = r'^[-+]?[0-9]\d*?$'
 REG_WINDOW = r'\b^[0-9]{0,4}$\b'
 REG_SHIFTS = r'\b^[0-9]*$\b'
 REG_OVERLAP = r'\b^([0]([.][0-9]{0,6})?|None)$\b'
+
 
 # Sub Menu
 
@@ -400,6 +402,7 @@ DEFAULT_DATA = {
         'is_output_image': False,
         'is_post_process': False,
         'is_high_end_process': False,
+        'post_process_threshold': 0.2,
         'vr_voc_inst_secondary_model': NO_MODEL,
         'vr_other_secondary_model': NO_MODEL,
         'vr_bass_secondary_model': NO_MODEL,
@@ -625,6 +628,9 @@ MODEL_SAMPLE_MODE_HELP = 'Allows the user to process only part of a track to sam
                          '• The number in the parentheses is the current number of seconds the generated sample will be.\n' +\
                          '• You can choose the number of seconds to extract from the track in the \"Additional Settings\" menu.'
                          
+POST_PROCESS_THREASHOLD_HELP = 'Allows the user to control the intensity of the Post_process option.\n\nNotes:\n\n' +\
+                               '• Higher values potentially remove more artifacts. However, bleed might increase.\n' +\
+                               '• Lower values limit artifact removal.'
 # Warning Messages
 
 STORAGE_ERROR = 'Insufficient Storage', 'There is not enough storage on main drive to continue. Your main drive must have at least 3 GB\'s of storage in order for this application function properly. \n\nPlease ensure your main drive has at least 3 GB\'s of storage and try again.\n\n'
@@ -729,6 +735,191 @@ LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover
                 'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
                 'SOFTWARE.'
 
+
+# Drag n Drop String Checks
+
+DOUBLE_BRACKET = "} {"
+RIGHT_BRACKET = "}"
+LEFT_BRACKET = "{"
+
+# Manual Downloads
+
+VR_PLACEMENT_TEXT = 'Place models in \"models/VR_Models\" directory.'
+MDX_PLACEMENT_TEXT = 'Place models in \"models/MDX_Net_Models\" directory.'
+DEMUCS_PLACEMENT_TEXT = 'Place models in \"models/Demucs_Models\" directory.'
+DEMUCS_V3_V4_PLACEMENT_TEXT = 'Place items in \"models/Demucs_Models/v3_v4_repo\" directory.'
+
+FULL_DOWNLOAD_LIST_VR = {
+                    "VR Arch Single Model v5: 1_HP-UVR": "1_HP-UVR.pth",
+                    "VR Arch Single Model v5: 2_HP-UVR": "2_HP-UVR.pth",
+                    "VR Arch Single Model v5: 3_HP-Vocal-UVR": "3_HP-Vocal-UVR.pth",
+                    "VR Arch Single Model v5: 4_HP-Vocal-UVR": "4_HP-Vocal-UVR.pth",
+                    "VR Arch Single Model v5: 5_HP-Karaoke-UVR": "5_HP-Karaoke-UVR.pth",
+                    "VR Arch Single Model v5: 6_HP-Karaoke-UVR": "6_HP-Karaoke-UVR.pth",
+                    "VR Arch Single Model v5: 7_HP2-UVR": "7_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 8_HP2-UVR": "8_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 9_HP2-UVR": "9_HP2-UVR.pth",
+                    "VR Arch Single Model v5: 10_SP-UVR-2B-32000-1": "10_SP-UVR-2B-32000-1.pth",
+                    "VR Arch Single Model v5: 11_SP-UVR-2B-32000-2": "11_SP-UVR-2B-32000-2.pth",
+                    "VR Arch Single Model v5: 12_SP-UVR-3B-44100": "12_SP-UVR-3B-44100.pth",
+                    "VR Arch Single Model v5: 13_SP-UVR-4B-44100-1": "13_SP-UVR-4B-44100-1.pth",
+                    "VR Arch Single Model v5: 14_SP-UVR-4B-44100-2": "14_SP-UVR-4B-44100-2.pth",
+                    "VR Arch Single Model v5: 15_SP-UVR-MID-44100-1": "15_SP-UVR-MID-44100-1.pth",
+                    "VR Arch Single Model v5: 16_SP-UVR-MID-44100-2": "16_SP-UVR-MID-44100-2.pth",
+                    "VR Arch Single Model v4: MGM_HIGHEND_v4": "MGM_HIGHEND_v4.pth",
+                    "VR Arch Single Model v4: MGM_LOWEND_A_v4": "MGM_LOWEND_A_v4.pth",
+                    "VR Arch Single Model v4: MGM_LOWEND_B_v4": "MGM_LOWEND_B_v4.pth",
+                    "VR Arch Single Model v4: MGM_MAIN_v4": "MGM_MAIN_v4.pth"
+                  }
+
+FULL_DOWNLOAD_LIST_MDX = {
+                    "MDX-Net Model: UVR-MDX-NET Main": "UVR_MDXNET_Main.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst Main": "UVR-MDX-NET-Inst_Main.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 1": "UVR_MDXNET_1_9703.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 2": "UVR_MDXNET_2_9682.onnx",
+                    "MDX-Net Model: UVR-MDX-NET 3": "UVR_MDXNET_3_9662.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 1": "UVR-MDX-NET-Inst_1.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 2": "UVR-MDX-NET-Inst_2.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Inst 3": "UVR-MDX-NET-Inst_3.onnx",
+                    "MDX-Net Model: UVR-MDX-NET Karaoke": "UVR_MDXNET_KARA.onnx",
+                    "MDX-Net Model: UVR_MDXNET_9482": "UVR_MDXNET_9482.onnx",
+                    "MDX-Net Model: kuielab_a_vocals": "kuielab_a_vocals.onnx",
+                    "MDX-Net Model: kuielab_a_other": "kuielab_a_other.onnx",
+                    "MDX-Net Model: kuielab_a_bass": "kuielab_a_bass.onnx",
+                    "MDX-Net Model: kuielab_a_drums": "kuielab_a_drums.onnx",
+                    "MDX-Net Model: kuielab_b_vocals": "kuielab_b_vocals.onnx",
+                    "MDX-Net Model: kuielab_b_other": "kuielab_b_other.onnx",
+                    "MDX-Net Model: kuielab_b_bass": "kuielab_b_bass.onnx",
+                    "MDX-Net Model: kuielab_b_drums": "kuielab_b_drums.onnx"}
+                    
+FULL_DOWNLOAD_LIST_DEMUCS = {
+                    
+	                "Demucs v4: htdemucs_ft":{
+	                                "f7e0c4bc-ba3fe64a.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/f7e0c4bc-ba3fe64a.th",
+	                                "d12395a8-e57c48e6.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/d12395a8-e57c48e6.th",
+	                                "92cfc3b6-ef3bcb9c.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/92cfc3b6-ef3bcb9c.th",
+	                                "04573f0d-f3cf25b2.th":"https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/04573f0d-f3cf25b2.th",
+	                                "htdemucs_ft.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs_ft.yaml"
+	                                },
+
+	                "Demucs v4: htdemucs":{
+	                                "955717e8-8726e21a.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/955717e8-8726e21a.th",
+	                                "htdemucs.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs.yaml"
+	                                },
+
+	                "Demucs v4: hdemucs_mmi":{
+	                                "75fc33f5-1941ce65.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/75fc33f5-1941ce65.th",
+	                                "hdemucs_mmi.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/hdemucs_mmi.yaml"
+	                                },
+	                "Demucs v4: htdemucs_6s":{
+	                                "5c90dfd2-34c22ccb.th": "https://dl.fbaipublicfiles.com/demucs/hybrid_transformer/5c90dfd2-34c22ccb.th",
+	                                "htdemucs_6s.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/htdemucs_6s.yaml"
+	                                },
+	                "Demucs v3: mdx":{
+	                                "0d19c1c6-0f06f20e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/0d19c1c6-0f06f20e.th", 
+	                                "7ecf8ec1-70f50cc9.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7ecf8ec1-70f50cc9.th",
+	                                "c511e2ab-fe698775.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/c511e2ab-fe698775.th",
+	                                "7d865c68-3d5dd56b.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7d865c68-3d5dd56b.th",
+	                                "mdx.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_q":{
+	                                "6b9c2ca1-3fd82607.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/6b9c2ca1-3fd82607.th",
+	                                "b72baf4e-8778635e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/b72baf4e-8778635e.th",
+	                                "42e558d4-196e0e1b.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/42e558d4-196e0e1b.th",
+	                                "305bc58f-18378783.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/305bc58f-18378783.th",
+	                                "mdx_q.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_q.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_extra":{
+	                                "e51eebcc-c1b80bdd.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/e51eebcc-c1b80bdd.th",
+	                                "a1d90b5c-ae9d2452.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/a1d90b5c-ae9d2452.th",
+	                                "5d2d6c55-db83574e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/5d2d6c55-db83574e.th",
+	                                "cfa93e08-61801ae1.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/cfa93e08-61801ae1.th",
+	                                "mdx_extra.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_extra.yaml"
+	                                },
+	                
+	                "Demucs v3: mdx_extra_q": {
+	                                "83fc094f-4a16d450.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/83fc094f-4a16d450.th",
+	                                "464b36d7-e5a9386e.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/464b36d7-e5a9386e.th",
+	                                "14fc6a69-a89dd0ee.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/14fc6a69-a89dd0ee.th",
+	                                "7fd6ef75-a905dd85.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/7fd6ef75-a905dd85.th",
+	                                "mdx_extra_q.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_extra_q.yaml"
+	                                },
+	                
+	                "Demucs v3: UVR Model":{
+	                                "ebf34a2db.th": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/ebf34a2db.th",
+	                                "UVR_Demucs_Model_1.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_Demucs_Model_1.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a":{
+	                                "9a6b4851-03af0aa6.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/9a6b4851-03af0aa6.th", 
+	                                "1ef250f1-592467ce.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/1ef250f1-592467ce.th",
+	                                "fa0cb7f9-100d8bf4.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/fa0cb7f9-100d8bf4.th",
+	                                "902315c2-b39ce9c9.th": "https://dl.fbaipublicfiles.com/demucs/mdx_final/902315c2-b39ce9c9.th",
+	                                "repro_mdx_a.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a_time_only":{
+	                                "9a6b4851-03af0aa6.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/9a6b4851-03af0aa6.th",
+	                                "1ef250f1-592467ce.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/1ef250f1-592467ce.th",
+	                                "repro_mdx_a_time_only.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a_time_only.yaml"
+	                                },
+
+	                "Demucs v3: repro_mdx_a_hybrid_only":{
+	                                "fa0cb7f9-100d8bf4.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/fa0cb7f9-100d8bf4.th",
+	                                "902315c2-b39ce9c9.th":"https://dl.fbaipublicfiles.com/demucs/mdx_final/902315c2-b39ce9c9.th",
+	                                "repro_mdx_a_hybrid_only.yaml": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/repro_mdx_a_hybrid_only.yaml"
+	                                },
+
+	                "Demucs v2: demucs": {
+	                                "demucs-e07c671f.th": "https://dl.fbaipublicfiles.com/demucs/v3.0/demucs-e07c671f.th"
+	                                },
+
+	                "Demucs v2: demucs_extra": {
+	                                "demucs_extra-3646af93.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs_extra-3646af93.th"
+	                                },
+
+	                "Demucs v2: demucs48_hq": {
+	                                "demucs48_hq-28a1282c.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs48_hq-28a1282c.th"
+	                                },
+
+	                "Demucs v2: tasnet": {
+	                                "tasnet-beb46fac.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/tasnet-beb46fac.th"
+	                                },
+
+	                "Demucs v2: tasnet_extra": {
+	                                "tasnet_extra-df3777b2.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/tasnet_extra-df3777b2.th"
+	                                },
+	                                
+	                "Demucs v2: demucs_unittest": {
+	                                "demucs_unittest-09ebc15f.th":"https://dl.fbaipublicfiles.com/demucs/v3.0/demucs_unittest-09ebc15f.th"
+	                                },
+
+	                "Demucs v1: demucs": {
+	                                "demucs.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/demucs.th"
+	                                },
+
+	                "Demucs v1: demucs_extra": {
+	                                "demucs_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/demucs_extra.th"
+	                                },
+
+	                "Demucs v1: light": {
+	                                "light.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/light.th"
+	                                },
+
+	                "Demucs v1: light_extra": {
+	                                "light_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/light_extra.th"
+	                                },
+
+	                "Demucs v1: tasnet": {
+	                                "tasnet.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/tasnet.th"
+	                                },
+	                                
+	                "Demucs v1: tasnet_extra": {
+	                                "tasnet_extra.th":"https://dl.fbaipublicfiles.com/demucs/v2.0/tasnet_extra.th"
+	                                }
+                }
 # Font Sizes
 
 FONT_SIZE_0 = 9
@@ -740,87 +931,3 @@ FONT_SIZE_5 = 14
 FONT_SIZE_6 = 17
 
 GEN_SETTINGS_WIDTH = 17
-# FONT_SIZE_0 = 7
-# FONT_SIZE_1 = 8
-# FONT_SIZE_2 = 9
-# FONT_SIZE_3 = 10
-# FONT_SIZE_4 = 11
-# FONT_SIZE_5 = 12
-# FONT_SIZE_6 = 15
-
-# INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'
-# STOP_HELP = '停止任何正在运行的进程 \n 弹出窗口将要求用户确认操作'
-# SETTINGS_HELP = '打开设置指南此窗口包括\"下载中心\"'
-# COMMAND_TEXT_HELP = '提供有关当前进程进度的信息'
-# SAVE_CURRENT_SETTINGS_HELP = '允许用户打开任何保存的设置或保存当前应用程序设置'
-# CHUNKS_HELP = ('此选项允许用户减少（或增加）RAM或VRAM\n\n' + \
-#                 '• 较小的块大小使用较少的RAM或VRAM，但也会增加处理时间\n' + \
-#                 '• 较大的块大小使用更多的RAM或VRAM，但也可以减少处理时间\n' + \
-#                 '• 选择“自动”可根据系统的RAM或VRAM大小计算适当的运行内存\n' + \
-#                 '• 选择“完整”将使用全部电脑可用资源处理曲目\n' + \
-#                 '• 此选项仅适用于具有强大pc的用户,不要对自己电脑过于自信\n' +\
-#                 '• 默认选择为“自动”.')
-# MARGIN_HELP = '选择要从中分割块的频率\n\n- 建议的频率大小为44100\n- 其他值可能会产生不可预测的结果'
-# AGGRESSION_SETTING_HELP = ('该选项允许您设置主轨道提取的强度\n\n' + \
-#                            '• 范围为0-100\n' + \
-#                            '• 值越高，提取程度越高\n' + \
-#                            '• 乐器和声乐模型的默认值为10\n' + \
-#                            '• 超过10的值可能会导致非发声模型的乐器发出浑浊的声音')
-# WINDOW_SIZE_HELP = ('分块大小越小，转换效果越好 \n然而，较小的分块意味着更长的转换时间和更重的资源使用\n\n' + \
-#                     '可选窗口大小值的细分：\n' + \
-#                     '• 1024 - 转换质量低，转换时间短，资源使用率低\n' + \
-#                     '• 512 - 平均转换质量、平均转换时间、正常资源使用\n' + \
-#                     '• 320 - 更好的转换质量')
-# DEMUCS_STEMS_HELP = ('在这里，您可以选择使用所选模型提取某个轨道\n\n' +\
-#                      '轨道选择：\n\n' +\
-#                      '• All Stems - 保存模型能够提取的所有轨道.\n' +\
-#                      '• Vocals -仅人声轨道.\n' +\
-#                      '• Other - 仅其他轨道.\n' +\
-#                      '• Bass - 仅贝斯轨道.\n' +\
-#                      '• Drums - 仅鼓轨道.\n')
-# SEGMENT_HELP = ('此选项允许用户减少（或增加）RAM或VRAM使用\n\n' + \
-#                 '• 较小的段大小使用较少的RAM或VRAM，但也会增加处理时间.\n' + \
-#                 '• 较大的段大小使用更多的RAM或VRAM，但也可以减少处理时间\n' + \
-#                 '• 选择“默认值”使用建议的段大小\n' + \
-#                 '• 建议不要使用带有“分段”的段".')
-# ENSEMBLE_MAIN_STEM_HELP = '允许用户选择要集成的阀杆类型\n\n示例：主阀杆/次阀杆'
-# ENSEMBLE_TYPE_HELP = '允许用户选择用于生成最终输出的集成算法'
-# ENSEMBLE_LISTBOX_HELP = '所选主阀杆对的所有可用型号列表'
-# IS_GPU_CONVERSION_HELP = ('选中后，应用程序将尝试使用您的GPU（如果您有）.\n' +\
-#                          '如果您没有GPU，但选中了此项，则应用程序将默认为CPU\n\n' +\
-#                          '注：CPU转换比通过GPU处理的转换慢得多.')
-# SAVE_STEM_ONLY_HELP = '允许用户仅保存选定的阀杆'
-# IS_NORMALIZATION_HELP = '规格化输出以防止剪裁'
-# CROP_SIZE_HELP = '**仅与部分型号兼容！**\n\n 设置应与训练作物大小值相匹配，如果不确定，则保持原样'
-# BATCH_SIZE_HELP = '**仅与部分型号兼容！**\n\n 值越低，资源使用量越少，但转换时间越长'
-# IS_TTA_HELP = ('此选项执行测试时间增强以提高分离质量\n\n' +\
-#                '注意：选择此选项将增加完成转换所需的时间')
-# IS_POST_PROCESS_HELP = ('该选项可以潜在地识别声音输出中残留的乐器伪影 \n此选项可能会改进某些歌曲的分离.\n\n' +\
-#                        '注意：选择此选项可能会对转换过程产生不利影响，具体取决于曲目。因此，建议将其作为最后救命稻草')
-# IS_HIGH_END_PROCESS_HELP = '应用程序将镜像输出的缺失频率范围'
-# SHIFTS_HELP = ('使用输入的随机移位执行多个预测，并对其进行平均.\n\n' +\
-#               '• 移位次数越多，预测所需时间越长\n- 除非您有GPU最低8g，否则别瞎选电脑爆炸概不负责')
-# OVERLAP_HELP = '此选项控制预测窗口之间的重叠量（对于demucs，一个窗口为10秒）'
-# IS_CHUNK_DEMUCS_HELP = '启用使用“块”.\n\n请注意：我们建议您不要在启用“拆分模式”的情况下启用此选项'
-# IS_SPLIT_MODE_HELP = ('启用“分段”. \n\n请注意：我们建议您不要使用“启用区块”来启用此选项.\n' +\
-#                      '仅建议具有强大pc或使用“块”模式.再次提醒别瞎点,要对自己电脑负责.别选!不负责任的狗男人')
-# IS_DEMUCS_COMBINE_STEMS_HELP = '应用程序将通过组合剩余的阀杆来创建第二阀杆\n而不是用混合物反转主茎'
-# COMPENSATE_HELP = '补偿主杆的音频，以获得更好的辅助杆'
-# IS_DENOISE_HELP = '该选项消除了MDX-NET模型产生的大部分噪声\n\n请注意：启用此选项后，转换所需的时间几乎是原来的两倍'
-# CLEAR_CACHE_HELP = '清除以前无法识别的模型的任何用户选择的模型设置'
-# IS_SAVE_ALL_OUTPUTS_ENSEMBLE_HELP = '启用此选项将保留集成生成的所有单独输出'
-# IS_APPEND_ENSEMBLE_NAME_HELP = '应用程序将在最终输出中附加集成名称 \n启用此选项时'
-# DONATE_HELP = '将用户带到外部网站为该项目捐款！'
-# IS_INVERT_SPEC_HELP = '相反，使用光谱图用混合物反转主阀杆 \n这种反演方法稍慢'
-# IS_TESTING_AUDIO_HELP = '在输出文件中附加一个唯一的10位数字，以便用户\nc不同设置的比较结果'
-# IS_CREATE_MODEL_FOLDER_HELP = '将为中的输出生成两个新目录 \n每次转换后的导出目录'
-# DELETE_YOUR_SETTINGS_HELP = '此菜单包含您保存的设置，系统将要求您\n确认是否要删除所选设置'
-# SET_STEM_NAME_HELP = '为所选模型选择主阀杆'
-# MDX_DIM_T_SET_HELP = INTERNAL_MODEL_ATT
-# MDX_DIM_F_SET_HELP = INTERNAL_MODEL_ATT
-# MDX_N_FFT_SCALE_SET_HELP = '设置训练模型的N_FFT大小'
-# POPUP_COMPENSATE_HELP = f'为所选模型选择适当的体积补偿\n\n提醒： {COMPENSATE_HELP}'
-# VR_MODEL_PARAM_HELP = '选择运行所选模型所需的参数'
-# CHOSEN_ENSEMBLE_HELP = '选择保存的集合或保存当前集合\n\n默认选择：\n\n- 保存当前集合\n- 清除所有当前模型选择'
-# CHOSEN_PROCESS_METHOD_HELP = '选择要运行曲目的进程'
-# FORMAT_SETTING_HELP = '将输出另存为'

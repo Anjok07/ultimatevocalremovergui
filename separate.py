@@ -155,6 +155,7 @@ class SeperateAttributes:
             self.crop_size = model_data.crop_size
             self.window_size = model_data.window_size
             self.input_high_end_h = None
+            self.post_process_threshold = model_data.post_process_threshold
             self.aggressiveness = {'value': model_data.aggression_setting, 
                                    'split_bin': self.mp.param['band'][1]['crop_stop'], 
                                    'aggr_correction': self.mp.param.get('aggr_correction')}
@@ -740,7 +741,7 @@ class SeperateVR(SeperateAttributes):
                    
         if self.is_post_process:
             pred_inv = np.clip(X_mag - pred, 0, np.inf)
-            pred = spec_utils.mask_silence(pred, pred_inv)
+            pred = spec_utils.mask_silence(pred, pred_inv, thres=self.post_process_threshold)
             
         y_spec = pred * X_phase
         v_spec = X_spec - y_spec

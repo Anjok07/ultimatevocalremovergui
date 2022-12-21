@@ -155,6 +155,7 @@ class SeperateAttributes:
             self.crop_size = model_data.crop_size
             self.window_size = model_data.window_size
             self.input_high_end_h = None
+            self.post_process_threshold = model_data.post_process_threshold
             self.aggressiveness = {'value': model_data.aggression_setting, 
                                    'split_bin': self.mp.param['band'][1]['crop_stop'], 
                                    'aggr_correction': self.mp.param.get('aggr_correction')}
@@ -607,9 +608,11 @@ class SeperateVR(SeperateAttributes):
             #print('ARC SIZE: ', nn_architecture)
 
             if nn_architecture in vr_5_1_models:
+                print('NEW: ', nn_architecture)
                 model = nets_new.CascadedNet(self.mp.param['bins'] * 2, nn_architecture)
                 inference = self.inference_vr_new
             else:
+                print('OLD: ', nn_architecture)
                 model = nets.determine_model_capacity(self.mp.param['bins'] * 2, nn_architecture)
                 inference = self.inference_vr
 
@@ -739,7 +742,7 @@ class SeperateVR(SeperateAttributes):
                    
         if self.is_post_process:
             pred_inv = np.clip(X_mag - pred, 0, np.inf)
-            pred = spec_utils.mask_silence(pred, pred_inv)
+            pred = spec_utils.mask_silence(pred, pred_inv, thres=self.post_process_threshold)
             
         y_spec = pred * X_phase
         v_spec = X_spec - y_spec
@@ -849,6 +852,8 @@ def process_secondary_model(secondary_model: ModelData, process_data, main_model
         return secondary_sources
     
 def gather_sources(primary_stem_name, secondary_stem_name, secondary_sources: dict):
+    
+    print(primary_stem_name, secondary_stem_name)
     
     source_primary = False
     source_secondary = False

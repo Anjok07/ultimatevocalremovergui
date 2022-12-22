@@ -89,9 +89,9 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### VR Architecture:
 
+- Ability to toggle "High-End Processing."
 - Support for the latest VR architecture
     - Crop Size and Batch Size are specifically for models using the latest architecture only.
-    - Ability to toggle "High-End Processing."
 
 ### MDX-NET:
 

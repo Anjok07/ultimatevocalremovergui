@@ -520,7 +520,7 @@ class Ensembler():
         save_format(stem_save_path, self.save_format, self.mp3_bit_set)
 
     def get_files_to_ensemble(self, folder="", prefix="", suffix=""):
-        """Grab all the files to be ensembles"""
+        """Grab all the files to be ensembled"""
         
         return [os.path.join(folder, i) for i in os.listdir(folder) if i.startswith(prefix) and i.endswith(suffix)]
 
@@ -571,7 +571,7 @@ class ToolTip(object):
         tw.wm_overrideredirect(1)
         tw.wm_geometry("+%d+%d" % (x, y))
         label = Label(tw, text=self.text, justify=LEFT,
-                      background="#ffffe0", foreground="black", relief=SOLID, borderwidth=1,
+                      background="#151515", foreground="#dedede", highlightcolor="#898b8e", relief=SOLID, borderwidth=1,
                       font=("tahoma", f"{FONT_SIZE_1}", "normal"))
         label.pack(ipadx=1)
 
@@ -1016,6 +1016,7 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.filePaths_musicFile_Open.place(x=-45, y=160, width=35, height=33, relx=1, rely=0, relwidth=0, relheight=0)
         self.filePaths_musicFile_Entry.configure(cursor="hand2")
         self.help_hints(self.filePaths_musicFile_Button, text=INPUT_FOLDER_ENTRY_HELP) 
+        self.help_hints(self.filePaths_musicFile_Entry, text=INPUT_FOLDER_ENTRY_HELP_2)
         self.help_hints(self.filePaths_musicFile_Open, text=INPUT_FOLDER_BUTTON_HELP)     
 
         # Save To Option
@@ -2290,6 +2291,8 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         self.menu_advanced_vr_options_close_window = lambda:(self.is_open_menu_advanced_vr_options.set(False), vr_opt.destroy())
         vr_opt.protocol("WM_DELETE_WINDOW", self.menu_advanced_vr_options_close_window)
         
+        toggle_post_process = lambda:self.post_process_threshold_Option.configure(state=tk.NORMAL) if self.is_post_process_var.get() else self.post_process_threshold_Option.configure(state=tk.DISABLED)
+        
         vr_opt_frame = self.menu_FRAME_SET(tab1)
         vr_opt_frame.grid(row=0,column=0,padx=0,pady=0)  
         
@@ -2360,6 +2363,8 @@ class MainWindow(tk.Tk): #MACOS_COMMENT
         
         self.vr_close_Button = ttk.Button(vr_opt_frame, text='Close Window', command=lambda:self.menu_advanced_vr_options_close_window())
         self.vr_close_Button.grid(row=19,column=0,padx=0,pady=5)
+        
+        toggle_post_process()
         
         self.menu_placement(vr_opt, "Advanced VR Options", is_help_hints=True, close_function=self.menu_advanced_vr_options_close_window)
 

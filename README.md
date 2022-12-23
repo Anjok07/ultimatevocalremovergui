@@ -19,7 +19,7 @@ This application uses state-of-the-art source separation models to remove vocals
 
 ### MacOS Only
 
-**This version is still a work in progress! Some features may not be available. A completed stand a lone version will be released soon.**
+**This version is still a work in progress! Some features may not be available. A completed stand alone version will be released soon.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/uvr_5_5_MacOS.zip)
 - Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)

@@ -55,13 +55,15 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 ### Patch Version: 
 
-- UVR_Patch_12_18_22_6_41
+- UVR_Patch_12_22_22_23_44
 
 ### Fixes & Changes:
 
 - The progress bar is now fully synced up with every process in the application.
 - Drag-n-drop feature should now work every time.
-- Users can now drop massive amounts of files and directories as inputs, and the application will add them to the conversion list.
+- Users can now drop large batches of files and directories as inputs. When directoriesare dropped, the application will search for any file with an audioextension and add it to the list of inputs.
+- Fixed low resolution icon.
+- Added the ability to download models manually if the application can't connect to the internet on it's own.
 - Various bug fixes for the Download Center.
 - Various design changes.
 
@@ -72,35 +74,37 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 ### New Options:
 
-- "Select Saved Settings" option - Allows the user to save the current settings of the whole application or reset them to the default.
+- "Select Saved Settings" option - Allows the user to save the current settings of the whole application. You can also load a saved setting or reset them to the default.
 - "Right-click" menu - Allows for quick access to important options.
 - "Help Hints" option - When enabled, users can hover over options to see pop-up text that describes that option. The right-clicking option also allows copying the "Help Hint" text.
-- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option that was only available to MDX-Net. Except now, this option is available in all three AI Networks and stems. Any model can now be Secondary, and the user can choose the amount of influence the Secondary model has, unlike before.
+- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option that was only available to MDX-Net. Except now, this option is available in all three AI Networks and for any stem. Any model can now be Secondary, and the user can choose the amount of influence it has on the final result.
 - Robust caching for ensemble mode, allowing for much faster processing times.
-- You can now drag and drop as many files/folders as inputs. The application willautomatically go through each selected directory for audio files.
-- Clicking the "Input" field will pop-up a new window that allows the user to go through all of the selected audio inputs and remove some, if desired.
+- Clicking the "Input" field will pop-up a new window that allows the user to go through all of the selected audio inputs. Within this menu, users can:
+    - Remove inputs.
+    - Verify inputs.
+    - Create samples of selected inputs.
 - "Sample Mode" option - Allows the user to process only part of a track to sample settings or a model without running a full conversion.
     - The number in the parentheses is the current number of seconds the generated sample will be.
     - You can choose the number of seconds to extract from the track in the "Additional Settings" menu.
 
 ### VR Architecture:
 
+- Ability to toggle "High-End Processing."
 - Support for the latest VR architecture
     - Crop Size and Batch Size are specifically for models using the latest architecture only.
-    - Ability to toggle "High-End Processing."
 
 ### MDX-NET:
 
 - "Denoise Output" option - When enabled, this option results in cleaner results, but the processing time will be longer. This option has replaced Noise Reduction.
-- "Spectral Inversion" option - This option uses inversion techniques for a cleaner secondary stem result. This option may slow down the audio export process.
+- "Spectral Inversion" option - This option uses spectral inversion techniques for a cleaner secondary stem result. This option may slow down the audio export process.
 - Secondary stem now has the same frequency cut-off as the main stem.
 
 ### Demucs:
 
-- Demucs v4 models are now supported, including the 6 stem models.
-- Ability to combine remaining stems instead of inverting selected stems with the 
-mixture only when a user selects 2 stems.
-- A "Pre-process" model that allows the user to run an inference through a robust vocal or instrumental model and separate the remaining stems from its generated instrumental mix. This option can significantly reduce vocal bleed in other Demucs-generated non-vocal stems. 
+- Demucs v4 models are now supported, including the 6 stem model.
+- Ability to combine remaining stems instead of inverting selected stem with the mixture only when a user does not select "All Stems".
+- A "Pre-process" model that allows the user to run an inference through a robust vocal or instrumental model and separate the remaining stems from its generated instrumental mix. This option can significantly reduce vocal bleed in other Demucs-generated non-vocal stems.
+  - The Pre-process model is intended for Demucs separations for all stems except vocals and instrumentals.
 
 ### Ensemble Mode: 
 

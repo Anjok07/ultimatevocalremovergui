@@ -195,50 +195,6 @@ def drop(event, accept_mode: str = 'files'):
     else:
         # Invalid accept mode
         return
-
-#FIXME:
-# def drop(event, accept_mode: str = 'files'):
-#     """Drag & Drop verification process"""
-    
-#     path: str
-    
-#     path = event.data
-
-#     #if RIGHT_BRACKET in path or LEFT_BRACKET in path:
-#     if path.startswith(LEFT_BRACKET):
-#         path = path[1:]
-        
-#     if path.endswith(RIGHT_BRACKET):
-#         path = path[:-1]
-
-#     print(path)
-
-#     if accept_mode == 'folder':
-#         if not os.path.isdir(path):
-#             tk.messagebox.showerror(title='Invalid Folder',
-#                                     message='Your given export path is not a valid folder!')
-#             return
-        
-#         # Set Variables
-#         root.export_path_var.set(path)
-#     elif accept_mode == 'files':
-#         # Clean path text and set path to the list of paths
-
-#         for drive_letter in list(string.ascii_lowercase.upper()):
-#             path = path.replace(f"{DOUBLE_BRACKET}{drive_letter}:", f";{drive_letter}:")
-#             path = path.replace(f"{RIGHT_BRACKET} {drive_letter}:", f";{drive_letter}:")
-#             path = path.replace(f" {LEFT_BRACKET}{drive_letter}:", f";{drive_letter}:")
-
-#         path = path.split(';')
-#         path[-1] = path[-1].replace(';', '')
-#         # Set Variables
-#         root.inputPaths = tuple(path)
-#         root.process_input_selections()
-#         root.update_inputPaths()
-
-#     else:
-#         # Invalid accept mode
-#         return
     
 class ModelData():
     def __init__(self, model_name: str, 
@@ -284,13 +240,11 @@ class ModelData():
         self.model_samplerate = 44100
         self.is_demucs_pre_proc_model_inst_mix = False
         self.manual_download_Button = None
-        
         self.secondary_model_4_stem = []
         self.secondary_model_4_stem_scale = []
         self.secondary_model_4_stem_names = []
         self.secondary_model_4_stem_model_names_list = []
         self.all_models = []
-        
         self.secondary_model_other = None
         self.secondary_model_scale_other = None
         self.secondary_model_bass = None
@@ -373,15 +327,12 @@ class ModelData():
         self.is_primary_model_secondary_stem_only = is_primary_model_secondary_stem_only
 
         if self.is_secondary_model_activated and self.model_status:
-
             if (not self.is_ensemble_mode and root.demucs_stems_var.get() == ALL_STEMS and self.process_method == DEMUCS_ARCH_TYPE) or self.is_4_stem_ensemble:
-                
                 for key in DEMUCS_4_SOURCE_LIST:
                     self.secondary_model_data(key)
                     self.secondary_model_4_stem.append(self.secondary_model)
                     self.secondary_model_4_stem_scale.append(self.secondary_model_scale)
                     self.secondary_model_4_stem_names.append(key)
-                    
                 self.demucs_4_stem_added_count = sum(i is not None for i in self.secondary_model_4_stem)
                 self.is_secondary_model_activated = False if all(i is None for i in self.secondary_model_4_stem) else True
                 self.demucs_4_stem_added_count = self.demucs_4_stem_added_count - 1 if self.is_secondary_model_activated else self.demucs_4_stem_added_count
@@ -562,7 +513,7 @@ class Ensembler():
         save_format(stem_save_path, self.save_format, self.mp3_bit_set)
 
     def get_files_to_ensemble(self, folder="", prefix="", suffix=""):
-        """Grab all the files to be ensembles"""
+        """Grab all the files to be ensembled"""
         
         return [os.path.join(folder, i) for i in os.listdir(folder) if i.startswith(prefix) and i.endswith(suffix)]
 
@@ -613,8 +564,8 @@ class ToolTip(object):
         tw.wm_overrideredirect(1)
         tw.wm_geometry("+%d+%d" % (x, y))
         label = Label(tw, text=self.text, justify=LEFT,
-                      background="#ffffe0", foreground="black", relief=SOLID, borderwidth=1,
-                      font=("tahoma", f"{FONT_SIZE_1}", "normal"))
+                      background="#151515", foreground="#dedede", highlightcolor="#898b8e", relief=SOLID, borderwidth=1,
+                      font=("Century Gothic", f"{FONT_SIZE_1}", "normal"))#('Century Gothic', FONT_SIZE_4)
         label.pack(ipadx=1)
 
     def hidetip(self):
@@ -1057,6 +1008,7 @@ class MainWindow(TkinterDnD.Tk):
         self.filePaths_musicFile_Open.place(x=-45, y=160, width=35, height=33, relx=1, rely=0, relwidth=0, relheight=0)
         self.filePaths_musicFile_Entry.configure(cursor="hand2")
         self.help_hints(self.filePaths_musicFile_Button, text=INPUT_FOLDER_ENTRY_HELP) 
+        self.help_hints(self.filePaths_musicFile_Entry, text=INPUT_FOLDER_ENTRY_HELP_2)
         self.help_hints(self.filePaths_musicFile_Open, text=INPUT_FOLDER_BUTTON_HELP)     
 
         # Save To Option
@@ -4979,7 +4931,5 @@ if __name__ == "__main__":
         print(e)
 
     root = MainWindow()
-        
     root.update_checkbox_text()
-
     root.mainloop()

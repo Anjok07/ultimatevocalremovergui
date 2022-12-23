@@ -61,14 +61,13 @@ class SeperateAttributes:
         self.is_primary_stem_only = model_data.is_primary_stem_only if not self.is_secondary_model else model_data.is_primary_model_primary_stem_only
         self.is_secondary_stem_only = model_data.is_secondary_stem_only if not self.is_secondary_model else model_data.is_primary_model_secondary_stem_only      
         self.is_ensemble_mode = model_data.is_ensemble_mode
-        self.secondary_model = model_data.secondary_model #VERIFY WHERE
+        self.secondary_model = model_data.secondary_model #
         self.primary_model_primary_stem = model_data.primary_model_primary_stem
-        self.primary_stem = model_data.primary_stem #-
-        self.secondary_stem = model_data.secondary_stem #-
+        self.primary_stem = model_data.primary_stem #
+        self.secondary_stem = model_data.secondary_stem #
         self.is_invert_spec = model_data.is_invert_spec #
         self.secondary_model_scale = model_data.secondary_model_scale #
         self.is_demucs_pre_proc_model_inst_mix = model_data.is_demucs_pre_proc_model_inst_mix #
-        #############################
         self.primary_source_map = {}
         self.secondary_source_map = {}
         self.primary_source = None
@@ -208,12 +207,6 @@ class SeperateAttributes:
             if self.process_method == DEMUCS_ARCH_TYPE:
                 self.cached_model_source_holder(DEMUCS_ARCH_TYPE, secondary_sources, self.model_basename)
                 
-            # if isinstance(secondary_sources, np.ndarray):
-            #     print('\n==================================\n', secondary_sources, f"\n\nMemory size of source for model {self.model_basename}: ", secondary_sources.size * secondary_sources.itemsize, 'BYTES', '\n==================================\n')
-                
-            # if type(secondary_sources) is dict:
-            #     print('\n==================================\n', secondary_sources, f"\n\nMemory size of source for model {self.model_basename}: ", sum(v.size * v.itemsize for v in secondary_sources.values()), 'BYTES', '\n==================================\n')
-
     def write_audio(self, stem_path, stem_source, samplerate, secondary_model_source=None, model_scale=None):
                 
         if not self.is_secondary_model:
@@ -604,8 +597,6 @@ class SeperateVR(SeperateAttributes):
             
             model_size = math.ceil(os.stat(self.model_path).st_size / 1024)
             nn_architecture = min(nn_arch_sizes, key=lambda x:abs(x-model_size))
-
-            #print('ARC SIZE: ', nn_architecture)
 
             if nn_architecture in vr_5_1_models:
                 print('NEW: ', nn_architecture)

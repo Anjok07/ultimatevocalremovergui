@@ -671,13 +671,14 @@ POPUP_COMPENSATE_HELP = f'Choose the appropriate voluem compensattion for the se
 VR_MODEL_PARAM_HELP = 'Choose the parameters needed to run the selected model.'
 CHOSEN_ENSEMBLE_HELP = 'Select saved enselble or save current ensemble.\n\nDefault Selections:\n\n• Save the current ensemble.\n• Clears all current model selections.'
 CHOSEN_PROCESS_METHOD_HELP = 'Here, you choose between different Al networks and algorithms to process your track.\n\n' +\
-                             'There are four options:\n\n' +\
+                             'There are five options:\n\n' +\
                              '• VR Architecture - These models use magnitude spectrograms for Source Separation.\n' +\
                              '• MDX-Net - These models use Hybrid Spectrogram/Waveform for Source Separation.\n' +\
                              '• Demucs v3 - These models use Hybrid Spectrogram/Waveform for Source Separation.\n' +\
                              '• Ensemble Mode - Here, you can get the best results from multiple models and networks.\n' +\
                              '• Audio Tools - These are additional tools for added convenience.'
 INPUT_FOLDER_ENTRY_HELP = 'Select Input:\n\nHere is where you select the audio files(s) you wish to process.'
+INPUT_FOLDER_ENTRY_HELP_2 = 'Input Option Menu:\n\nClick here to access the input option menu.'
 OUTPUT_FOLDER_ENTRY_HELP = 'Select Output:\n\nHere is where you select the directory where your processed files are to be saved.'
 INPUT_FOLDER_BUTTON_HELP = 'Open Input Folder Button: \n\nOpens the directory containing the selected input audio file(s).'
 OUTPUT_FOLDER_BUTTON_HELP = 'Open Output Folder Button: \n\nOpens the selected output folder.'
@@ -764,7 +765,7 @@ OPTION_HEIGHT = 7
 LOW_MENU_Y = 18, 16
 FFMPEG_EXT = (".aac", ".aiff", ".alac" ,".flac", ".mov", ".mp4", 
               ".m4a", ".mp2", ".mp3", ".mp4", ".mpc", ".mpc8", 
-              ".mpeg", ".ogg", ".tta", ".wav", ".wma")
+              ".mpeg", ".ogg", ".tta", ".wav", ".wma", ".webm")
 FFMPEG_MORE_EXT = (".aa", ".aac", ".ac3", ".aiff", ".alac", ".avi", ".f4v",".flac", ".flic", ".flv",
               ".m4v",".mlv", ".mov", ".mp4", ".m4a", ".mp2", ".mp3", ".mp4", ".mpc", ".mpc8", 
               ".mpeg", ".ogg", ".tta", ".tty", ".vcd", ".wav", ".wma")

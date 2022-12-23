@@ -16,6 +16,8 @@ WINDOW_SIZE_ERROR = "h1_shape[3] must be greater than h2_shape[3]"
 SF_WRITE_ERROR = "sf.write"
 SYSTEM_MEMORY_ERROR = "DefaultCPUAllocator: not enough memory"
 MISSING_MODEL_ERROR = "'NoneType\' object has no attribute \'model_basename\'"
+ARRAY_SIZE_ERROR = "ValueError: \"array is too big; `arr.size * arr.dtype.itemsize` is larger than the maximum possible size.\""
+GPU_INCOMPATIBLE_ERROR = "no kernel image is available for execution on the device"
 
 CONTACT_DEV = 'If this error persists, please contact the developers with the error details.'
 
@@ -65,6 +67,11 @@ ERROR_MAPPER = {
     MISSING_MODEL_ERROR:
                         ('Model Missing: The application was unable to locate the chosen model.\n\n' + 
                         'If the error persists, please verify any selected models are present.'),
+    GPU_INCOMPATIBLE_ERROR:
+                        ('This process is not compatible with your GPU.\n\n' + 
+                        'Please uncheck \"GPU Conversion\" and try again'),
+    ARRAY_SIZE_ERROR:
+                        ('The application was not able to process the given audiofile. Please convert the audiofile to another format and try again.'),
 }
 
 def error_text(process_method, exception):

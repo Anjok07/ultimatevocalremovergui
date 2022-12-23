@@ -26,7 +26,7 @@ proc set_theme {mode} {
             -insertwidth 0 \
             -insertcolor $colors(-fg) \
             -fieldbackground $colors(-selectbg) \
-            -font {"Century Gothic" 10} \
+            -font {"Century Gothic" 13} \
             -borderwidth 0 \
             -relief flat
 

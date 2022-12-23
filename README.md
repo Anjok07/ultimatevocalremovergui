@@ -37,7 +37,7 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 - The Download Center will not work out of the box. You will need to update and install a certificate (instructions for that coming soon).
    - In the meantime, you can download the models via the "Try Manual Download" button located in the Download Center tab.
-- GPU selection does not work. However, if you are running a MacBook Pro running the M2 processor, you can get MPS acceleration on the VR Models **only!** It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is.
+- GPU selection will be disabled. However, if you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is.
 - Drag-n-drop currently does not work for this build. It might come in a future update.
 - So far everthing else is working as expected.
 

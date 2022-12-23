@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v5.5.0
+# Ultimate Vocal Remover GUI v5.5.0 (MacOS Version)
 <img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/uvr_5_5_MacOS/gui_data/img/UVR_5_5_MacOS.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)

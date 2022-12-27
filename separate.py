@@ -586,7 +586,10 @@ class SeperateVR(SeperateAttributes):
         else:
             self.start_inference()
             if self.is_gpu_conversion >= 0:
-                device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
+                if OPERATING_SYSTEM == 'Darwin':
+                    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
+                else:
+                    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
             else:
                 device = torch.device('cpu')
             
@@ -599,11 +602,9 @@ class SeperateVR(SeperateAttributes):
             nn_architecture = min(nn_arch_sizes, key=lambda x:abs(x-model_size))
 
             if nn_architecture in vr_5_1_models:
-                print('NEW: ', nn_architecture)
                 model = nets_new.CascadedNet(self.mp.param['bins'] * 2, nn_architecture)
                 inference = self.inference_vr_new
             else:
-                print('OLD: ', nn_architecture)
                 model = nets.determine_model_capacity(self.mp.param['bins'] * 2, nn_architecture)
                 inference = self.inference_vr
 
@@ -663,14 +664,19 @@ class SeperateVR(SeperateAttributes):
         for d in range(bands_n, 0, -1):        
             bp = self.mp.param['band'][d]
         
+            if OPERATING_SYSTEM == 'Windows':
+                wav_resolution = bp['res_type']
+            else:
+                wav_resolution = 'polyphase'
+        
             if d == bands_n: # high-end band
                 X_wave[d], _ = librosa.load(
-                    self.audio_file, bp['sr'], False, dtype=np.float32, res_type=bp['res_type'])
+                    self.audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
                     
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else: # lower bands
-                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type=bp['res_type'])
+                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type=wav_resolution)
                 
             X_spec_s[d] = spec_utils.wave_to_spectrogram_mt(X_wave[d], bp['hl'], bp['n_fft'], self.mp.param['mid_side'], 
                                                             self.mp.param['mid_side_b2'], self.mp.param['reverse'])
@@ -844,8 +850,6 @@ def process_secondary_model(secondary_model: ModelData, process_data, main_model
     
 def gather_sources(primary_stem_name, secondary_stem_name, secondary_sources: dict):
     
-    print(primary_stem_name, secondary_stem_name)
-    
     source_primary = False
     source_secondary = False
 
@@ -903,6 +907,10 @@ def prepare_mix(mix, chunk_set, margin_set, mdx_net_cut=False, is_missing_mix=Fa
 def save_format(audio_path, save_format, mp3_bit_set):
     
     if not save_format == WAV:
+        
+        if not OPERATING_SYSTEM == 'Windows':
+            FFMPEG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ffmpeg')
+            pydub.AudioSegment.converter = FFMPEG_PATH
         
         musfile = pydub.AudioSegment.from_wav(audio_path)
         

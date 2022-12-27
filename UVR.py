@@ -12,7 +12,7 @@ import onnx
 import os
 import pickle  # Save Data
 import psutil
-import pyglet
+from pyglet import font
 import pyperclip
 import base64
 import queue
@@ -44,7 +44,6 @@ from gui_data.app_size_values import ImagePath, AdjustedValues as av
 from gui_data.constants import *
 from gui_data.error_handling import error_text, error_dialouge
 from gui_data.old_data_check import file_check, remove_unneeded_yamls, remove_temps
-from gui_data.tkinterdnd2 import TkinterDnD, DND_FILES  # Enable Drag & Drop
 from lib_v5.vr_network.model_param_init import ModelParameters
 from kthread import KThread
 from lib_v5 import spec_utils
@@ -55,11 +54,33 @@ from tkinter import *
 from tkinter.tix import *
 import re
 from typing import List
+import ssl
 
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 logging.info('UVR BEGIN')
 
-right_click_button = '<Button-3>'
+if OPERATING_SYSTEM=="Darwin":
+    OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
+    is_windows = False
+    right_click_button = '<Button-2>'
+    main_font_name = "Century Gothic"
+    application_extension = ".dmg"
+elif OPERATING_SYSTEM=="Linux":
+    OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
+    is_windows = False
+    right_click_button = '<Button-3>'
+    main_font_name = "Century Gothic"
+    application_extension = ".zip"
+elif OPERATING_SYSTEM=="Windows":
+    from gui_data.tkinterdnd2 import TkinterDnD, DND_FILES
+    OPEN_FILE_func = lambda input_string:os.startfile(input_string)
+    is_windows = True
+    right_click_button = '<Button-3>'
+    main_font_name = "Century Gothic"
+    application_extension = ".exe"
+    
+if not is_windows:
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 try:
     with open(os.path.join(os.getcwd(), 'tmp', 'splash.txt'), 'w') as f:
@@ -140,9 +161,11 @@ SAMPLE_CLIP_PATH = os.path.join(BASE_PATH, 'temp_sample_clips')
 ENSEMBLE_TEMP_PATH = os.path.join(BASE_PATH, 'ensemble_temps')
 
 #Style
-ICON_IMG_PATH = os.path.join(BASE_PATH, 'gui_data', 'img', 'GUI-icon.ico')
+ICON_IMG_PATH = os.path.join(BASE_PATH, 'gui_data', 'img', 'GUI-Icon.ico')
+if not is_windows:
+    MAIN_ICON_IMG_PATH = os.path.join(BASE_PATH, 'gui_data', 'img', 'GUI-Icon.png')
 FONT_PATH = os.path.join(BASE_PATH, 'gui_data', 'fonts', 'centurygothic', 'GOTHIC.TTF')#ensemble_temps
-MENU_COMBOBOX_WIDTH = 18
+MENU_COMBOBOX_WIDTH = 19
 
 #Other
 COMPLETE_CHIME = os.path.join(BASE_PATH, 'gui_data', 'complete_chime.wav')
@@ -565,7 +588,7 @@ class ToolTip(object):
         tw.wm_geometry("+%d+%d" % (x, y))
         label = Label(tw, text=self.text, justify=LEFT,
                       background="#151515", foreground="#dedede", highlightcolor="#898b8e", relief=SOLID, borderwidth=1,
-                      font=("Century Gothic", f"{FONT_SIZE_1}", "normal"))#('Century Gothic', FONT_SIZE_4)
+                      font=(main_font_name, f"{FONT_SIZE_1}", "normal"))#('Century Gothic', FONT_SIZE_4)
         label.pack(ipadx=1)
 
     def hidetip(self):
@@ -614,10 +637,10 @@ class ThreadSafeConsole(tk.Text):
     def select_all_text(self):
         self.tag_add('sel', '1.0', 'end')
 
-class MainWindow(TkinterDnD.Tk):
+class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
     # --Constants--
     # Layout
-    
+
     IMAGE_HEIGHT = av.IMAGE_HEIGHT
     FILEPATHS_HEIGHT = av.FILEPATHS_HEIGHT
     OPTIONS_HEIGHT = av.OPTIONS_HEIGHT
@@ -653,7 +676,7 @@ class MainWindow(TkinterDnD.Tk):
             xpad=int(self.winfo_screenwidth()/2 - width/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
  
-        self.iconbitmap(ICON_IMG_PATH)
+        self.iconbitmap(ICON_IMG_PATH) if is_windows else self.tk.call('wm', 'iconphoto', self._w, tk.PhotoImage(file=MAIN_ICON_IMG_PATH))
         self.configure(bg='#0e0e0f')  # Set background color to #0c0c0d
         self.protocol("WM_DELETE_WINDOW", self.save_values)
         self.resizable(False, False)
@@ -764,7 +787,7 @@ class MainWindow(TkinterDnD.Tk):
         self.clear_cache_torch = False
         self.vr_hash_MAPPER = load_model_hash_data(VR_HASH_JSON)
         self.mdx_hash_MAPPER = load_model_hash_data(MDX_HASH_JSON)
-        self.is_gpu_available = torch.cuda.is_available()
+        self.is_gpu_available = torch.cuda.is_available() if not OPERATING_SYSTEM == 'Darwin' else torch.backends.mps.is_available()
         self.is_process_stopped = False
         self.inputs_from_dir = []
         self.iteration = 0
@@ -806,9 +829,10 @@ class MainWindow(TkinterDnD.Tk):
         self.active_download_thread = None
 
         # Font
-        pyglet.font.add_file(FONT_PATH)
-        self.font = tk.font.Font(family='Century Gothic', size=10)
-        self.fontRadio = tk.font.Font(family='Century Gothic', size=9) 
+        font.add_file(FONT_PATH)
+        self.font = tk.font.Font(family=main_font_name, size=FONT_SIZE_F1)
+        self.font_smaller = tk.font.Font(family=main_font_name, size=FONT_SIZE_F2)
+        self.fontRadio = tk.font.Font(family=main_font_name, size=FONT_SIZE_F3) 
         
         #Model Update
         self.last_found_ensembles = ENSEMBLE_OPTIONS
@@ -836,39 +860,51 @@ class MainWindow(TkinterDnD.Tk):
         self.update_checkbox_text = lambda:self.selection_action_process_method(self.chosen_process_method_var.get())
   
     # Menu Functions
-    def main_window_LABEL_SET(self, master, text):return ttk.Label(master=master, text=text, background='#0e0e0f', font=self.font, foreground='#13a4c9', anchor=tk.CENTER)
-    def menu_title_LABEL_SET(self, frame, text, width=35):return ttk.Label(master=frame, text=text, font=("Century Gothic",  f"{FONT_SIZE_5}", "underline"), justify="center", foreground="#13a4c9", width=width, anchor=tk.CENTER)
-    def menu_sub_LABEL_SET(self, frame, text, font_size=FONT_SIZE_2):return ttk.Label(master=frame, text=text, font=("Century Gothic", f"{font_size}"), foreground='#13a4c9', anchor=tk.CENTER)
+    def main_window_LABEL_SET(self, master, text):return ttk.Label(master=master, text=text, background='#0e0e0f', font=self.font_smaller, foreground='#13849f', anchor=tk.CENTER)
+    def menu_title_LABEL_SET(self, frame, text, width=35):return ttk.Label(master=frame, text=text, font=(main_font_name, f"{FONT_SIZE_5}", "underline"), justify="center", foreground="#13849f", width=width, anchor=tk.CENTER)
+    def menu_sub_LABEL_SET(self, frame, text, font_size=FONT_SIZE_2):return ttk.Label(master=frame, text=text, font=(main_font_name, f"{font_size}"), foreground='#13849f', anchor=tk.CENTER)
     def menu_FRAME_SET(self, frame, thickness=20):return Frame(frame, highlightbackground='#0e0e0f', highlightcolor='#0e0e0f', highlightthicknes=thickness)
     def check_is_menu_settings_open(self):self.menu_settings() if not self.is_menu_settings_open else None
     
     def check_is_open_menu_advanced_vr_options(self):
-        if not self.is_open_menu_advanced_vr_options.get():
-            self.menu_advanced_vr_options() 
-        else:
-            self.menu_advanced_vr_options_close_window()
-            self.menu_advanced_vr_options()
-        
+        try:
+            if not self.is_open_menu_advanced_vr_options.get():
+                self.menu_advanced_vr_options() 
+            else:
+                self.menu_advanced_vr_options_close_window()
+                self.menu_advanced_vr_options()
+        except Exception as e:
+            self.error_log_var.set("{}".format(error_text('VR Menu', e)))
+
     def check_is_open_menu_advanced_demucs_options(self): 
-        if not self.is_open_menu_advanced_demucs_options.get():
-            self.menu_advanced_demucs_options() 
-        else:
-            self.menu_advanced_demucs_options_close_window()
-            self.menu_advanced_demucs_options()
+        try:
+            if not self.is_open_menu_advanced_demucs_options.get():
+                self.menu_advanced_demucs_options() 
+            else:
+                self.menu_advanced_demucs_options_close_window()
+                self.menu_advanced_demucs_options()
+        except Exception as e:
+            self.error_log_var.set("{}".format(error_text('Demucs Menu', e)))
   
     def check_is_open_menu_advanced_mdx_options(self): 
-        if not self.is_open_menu_advanced_mdx_options.get():
-            self.menu_advanced_mdx_options() 
-        else:
-            self.menu_advanced_mdx_options_close_window()
-            self.menu_advanced_mdx_options()
+        try:
+            if not self.is_open_menu_advanced_mdx_options.get():
+                self.menu_advanced_mdx_options() 
+            else:
+                self.menu_advanced_mdx_options_close_window()
+                self.menu_advanced_mdx_options()
+        except Exception as e:
+            self.error_log_var.set("{}".format(error_text('MDX-Net Menu', e)))
 
     def check_is_open_menu_advanced_ensemble_options(self): 
-        if not self.is_open_menu_advanced_ensemble_options.get():
-            self.menu_advanced_ensemble_options() 
-        else:
-            self.menu_advanced_ensemble_options_close_window()
-            self.menu_advanced_ensemble_options()
+        try:
+            if not self.is_open_menu_advanced_ensemble_options.get():
+                self.menu_advanced_ensemble_options() 
+            else:
+                self.menu_advanced_ensemble_options_close_window()
+                self.menu_advanced_ensemble_options()
+        except Exception as e:
+            self.error_log_var.set("{}".format(error_text('Ensemble Menu', e)))
 
     def check_is_open_menu_help(self): 
         if not self.is_open_menu_help.get():
@@ -885,12 +921,15 @@ class MainWindow(TkinterDnD.Tk):
             self.menu_error_log()
             
     def check_is_open_menu_view_inputs(self): 
-        if not self.is_open_menu_view_inputs.get():
-            self.menu_view_inputs() 
-        else:
-            self.menu_view_inputs_close_window()
-            self.menu_view_inputs()
-            
+        try:
+            if not self.is_open_menu_view_inputs.get():
+                self.menu_view_inputs() 
+            else:
+                self.menu_view_inputs_close_window()
+                self.menu_view_inputs()
+        except Exception as e:
+            self.error_log_var.set("{}".format(error_text('Inputs Menu', e)))
+ 
     #Ensemble Listbox Functions
     def ensemble_listbox_get_all_selected_models(self):return [self.ensemble_listbox_Option.get(i) for i in self.ensemble_listbox_Option.curselection()]
     def ensemble_listbox_select_from_indexs(self, indexes):return [self.ensemble_listbox_Option.selection_set(i) for i in indexes]
@@ -950,9 +989,9 @@ class MainWindow(TkinterDnD.Tk):
                 is_running = True
                 
         return is_running
-                       
+
     # -Widget Methods--
-    
+
     def fill_main_frame(self):
         """Creates root window widgets"""
         
@@ -989,7 +1028,7 @@ class MainWindow(TkinterDnD.Tk):
         self.console_Frame.place(x=15, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.CONVERSIONBUTTON_HEIGHT + self.PADDING + 5 *3, width=-30, height=self.COMMAND_HEIGHT+7,
                                 relx=0, rely=0, relwidth=1, relheight=0)
 
-        self.command_Text = ThreadSafeConsole(master=self.console_Frame, background='#0c0c0d',fg='#898b8e', font=('Century Gothic', FONT_SIZE_4), borderwidth=0)
+        self.command_Text = ThreadSafeConsole(master=self.console_Frame, background='#0c0c0d',fg='#898b8e', font=(main_font_name, FONT_SIZE_4), borderwidth=0)
         self.command_Text.pack(fill=BOTH, expand=1)
         self.command_Text.bind(right_click_button, lambda e:self.right_click_console(e))
             
@@ -1004,7 +1043,7 @@ class MainWindow(TkinterDnD.Tk):
         self.filePaths_musicFile_Button.place(x=0, y=5, width=0, height=-5, relx=0, rely=0, relwidth=0.3, relheight=0.5) 
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame, textvariable=self.inputPathsEntry_var, font=self.fontRadio, state=tk.DISABLED)
         self.filePaths_musicFile_Entry.place(x=7.5, y=5, width=-50, height=-5, relx=0.3, rely=0, relwidth=0.7, relheight=0.5)                                   
-        self.filePaths_musicFile_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:os.startfile(os.path.dirname(self.inputPaths[0])) if self.inputPaths and os.path.isdir(os.path.dirname(self.inputPaths[0])) else self.error_dialoge(INVALID_INPUT))
+        self.filePaths_musicFile_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:OPEN_FILE_func(os.path.dirname(self.inputPaths[0])) if self.inputPaths and os.path.isdir(os.path.dirname(self.inputPaths[0])) else self.error_dialoge(INVALID_INPUT))
         self.filePaths_musicFile_Open.place(x=-45, y=160, width=35, height=33, relx=1, rely=0, relwidth=0, relheight=0)
         self.filePaths_musicFile_Entry.configure(cursor="hand2")
         self.help_hints(self.filePaths_musicFile_Button, text=INPUT_FOLDER_ENTRY_HELP) 
@@ -1016,7 +1055,7 @@ class MainWindow(TkinterDnD.Tk):
         self.filePaths_saveTo_Button.place(x=0, y=5, width=0, height=-5, relx=0, rely=0.5, relwidth=0.3, relheight=0.5)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame, textvariable=self.export_path_var, font=self.fontRadio, state=tk.DISABLED)
         self.filePaths_saveTo_Entry.place(x=7.5, y=5, width=-50, height=-5, relx=0.3, rely=0.5, relwidth=0.7, relheight=0.5)
-        self.filePaths_saveTo_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:os.startfile(Path(self.export_path_var.get())) if os.path.isdir(self.export_path_var.get()) else self.error_dialoge(INVALID_EXPORT))
+        self.filePaths_saveTo_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:OPEN_FILE_func(Path(self.export_path_var.get())) if os.path.isdir(self.export_path_var.get()) else self.error_dialoge(INVALID_EXPORT))
         self.filePaths_saveTo_Open.place(x=-45, y=197.5, width=35, height=33, relx=1, rely=0, relwidth=0, relheight=0)
         self.help_hints(self.filePaths_saveTo_Button, text=OUTPUT_FOLDER_ENTRY_HELP) 
         self.help_hints(self.filePaths_saveTo_Entry, text=OUTPUT_FOLDER_ENTRY_HELP) 
@@ -1042,7 +1081,7 @@ class MainWindow(TkinterDnD.Tk):
         self.help_hints(self.mp3_button, text=f'{FORMAT_SETTING_HELP}{MP3}')
 
         # Choose Conversion Method
-        self.chosen_process_method_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Process Method')
+        self.chosen_process_method_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_PROC_METHOD_MAIN_LABEL)
         self.chosen_process_method_Label.place(x=0, y=MAIN_ROW_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.chosen_process_method_Option = ttk.OptionMenu(self.options_Frame, self.chosen_process_method_var, None, *PROCESS_METHODS, command=lambda s:self.selection_action_process_method(s, from_widget=True))
         self.chosen_process_method_Option.place(x=0, y=MAIN_ROW_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -1050,7 +1089,7 @@ class MainWindow(TkinterDnD.Tk):
         self.help_hints(self.chosen_process_method_Label, text=CHOSEN_PROCESS_METHOD_HELP)
         
         #  Choose Settings Option
-        self.save_current_settings_Label = self.main_window_LABEL_SET(self.options_Frame, 'Select Saved Settings')
+        self.save_current_settings_Label = self.main_window_LABEL_SET(self.options_Frame, SELECT_SAVED_SETTINGS_MAIN_LABEL)
         self.save_current_settings_Label_place = lambda:self.save_current_settings_Label.place(x=MAIN_ROW_2_X[0], y=LOW_MENU_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.save_current_settings_Option = ttk.OptionMenu(self.options_Frame, self.save_current_settings_var)
         self.save_current_settings_Option_place = lambda:self.save_current_settings_Option.place(x=MAIN_ROW_2_X[1], y=LOW_MENU_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=2/3, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -1059,14 +1098,14 @@ class MainWindow(TkinterDnD.Tk):
         ### MDX-NET ###
 
         #  Choose MDX-Net Model
-        self.mdx_net_model_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose MDX-Net Model')
+        self.mdx_net_model_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_MDX_MODEL_MAIN_LABEL)
         self.mdx_net_model_Label_place = lambda:self.mdx_net_model_Label.place(x=0, y=LOW_MENU_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.mdx_net_model_Option = ttk.OptionMenu(self.options_Frame, self.mdx_net_model_var)
         self.mdx_net_model_Option_place = lambda:self.mdx_net_model_Option.place(x=0, y=LOW_MENU_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.help_hints(self.mdx_net_model_Label, text=CHOOSE_MODEL_HELP)
 
         # MDX-chunks
-        self.chunks_Label = self.main_window_LABEL_SET(self.options_Frame, 'Chunks')
+        self.chunks_Label = self.main_window_LABEL_SET(self.options_Frame, CHUNKS_MDX_MAIN_LABEL)
         self.chunks_Label_place = lambda:self.chunks_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.chunks_Option = ttk.Combobox(self.options_Frame, value=CHUNKS, textvariable=self.chunks_var)
         self.chunks_Option_place = lambda:self.chunks_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1074,7 +1113,7 @@ class MainWindow(TkinterDnD.Tk):
         self.help_hints(self.chunks_Label, text=CHUNKS_HELP)
 
         # MDX-Margin
-        self.margin_Label = self.main_window_LABEL_SET(self.options_Frame, 'Margin Size')
+        self.margin_Label = self.main_window_LABEL_SET(self.options_Frame, MARGIN_MDX_MAIN_LABEL)
         self.margin_Label_place = lambda:self.margin_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.margin_Option = ttk.Combobox(self.options_Frame, value=MARGIN_SIZE, textvariable=self.margin_var)
         self.margin_Option_place = lambda:self.margin_Option.place(x=MAIN_ROW_2_X[1], y=MAIN_ROW_2_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=2/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1084,14 +1123,14 @@ class MainWindow(TkinterDnD.Tk):
         ### VR ARCH ###
         
         #  Choose VR Model
-        self.vr_model_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose VR Model')
+        self.vr_model_Label = self.main_window_LABEL_SET(self.options_Frame, SELECT_VR_MODEL_MAIN_LABEL)
         self.vr_model_Label_place = lambda:self.vr_model_Label.place(x=0, y=LOW_MENU_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.vr_model_Option = ttk.OptionMenu(self.options_Frame, self.vr_model_var)
         self.vr_model_Option_place = lambda:self.vr_model_Option.place(x=0, y=LOW_MENU_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.help_hints(self.vr_model_Label, text=CHOOSE_MODEL_HELP)
         
         # Aggression Setting
-        self.aggression_setting_Label = self.main_window_LABEL_SET(self.options_Frame, 'Aggression Setting')
+        self.aggression_setting_Label = self.main_window_LABEL_SET(self.options_Frame, AGGRESSION_SETTING_MAIN_LABEL)
         self.aggression_setting_Label_place = lambda:self.aggression_setting_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.aggression_setting_Option = ttk.Combobox(self.options_Frame, value=VR_AGGRESSION, textvariable=self.aggression_setting_var)
         self.aggression_setting_Option_place = lambda:self.aggression_setting_Option.place(x=MAIN_ROW_2_X[1], y=MAIN_ROW_2_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1099,7 +1138,7 @@ class MainWindow(TkinterDnD.Tk):
         self.help_hints(self.aggression_setting_Label, text=AGGRESSION_SETTING_HELP)
         
         # Window Size
-        self.window_size_Label = self.main_window_LABEL_SET(self.options_Frame, 'Window Size')#anchor=tk.CENTER
+        self.window_size_Label = self.main_window_LABEL_SET(self.options_Frame, WINDOW_SIZE_MAIN_LABEL)
         self.window_size_Label_place = lambda:self.window_size_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.window_size_Option = ttk.Combobox(self.options_Frame, value=VR_WINDOW, textvariable=self.window_size_var)
         self.window_size_Option_place = lambda:self.window_size_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1109,21 +1148,21 @@ class MainWindow(TkinterDnD.Tk):
         ### DEMUCS ###
         
         #  Choose Demucs Model
-        self.demucs_model_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Demucs Model')
+        self.demucs_model_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_DEMUCS_MODEL_MAIN_LABEL)
         self.demucs_model_Label_place = lambda:self.demucs_model_Label.place(x=0, y=LOW_MENU_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.demucs_model_Option = ttk.OptionMenu(self.options_Frame, self.demucs_model_var)
         self.demucs_model_Option_place = lambda:self.demucs_model_Option.place(x=0, y=LOW_MENU_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.help_hints(self.demucs_model_Label, text=CHOOSE_MODEL_HELP)
 
         # Choose Demucs Stems
-        self.demucs_stems_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Stem(s)')
+        self.demucs_stems_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_DEMUCS_STEMS_MAIN_LABEL)
         self.demucs_stems_Label_place = lambda:self.demucs_stems_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.demucs_stems_Option = ttk.OptionMenu(self.options_Frame, self.demucs_stems_var, None)
         self.demucs_stems_Option_place = lambda:self.demucs_stems_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.help_hints(self.demucs_stems_Label, text=DEMUCS_STEMS_HELP)
 
         # Demucs-Segment
-        self.segment_Label = self.main_window_LABEL_SET(self.options_Frame, 'Segment')
+        self.segment_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_SEGMENT_MAIN_LABEL)
         self.segment_Label_place = lambda:self.segment_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=2/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.segment_Option = ttk.Combobox(self.options_Frame, value=DEMUCS_SEGMENTS, textvariable=self.segment_var)
         self.segment_Option_place = lambda:self.segment_Option.place(x=MAIN_ROW_2_X[1], y=MAIN_ROW_2_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=2/3, rely=3/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1146,21 +1185,21 @@ class MainWindow(TkinterDnD.Tk):
         ### ENSEMBLE MODE ###
 
         # Ensemble Mode
-        self.chosen_ensemble_Label = self.main_window_LABEL_SET(self.options_Frame, 'Ensemble Options')
+        self.chosen_ensemble_Label = self.main_window_LABEL_SET(self.options_Frame, ENSEMBLE_OPTIONS_MAIN_LABEL)
         self.chosen_ensemble_Label_place = lambda:self.chosen_ensemble_Label.place(x=0, y=LOW_MENU_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.chosen_ensemble_Option = ttk.OptionMenu(self.options_Frame, self.chosen_ensemble_var)
         self.chosen_ensemble_Option_place = lambda:self.chosen_ensemble_Option.place(x=0, y=LOW_MENU_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.help_hints(self.chosen_ensemble_Label, text=CHOSEN_ENSEMBLE_HELP)
                         
         # Ensemble Main Stems
-        self.ensemble_main_stem_Label = self.main_window_LABEL_SET(self.options_Frame, 'Main Stem Pair')
+        self.ensemble_main_stem_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_MAIN_PAIR_MAIN_LABEL)
         self.ensemble_main_stem_Label_place = lambda:self.ensemble_main_stem_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.ensemble_main_stem_Option = ttk.OptionMenu(self.options_Frame, self.ensemble_main_stem_var, None, *ENSEMBLE_MAIN_STEM, command=self.selection_action_ensemble_stems)
         self.ensemble_main_stem_Option_place = lambda:self.ensemble_main_stem_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.help_hints(self.ensemble_main_stem_Label, text=ENSEMBLE_MAIN_STEM_HELP)
 
         # Ensemble Algorithm
-        self.ensemble_type_Label = self.main_window_LABEL_SET(self.options_Frame, 'Ensemble Algorithm')
+        self.ensemble_type_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_ENSEMBLE_ALGORITHM_MAIN_LABEL)
         self.ensemble_type_Label_place = lambda:self.ensemble_type_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=2/11, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.ensemble_type_Option = ttk.OptionMenu(self.options_Frame, self.ensemble_type_var, None, *ENSEMBLE_TYPE)
         self.ensemble_type_Option_place = lambda:self.ensemble_type_Option.place(x=MAIN_ROW_2_X[1], y=MAIN_ROW_2_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT,relx=2/3, rely=3/11, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -1170,10 +1209,10 @@ class MainWindow(TkinterDnD.Tk):
     
         # Ensemble Save Ensemble Outputs
         
-        self.ensemble_listbox_Label = self.main_window_LABEL_SET(self.options_Frame, 'Available Models')
+        self.ensemble_listbox_Label = self.main_window_LABEL_SET(self.options_Frame, AVAILABLE_MODELS_MAIN_LABEL)
         self.ensemble_listbox_Label_place = lambda:self.ensemble_listbox_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[1], width=0, height=LABEL_HEIGHT, relx=2/3, rely=5/11, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.ensemble_listbox_Frame = Frame(self.options_Frame, highlightbackground='#04332c', highlightcolor='#04332c', highlightthicknes=1)
-        self.ensemble_listbox_Option = tk.Listbox(self.ensemble_listbox_Frame, selectmode=tk.MULTIPLE, activestyle='dotbox', font=("Century Gothic", f"{FONT_SIZE_1}"), background='#070708', exportselection=0, relief=SOLID, borderwidth=0)
+        self.ensemble_listbox_Option = tk.Listbox(self.ensemble_listbox_Frame, selectmode=tk.MULTIPLE, activestyle='dotbox', font=(main_font_name, f"{FONT_SIZE_1}"), background='#070708', exportselection=0, relief=SOLID, borderwidth=0)
         self.ensemble_listbox_scroll = ttk.Scrollbar(self.options_Frame, orient=VERTICAL)
         self.ensemble_listbox_Option.config(yscrollcommand=self.ensemble_listbox_scroll.set)
         self.ensemble_listbox_scroll.configure(command=self.ensemble_listbox_Option.yview)
@@ -1185,7 +1224,7 @@ class MainWindow(TkinterDnD.Tk):
         ### AUDIO TOOLS ###
 
         # Chosen Audio Tool
-        self.chosen_audio_tool_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Audio Tool')
+        self.chosen_audio_tool_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_AUDIO_TOOLS_MAIN_LABEL)
         self.chosen_audio_tool_Label_place = lambda:self.chosen_audio_tool_Label.place(x=0, y=LOW_MENU_Y[0], width=LEFT_ROW_WIDTH, height=LABEL_HEIGHT, relx=0, rely=6/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
         self.chosen_audio_tool_Option = ttk.OptionMenu(self.options_Frame, self.chosen_audio_tool_var, None, *AUDIO_TOOL_OPTIONS)
         self.chosen_audio_tool_Option_place = lambda:self.chosen_audio_tool_Option.place(x=0, y=LOW_MENU_Y[1], width=LEFT_ROW_WIDTH, height=OPTION_HEIGHT, relx=0, rely=7/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL1_ROWS)
@@ -1193,20 +1232,20 @@ class MainWindow(TkinterDnD.Tk):
         self.help_hints(self.chosen_audio_tool_Label, text=AUDIO_TOOLS_HELP)
         
         # Choose Agorithim
-        self.choose_algorithm_Label = self.main_window_LABEL_SET(self.options_Frame, 'Choose Algorithm')
+        self.choose_algorithm_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_MANUAL_ALGORITHM_MAIN_LABEL)
         self.choose_algorithm_Label_place = lambda:self.choose_algorithm_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.choose_algorithm_Option = ttk.OptionMenu(self.options_Frame,  self.choose_algorithm_var, None, *MANUAL_ENSEMBLE_OPTIONS)
         self.choose_algorithm_Option_place = lambda:self.choose_algorithm_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
 
         # Time Stretch
-        self.time_stretch_rate_Label = self.main_window_LABEL_SET(self.options_Frame, 'Rate')
+        self.time_stretch_rate_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_RATE_MAIN_LABEL)
         self.time_stretch_rate_Label_place = lambda:self.time_stretch_rate_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.time_stretch_rate_Option = ttk.Combobox(self.options_Frame, value=TIME_PITCH, textvariable=self.time_stretch_rate_var)
         self.time_stretch_rate_Option_place = lambda:self.time_stretch_rate_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.combobox_entry_validation(self.time_stretch_rate_Option, self.time_stretch_rate_var, REG_TIME_PITCH, TIME_PITCH)
 
         # Pitch Rate
-        self.pitch_rate_Label = self.main_window_LABEL_SET(self.options_Frame, 'Semitones')
+        self.pitch_rate_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_SEMITONES_MAIN_LABEL)
         self.pitch_rate_Label_place = lambda:self.pitch_rate_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.pitch_rate_Option = ttk.Combobox(self.options_Frame, value=TIME_PITCH, textvariable=self.pitch_rate_var)
         self.pitch_rate_Option_place = lambda:self.pitch_rate_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -1215,9 +1254,10 @@ class MainWindow(TkinterDnD.Tk):
         ### SHARED SETTINGS ###
         
         # GPU Selection
-        self.is_gpu_conversion_Option = ttk.Checkbutton(master=self.options_Frame, text='GPU Conversion', variable=self.is_gpu_conversion_var)
+        self.is_gpu_conversion_Option = ttk.Checkbutton(master=self.options_Frame, text=GPU_CONVERSION_MAIN_LABEL, variable=self.is_gpu_conversion_var)
         self.is_gpu_conversion_Option_place = lambda:self.is_gpu_conversion_Option.place(x=CHECK_BOX_X, y=CHECK_BOX_Y, width=CHECK_BOX_WIDTH, height=CHECK_BOX_HEIGHT, relx=1/3, rely=5/self.COL2_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.is_gpu_conversion_Disable = lambda:(self.is_gpu_conversion_Option.configure(state=tk.DISABLED), self.is_gpu_conversion_var.set(False))
+        self.is_gpu_conversion_Enable = lambda:self.is_gpu_conversion_Option.configure(state=tk.NORMAL)
         self.help_hints(self.is_gpu_conversion_Option, text=IS_GPU_CONVERSION_HELP)
 
         # Vocal Only
@@ -1317,17 +1357,17 @@ class MainWindow(TkinterDnD.Tk):
         
         self.chosen_audio_tool_align = tk.BooleanVar(value=True)
         add_align = lambda e:(self.chosen_audio_tool_Option['menu'].add_radiobutton(label=ALIGN_INPUTS, command=tk._setit(self.chosen_audio_tool_var, ALIGN_INPUTS)), self.chosen_audio_tool_align.set(False)) if self.chosen_audio_tool_align else None
-        
-        self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
-        self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)
-        self.drop_target_register(DND_FILES)
-        
-        self.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='files'))
         self.bind("<a> <s> <\>", add_align)
-        self.filePaths_saveTo_Button.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='folder'))
-        self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='folder'))    
-        self.ensemble_listbox_Option.bind('<<ListboxSelect>>', lambda e: self.chosen_ensemble_var.set(CHOOSE_ENSEMBLE_OPTION))
         
+        if is_windows:
+            self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
+            self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)
+            self.drop_target_register(DND_FILES)
+            self.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='files'))
+            self.filePaths_saveTo_Button.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='folder'))
+            self.filePaths_saveTo_Entry.dnd_bind('<<Drop>>', lambda e: drop(e, accept_mode='folder'))    
+            
+        self.ensemble_listbox_Option.bind('<<ListboxSelect>>', lambda e: self.chosen_ensemble_var.set(CHOOSE_ENSEMBLE_OPTION))
         self.options_Frame.bind(right_click_button, lambda e:self.right_click_menu_popup(e, main_menu=True))
         self.filePaths_musicFile_Entry.bind(right_click_button, lambda e:self.input_right_click_menu(e))
         self.filePaths_musicFile_Entry.bind('<Button-1>', lambda e:self.check_is_open_menu_view_inputs())
@@ -1409,8 +1449,8 @@ class MainWindow(TkinterDnD.Tk):
         EXTENSIONS = (('.aes', '.txt', '.tmp'))
         
         try:
-            if os.path.isfile(f"{PATCH}.exe"):
-                os.remove(f"{PATCH}.exe")
+            if os.path.isfile(f"{PATCH}{application_extension}"):
+                os.remove(f"{PATCH}{application_extension}")
             
             if os.path.isfile(SPLASH_DOC):
                 os.remove(SPLASH_DOC)
@@ -1510,7 +1550,7 @@ class MainWindow(TkinterDnD.Tk):
         
         def copy_help_hint(event):
             if self.help_hints_var.get():
-                right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+                right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
                 right_click_menu.add_command(label='Copy Help Hint Text', command=right_click_menu_copy_hint)
                 
                 try:
@@ -1525,7 +1565,7 @@ class MainWindow(TkinterDnD.Tk):
       
     def input_right_click_menu(self, event):
 
-        right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+        right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
         right_click_menu.add_command(label='See All Inputs', command=self.check_is_open_menu_view_inputs)
         
         try:
@@ -1646,7 +1686,7 @@ class MainWindow(TkinterDnD.Tk):
     #--Right Click Menu Pop-Ups--
 
     def right_click_select_settings_sub(self, parent_menu, process_method):
-        saved_settings_sub_menu = Menu(parent_menu, font=('Century Gothic', FONT_SIZE_1), tearoff=False)
+        saved_settings_sub_menu = Menu(parent_menu, font=(main_font_name, FONT_SIZE_1), tearoff=False)
         settings_options = self.last_found_settings + SAVE_SET_OPTIONS
         
         for settings_options in settings_options:
@@ -1659,7 +1699,7 @@ class MainWindow(TkinterDnD.Tk):
     
     def right_click_menu_popup(self, event, text_box=False, main_menu=False):
         
-        right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+        right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
         
         PM_RIGHT_CLICK_MAPPER = {
                         ENSEMBLE_MODE:self.check_is_open_menu_advanced_ensemble_options,
@@ -1673,7 +1713,7 @@ class MainWindow(TkinterDnD.Tk):
                         MDX_ARCH_TYPE:self.mdx_is_secondary_model_activate_var.get(),
                         DEMUCS_ARCH_TYPE:self.demucs_is_secondary_model_activate_var.get()}
         
-        saved_settings_sub_load_for_menu = Menu(right_click_menu, font=('Century Gothic', FONT_SIZE_1), tearoff=False)
+        saved_settings_sub_load_for_menu = Menu(right_click_menu, font=(main_font_name, FONT_SIZE_1), tearoff=False)
         saved_settings_sub_load_for_menu.add_cascade(label=VR_ARCH_SETTING_LOAD, menu=self.right_click_select_settings_sub(saved_settings_sub_load_for_menu, VR_ARCH_PM))
         saved_settings_sub_load_for_menu.add_cascade(label=MDX_SETTING_LOAD, menu=self.right_click_select_settings_sub(saved_settings_sub_load_for_menu, MDX_ARCH_TYPE))
         saved_settings_sub_load_for_menu.add_cascade(label=DEMUCS_SETTING_LOAD, menu=self.right_click_select_settings_sub(saved_settings_sub_load_for_menu, DEMUCS_ARCH_TYPE))
@@ -1744,7 +1784,7 @@ class MainWindow(TkinterDnD.Tk):
             self.current_text_box.delete(0, END)
     
     def right_click_console(self, event):
-        right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+        right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
         right_click_menu.add_command(label='Copy', command=self.command_Text.copy_text)
         right_click_menu.add_command(label='Select All', command=self.command_Text.select_all_text)
         
@@ -1758,11 +1798,12 @@ class MainWindow(TkinterDnD.Tk):
     def menu_placement(self, window: Toplevel, title, pop_up=False, is_help_hints=False, close_function=None):
         """Prepares and centers each secondary window relative to the main window"""
         
+        window.wm_attributes('-alpha', 0.0) if not is_windows else None
         window.geometry("+%d+%d" %(8000, 5000))
         window.resizable(False, False)
         window.wm_transient(root)
         window.title(title)
-        window.iconbitmap(ICON_IMG_PATH)
+        window.iconbitmap(ICON_IMG_PATH if is_windows else None)
         window.update()
         window.deiconify()
 
@@ -1778,11 +1819,12 @@ class MainWindow(TkinterDnD.Tk):
         menu_offset_x = (root_x - sub_menu_x) // 2
         menu_offset_y = (root_y - sub_menu_y) // 2
         window.geometry("+%d+%d" %(root_location_x+menu_offset_x, root_location_y+menu_offset_y))
+        window.wm_attributes('-alpha', 1.0) if not is_windows else None
         
         def right_click_menu(event):
             help_hints_label = 'Enable' if self.help_hints_var.get() == False else 'Disable'
             help_hints_bool = True if self.help_hints_var.get() == False else False
-            right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+            right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
             if is_help_hints:
                 right_click_menu.add_command(label=f'{help_hints_label} Help Hints', command=lambda:self.help_hints_var.set(help_hints_bool))
             right_click_menu.add_command(label='Exit Window', command=close_function)
@@ -1900,7 +1942,7 @@ class MainWindow(TkinterDnD.Tk):
             if self.inputPaths:
                 track_selected = self.inputPaths[input_files_listbox_Option.index(tk.ACTIVE)]
                 if os.path.isfile(track_selected):
-                    os.startfile(track_selected) if is_play_file else os.startfile(os.path.dirname(track_selected))
+                    OPEN_FILE_func(track_selected if is_play_file else os.path.dirname(track_selected))
         
         def get_export_dir():
             if os.path.isdir(self.export_path_var.get()):
@@ -1973,12 +2015,12 @@ class MainWindow(TkinterDnD.Tk):
                 input_info_text_var.set('You cannot verify inputs during an active process.')
 
         def right_click_menu(event):
-                right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+                right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
                 right_click_menu.add_command(label='Remove Selected Items Only', command=lambda:selected_files(is_remove=True))
                 right_click_menu.add_command(label='Keep Selected Items Only', command=lambda:selected_files(is_remove=False))
                 right_click_menu.add_command(label='Clear All Input(s)', command=lambda:input_options(is_select_inputs=False))
                 right_click_menu.add_separator()
-                right_click_menu_sub = Menu(right_click_menu, font=('Century Gothic', FONT_SIZE_1), tearoff=False)
+                right_click_menu_sub = Menu(right_click_menu, font=(main_font_name, FONT_SIZE_1), tearoff=False)
                 right_click_menu.add_command(label='Verify and Create Samples of Selected Inputs', command=lambda:verify_audio_start_thread(is_create_samples=True))
                 right_click_menu.add_cascade(label='Preferred Double Click Action', menu=right_click_menu_sub)
                 if is_play_file_var.get():
@@ -1995,24 +2037,25 @@ class MainWindow(TkinterDnD.Tk):
         menu_view_inputs_Frame.grid(row=0,column=0,padx=0,pady=0)  
 
         self.main_window_LABEL_SET(menu_view_inputs_Frame, 'Selected Inputs').grid(row=0,column=0,padx=0,pady=5)
-        tk.Label(menu_view_inputs_Frame, textvariable=input_length_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9').grid(row=1, column=0, padx=0, pady=5)
+        tk.Label(menu_view_inputs_Frame, textvariable=input_length_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#13849f').grid(row=1, column=0, padx=0, pady=5)
         ttk.Button(menu_view_inputs_Frame, text='Select Input(s)', command=lambda:input_options()).grid(row=2,column=0,padx=0,pady=10)
         
-        input_files_listbox_Option = tk.Listbox(menu_view_inputs_Frame, selectmode=tk.EXTENDED, activestyle='dotbox', font=("Century Gothic", f"{FONT_SIZE_1}"), background='#101414', exportselection=0, width=110, height=17, relief=SOLID, borderwidth=0)
+        input_files_listbox_Option = tk.Listbox(menu_view_inputs_Frame, selectmode=tk.EXTENDED, activestyle='dotbox', font=(main_font_name, f"{FONT_SIZE_1}"), background='#101414', exportselection=0, width=110, height=17, relief=SOLID, borderwidth=0)
         input_files_listbox_vertical_scroll = ttk.Scrollbar(menu_view_inputs_Frame, orient=VERTICAL)
         input_files_listbox_Option.config(yscrollcommand=input_files_listbox_vertical_scroll.set)
         input_files_listbox_vertical_scroll.configure(command=input_files_listbox_Option.yview)
         input_files_listbox_Option.grid(row=4, sticky=W)
         input_files_listbox_vertical_scroll.grid(row=4, column=1, sticky=NS)
 
-        tk.Label(menu_view_inputs_Frame, textvariable=input_info_text_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9').grid(row=5, column=0, padx=0, pady=0)
+        tk.Label(menu_view_inputs_Frame, textvariable=input_info_text_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#13849f').grid(row=5, column=0, padx=0, pady=0)
         ttk.Checkbutton(menu_view_inputs_Frame, text='Widen Box', variable=is_widen_box_var, command=lambda:box_size()).grid(row=6,column=0,padx=0,pady=0)
         verify_audio_Button = ttk.Button(menu_view_inputs_Frame, textvariable=varification_text_var, command=lambda:verify_audio_start_thread())
         verify_audio_Button.grid(row=7,column=0,padx=0,pady=5)
         ttk.Button(menu_view_inputs_Frame, text='Close Window', command=lambda:menu_view_inputs_top.destroy()).grid(row=8,column=0,padx=0,pady=5)
 
-        menu_view_inputs_top.drop_target_register(DND_FILES)
-        menu_view_inputs_top.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e))
+        if is_windows:
+            menu_view_inputs_top.drop_target_register(DND_FILES)
+            menu_view_inputs_top.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e))
         input_files_listbox_Option.bind(right_click_button, lambda e:right_click_menu(e))
         input_files_listbox_Option.bind('<Double-Button>', lambda e:pop_open_file_path())
         input_files_listbox_Option.bind('<Delete>', lambda e:selected_files(is_remove=True))
@@ -2061,10 +2104,10 @@ class MainWindow(TkinterDnD.Tk):
         self.download_progress_percent_var.set('')
         
         OPTION_LIST = {
-            ENSEMBLE_OPTION:self.check_is_open_menu_advanced_ensemble_options,
+            VR_OPTION:self.check_is_open_menu_advanced_vr_options,
             MDX_OPTION:self.check_is_open_menu_advanced_mdx_options,
             DEMUCS_OPTION:self.check_is_open_menu_advanced_demucs_options,
-            VR_OPTION:self.check_is_open_menu_advanced_vr_options,
+            ENSEMBLE_OPTION:self.check_is_open_menu_advanced_ensemble_options,
             HELP_OPTION:self.check_is_open_menu_help,
             ERROR_OPTION:self.check_is_open_menu_error_log}
         
@@ -2084,20 +2127,21 @@ class MainWindow(TkinterDnD.Tk):
         select_Label = self.menu_sub_LABEL_SET(settings_menu_main_Frame, 'Additional Menus & Information')
         select_Label.grid(row=1,column=0,padx=0,pady=5)
         
-        select_Option = ttk.OptionMenu(settings_menu_main_Frame, self.main_menu_var, None, *ADVANCED_SETTINGS, command=lambda selection:(OPTION_LIST[selection](), close_window()))
+        select_Option = ttk.OptionMenu(settings_menu_main_Frame, self.main_menu_var, None, *OPTION_LIST.keys(), command=lambda selection:(OPTION_LIST[selection](), close_window()))
         select_Option.grid(row=2,column=0,padx=0,pady=5)
         
-        help_hints_Option = ttk.Checkbutton(settings_menu_main_Frame, text='Enable Help Hints', variable=self.help_hints_var, width=16) 
+        help_hints_Option = ttk.Checkbutton(settings_menu_main_Frame, text='Enable Help Hints', variable=self.help_hints_var, width=HELP_HINT_CHECKBOX_WIDTH) 
         help_hints_Option.grid(row=3,column=0,padx=0,pady=5)
         
-        open_app_dir_Button = ttk.Button(settings_menu_main_Frame, text='Open Application Directory', command=lambda:os.startfile('.'))
+        open_app_dir_Button = ttk.Button(settings_menu_main_Frame, text='Open Application Directory', command=lambda:OPEN_FILE_func(BASE_PATH))
         open_app_dir_Button.grid(row=6,column=0,padx=0,pady=5)
         
         reset_all_app_settings_Button = ttk.Button(settings_menu_main_Frame, text='Reset All Settings to Default', command=lambda:self.load_to_default_confirm())
         reset_all_app_settings_Button.grid(row=7,column=0,padx=0,pady=5)
         
-        restart_app_Button = ttk.Button(settings_menu_main_Frame, text='Restart Application', command=lambda:self.restart())
-        restart_app_Button.grid(row=8,column=0,padx=0,pady=5)
+        if is_windows:
+            restart_app_Button = ttk.Button(settings_menu_main_Frame, text='Restart Application', command=lambda:self.restart())
+            restart_app_Button.grid(row=8,column=0,padx=0,pady=5)
         
         close_settings_win_Button = ttk.Button(settings_menu_main_Frame, text='Close Window', command=lambda:close_window())
         close_settings_win_Button.grid(row=9,column=0,padx=0,pady=5)
@@ -2108,7 +2152,7 @@ class MainWindow(TkinterDnD.Tk):
         self.app_update_button = ttk.Button(settings_menu_main_Frame, textvariable=self.app_update_button_Text_var, command=lambda:self.pop_up_update_confirmation())
         self.app_update_button.grid(row=11,column=0,padx=0,pady=5)
         
-        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, font=("Century Gothic",  f"{FONT_SIZE_5}"), width=35, justify="center", relief="ridge", fg="#13a4c9")
+        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, font=(main_font_name,  f"{FONT_SIZE_5}"), width=35, justify="center", relief="ridge", fg="#13849f")
         self.app_update_status_Label.grid(row=12,column=0,padx=0,pady=20)
         
         donate_Button = ttk.Button(settings_menu_main_Frame, image=self.donate_img, command=lambda:webbrowser.open_new_tab(DONATE_LINK_BMAC))
@@ -2167,7 +2211,7 @@ class MainWindow(TkinterDnD.Tk):
         self.model_sample_mode_duration_Label = self.menu_sub_LABEL_SET(settings_menu_format_Frame, 'Sample Clip Duration')
         self.model_sample_mode_duration_Label.grid(row=14,column=0,padx=0,pady=5)
         
-        tk.Label(settings_menu_format_Frame, textvariable=model_sample_mode_duration_label_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9').grid(row=15,column=0,padx=0,pady=2)
+        tk.Label(settings_menu_format_Frame, textvariable=model_sample_mode_duration_label_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#13849f').grid(row=15,column=0,padx=0,pady=2)
         model_sample_mode_duration_Option = ttk.Scale(settings_menu_format_Frame, variable=self.model_sample_mode_duration_var, from_=5, to=120, command=set_vars_for_sample_mode, orient='horizontal')
         model_sample_mode_duration_Option.grid(row=16,column=0,padx=0,pady=2)
         
@@ -2207,10 +2251,10 @@ class MainWindow(TkinterDnD.Tk):
         self.download_Button = ttk.Button(settings_menu_download_center_Frame, image=self.download_img, command=lambda:self.download_item())#, command=download_model)
         self.download_Button.grid(row=9,column=0,padx=0,pady=5)
         
-        self.download_progress_info_Label = tk.Label(settings_menu_download_center_Frame, textvariable=self.download_progress_info_var, font=("Century Gothic", f"{FONT_SIZE_2}"), foreground='#13a4c9', borderwidth=0)
+        self.download_progress_info_Label = tk.Label(settings_menu_download_center_Frame, textvariable=self.download_progress_info_var, font=(main_font_name, f"{FONT_SIZE_2}"), foreground='#13849f', borderwidth=0)
         self.download_progress_info_Label.grid(row=10,column=0,padx=0,pady=5)
         
-        self.download_progress_percent_Label = tk.Label(settings_menu_download_center_Frame, textvariable=self.download_progress_percent_var, font=("Century Gothic", f"{FONT_SIZE_2}"), wraplength=350, foreground='#13a4c9')
+        self.download_progress_percent_Label = tk.Label(settings_menu_download_center_Frame, textvariable=self.download_progress_percent_var, font=(main_font_name, f"{FONT_SIZE_2}"), wraplength=350, foreground='#13849f')
         self.download_progress_percent_Label.grid(row=11,column=0,padx=0,pady=5)
         
         self.download_progress_bar_Progressbar = ttk.Progressbar(settings_menu_download_center_Frame, variable=self.download_progress_bar_var)
@@ -2249,12 +2293,12 @@ class MainWindow(TkinterDnD.Tk):
             manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
             settings_menu_download_center_Frame.update()
         
+        self.menu_placement(settings_menu, "Settings Guide", is_help_hints=True, close_function=lambda:close_window())
+
         if self.is_online:
             self.download_list_fill()
         else:
             load_manual_download_button()
-
-        self.menu_placement(settings_menu, "Settings Guide", is_help_hints=True, close_function=lambda:close_window())
 
         if select_tab_2:
             tabControl.select(tab2)
@@ -2267,8 +2311,7 @@ class MainWindow(TkinterDnD.Tk):
             self.is_menu_settings_open = False
             settings_menu.destroy()
 
-        settings_menu.bind("<m> <Return>", lambda e:load_manual_download_button())
-
+        settings_menu.bind("<m>", lambda e:load_manual_download_button())
         settings_menu.protocol("WM_DELETE_WINDOW", close_window)
 
     def menu_advanced_vr_options(self):
@@ -2346,7 +2389,7 @@ class MainWindow(TkinterDnD.Tk):
         self.vr_clear_cache_Button.grid(row=16,column=0,padx=0,pady=5)
         self.help_hints(self.vr_clear_cache_Button, text=CLEAR_CACHE_HELP)
         
-        self.open_vr_model_dir_Button = ttk.Button(vr_opt_frame, text='Open VR Models Folder', command=lambda:os.startfile(VR_MODELS_DIR))
+        self.open_vr_model_dir_Button = ttk.Button(vr_opt_frame, text='Open VR Models Folder', command=lambda:OPEN_FILE_func(VR_MODELS_DIR))
         self.open_vr_model_dir_Button.grid(row=17,column=0,padx=0,pady=5)
         
         self.vr_return_Button=ttk.Button(vr_opt_frame, text=BACK_TO_MAIN_MENU, command=lambda:(self.menu_advanced_vr_options_close_window(), self.check_is_menu_settings_open()))
@@ -2439,7 +2482,7 @@ class MainWindow(TkinterDnD.Tk):
         is_invert_spec_Option.grid(row=14,column=0,padx=0,pady=0)
         self.help_hints(is_invert_spec_Option, text=IS_INVERT_SPEC_HELP)
         
-        self.open_demucs_model_dir_Button = ttk.Button(demucs_frame, text='Open Demucs Model Folder', command=lambda:os.startfile('models\Demucs_Models'))
+        self.open_demucs_model_dir_Button = ttk.Button(demucs_frame, text='Open Demucs Model Folder', command=lambda:OPEN_FILE_func(DEMUCS_MODELS_DIR))
         self.open_demucs_model_dir_Button.grid(row=15,column=0,padx=0,pady=5)
         
         self.demucs_return_Button = ttk.Button(demucs_frame, text=BACK_TO_MAIN_MENU, command=lambda:(self.menu_advanced_demucs_options_close_window(), self.check_is_menu_settings_open()))
@@ -2509,11 +2552,11 @@ class MainWindow(TkinterDnD.Tk):
         self.combobox_entry_validation(compensate_Option, self.compensate_var, REG_COMPENSATION, VOL_COMPENSATION)
         self.help_hints(compensate_Label, text=COMPENSATE_HELP)
         
-        is_denoise_Option = ttk.Checkbutton(mdx_net_frame, text='Denoise Output', width=18, variable=self.is_denoise_var) 
+        is_denoise_Option = ttk.Checkbutton(mdx_net_frame, text='Denoise Output', width=MDX_CHECKBOXS_WIDTH, variable=self.is_denoise_var) 
         is_denoise_Option.grid(row=8,column=0,padx=0,pady=0)
         self.help_hints(is_denoise_Option, text=IS_DENOISE_HELP)
 
-        is_invert_spec_Option = ttk.Checkbutton(mdx_net_frame, text='Spectral Inversion', width=18, variable=self.is_invert_spec_var) 
+        is_invert_spec_Option = ttk.Checkbutton(mdx_net_frame, text='Spectral Inversion', width=MDX_CHECKBOXS_WIDTH, variable=self.is_invert_spec_var) 
         is_invert_spec_Option.grid(row=9,column=0,padx=0,pady=0)
         self.help_hints(is_invert_spec_Option, text=IS_INVERT_SPEC_HELP)
 
@@ -2521,7 +2564,7 @@ class MainWindow(TkinterDnD.Tk):
         clear_mdx_cache_Button.grid(row=10,column=0,padx=0,pady=5)
         self.help_hints(clear_mdx_cache_Button, text=CLEAR_CACHE_HELP)
         
-        open_mdx_model_dir_Button = ttk.Button(mdx_net_frame, text='Open MDX-Net Models Folder', command=lambda:os.startfile(MDX_MODELS_DIR))
+        open_mdx_model_dir_Button = ttk.Button(mdx_net_frame, text='Open MDX-Net Models Folder', command=lambda:OPEN_FILE_func(MDX_MODELS_DIR))
         open_mdx_model_dir_Button.grid(row=11,column=0,padx=0,pady=5)
         
         mdx_return_Button = ttk.Button(mdx_net_frame, text=BACK_TO_MAIN_MENU, command=lambda:(self.menu_advanced_mdx_options_close_window(), self.check_is_menu_settings_open()))
@@ -2607,14 +2650,14 @@ class MainWindow(TkinterDnD.Tk):
         tab4.grid_rowconfigure(0, weight=1)
         tab4.grid_columnconfigure(0, weight=1)
         
-        section_title_Label = lambda place, frame, text, font_size=FONT_SIZE_4: tk.Label(master=frame, text=text,font=("Century Gothic", f"{font_size}", "bold"), justify="center", fg="#F4F4F4").grid(row=place,column=0,padx=0,pady=3)
-        description_Label = lambda place, frame, text, font=FONT_SIZE_2: tk.Label(master=frame, text=text, font=("Century Gothic", f"{font}"), justify="center", fg="#F6F6F7").grid(row=place,column=0,padx=0,pady=3)
+        section_title_Label = lambda place, frame, text, font_size=FONT_SIZE_4: tk.Label(master=frame, text=text,font=(main_font_name, f"{font_size}", "bold"), justify="center", fg="#F4F4F4").grid(row=place,column=0,padx=0,pady=3)
+        description_Label = lambda place, frame, text, font=FONT_SIZE_2: tk.Label(master=frame, text=text, font=(main_font_name, f"{font}"), justify="center", fg="#F6F6F7").grid(row=place,column=0,padx=0,pady=3)
 
         def credit_label(place, frame, text, link=None, message=None, is_link=False, is_top=False):
             if is_top:
-                thank = tk.Label(master=frame, text=text, font=("Century Gothic", f"{FONT_SIZE_3}", "bold"), justify="center", fg="#13a4c9")
+                thank = tk.Label(master=frame, text=text, font=(main_font_name, f"{FONT_SIZE_3}", "bold"), justify="center", fg="#13849f")
             else:
-                thank = tk.Label(master=frame, text=text, font=("Century Gothic", f"{FONT_SIZE_3}", "underline" if is_link else "normal"), justify="center", fg="#13a4c9")
+                thank = tk.Label(master=frame, text=text, font=(main_font_name, f"{FONT_SIZE_3}", "underline" if is_link else "normal"), justify="center", fg="#13849f")
             thank.configure(cursor="hand2") if is_link else None
             thank.grid(row=place,column=0,padx=0,pady=1)
             if link:
@@ -2623,13 +2666,13 @@ class MainWindow(TkinterDnD.Tk):
                 description_Label(place+1, frame, message)
         
         def Link(place, frame, text, link, description, font=FONT_SIZE_2): 
-            link_label = tk.Label(master=frame, text=text, font=("Century Gothic", f"{FONT_SIZE_4}", "underline"), foreground='#15bfeb', justify="center", cursor="hand2")
+            link_label = tk.Label(master=frame, text=text, font=(main_font_name, f"{FONT_SIZE_4}", "underline"), foreground='#13849f', justify="center", cursor="hand2")
             link_label.grid(row=place,column=0,padx=0,pady=5)
             link_label.bind("<Button-1>", lambda e:webbrowser.open_new_tab(link))
             description_Label(place+1, frame, description, font=font)
 
         def right_click_menu(event):
-                right_click_menu = Menu(self, font=('Century Gothic', FONT_SIZE_1), tearoff=0)
+                right_click_menu = Menu(self, font=(main_font_name, FONT_SIZE_1), tearoff=0)
                 right_click_menu.add_command(label='Return to Settings Menu', command=lambda:(self.menu_help_close_window(), self.check_is_menu_settings_open()))
                 right_click_menu.add_command(label='Exit Window', command=lambda:self.menu_help_close_window())
                 
@@ -2716,13 +2759,21 @@ class MainWindow(TkinterDnD.Tk):
         
         Link(place=12, 
              frame=more_info_tab_Frame, 
+             text="MVSep", 
+             link="https://mvsep.com/quality_checker/leaderboard.php", 
+             description="Some of our models are also on MVSep.\n" + \
+                         "Click the link above for a list of some of the best settings \nand model combinations recorded by fellow UVR users.",
+             font=FONT_SIZE_3)
+        
+        Link(place=18, 
+             frame=more_info_tab_Frame, 
              text="FFmpeg", 
              link="https://www.wikihow.com/Install-FFmpeg-on-Windows", 
              description="UVR relies on FFmpeg for processing non-wav audio files.\n" + \
                          "If you are missing FFmpeg, please see the installation guide via the link provided.",
              font=FONT_SIZE_3)
         
-        Link(place=18, 
+        Link(place=22, 
              frame=more_info_tab_Frame, 
              text="Rubber Band Library", 
              link="https://breakfastquay.com/rubberband/",
@@ -2730,7 +2781,7 @@ class MainWindow(TkinterDnD.Tk):
                          "You can get more information on it via the link provided.",
              font=FONT_SIZE_3)
         
-        Link(place=22, 
+        Link(place=26, 
              frame=more_info_tab_Frame, 
              text="Official UVR Patreon", 
              link=DONATE_LINK_PATREON, 
@@ -2741,10 +2792,10 @@ class MainWindow(TkinterDnD.Tk):
         appplication_license_tab_Frame = Frame(tab3)
         appplication_license_tab_Frame.grid(row=0,column=0,padx=0,pady=0)
         
-        appplication_license_Label = tk.Label(appplication_license_tab_Frame, text='UVR License Information', font=("Century Gothic", f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
+        appplication_license_Label = tk.Label(appplication_license_tab_Frame, text='UVR License Information', font=(main_font_name, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
         appplication_license_Label.grid(row=0,column=0,padx=0,pady=25)
         
-        appplication_license_Text = tk.Text(appplication_license_tab_Frame, font=("Century Gothic", f"{FONT_SIZE_4}"), fg="white", bg="black", width=80, wrap=WORD, borderwidth=0)
+        appplication_license_Text = tk.Text(appplication_license_tab_Frame, font=(main_font_name, f"{FONT_SIZE_4}"), fg="white", bg="black", width=80, wrap=WORD, borderwidth=0)
         appplication_license_Text.grid(row=1,column=0,padx=0,pady=0)
         appplication_license_Text_scroll = ttk.Scrollbar(appplication_license_tab_Frame, orient=VERTICAL)
         appplication_license_Text.config(yscrollcommand=appplication_license_Text_scroll.set)
@@ -2763,10 +2814,10 @@ class MainWindow(TkinterDnD.Tk):
         else:
             change_log_text = 'Change log unavailable.'
         
-        application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='UVR Change Log', font=("Century Gothic", f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
+        application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='UVR Change Log', font=(main_font_name, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
         application_change_log_Label.grid(row=0,column=0,padx=0,pady=25)
         
-        application_change_log_Text = tk.Text(application_change_log_tab_Frame, font=("Century Gothic", f"{FONT_SIZE_4}"), fg="white", bg="black", width=80, wrap=WORD, borderwidth=0)
+        application_change_log_Text = tk.Text(application_change_log_tab_Frame, font=(main_font_name, f"{FONT_SIZE_4}"), fg="white", bg="black", width=80, wrap=WORD, borderwidth=0)
         application_change_log_Text.grid(row=1,column=0,padx=0,pady=0)
         application_change_log_Text_scroll = ttk.Scrollbar(application_change_log_tab_Frame, orient=VERTICAL)
         application_change_log_Text.config(yscrollcommand=application_change_log_Text_scroll.set)
@@ -2796,12 +2847,7 @@ class MainWindow(TkinterDnD.Tk):
         error_consol_title_Label = self.menu_title_LABEL_SET(error_log_frame, "Error Console")
         error_consol_title_Label.grid(row=1,column=0,padx=20,pady=10)
         
-        # error_details_Text = tk.Text(error_log_frame, font=("Century Gothic", "8"), fg="#D37B7B", bg="black", width=110, relief="sunken")
-        # error_details_Text.grid(row=4,column=0,padx=0,pady=0)
-        # error_details_Text.insert("insert", self.error_log_var.get())
-        # error_details_Text.bind('<Button-3>', lambda e:self.right_click_menu_popup(e, text_box=True))
-
-        error_details_Text = tk.Text(error_log_frame, font=("Century Gothic", f"{FONT_SIZE_1}"), fg="#D37B7B", bg="black", width=110, wrap=WORD, borderwidth=0)
+        error_details_Text = tk.Text(error_log_frame, font=(main_font_name, f"{FONT_SIZE_1}"), fg="#D37B7B", bg="black", width=110, wrap=WORD, borderwidth=0)
         error_details_Text.grid(row=4,column=0,padx=0,pady=0)
         error_details_Text.insert("insert", self.error_log_var.get())
         error_details_Text.bind(right_click_button, lambda e:self.right_click_menu_popup(e, text_box=True))
@@ -2812,7 +2858,7 @@ class MainWindow(TkinterDnD.Tk):
         error_details_Text.grid(row=4,sticky=W)
         error_details_Text_scroll.grid(row=4, column=1, sticky=NS)
 
-        copy_text_Label = tk.Label(error_log_frame, textvariable=copied_var, font=("Century Gothic",  f"{FONT_SIZE_0}"), justify="center", fg="#f4f4f4")
+        copy_text_Label = tk.Label(error_log_frame, textvariable=copied_var, font=(main_font_name,  f"{FONT_SIZE_0}"), justify="center", fg="#f4f4f4")
         copy_text_Label.grid(row=5,column=0,padx=20,pady=0)
         
         copy_text_Button = ttk.Button(error_log_frame, text="Copy All Text", command=lambda:(pyperclip.copy(error_details_Text.get(1.0, tk.END+"-1c")), copied_var.set('Copied!')))
@@ -2877,7 +2923,7 @@ class MainWindow(TkinterDnD.Tk):
             secondary_model_Option = ttk.OptionMenu(secondary_model_Frame, option_var, None, NO_MODEL, *model_list)
             secondary_model_Option.configure(width=33)
             secondary_model_Option.grid(row=placement[1],column=0,padx=0,pady=5)
-            secondary_scale_info_Label = tk.Label(secondary_model_Frame, textvariable=label_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9')
+            secondary_scale_info_Label = tk.Label(secondary_model_Frame, textvariable=label_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#13849f')
             secondary_scale_info_Label.grid(row=placement[2],column=0,padx=0,pady=0)   
             secondary_model_scale_Option = ttk.Scale(secondary_model_Frame, variable=scale_var, from_=0.01, to=0.99, command=lambda s:convert_to_percentage(s, scale_var, label_var), orient='horizontal')
             secondary_model_scale_Option.grid(row=placement[3],column=0,padx=0,pady=2)
@@ -2929,7 +2975,6 @@ class MainWindow(TkinterDnD.Tk):
             return final_link
             
         def get_links():
-            
             for widgets in manual_downloads_link_Frame.winfo_children():
                 widgets.destroy()
                 
@@ -2995,7 +3040,7 @@ class MainWindow(TkinterDnD.Tk):
             
         manual_downloads_menu_select_Option.grid(row=2,column=0,padx=0,pady=5)
         
-        tk.Label(manual_downloads_menu_Frame, textvariable=info_text_var, font=("Century Gothic", f"{FONT_SIZE_2}"), foreground='#868687', justify="left").grid(row=3,column=0,padx=0,pady=5)
+        tk.Label(manual_downloads_menu_Frame, textvariable=info_text_var, font=(main_font_name, f"{FONT_SIZE_2}"), foreground='#868687', justify="left").grid(row=3,column=0,padx=0,pady=5)
         
         self.menu_placement(manual_downloads_menu, "Manual Downloads", pop_up=True, close_function=lambda:manual_downloads_menu.destroy())
         
@@ -3025,10 +3070,10 @@ class MainWindow(TkinterDnD.Tk):
         settings_save_name_Entry.bind(right_click_button, self.right_click_menu_popup)
         self.current_text_box = settings_save_name_Entry
         
-        entry_validation_header_Label = tk.Label(settings_save_Frame, textvariable=entry_validation_header_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
+        entry_validation_header_Label = tk.Label(settings_save_Frame, textvariable=entry_validation_header_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
         entry_validation_header_Label.grid(row=5,column=0,padx=0,pady=0)
         
-        entry_rules_Label = tk.Label(settings_save_Frame, text=ENSEMBLE_INPUT_RULE, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
+        entry_rules_Label = tk.Label(settings_save_Frame, text=ENSEMBLE_INPUT_RULE, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
         entry_rules_Label.grid(row=6,column=0,padx=0,pady=0)     
         
         settings_save_Button = ttk.Button(settings_save_Frame, text="Save", command=lambda:save_func() if validation(settings_save_var.get()) else None)
@@ -3055,11 +3100,20 @@ class MainWindow(TkinterDnD.Tk):
         """Ask user is they want to update"""
         
         is_new_update = self.online_data_refresh(confirmation_box=True)
+        is_download_in_app_var = tk.BooleanVar(value=False)
         
+        def update_type():
+            if is_download_in_app_var.get():
+                self.download_item(is_update_app=True)
+            else:
+                webbrowser.open_new_tab(self.download_update_link_var.get())
+
+            update_confirmation_win.destroy()
+            
         if is_new_update:
             
             update_confirmation_win = Toplevel()
-            
+
             update_confirmation_Frame = self.menu_FRAME_SET(update_confirmation_win)
             update_confirmation_Frame.grid(row=0,column=0,padx=0,pady=0)  
             
@@ -3069,11 +3123,14 @@ class MainWindow(TkinterDnD.Tk):
             confirm_update_label = self.menu_sub_LABEL_SET(update_confirmation_Frame, 'Are you sure you want to continue?\n\nThe application will need to be restarted.\n', font_size=FONT_SIZE_3)
             confirm_update_label.grid(row=1,column=0,padx=0,pady=5)
                     
-            yes_button = ttk.Button(update_confirmation_Frame, text='Yes', command=lambda:(self.download_item(is_update_app=True), update_confirmation_win.destroy()))
+            yes_button = ttk.Button(update_confirmation_Frame, text='Yes', command=update_type)
             yes_button.grid(row=2,column=0,padx=0,pady=5)
             
             no_button = ttk.Button(update_confirmation_Frame, text='No', command=lambda:(update_confirmation_win.destroy()))
             no_button.grid(row=3,column=0,padx=0,pady=5)
+            
+            download_outside_application_button = ttk.Checkbutton(update_confirmation_Frame, variable=is_download_in_app_var, text='Download Update in Application')
+            download_outside_application_button.grid(row=4,column=0,padx=0,pady=5)
             
             self.menu_placement(update_confirmation_win, "Confirm Update", pop_up=True)
 
@@ -3098,7 +3155,7 @@ class MainWindow(TkinterDnD.Tk):
         self.user_code_Entry.bind(right_click_button, self.right_click_menu_popup)
         self.current_text_box = self.user_code_Entry
         
-        validation_Label = tk.Label(user_code_Frame, textvariable=self.user_code_validation_var, font=("Century Gothic",  f"{FONT_SIZE_0}"), foreground='#868687')
+        validation_Label = tk.Label(user_code_Frame, textvariable=self.user_code_validation_var, font=(main_font_name,  f"{FONT_SIZE_0}"), foreground='#868687')
         validation_Label.grid(row=3,column=0,padx=0,pady=0)     
 
         user_code_confrim_Button = ttk.Button(user_code_Frame, text='Confirm', command=lambda:self.download_validate_code(confirm=True))
@@ -3113,7 +3170,7 @@ class MainWindow(TkinterDnD.Tk):
         support_sub_Label = tk.Label(user_code_Frame, text="Obtain codes by visiting one of the following links below." +\
                                                             "\nFrom there you can donate, pledge, " +\
                                                             "or just obatain the code!\n (Donations are not required to obtain VIP code)", 
-                                                            font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#13a4c9')
+                                                            font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#13849f')
         support_sub_Label.grid(row=7,column=0,padx=0,pady=5)
         
         uvr_patreon_Button = ttk.Button(user_code_Frame, text='UVR Patreon Link', command=lambda:webbrowser.open_new_tab(DONATE_LINK_PATREON))
@@ -3127,88 +3184,97 @@ class MainWindow(TkinterDnD.Tk):
     def pop_up_mdx_model(self, mdx_model_hash, model_path):
         """Opens MDX-Net model settings"""
 
-        model = onnx.load(model_path)
-        model_shapes = [[d.dim_value for d in _input.type.tensor_type.shape.dim] for _input in model.graph.input][0]
-        dim_f = model_shapes[2]
-        dim_t = int(math.log(model_shapes[3], 2))
-
-        mdx_model_set = Toplevel(root)
-
-        mdx_n_fft_scale_set_var = tk.StringVar(value='6144')
-        mdx_dim_f_set_var = tk.StringVar(value=dim_f)
-        mdx_dim_t_set_var = tk.StringVar(value=dim_t)
-        primary_stem_var = tk.StringVar(value='Vocals')
-        mdx_compensate_var = tk.StringVar(value=1.035)
-             
-        mdx_model_set_Frame = self.menu_FRAME_SET(mdx_model_set)
-        mdx_model_set_Frame.grid(row=2,column=0,padx=0,pady=0)  
+        is_onnx_model = True
         
-        mdx_model_set_title = self.menu_title_LABEL_SET(mdx_model_set_Frame, "Specify MDX-Net Model Parameters")
-        mdx_model_set_title.grid(row=0,column=0,padx=0,pady=15)
+        try:
+            model = onnx.load(model_path)
+            model_shapes = [[d.dim_value for d in _input.type.tensor_type.shape.dim] for _input in model.graph.input][0]
+            dim_f = model_shapes[2]
+            dim_t = int(math.log(model_shapes[3], 2))
+        except Exception as e:
+            dim_f = 0
+            dim_t = 0
+            self.error_dialoge(INVALID_ONNX_MODEL_ERROR)
+            self.error_log_var.set("{}".format(error_text('MDX-Net Model Settings', e)))
+            is_onnx_model = False
+
+        if is_onnx_model or not is_windows:
+            mdx_model_set = Toplevel(root)
+            mdx_n_fft_scale_set_var = tk.StringVar(value='6144')
+            mdx_dim_f_set_var = tk.StringVar(value=dim_f)
+            mdx_dim_t_set_var = tk.StringVar(value=dim_t)
+            primary_stem_var = tk.StringVar(value='Vocals')
+            mdx_compensate_var = tk.StringVar(value=1.035)
                 
-        set_stem_name_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Primary Stem')
-        set_stem_name_Label.grid(row=3,column=0,padx=0,pady=5)
-        set_stem_name_Option = ttk.OptionMenu(mdx_model_set_Frame, primary_stem_var, None, *STEM_SET_MENU)
-        set_stem_name_Option.configure(width=12)
-        set_stem_name_Option.grid(row=4,column=0,padx=0,pady=5)
-        self.help_hints(set_stem_name_Label, text=SET_STEM_NAME_HELP)
-
-        mdx_dim_t_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Dim_t')
-        mdx_dim_t_set_Label.grid(row=5,column=0,padx=0,pady=5)
-        mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, '(Leave this setting as is if you are unsure.)')
-        mdx_dim_f_set_Label.grid(row=6,column=0,padx=0,pady=5)
-        mdx_dim_t_set_Option = ttk.Combobox(mdx_model_set_Frame, value=('7', '8'), textvariable=mdx_dim_t_set_var)
-        mdx_dim_t_set_Option.configure(width=12)
-        mdx_dim_t_set_Option.grid(row=7,column=0,padx=0,pady=5)
-        self.help_hints(mdx_dim_t_set_Label, text=MDX_DIM_T_SET_HELP)
-        
-        mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Dim_f')
-        mdx_dim_f_set_Label.grid(row=8,column=0,padx=0,pady=5)
-        mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, '(Leave this setting as is if you are unsure.)')
-        mdx_dim_f_set_Label.grid(row=9,column=0,padx=0,pady=5)
-        mdx_dim_f_set_Option = ttk.Combobox(mdx_model_set_Frame, value=(MDX_POP_DIMF), textvariable=mdx_dim_f_set_var)
-        mdx_dim_f_set_Option.configure(width=12)
-        mdx_dim_f_set_Option.grid(row=10,column=0,padx=0,pady=5)
-        self.help_hints(mdx_dim_f_set_Label, text=MDX_DIM_F_SET_HELP)
-
-        mdx_n_fft_scale_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'N_FFT Scale')
-        mdx_n_fft_scale_set_Label.grid(row=11,column=0,padx=0,pady=5)
-        mdx_n_fft_scale_set_Option = ttk.Combobox(mdx_model_set_Frame, values=(MDX_POP_NFFT), textvariable=mdx_n_fft_scale_set_var)
-        mdx_n_fft_scale_set_Option.configure(width=12)
-        mdx_n_fft_scale_set_Option.grid(row=12,column=0,padx=0,pady=5)
-        self.help_hints(mdx_n_fft_scale_set_Label, text=MDX_N_FFT_SCALE_SET_HELP)
-        
-        mdx_compensate_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Volume Compensation')
-        mdx_compensate_Label.grid(row=13,column=0,padx=0,pady=5)
-        mdx_compensate_Entry = ttk.Combobox(mdx_model_set_Frame, value=('1.035', '1.08'), textvariable=mdx_compensate_var)
-        mdx_compensate_Entry.configure(width=14)
-        mdx_compensate_Entry.grid(row=15,column=0,padx=0,pady=5)
-        self.help_hints(mdx_compensate_Label, text=POPUP_COMPENSATE_HELP)
-
-        mdx_param_set_Button = ttk.Button(mdx_model_set_Frame, text="Confirm", command=lambda:pull_data())
-        mdx_param_set_Button.grid(row=16,column=0,padx=0,pady=10)
-        
-        stop_process_Button = ttk.Button(mdx_model_set_Frame, text="Cancel", command=lambda:cancel())
-        stop_process_Button.grid(row=17,column=0,padx=0,pady=0)
-        
-        def pull_data():
-            mdx_model_params = {
-                'compensate': float(mdx_compensate_var.get()),
-                'mdx_dim_f_set': int(mdx_dim_f_set_var.get()),
-                'mdx_dim_t_set': int(mdx_dim_t_set_var.get()),
-                'mdx_n_fft_scale_set': int(mdx_n_fft_scale_set_var.get()),
-                'primary_stem': primary_stem_var.get()
-                }
+            mdx_model_set_Frame = self.menu_FRAME_SET(mdx_model_set)
+            mdx_model_set_Frame.grid(row=2,column=0,padx=0,pady=0)  
             
-            self.pop_up_mdx_model_sub_json_dump(mdx_model_params, mdx_model_hash)
-            mdx_model_set.destroy()
+            mdx_model_set_title = self.menu_title_LABEL_SET(mdx_model_set_Frame, "Specify MDX-Net Model Parameters")
+            mdx_model_set_title.grid(row=0,column=0,padx=0,pady=15)
+                    
+            set_stem_name_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Primary Stem')
+            set_stem_name_Label.grid(row=3,column=0,padx=0,pady=5)
+            set_stem_name_Option = ttk.OptionMenu(mdx_model_set_Frame, primary_stem_var, None, *STEM_SET_MENU)
+            set_stem_name_Option.configure(width=12)
+            set_stem_name_Option.grid(row=4,column=0,padx=0,pady=5)
+            self.help_hints(set_stem_name_Label, text=SET_STEM_NAME_HELP)
 
-        def cancel():
-            mdx_model_set.destroy()
+            mdx_dim_t_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Dim_t')
+            mdx_dim_t_set_Label.grid(row=5,column=0,padx=0,pady=5)
+            mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, '(Leave this setting as is if you are unsure.)')
+            mdx_dim_f_set_Label.grid(row=6,column=0,padx=0,pady=5)
+            mdx_dim_t_set_Option = ttk.Combobox(mdx_model_set_Frame, value=('7', '8'), textvariable=mdx_dim_t_set_var)
+            mdx_dim_t_set_Option.configure(width=12)
+            mdx_dim_t_set_Option.grid(row=7,column=0,padx=0,pady=5)
+            self.help_hints(mdx_dim_t_set_Label, text=MDX_DIM_T_SET_HELP)
             
-        mdx_model_set.protocol("WM_DELETE_WINDOW", cancel)
+            mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Dim_f')
+            mdx_dim_f_set_Label.grid(row=8,column=0,padx=0,pady=5)
+            mdx_dim_f_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, '(Leave this setting as is if you are unsure.)')
+            mdx_dim_f_set_Label.grid(row=9,column=0,padx=0,pady=5)
+            mdx_dim_f_set_Option = ttk.Combobox(mdx_model_set_Frame, value=(MDX_POP_DIMF), textvariable=mdx_dim_f_set_var)
+            mdx_dim_f_set_Option.configure(width=12)
+            mdx_dim_f_set_Option.grid(row=10,column=0,padx=0,pady=5)
+            self.help_hints(mdx_dim_f_set_Label, text=MDX_DIM_F_SET_HELP)
+
+            mdx_n_fft_scale_set_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'N_FFT Scale')
+            mdx_n_fft_scale_set_Label.grid(row=11,column=0,padx=0,pady=5)
+            mdx_n_fft_scale_set_Option = ttk.Combobox(mdx_model_set_Frame, values=(MDX_POP_NFFT), textvariable=mdx_n_fft_scale_set_var)
+            mdx_n_fft_scale_set_Option.configure(width=12)
+            mdx_n_fft_scale_set_Option.grid(row=12,column=0,padx=0,pady=5)
+            self.help_hints(mdx_n_fft_scale_set_Label, text=MDX_N_FFT_SCALE_SET_HELP)
             
-        self.menu_placement(mdx_model_set, "Specify Parameters", pop_up=True)
+            mdx_compensate_Label = self.menu_sub_LABEL_SET(mdx_model_set_Frame, 'Volume Compensation')
+            mdx_compensate_Label.grid(row=13,column=0,padx=0,pady=5)
+            mdx_compensate_Entry = ttk.Combobox(mdx_model_set_Frame, value=('1.035', '1.08'), textvariable=mdx_compensate_var)
+            mdx_compensate_Entry.configure(width=14)
+            mdx_compensate_Entry.grid(row=15,column=0,padx=0,pady=5)
+            self.help_hints(mdx_compensate_Label, text=POPUP_COMPENSATE_HELP)
+
+            mdx_param_set_Button = ttk.Button(mdx_model_set_Frame, text="Confirm", command=lambda:pull_data())
+            mdx_param_set_Button.grid(row=16,column=0,padx=0,pady=10)
+            
+            stop_process_Button = ttk.Button(mdx_model_set_Frame, text="Cancel", command=lambda:cancel())
+            stop_process_Button.grid(row=17,column=0,padx=0,pady=0)
+            
+            def pull_data():
+                mdx_model_params = {
+                    'compensate': float(mdx_compensate_var.get()),
+                    'mdx_dim_f_set': int(mdx_dim_f_set_var.get()),
+                    'mdx_dim_t_set': int(mdx_dim_t_set_var.get()),
+                    'mdx_n_fft_scale_set': int(mdx_n_fft_scale_set_var.get()),
+                    'primary_stem': primary_stem_var.get()
+                    }
+                
+                self.pop_up_mdx_model_sub_json_dump(mdx_model_params, mdx_model_hash)
+                mdx_model_set.destroy()
+
+            def cancel():
+                mdx_model_set.destroy()
+                
+            mdx_model_set.protocol("WM_DELETE_WINDOW", cancel)
+                
+            self.menu_placement(mdx_model_set, "Specify Parameters", pop_up=True)
                         
     def pop_up_mdx_model_sub_json_dump(self, mdx_model_params, mdx_model_hash):
         """Dumps current selected MDX-Net model settings to a json named after model hash"""
@@ -3322,10 +3388,10 @@ class MainWindow(TkinterDnD.Tk):
             ensemble_name_Entry.grid(row=4,column=0,padx=0,pady=5)
             ensemble_name_Entry.config(validate='focus', validatecommand=(self.register(validation), '%P'), invalidcommand=(self.register(invalid),))
             
-            entry_validation_header_Label = tk.Label(ensemble_save_Frame, textvariable=entry_validation_header_var, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
+            entry_validation_header_Label = tk.Label(ensemble_save_Frame, textvariable=entry_validation_header_var, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
             entry_validation_header_Label.grid(row=5,column=0,padx=0,pady=0)
             
-            entry_rules_Label = tk.Label(ensemble_save_Frame, text=ENSEMBLE_INPUT_RULE, font=("Century Gothic", f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
+            entry_rules_Label = tk.Label(ensemble_save_Frame, text=ENSEMBLE_INPUT_RULE, font=(main_font_name, f"{FONT_SIZE_1}"), foreground='#868687', justify="left")
             entry_rules_Label.grid(row=6,column=0,padx=0,pady=0)     
             
             mdx_param_set_Button = ttk.Button(ensemble_save_Frame, text="Save", command=lambda:save_func() if validation(ensemble_save_var.get()) else None)
@@ -3386,6 +3452,7 @@ class MainWindow(TkinterDnD.Tk):
 
             self.app_update_status_Text_var.set('Loading version information...')
             self.app_update_button_Text_var.set('Check for Updates')
+
             is_new_update = False
             
             try:
@@ -3399,8 +3466,8 @@ class MainWindow(TkinterDnD.Tk):
                     is_new_update = True
                     self.app_update_status_Text_var.set(f"Update Found: {self.lastest_version}")
                     self.app_update_button_Text_var.set('Click Here to Update')
-                    self.download_update_link_var.set('{}{}.exe'.format(UPDATE_REPO, self.lastest_version))
-                    self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}.exe'))
+                    self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
+                    self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
                     
                     if not user_refresh:
                         self.new_update_notify(self.lastest_version)
@@ -3430,6 +3497,7 @@ class MainWindow(TkinterDnD.Tk):
             return online_check()
         else:
             self.current_thread = KThread(target=online_check)
+            self.current_thread.setDaemon(True) if not is_windows else None
             self.current_thread.start()
                 
     def offline_state_set(self):

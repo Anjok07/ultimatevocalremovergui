@@ -36,14 +36,27 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 - **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
 
-### MacOS Installation
+### MacOS & Linux Installation
 
-- The stand alone version will be coming soon!
-- If you wish to run UVR on MacOS at this time, you can manually install the UVR Mac build [here]( https://github.com/Anjok07/ultimatevocalremovergui/tree/uvr_5_5_MacOS)
+**A completed stand alone version for MacOS will be released soon.**
 
-### Linux Installation
+- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9)
+- From the saved directory run the following - 
 
-- Linux installs will need to be done manually. See the Manual install section, or try the Mac Build above.
+```
+pip3 install -r requirements.txt
+```
+
+- (If installing on MacOS) Once complete, download and unzip the archive containing ffmpeg to the UVR directory. Archive [download here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
+
+This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
+
+**PLEASE NOTE:**
+
+- For MacOS, GPU selection will be disabled. However, if you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is.
+- Drag-n-drop currently does not work for MacOS or Linux. It might come in a future update.
+- So far everthing else is working as expected.
 
 ### Other Application Notes
 

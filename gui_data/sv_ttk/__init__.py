@@ -1,4 +1,10 @@
 from pathlib import Path
+import platform
+
+if platform.system() == "Darwin":
+    sun_valley_tcl = "sun-valley_darwin.tcl"
+else:
+    sun_valley_tcl = "sun-valley.tcl"
 
 inited = False
 root = None
@@ -12,7 +18,7 @@ def init(func):
         if not inited:
             from tkinter import _default_root
 
-            path = (Path(__file__).parent / "sun-valley.tcl").resolve()
+            path = (Path(__file__).parent / sun_valley_tcl).resolve()
 
             try:
                 _default_root.tk.call("source", str(path))

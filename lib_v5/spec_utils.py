@@ -5,7 +5,14 @@ import math
 import random
 import pyrubberband
 import math
-#import noisereduce as nr
+import platform
+
+OPERATING_SYSTEM = platform.system()
+
+if OPERATING_SYSTEM == 'Windows':
+    wav_resolution = "sinc_fastest"
+else:
+    wav_resolution = "polyphase"
 
 MAX_SPEC = 'Max Spec'
 MIN_SPEC = 'Min Spec'
@@ -189,7 +196,7 @@ def reduce_vocal_aggressively(X, y, softmask):
 
     return y_mag * np.exp(1.j * np.angle(y))
 
-def merge_artifacts(y_mask, thres=0.05, min_range=64, fade_size=32):
+def merge_artifacts(y_mask, thres=0.01, min_range=64, fade_size=32):
     if min_range < fade_size * 2:
         raise ValueError('min_range must be >= fade_size * 2')
 
@@ -224,7 +231,7 @@ def merge_artifacts(y_mask, thres=0.05, min_range=64, fade_size=32):
 
     return y_mask
 
-def mask_silence(mag, ref, thres=0.2, min_range=64, fade_size=32):
+def mask_silence(mag, ref, thres=0.1, min_range=64, fade_size=32):
     if min_range < fade_size * 2:
         raise ValueError('min_range must be >= fade_area * 2')
 
@@ -329,12 +336,12 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None):
             sr = mp.param['band'][d+1]['sr']
             if d == 1: # lower
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
-                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']), bp['sr'], sr, res_type="sinc_fastest")
+                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']), bp['sr'], sr, res_type=wav_resolution)
             else: # mid
                 spec_s = fft_hp_filter(spec_s, bp['hpf_start'], bp['hpf_stop'] - 1)
                 spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
                 wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp.param['mid_side'], mp.param['mid_side_b2'], mp.param['reverse']))
-                wave = librosa.resample(wave2, bp['sr'], sr, res_type="sinc_fastest")
+                wave = librosa.resample(wave2, bp['sr'], sr, res_type=wav_resolution)
         
     return wave
 
@@ -460,30 +467,6 @@ def wave_to_spectrogram_no_mp(wave):
 
     return spec
 
-# def noise_reduction(audio_file):
-    
-#     noise_pro = 'noise_pro.wav'
-    
-#     wav, sr = librosa.load(audio_file, sr=44100, mono=False)
-#     wav_noise, noise_rate = librosa.load(noise_pro, sr=44100, mono=False)
-    
-#     if wav.ndim == 1:
-#         wav = np.asfortranarray([wav,wav])
-
-#     wav_1 = nr.reduce_noise(audio_clip=wav[0], noise_clip=wav_noise, verbose=True)
-#     wav_2 = nr.reduce_noise(audio_clip=wav[1], noise_clip=wav_noise, verbose=True)
-
-#     if wav_1.shape > wav_2.shape:
-#         wav_2 = to_shape(wav_2, wav_1.shape)
-#     if wav_1.shape < wav_2.shape:
-#         wav_1 = to_shape(wav_1, wav_2.shape)
-
-#     #print('wav_1.shape: ', wav_1.shape)
-        
-#     wav_mix = np.asfortranarray([wav_1, wav_2])
-  
-#     return wav_mix, sr
-
 def invert_audio(specs, invert_p=True):
     
     ln = min([specs[0].shape[2], specs[1].shape[2]])
@@ -518,8 +501,6 @@ def ensembling(a, specs):
         spec = spec[:,:,:ln]
         specs[i] = specs[i][:,:,:ln]
         
-        #print('spec: ', a)
-
         if MIN_SPEC == a:
             spec = np.where(np.abs(specs[i]) <= np.abs(spec), specs[i], spec)
         if MAX_SPEC == a:
@@ -531,8 +512,6 @@ def ensembling(a, specs):
 
 def ensemble_inputs(audio_input, algorithm, is_normalization, wav_type_set, save_path):
     
-    #print(algorithm)
-    
     if algorithm == AVERAGE:
         output = average_audio(audio_input)
         samplerate = 44100
@@ -543,9 +522,6 @@ def ensemble_inputs(audio_input, algorithm, is_normalization, wav_type_set, save
             wave, samplerate = librosa.load(audio_input[i], mono=False, sr=44100)
             spec = wave_to_spectrogram_no_mp(wave)
             specs.append(spec)
-            #print('output size: ', sys.getsizeof(spec))
-            
-        #print('output size: ', sys.getsizeof(specs))
         
         output = spectrogram_to_wave_no_mp(ensembling(algorithm, specs))
 
@@ -571,8 +547,6 @@ def to_shape_minimize(x: np.ndarray, target_shape):
     return np.pad(x, tuple(padding_list), mode='constant')
 
 def augment_audio(export_path, audio_file, rate, is_normalization, wav_type_set, save_format=None, is_pitch=False):
-    
-    #print(rate)
     
     wav, sr = librosa.load(audio_file, sr=44100, mono=False)
 

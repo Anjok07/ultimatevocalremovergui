@@ -1,6 +1,13 @@
 import platform
 
+#Platform Details
 OPERATING_SYSTEM = platform.system()
+SYSTEM_ARCH = platform.platform()
+SYSTEM_PROC = platform.processor()
+ARM = 'arm'
+
+#Main Font
+MAIN_FONT_NAME = "Century Gothic"
 
 #Model Types
 VR_ARCH_TYPE = 'VR Arc'

@@ -44,6 +44,7 @@ from gui_data.app_size_values import ImagePath, AdjustedValues as av
 from gui_data.constants import *
 from gui_data.error_handling import error_text, error_dialouge
 from gui_data.old_data_check import file_check, remove_unneeded_yamls, remove_temps
+from gui_data.tkinterdnd2 import TkinterDnD, DND_FILES
 from lib_v5.vr_network.model_param_init import ModelParameters
 from kthread import KThread
 from lib_v5 import spec_utils
@@ -72,7 +73,6 @@ elif OPERATING_SYSTEM=="Linux":
     main_font_name = "Century Gothic"
     application_extension = ".zip"
 elif OPERATING_SYSTEM=="Windows":
-    from gui_data.tkinterdnd2 import TkinterDnD, DND_FILES
     OPEN_FILE_func = lambda input_string:os.startfile(input_string)
     is_windows = True
     right_click_button = '<Button-3>'
@@ -165,7 +165,6 @@ ICON_IMG_PATH = os.path.join(BASE_PATH, 'gui_data', 'img', 'GUI-Icon.ico')
 if not is_windows:
     MAIN_ICON_IMG_PATH = os.path.join(BASE_PATH, 'gui_data', 'img', 'GUI-Icon.png')
 FONT_PATH = os.path.join(BASE_PATH, 'gui_data', 'fonts', 'centurygothic', 'GOTHIC.TTF')#ensemble_temps
-MENU_COMBOBOX_WIDTH = 19
 
 #Other
 COMPLETE_CHIME = os.path.join(BASE_PATH, 'gui_data', 'complete_chime.wav')
@@ -198,7 +197,8 @@ def drop(event, accept_mode: str = 'files'):
     if accept_mode == 'folder':
         path = path.replace('{', '').replace('}', '')
         if not os.path.isdir(path):
-            tk.messagebox.showerror(title='Invalid Folder',
+            tk.messagebox.showerror(parent=root,
+                                    title='Invalid Folder',
                                     message='Your given export path is not a valid folder!')
             return
         # Set Variables
@@ -436,8 +436,8 @@ class ModelData():
         
         if not self.is_dry_check:
             confirm = tk.messagebox.askyesno(title=UNRECOGNIZED_MODEL[0],
-                                            message=f"\"{self.model_name}\"{UNRECOGNIZED_MODEL[1]}",
-                                            parent=root)
+                                             message=f"\"{self.model_name}\"{UNRECOGNIZED_MODEL[1]}",
+                                             parent=root)
                                             
             if confirm:
                 if self.process_method == VR_ARCH_TYPE:
@@ -1382,7 +1382,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
                 self.lastDir = None
 
         paths = tk.filedialog.askopenfilenames(
-            parent=self,
+            parent=root,
             title=f'Select Music Files',
             initialfile='',
             initialdir=self.lastDir)
@@ -1399,7 +1399,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         export_path = None
         
         path = tk.filedialog.askdirectory(
-            parent=self,
+            parent=root,
             title=f'Select Folder',)
 
         if path:  # Path selected
@@ -1429,8 +1429,9 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
     def restart(self):
         """Restart the application after asking for confirmation"""
         
-        confirm = tk.messagebox.askyesno(title='Restart Confirmation',
-                message='This will restart the application and halt any running processes. Your current settings will be saved. \n\n Are you sure you wish to continue?')
+        confirm = tk.messagebox.askyesno(parent=root,
+                                         title='Restart Confirmation',
+                                         message='This will restart the application and halt any running processes. Your current settings will be saved. \n\n Are you sure you wish to continue?')
         
         if confirm:
             #self.save_values()
@@ -2376,15 +2377,15 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         self.combobox_entry_validation(self.post_process_threshold_Option, self.post_process_threshold_var, REG_THES_POSTPORCESS, POST_PROCESSES_THREASHOLD_VALUES)
         self.help_hints(self.post_process_threshold_Label, text=POST_PROCESS_THREASHOLD_HELP)
         
-        self.is_tta_Option = ttk.Checkbutton(vr_opt_frame, text='Enable TTA', width=16, variable=self.is_tta_var) 
+        self.is_tta_Option = ttk.Checkbutton(vr_opt_frame, text='Enable TTA', width=VR_CHECKBOXS_WIDTH, variable=self.is_tta_var) 
         self.is_tta_Option.grid(row=13,column=0,padx=0,pady=0)
         self.help_hints(self.is_tta_Option, text=IS_TTA_HELP)
         
-        self.is_post_process_Option = ttk.Checkbutton(vr_opt_frame, text='Post-Process', width=16, variable=self.is_post_process_var, command=toggle_post_process) 
+        self.is_post_process_Option = ttk.Checkbutton(vr_opt_frame, text='Post-Process', width=VR_CHECKBOXS_WIDTH, variable=self.is_post_process_var, command=toggle_post_process) 
         self.is_post_process_Option.grid(row=14,column=0,padx=0,pady=0)
         self.help_hints(self.is_post_process_Option, text=IS_POST_PROCESS_HELP)
         
-        self.is_high_end_process_Option = ttk.Checkbutton(vr_opt_frame, text='High-End Process', width=16, variable=self.is_high_end_process_var) 
+        self.is_high_end_process_Option = ttk.Checkbutton(vr_opt_frame, text='High-End Process', width=VR_CHECKBOXS_WIDTH, variable=self.is_high_end_process_var) 
         self.is_high_end_process_Option.grid(row=15,column=0,padx=0,pady=0)
         self.help_hints(self.is_high_end_process_Option, text=IS_HIGH_END_PROCESS_HELP)
         
@@ -2469,19 +2470,19 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         self.combobox_entry_validation(self.margin_Option, self.margin_demucs_var, REG_MARGIN, MARGIN_SIZE)
         self.help_hints(self.margin_demucs_Label, text=MARGIN_HELP)
         
-        self.is_chunk_demucs_Option = ttk.Checkbutton(demucs_frame, text='Enable Chunks', width=18, variable=self.is_chunk_demucs_var, command=chunks_toggle) 
+        self.is_chunk_demucs_Option = ttk.Checkbutton(demucs_frame, text='Enable Chunks', width=DEMUCS_CHECKBOXS_WIDTH, variable=self.is_chunk_demucs_var, command=chunks_toggle) 
         self.is_chunk_demucs_Option.grid(row=11,column=0,padx=0,pady=0)
         self.help_hints(self.is_chunk_demucs_Option, text=IS_CHUNK_DEMUCS_HELP)
         
-        self.is_split_mode_Option = ttk.Checkbutton(demucs_frame, text='Split Mode', width=18, variable=self.is_split_mode_var) 
+        self.is_split_mode_Option = ttk.Checkbutton(demucs_frame, text='Split Mode', width=DEMUCS_CHECKBOXS_WIDTH, variable=self.is_split_mode_var) 
         self.is_split_mode_Option.grid(row=12,column=0,padx=0,pady=0)
         self.help_hints(self.is_split_mode_Option, text=IS_SPLIT_MODE_HELP)
         
-        self.is_demucs_combine_stems_Option = ttk.Checkbutton(demucs_frame, text='Combine Stems', width=18, variable=self.is_demucs_combine_stems_var) 
+        self.is_demucs_combine_stems_Option = ttk.Checkbutton(demucs_frame, text='Combine Stems', width=DEMUCS_CHECKBOXS_WIDTH, variable=self.is_demucs_combine_stems_var) 
         self.is_demucs_combine_stems_Option.grid(row=13,column=0,padx=0,pady=0)
         self.help_hints(self.is_demucs_combine_stems_Option, text=IS_DEMUCS_COMBINE_STEMS_HELP)
         
-        is_invert_spec_Option = ttk.Checkbutton(demucs_frame, text='Spectral Inversion', width=18, variable=self.is_invert_spec_var) 
+        is_invert_spec_Option = ttk.Checkbutton(demucs_frame, text='Spectral Inversion', width=DEMUCS_CHECKBOXS_WIDTH, variable=self.is_invert_spec_var) 
         is_invert_spec_Option.grid(row=14,column=0,padx=0,pady=0)
         self.help_hints(is_invert_spec_Option, text=IS_INVERT_SPEC_HELP)
         
@@ -2503,11 +2504,11 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         demucs_pre_proc_model_Option.configure(width=33)
         demucs_pre_proc_model_Option.grid(row=2,column=0,padx=0,pady=10)
         
-        is_demucs_pre_proc_model_inst_mix_Option = ttk.Checkbutton(demucs_pre_model_frame, text='Save Instrumental Mixture', width=27, variable=self.is_demucs_pre_proc_model_inst_mix_var) 
+        is_demucs_pre_proc_model_inst_mix_Option = ttk.Checkbutton(demucs_pre_model_frame, text='Save Instrumental Mixture', width=DEMUCS_PRE_CHECKBOXS_WIDTH, variable=self.is_demucs_pre_proc_model_inst_mix_var) 
         is_demucs_pre_proc_model_inst_mix_Option.grid(row=3,column=0,padx=0,pady=0)
         self.help_hints(is_demucs_pre_proc_model_inst_mix_Option, text=PRE_PROC_MODEL_INST_MIX_HELP)
         
-        is_demucs_pre_proc_model_activate_Option = ttk.Checkbutton(demucs_pre_model_frame, text='Activate Pre-process Model', width=27, variable=self.is_demucs_pre_proc_model_activate_var, command=pre_proc_model_toggle) 
+        is_demucs_pre_proc_model_activate_Option = ttk.Checkbutton(demucs_pre_model_frame, text='Activate Pre-process Model', width=DEMUCS_PRE_CHECKBOXS_WIDTH, variable=self.is_demucs_pre_proc_model_activate_var, command=pre_proc_model_toggle) 
         is_demucs_pre_proc_model_activate_Option.grid(row=4,column=0,padx=0,pady=0)
         self.help_hints(is_demucs_pre_proc_model_activate_Option, text=PRE_PROC_MODEL_ACTIVATE_HELP)
                 
@@ -3872,7 +3873,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         for widget in self.GUI_LIST:
             widget.place_forget()
 
-        general_shared_Buttons_place = lambda:(self.is_gpu_conversion_Option_place(), self.model_sample_mode_Option_place(), self.is_gpu_conversion_Enable())
+        general_shared_Buttons_place = lambda:(self.is_gpu_conversion_Option_place(), self.model_sample_mode_Option_place())
         stem_save_Options_place = lambda:(self.is_primary_stem_only_Option_place(), self.is_secondary_stem_only_Option_place())
         stem_save_demucs_Options_place = lambda:(self.is_primary_stem_only_Demucs_Option_place(), self.is_secondary_stem_only_Demucs_Option_place())
         no_ensemble_shared = lambda:(self.save_current_settings_Label_place(), self.save_current_settings_Option_place())
@@ -3934,10 +3935,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
             general_shared_Buttons_place()
             stem_save_Options_place()
 
-        if OPERATING_SYSTEM == 'Darwin':
-            self.is_gpu_conversion_Disable() if self.chosen_process_method_var.get() == MDX_ARCH_TYPE else None
-        else:
-            self.is_gpu_conversion_Disable() if not self.is_gpu_available else None
+        self.is_gpu_conversion_Disable() if not self.is_gpu_available else None
 
         self.update_inputPaths()
 
@@ -3965,13 +3963,6 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
             for stem in stems:
                 self.demucs_stems_Option['menu'].add_radiobutton(label=stem, 
                                                                  command=tk._setit(self.demucs_stems_var, stem, lambda s:self.update_stem_checkbox_labels(s, demucs=True)))
-
-        if OPERATING_SYSTEM == 'Darwin' and self.chosen_process_method_var.get() == DEMUCS_ARCH_TYPE:
-            if self.demucs_model_var.get().startswith(DEMUCS_V3) or self.demucs_model_var.get().startswith(DEMUCS_V4) or 'Tasnet' in self.demucs_model_var.get():
-                self.is_gpu_conversion_Disable()
-            else:
-                self.is_gpu_conversion_Enable() if self.is_gpu_available else None
-
 
     def update_stem_checkbox_labels(self, selection, demucs=False, disable_boxes=False, is_disable_demucs_boxes=True):
         """Updates the "save only" checkboxes based on the model selected"""
@@ -4291,8 +4282,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         """Asks for confirmation before halting active process"""
         
         if self.thread_check(self.active_processing_thread):
-            confirm = tk.messagebox.askyesno(title=STOP_PROCESS_CONFIRM[0],
-                                             message=STOP_PROCESS_CONFIRM[1])
+            confirm = tk.messagebox.askyesno(parent=root, title=STOP_PROCESS_CONFIRM[0], message=STOP_PROCESS_CONFIRM[1])
 
             if confirm:
                 try:
@@ -4314,7 +4304,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         
         if error:
             error_message_box_text = f'{error_dialouge(error)}{ERROR_OCCURED[1]}'
-            confirm = tk.messagebox.askyesno(master=self,
+            confirm = tk.messagebox.askyesno(parent=root,
                                              title=ERROR_OCCURED[0],
                                              message=error_message_box_text)
             
@@ -4637,7 +4627,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         if self.thread_check(self.active_processing_thread):
             self.error_dialoge(SET_TO_DEFAULT_PROCESS_ERROR)
         else:
-            confirm = tk.messagebox.askyesno(title=RESET_ALL_TO_DEFAULT_WARNING[0],
+            confirm = tk.messagebox.askyesno(parent=root, title=RESET_ALL_TO_DEFAULT_WARNING[0],
                                              message=RESET_ALL_TO_DEFAULT_WARNING[1])
             
             if confirm:

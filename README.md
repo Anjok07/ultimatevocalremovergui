@@ -38,6 +38,10 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 ### MacOS Installation
 
+<details id="MacInstall">
+  <summary>See Mac Installation Instructions</summary>
+<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/gui_data/img/UVR_v5_5_MacOS.png?raw=true" />
+
 **A completed stand alone version will be released soon.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
@@ -58,23 +62,32 @@ cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packag
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
 
-**MAC USERS PLEASE NOTE:**
+**Please Note:**
 
 - If you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is and allow you to toggle the "GPU Conversion" checkbox.
 - Drag-n-drop currently does not work for MacOS or Linux. It might come in a future update.
 - So far everthing else is working as expected.
 
+</details>
+
 ### Linux Installation
 
+<details id="LinuxInstall">
+  <summary>See Linux Installation Instructions</summary>
+
+<br />
+    
 **Install instructions will be updated soon. However, this version of UVR is confirmed to be working 100% with Ubuntu 22.10.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
+- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9)
 - From the saved directory run the following - 
 
 ```
 pip3 install -r requirements.txt
 ```
+
+</details>
 
 ### Other Application Notes
 
@@ -84,7 +97,7 @@ pip3 install -r requirements.txt
 - This application relies on FFmpeg to process non-wav audio files.
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 
-- These models are computationally intensive. Please proceed with caution and pay attention to your PC to ensure it doesn't overheat. ***We are not responsible for any hardware damage.***
+- These models are computationally intensive. 
 
 ## Change Log
 

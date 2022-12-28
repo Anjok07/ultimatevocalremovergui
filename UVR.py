@@ -3133,9 +3133,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             no_button = ttk.Button(update_confirmation_Frame, text='No', command=lambda:(update_confirmation_win.destroy()))
             no_button.grid(row=3,column=0,padx=0,pady=5)
             
-            download_outside_application_button = ttk.Checkbutton(update_confirmation_Frame, variable=is_download_in_app_var, text='Download Update in Application')
-            download_outside_application_button.grid(row=4,column=0,padx=0,pady=5)
-            
+            if is_windows:
+                download_outside_application_button = ttk.Checkbutton(update_confirmation_Frame, variable=is_download_in_app_var, text='Download Update in Application')
+                download_outside_application_button.grid(row=4,column=0,padx=0,pady=5)
+
             self.menu_placement(update_confirmation_win, "Confirm Update", pop_up=True)
 
     def pop_up_user_code_input(self):

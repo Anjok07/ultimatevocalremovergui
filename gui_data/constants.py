@@ -781,9 +781,9 @@ LEFT_ROW_WIDTH = -10
 LABEL_HEIGHT = -5
 OPTION_HEIGHT = 7
 LOW_MENU_Y = 18, 16
-FFMPEG_EXT = (".aac", ".aiff", ".alac" ,".flac", ".mov", ".mp4", 
-              ".m4a", ".mp2", ".mp3", ".mp4", ".mpc", ".mpc8", 
-              ".mpeg", ".ogg", ".tta", ".wav", ".wma", ".webm")
+FFMPEG_EXT = (".aac", ".aiff", ".alac" ,".flac", ".FLAC", ".mov", ".mp4", ".MP4", 
+              ".m4a", ".M4A", ".mp2", ".mp3", "MP3", ".mpc", ".mpc8", 
+              ".mpeg", ".ogg", ".OGG", ".tta", ".wav", ".wave", ".WAV", ".WAVE", ".wma", ".webm")
 FFMPEG_MORE_EXT = (".aa", ".aac", ".ac3", ".aiff", ".alac", ".avi", ".f4v",".flac", ".flic", ".flv",
               ".m4v",".mlv", ".mov", ".mp4", ".m4a", ".mp2", ".mp3", ".mp4", ".mpc", ".mpc8", 
               ".mpeg", ".ogg", ".tta", ".tty", ".vcd", ".wav", ".wma")
@@ -1056,7 +1056,11 @@ if OPERATING_SYSTEM=="Darwin":
    FONT_SIZE_6 = 17
    HELP_HINT_CHECKBOX_WIDTH = 13
    MDX_CHECKBOXS_WIDTH = 14
+   VR_CHECKBOXS_WIDTH = 14
+   DEMUCS_CHECKBOXS_WIDTH = 14
+   DEMUCS_PRE_CHECKBOXS_WIDTH = 20
    GEN_SETTINGS_WIDTH = 17
+   MENU_COMBOBOX_WIDTH = 16
     
 elif OPERATING_SYSTEM=="Linux":
    LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
@@ -1107,10 +1111,13 @@ elif OPERATING_SYSTEM=="Linux":
    FONT_SIZE_4 = 13
    FONT_SIZE_5 = 14
    FONT_SIZE_6 = 17
-   
    HELP_HINT_CHECKBOX_WIDTH = 13
    MDX_CHECKBOXS_WIDTH = 14
+   VR_CHECKBOXS_WIDTH = 16
+   DEMUCS_CHECKBOXS_WIDTH = 18
+   DEMUCS_PRE_CHECKBOXS_WIDTH = 27
    GEN_SETTINGS_WIDTH = 17
+   MENU_COMBOBOX_WIDTH = 19
     
 elif OPERATING_SYSTEM=="Windows":
    LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
@@ -1163,7 +1170,11 @@ elif OPERATING_SYSTEM=="Windows":
    FONT_SIZE_6 = 15
    HELP_HINT_CHECKBOX_WIDTH = 16
    MDX_CHECKBOXS_WIDTH = 16
+   VR_CHECKBOXS_WIDTH = 16
+   DEMUCS_CHECKBOXS_WIDTH = 18
+   DEMUCS_PRE_CHECKBOXS_WIDTH = 27
    GEN_SETTINGS_WIDTH = 23
+   MENU_COMBOBOX_WIDTH = 19
 
 # INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'
 # STOP_HELP = '停止任何正在运行的进程 \n 弹出窗口将要求用户确认操作'

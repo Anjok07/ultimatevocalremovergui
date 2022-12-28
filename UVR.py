@@ -1471,6 +1471,9 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
     def determine_auto_chunks(self, chunks, gpu):
         """Determines appropriate chunk size based on user computer specs"""
         
+        if OPERATING_SYSTEM == 'Darwin':
+            gpu = -1
+
         if chunks == 'Full':
             chunk_set = 0
         elif chunks == 'Auto':
@@ -3869,7 +3872,7 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
         for widget in self.GUI_LIST:
             widget.place_forget()
 
-        general_shared_Buttons_place = lambda:(self.is_gpu_conversion_Option_place(), self.model_sample_mode_Option_place())
+        general_shared_Buttons_place = lambda:(self.is_gpu_conversion_Option_place(), self.model_sample_mode_Option_place(), self.is_gpu_conversion_Enable())
         stem_save_Options_place = lambda:(self.is_primary_stem_only_Option_place(), self.is_secondary_stem_only_Option_place())
         stem_save_demucs_Options_place = lambda:(self.is_primary_stem_only_Demucs_Option_place(), self.is_secondary_stem_only_Demucs_Option_place())
         no_ensemble_shared = lambda:(self.save_current_settings_Label_place(), self.save_current_settings_Option_place())
@@ -3931,7 +3934,10 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
             general_shared_Buttons_place()
             stem_save_Options_place()
 
-        self.is_gpu_conversion_Disable() if not self.is_gpu_available else None
+        if OPERATING_SYSTEM == 'Darwin':
+            self.is_gpu_conversion_Disable() if self.chosen_process_method_var.get() == MDX_ARCH_TYPE else None
+        else:
+            self.is_gpu_conversion_Disable() if not self.is_gpu_available else None
 
         self.update_inputPaths()
 
@@ -3959,6 +3965,13 @@ class MainWindow(TkinterDnD.Tk if is_windows else tk.Tk):
             for stem in stems:
                 self.demucs_stems_Option['menu'].add_radiobutton(label=stem, 
                                                                  command=tk._setit(self.demucs_stems_var, stem, lambda s:self.update_stem_checkbox_labels(s, demucs=True)))
+
+        if OPERATING_SYSTEM == 'Darwin' and self.chosen_process_method_var.get() == DEMUCS_ARCH_TYPE:
+            if self.demucs_model_var.get().startswith(DEMUCS_V3) or self.demucs_model_var.get().startswith(DEMUCS_V4) or 'Tasnet' in self.demucs_model_var.get():
+                self.is_gpu_conversion_Disable()
+            else:
+                self.is_gpu_conversion_Enable() if self.is_gpu_available else None
+
 
     def update_stem_checkbox_labels(self, selection, demucs=False, disable_boxes=False, is_disable_demucs_boxes=True):
         """Updates the "save only" checkboxes based on the model selected"""

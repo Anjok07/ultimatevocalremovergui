@@ -36,27 +36,45 @@ This installation bundle contains the UVR interface, Python, PyTorch, and other 
 
 - **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
 
-### MacOS & Linux Installation
+### MacOS Installation
 
-**A completed stand alone version for MacOS will be released soon.**
+**A completed stand alone version will be released soon.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9)
+- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
 - From the saved directory run the following - 
 
 ```
 pip3 install -r requirements.txt
 ```
 
-- (If installing on MacOS) Once complete, download and unzip the archive containing ffmpeg to the UVR directory. Archive [download here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
+- If your Mac is running with an M1, please run the following command next. If not, skip this step. - 
+
+```
+cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile_arm64.dylib /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile.dylib
+```
+
+- Once everything is done installing, download and unzip the archive containing ffmpeg for MacOS to the UVR directory. Archive [download here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
 
-**PLEASE NOTE:**
+**MAC USERS PLEASE NOTE:**
 
-- For MacOS, GPU selection will be disabled. However, if you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is.
+- If you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is and allow you to toggle the "GPU Conversion" checkbox.
 - Drag-n-drop currently does not work for MacOS or Linux. It might come in a future update.
 - So far everthing else is working as expected.
+
+### Linux Installation
+
+**Install instructions will be updated soon. However, this version of UVR is confirmed to be working 100% with Ubuntu 22.10.**
+
+- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
+- From the saved directory run the following - 
+
+```
+pip3 install -r requirements.txt
+```
 
 ### Other Application Notes
 

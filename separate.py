@@ -913,7 +913,7 @@ def save_format(audio_path, save_format, mp3_bit_set):
     
     if not save_format == WAV:
         
-        if not OPERATING_SYSTEM == 'Windows':
+        if OPERATING_SYSTEM == 'Darwin':
             FFMPEG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ffmpeg')
             pydub.AudioSegment.converter = FFMPEG_PATH
         

@@ -101,12 +101,20 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 <br />
     
-**Install instructions will be updated soon. However, this version of UVR is confirmed to be working 100% with Ubuntu 22.10.**
+**These install instructions are for Ubuntu 22.10.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9)
 - From the saved directory run the following - 
 
+```
+sudo apt-get update
+```
+```
+sudo apt install python3-pip
+```
+```
+sudo apt-get -y install python3-tk
+```
 ```
 pip3 install -r requirements.txt
 ```
@@ -127,7 +135,7 @@ pip3 install -r requirements.txt
 
 ### Patch Version: 
 
-- UVR_Patch_12_22_22_23_44
+- UVR_Patch_12_29_22_07_20
 
 ### Fixes & Changes:
 

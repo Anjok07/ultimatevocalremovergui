@@ -85,6 +85,12 @@ elif OPERATING_SYSTEM=="Windows":
     right_click_button = '<Button-3>'
     application_extension = ".exe"
     
+def right_click_release_linux(window, top_win=None):
+    if OPERATING_SYSTEM=="Linux":
+        root.bind('<Button-1>', lambda e:window.destroy())
+        if top_win:
+            top_win.bind('<Button-1>', lambda e:window.destroy())
+
 if not is_windows:
     ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -1361,7 +1367,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         self.chosen_audio_tool_align = tk.BooleanVar(value=True)
         add_align = lambda e:(self.chosen_audio_tool_Option['menu'].add_radiobutton(label=ALIGN_INPUTS, command=tk._setit(self.chosen_audio_tool_var, ALIGN_INPUTS)), self.chosen_audio_tool_align.set(False)) if self.chosen_audio_tool_align else None
-
+        
         if is_dnd_compatible:
             self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
             self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)
@@ -1562,6 +1568,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 
                 try:
                     right_click_menu.tk_popup(event.x_root,event.y_root)
+                    right_click_release_linux(right_click_menu)
                 finally:
                     right_click_menu.grab_release()
             else:
@@ -1577,6 +1584,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         try:
             right_click_menu.tk_popup(event.x_root,event.y_root)
+            right_click_release_linux(right_click_menu)
         finally:
             right_click_menu.grab_release()
 
@@ -1755,6 +1763,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
         try:
             right_click_menu.tk_popup(event.x_root,event.y_root)
+            right_click_release_linux(right_click_menu)
         finally:
             right_click_menu.grab_release()
 
@@ -1795,6 +1804,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         try:
             right_click_menu.tk_popup(event.x_root,event.y_root)
+            right_click_release_linux(right_click_menu)
         finally:
             right_click_menu.grab_release()
 
@@ -1836,6 +1846,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
             try:
                 right_click_menu.tk_popup(event.x_root,event.y_root)
+                right_click_release_linux(right_click_menu, window)
             finally:
                 right_click_menu.grab_release()
         
@@ -2036,6 +2047,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
                 try:
                     right_click_menu.tk_popup(event.x_root,event.y_root)
+                    right_click_release_linux(right_click_menu, menu_view_inputs_top)
                 finally:
                     right_click_menu.grab_release()
 
@@ -2044,8 +2056,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         self.main_window_LABEL_SET(menu_view_inputs_Frame, 'Selected Inputs').grid(row=0,column=0,padx=0,pady=5)
         tk.Label(menu_view_inputs_Frame, textvariable=input_length_var, font=(MAIN_FONT_NAME, f"{FONT_SIZE_1}"), foreground='#13849f').grid(row=1, column=0, padx=0, pady=5)
-        ttk.Button(menu_view_inputs_Frame, text='Select Input(s)', command=lambda:input_options()).grid(row=2,column=0,padx=0,pady=10)
-        
+        if not OPERATING_SYSTEM == "Linux":
+            ttk.Button(menu_view_inputs_Frame, text='Select Input(s)', command=lambda:input_options()).grid(row=2,column=0,padx=0,pady=10)
         input_files_listbox_Option = tk.Listbox(menu_view_inputs_Frame, selectmode=tk.EXTENDED, activestyle='dotbox', font=(MAIN_FONT_NAME, f"{FONT_SIZE_1}"), background='#101414', exportselection=0, width=110, height=17, relief=SOLID, borderwidth=0)
         input_files_listbox_vertical_scroll = ttk.Scrollbar(menu_view_inputs_Frame, orient=VERTICAL)
         input_files_listbox_Option.config(yscrollcommand=input_files_listbox_vertical_scroll.set)
@@ -2068,7 +2080,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         input_files_listbox_Option.bind('<BackSpace>', lambda e:selected_files(is_remove=False))
 
         reset_list()
-        
+
         self.menu_placement(menu_view_inputs_top, 'Selected Inputs', pop_up=True)
 
     def menu_settings(self, select_tab_2=False, select_tab_3=False):
@@ -2679,6 +2691,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 
                 try:
                     right_click_menu.tk_popup(event.x_root,event.y_root)
+                    right_click_release_linux(right_click_menu, help_guide_opt)
                 finally:
                     right_click_menu.grab_release()
 

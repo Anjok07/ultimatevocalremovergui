@@ -107,15 +107,11 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 - From the saved directory run the following commands in this order- 
 
 ```
+sudo apt update && sudo apt upgrade
 sudo apt-get update
-```
-```
+sudo apt install ffmpeg
 sudo apt install python3-pip
-```
-```
 sudo apt-get -y install python3-tk
-```
-```
 pip3 install -r requirements.txt
 ```
 

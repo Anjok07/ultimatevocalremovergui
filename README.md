@@ -104,7 +104,7 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 **These install instructions are for Ubuntu 22.10.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- From the saved directory run the following - 
+- From the saved directory run the following commands in this order- 
 
 ```
 sudo apt-get update

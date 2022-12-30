@@ -205,10 +205,6 @@ Please be as detailed as possible when posting a new issue.
 
 If possible, click the "Settings Button" to the left of the "Start Processing" button and click the "Error Log" button for detailed error information that can be provided to us.
 
-## Manual Installation (For Developers)
-
-**PLEASE NOTE:** Manual installs are **not** possible at this time! The new manual install instructions will be updated before the end of the year.
-
 ## License
 
 The **Ultimate Vocal Remover GUI** code is [MIT-licensed](LICENSE). 

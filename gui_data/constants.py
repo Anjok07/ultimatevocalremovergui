@@ -254,8 +254,8 @@ TIME_STRETCH = 'Time Stretch'
 CHANGE_PITCH = 'Change Pitch'
 ALIGN_INPUTS = 'Align Inputs'
 
-if OPERATING_SYSTEM == 'Windows':  
-   AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, TIME_STRETCH, CHANGE_PITCH)
+if OPERATING_SYSTEM == 'Windows' or OPERATING_SYSTEM == 'Darwin':  
+   AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, TIME_STRETCH, CHANGE_PITCH, ALIGN_INPUTS)
 else:
    AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, ALIGN_INPUTS)
 
@@ -347,7 +347,8 @@ PITCH_TEXT = '_pitch_shifted'
 
 #RegEx Input Validation
 
-REG_TIME_PITCH = r'^[-+]?(1[0]|[0-9]([.][0-9]*)?)$'
+REG_PITCH = r'^[-+]?(1[0]|[0-9]([.][0-9]*)?)$'
+REG_TIME = r'^[+]?(1[0]|[0-9]([.][0-9]*)?)$'
 REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
 REG_THES_POSTPORCESS = r'\b^([0]([.][0-9]{0,6})?)$\b'
 REG_CHUNKS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Auto|Full)$\b'
@@ -358,7 +359,6 @@ REG_AGGRESSION = r'^[-+]?[0-9]\d*?$'
 REG_WINDOW = r'\b^[0-9]{0,4}$\b'
 REG_SHIFTS = r'\b^[0-9]*$\b'
 REG_OVERLAP = r'\b^([0]([.][0-9]{0,6})?|None)$\b'
-
 
 # Sub Menu
 
@@ -1013,44 +1013,9 @@ CHOOSE_SEMITONES_MAIN_LABEL = 'SEMITONES'
 GPU_CONVERSION_MAIN_LABEL = 'GPU Conversion'
 
 if OPERATING_SYSTEM=="Darwin":
-   LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
-                  f'Current Patch Version: {p}\n\n' +\
-                  'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
-                  'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
-                  'models or code for projects unrelated to UVR.\n\n' +\
-                  '• This application is intended for those running macOS Monterey and above.\n' +\
-                  '• Application functionality for systems running macOS BigSur or lower.\n' +\
-                  '• Application functionality for older or budget Mac systems is not guaranteed.\n\n' +\
-                  'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
-                  'dependencies needed to run the application effectively.\n\n' +\
-                  'Website Links: This application, System or Service(s) may contain links to\n' +\
-                  'other websites and downloads, and they are solely provided to you as an\n' +\
-                  'additional convenience. You understand and acknowledge that by clicking\n' +\
-                  'or activating such links you are accessing a site or service outside of\n' +\
-                  'this application, and that we do not screen, review, approve, or otherwise\n' +\
-                  'endorse any content or information contained in these linked websites.\n' +\
-                  'You acknowledge and agree that we, our affiliates and partners are not\n' +\
-                  'responsible for the contents of any of these linked websites, including\n' +\
-                  'the accuracy or availability of information provided by the linked websites,\n' +\
-                  'and we make no representations or warranties regarding your use of\n' +\
-                  'the linked websites.\n\n' +\
-                  'This application is MIT Licensed\n\n' +\
-                  'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
-                  'of this software and associated documentation files (the "Software"), to deal\n' +\
-                  'in the Software without restriction, including without limitation the rights\n' +\
-                  'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
-                  'copies of the Software, and to permit persons to whom the Software is\n' +\
-                  'furnished to do so, subject to the following conditions:\n\n' +\
-                  'The above copyright notice and this permission notice shall be included in all\n' +\
-                  'copies or substantial portions of the Software.\n\n' +\
-                  'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
-                  'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
-                  'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
-                  'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
-                  'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
-                  'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
-                  'SOFTWARE.'
-
+   LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running macOS BigSur and above.\n' +\
+                              '• Application functionality for systems running macOS Catalina or lower.\n' +\
+                              '• Application functionality for older or budget Mac systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 13
    FONT_SIZE_F2 = 11
    FONT_SIZE_F3 = 12
@@ -1068,46 +1033,11 @@ if OPERATING_SYSTEM=="Darwin":
    DEMUCS_PRE_CHECKBOXS_WIDTH = 20
    GEN_SETTINGS_WIDTH = 17
    MENU_COMBOBOX_WIDTH = 16
-    
-elif OPERATING_SYSTEM=="Linux":
-   LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
-                  f'Current Patch Version: {p}\n\n' +\
-                  'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
-                  'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
-                  'models or code for projects unrelated to UVR.\n\n' +\
-                  '• This application is intended for those running Linux Ubuntu 21.01+.\n' +\
-                  '• Application functionality for systems running other Linux platforms is not guaranteed.\n' +\
-                  '• Application functionality for older or budget systems is not guaranteed.\n\n' +\
-                  'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
-                  'dependencies needed to run the application effectively.\n\n' +\
-                  'Website Links: This application, System or Service(s) may contain links to\n' +\
-                  'other websites and downloads, and they are solely provided to you as an\n' +\
-                  'additional convenience. You understand and acknowledge that by clicking\n' +\
-                  'or activating such links you are accessing a site or service outside of\n' +\
-                  'this application, and that we do not screen, review, approve, or otherwise\n' +\
-                  'endorse any content or information contained in these linked websites.\n' +\
-                  'You acknowledge and agree that we, our affiliates and partners are not\n' +\
-                  'responsible for the contents of any of these linked websites, including\n' +\
-                  'the accuracy or availability of information provided by the linked websites,\n' +\
-                  'and we make no representations or warranties regarding your use of\n' +\
-                  'the linked websites.\n\n' +\
-                  'This application is MIT Licensed\n\n' +\
-                  'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
-                  'of this software and associated documentation files (the "Software"), to deal\n' +\
-                  'in the Software without restriction, including without limitation the rights\n' +\
-                  'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
-                  'copies of the Software, and to permit persons to whom the Software is\n' +\
-                  'furnished to do so, subject to the following conditions:\n\n' +\
-                  'The above copyright notice and this permission notice shall be included in all\n' +\
-                  'copies or substantial portions of the Software.\n\n' +\
-                  'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
-                  'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
-                  'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
-                  'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
-                  'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
-                  'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
-                  'SOFTWARE.'
 
+elif OPERATING_SYSTEM=="Linux":
+   LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running Linux Ubuntu 18.04+.\n' +\
+                              '• Application functionality for systems running other Linux platforms is not guaranteed.\n' +\
+                              '• Application functionality for older or budget systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 13
    FONT_SIZE_F2 = 11
    FONT_SIZE_F3 = 12
@@ -1127,44 +1057,9 @@ elif OPERATING_SYSTEM=="Linux":
    MENU_COMBOBOX_WIDTH = 19
     
 elif OPERATING_SYSTEM=="Windows":
-   LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
-                              f'Current Patch Version: {p}\n\n' +\
-                              'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
-                              'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
-                              'models or code for projects unrelated to UVR.\n\n' +\
-                              '• This application is intended for those running Windows 10 or higher.\n' +\
+   LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running Windows 10 or higher.\n' +\
                               '• Application functionality for systems running Windows 7 or lower.\n' +\
-                              '• Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.\n\n' +\
-                              'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
-                              'dependencies needed to run the application effectively.\n\n' +\
-                              'Website Links: This application, System or Service(s) may contain links to\n' +\
-                              'other websites and downloads, and they are solely provided to you as an\n' +\
-                              'additional convenience. You understand and acknowledge that by clicking\n' +\
-                              'or activating such links you are accessing a site or service outside of\n' +\
-                              'this application, and that we do not screen, review, approve, or otherwise\n' +\
-                              'endorse any content or information contained in these linked websites.\n' +\
-                              'You acknowledge and agree that we, our affiliates and partners are not\n' +\
-                              'responsible for the contents of any of these linked websites, including\n' +\
-                              'the accuracy or availability of information provided by the linked websites,\n' +\
-                              'and we make no representations or warranties regarding your use of\n' +\
-                              'the linked websites.\n\n' +\
-                              'This application is MIT Licensed\n\n' +\
-                              'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
-                              'of this software and associated documentation files (the "Software"), to deal\n' +\
-                              'in the Software without restriction, including without limitation the rights\n' +\
-                              'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
-                              'copies of the Software, and to permit persons to whom the Software is\n' +\
-                              'furnished to do so, subject to the following conditions:\n\n' +\
-                              'The above copyright notice and this permission notice shall be included in all\n' +\
-                              'copies or substantial portions of the Software.\n\n' +\
-                              'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
-                              'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
-                              'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
-                              'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
-                              'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
-                              'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
-                              'SOFTWARE.'
-
+                              '• Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 10
    FONT_SIZE_F2 = 8
    FONT_SIZE_F3 = 9
@@ -1182,6 +1077,55 @@ elif OPERATING_SYSTEM=="Windows":
    DEMUCS_PRE_CHECKBOXS_WIDTH = 27
    GEN_SETTINGS_WIDTH = 23
    MENU_COMBOBOX_WIDTH = 19
+
+LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover {a}\n' +\
+               f'Current Patch Version: {p}\n\n' +\
+               'Copyright (c) 2022 Ultimate Vocal Remover\n\n' +\
+               'UVR is free and open-source, but MIT licensed. Please credit us if you use our\n' +\
+               f'models or code for projects unrelated to UVR.\n\n{LICENSE_OS_SPECIFIC_TEXT}' +\
+               'This bundle contains the UVR interface, Python, PyTorch, and other\n' +\
+               'dependencies needed to run the application effectively.\n\n' +\
+               'Website Links: This application, System or Service(s) may contain links to\n' +\
+               'other websites and downloads, and they are solely provided to you as an\n' +\
+               'additional convenience. You understand and acknowledge that by clicking\n' +\
+               'or activating such links you are accessing a site or service outside of\n' +\
+               'this application, and that we do not screen, review, approve, or otherwise\n' +\
+               'endorse any content or information contained in these linked websites.\n' +\
+               'You acknowledge and agree that we, our affiliates and partners are not\n' +\
+               'responsible for the contents of any of these linked websites, including\n' +\
+               'the accuracy or availability of information provided by the linked websites,\n' +\
+               'and we make no representations or warranties regarding your use of\n' +\
+               'the linked websites.\n\n' +\
+               'This application is MIT Licensed\n\n' +\
+               'Permission is hereby granted, free of charge, to any person obtaining a copy\n' +\
+               'of this software and associated documentation files (the "Software"), to deal\n' +\
+               'in the Software without restriction, including without limitation the rights\n' +\
+               'to use, copy, modify, merge, publish, distribute, sublicense, and/or sell\n' +\
+               'copies of the Software, and to permit persons to whom the Software is\n' +\
+               'furnished to do so, subject to the following conditions:\n\n' +\
+               'The above copyright notice and this permission notice shall be included in all\n' +\
+               'copies or substantial portions of the Software.\n\n' +\
+               'THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\n' +\
+               'IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\n' +\
+               'FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\n' +\
+               'AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\n' +\
+               'LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\n' +\
+               'OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\n' +\
+               'SOFTWARE.'
+
+CHANGE_LOG_HEADER = lambda patch:f"Patch Version:\n\n{patch}"
+
+#DND CONSTS
+
+MAC_DND_CHECK = ('/Users/',
+                 '/Applications/',
+                 '/Library/',
+                 '/System/')
+LINUX_DND_CHECK = ('/Users/',
+                 '/Applications/'
+                 '/Library/',
+                 '/System/')
+WINDOWS_DND_CHECK = ('A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:', 'J:', 'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:', 'T:', 'U:', 'V:', 'W:', 'X:', 'Y:', 'Z:')
 
 # INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'
 # STOP_HELP = '停止任何正在运行的进程 \n 弹出窗口将要求用户确认操作'

@@ -3,8 +3,6 @@ from screeninfo import get_monitors
 from PIL import Image
 from PIL import ImageTk
 
-MAC = False
-
 def get_screen_height():
     monitors = get_monitors()
     if len(monitors) == 0:
@@ -45,36 +43,18 @@ SCREEN_SIZE_VALUES = {
             'PROGRESS_HEIGHT': 9, 
             'PADDING': 7, 
         },
-        "mac": {
-            "credits_img":(200, 200),
-            ## App Size
-            'IMAGE_HEIGHT': 135, 
-            'FILEPATHS_HEIGHT': 75, 
-            'OPTIONS_HEIGHT': 262, 
-            'CONVERSIONBUTTON_HEIGHT': 30, 
-            'COMMAND_HEIGHT': 141, 
-            'PROGRESS_HEIGHT': 25, 
-            'PADDING': 5, 
-        },
 }
 
-if MAC:
-    determined_size = SCREEN_SIZE_VALUES["mac"]
-    normal_screen = True
-else:
-    try:
-        if get_screen_height() >= 900:
-            determined_size = SCREEN_SIZE_VALUES["normal"]
-            normal_screen = True
-        elif get_screen_height() <= 720:
-            determined_size = SCREEN_SIZE_VALUES["small"]
-            normal_screen = False
-        else:
-            determined_size = SCREEN_SIZE_VALUES["medium"]
-            normal_screen = False
-    except:
-            determined_size = SCREEN_SIZE_VALUES["normal"]
-            normal_screen = False
+
+try:
+    if get_screen_height() >= 900:
+        determined_size = SCREEN_SIZE_VALUES["normal"]
+    elif get_screen_height() <= 720:
+        determined_size = SCREEN_SIZE_VALUES["small"]
+    else:
+        determined_size = SCREEN_SIZE_VALUES["medium"]
+except:
+        determined_size = SCREEN_SIZE_VALUES["normal"]
 
 class ImagePath():
     def __init__(self, base_path):
@@ -139,4 +119,3 @@ class AdjustedValues():
     COMMAND_HEIGHT = determined_size["COMMAND_HEIGHT"]
     PROGRESS_HEIGHT = determined_size["PROGRESS_HEIGHT"]
     PADDING = determined_size["PADDING"]
-    normal_screen = normal_screen

@@ -224,13 +224,14 @@ class SeperateAttributes:
 class SeperateMDX(SeperateAttributes):        
 
     def seperate(self):
-        
+
         samplerate = 44100
                 
         if self.primary_model_name == self.model_basename and self.primary_sources:
             self.primary_source, self.secondary_source = self.load_cached_sources()
         else:
             self.start_inference()
+
             if self.is_gpu_conversion >= 0:
                 self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')  
                 run_type = ['CUDAExecutionProvider'] if torch.cuda.is_available() else ['CPUExecutionProvider']
@@ -668,10 +669,10 @@ class SeperateVR(SeperateAttributes):
         for d in range(bands_n, 0, -1):        
             bp = self.mp.param['band'][d]
         
-            if OPERATING_SYSTEM == 'Windows':
-                wav_resolution = bp['res_type']
+            if OPERATING_SYSTEM == 'Darwin':
+                wav_resolution = 'polyphase' if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else bp['res_type']
             else:
-                wav_resolution = 'polyphase'
+                wav_resolution = bp['res_type']
         
             if d == bands_n: # high-end band
                 X_wave[d], _ = librosa.load(

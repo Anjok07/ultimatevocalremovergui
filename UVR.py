@@ -18,7 +18,6 @@ import base64
 import queue
 import re
 import shutil
-import string
 import subprocess
 import sys
 import soundfile as sf
@@ -34,8 +33,7 @@ import urllib.request
 import webbrowser
 import wget
 import traceback
-#import multiprocessing as KThread
-from __version__ import VERSION, PATCH
+from __version__ import VERSION, PATCH, PATCH_MAC, PATCH_LINUX
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -61,20 +59,28 @@ logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 logging.info('UVR BEGIN')
 
 is_dnd_compatible = True
+banner_placement = -2
 
 if OPERATING_SYSTEM=="Darwin":
     OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
     is_dnd_compatible = False if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else True
+    dnd_path_check = MAC_DND_CHECK
+    banner_placement = -8
+    current_patch = PATCH_MAC
     is_windows = False
     right_click_button = '<Button-2>'
-    application_extension = "_arm_build.dmg" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else "_x86_64_build.dmg"
+    application_extension = ".dmg"
 elif OPERATING_SYSTEM=="Linux":
     OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
+    dnd_path_check = LINUX_DND_CHECK
+    current_patch = PATCH_LINUX
     is_windows = False
     right_click_button = '<Button-3>'
     application_extension = ".zip"
 elif OPERATING_SYSTEM=="Windows":
     OPEN_FILE_func = lambda input_string:os.startfile(input_string)
+    dnd_path_check = WINDOWS_DND_CHECK
+    current_patch = PATCH
     is_windows = True
     right_click_button = '<Button-3>'
     application_extension = ".exe"
@@ -193,7 +199,6 @@ def drop(event, accept_mode: str = 'files'):
     """Drag & Drop verification process"""
     
     path = event.data
-
     if accept_mode == 'folder':
         path = path.replace('{', '').replace('}', '')
         if not os.path.isdir(path):
@@ -206,8 +211,8 @@ def drop(event, accept_mode: str = 'files'):
     elif accept_mode == 'files':
         # Clean path text and set path to the list of paths
         path = path.replace("{", "").replace("}", "")
-        for drive_letter in list(string.ascii_lowercase.upper()):
-            path = path.replace(f" {drive_letter}:", f";{drive_letter}:")
+        for dnd_file in dnd_path_check:
+            path = path.replace(f" {dnd_file}", f";{dnd_file}")
         path = path.split(';')
         path[-1] = path[-1].replace(';', '')
         # Set Variables
@@ -844,8 +849,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         # --Widgets--
         self.fill_main_frame()
         self.bind_widgets()
-        self.online_data_refresh(user_refresh=False)
-
+        
         # --Update Widgets--
         self.update_available_models()
         self.update_main_widget_states()
@@ -856,9 +860,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.ensemble_listbox_Option.configure(state=tk.DISABLED)
 
         self.command_Text.write(f'Ultimate Vocal Remover {VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]')
-        self.new_update_notify = lambda latest_version:self.command_Text.write(f"\n\nNew Update Found: {latest_version}\n\nClick the update button in the \"Settings\" menu to download and install!")
         self.update_checkbox_text = lambda:self.selection_action_process_method(self.chosen_process_method_var.get())
-  
+        self.online_data_refresh(user_refresh=False)
+
     # Menu Functions
     def main_window_LABEL_SET(self, master, text):return ttk.Label(master=master, text=text, background='#0e0e0f', font=self.font_smaller, foreground='#13849f', anchor=tk.CENTER)
     def menu_title_LABEL_SET(self, frame, text, width=35):return ttk.Label(master=frame, text=text, font=(MAIN_FONT_NAME, f"{FONT_SIZE_5}", "underline"), justify="center", foreground="#13849f", width=width, anchor=tk.CENTER)
@@ -996,7 +1000,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Creates root window widgets"""
         
         self.title_Label = tk.Label(master=self, image=self.logo_img, compound=tk.TOP)
-        self.title_Label.place(x=-2, y=-2)
+        self.title_Label.place(x=-2, y=banner_placement)
 
         button_y = self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT - 8 + self.PADDING*2
 
@@ -1242,14 +1246,14 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.time_stretch_rate_Label_place = lambda:self.time_stretch_rate_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.time_stretch_rate_Option = ttk.Combobox(self.options_Frame, value=TIME_PITCH, textvariable=self.time_stretch_rate_var)
         self.time_stretch_rate_Option_place = lambda:self.time_stretch_rate_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.combobox_entry_validation(self.time_stretch_rate_Option, self.time_stretch_rate_var, REG_TIME_PITCH, TIME_PITCH)
+        self.combobox_entry_validation(self.time_stretch_rate_Option, self.time_stretch_rate_var, REG_TIME, TIME_PITCH)
 
         # Pitch Rate
         self.pitch_rate_Label = self.main_window_LABEL_SET(self.options_Frame, CHOOSE_SEMITONES_MAIN_LABEL)
         self.pitch_rate_Label_place = lambda:self.pitch_rate_Label.place(x=MAIN_ROW_X[0], y=MAIN_ROW_Y[0], width=0, height=LABEL_HEIGHT, relx=1/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.pitch_rate_Option = ttk.Combobox(self.options_Frame, value=TIME_PITCH, textvariable=self.pitch_rate_var)
         self.pitch_rate_Option_place = lambda:self.pitch_rate_Option.place(x=MAIN_ROW_X[1], y=MAIN_ROW_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=1/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
-        self.combobox_entry_validation(self.pitch_rate_Option, self.pitch_rate_var, REG_TIME_PITCH, TIME_PITCH)
+        self.combobox_entry_validation(self.pitch_rate_Option, self.pitch_rate_var, REG_PITCH, TIME_PITCH)
 
         ### SHARED SETTINGS ###
         
@@ -1450,8 +1454,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         EXTENSIONS = (('.aes', '.txt', '.tmp'))
         
         try:
-            if os.path.isfile(f"{PATCH}{application_extension}"):
-                os.remove(f"{PATCH}{application_extension}")
+            if os.path.isfile(f"{current_patch}{application_extension}"):
+                os.remove(f"{current_patch}{application_extension}")
             
             if os.path.isfile(SPLASH_DOC):
                 os.remove(SPLASH_DOC)
@@ -1632,8 +1636,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 else:
                     for i in model.secondary_model_4_stem_model_names_list:
                         self.demucs_secondary_model_names.append(i)
-        
-        print('self.demucs_pre_proc_model_name: ', self.demucs_pre_proc_model_name)
         
         self.all_models = self.vr_primary_model_names + self.mdx_primary_model_names + self.demucs_primary_model_names + self.vr_secondary_model_names + self.mdx_secondary_model_names + self.demucs_secondary_model_names + self.demucs_pre_proc_model_name
       
@@ -2275,6 +2277,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.download_key_Button = ttk.Button(settings_menu_download_center_Frame, image=self.key_img, command=lambda:self.pop_up_user_code_input())
         self.download_key_Button.grid(row=15,column=0,padx=0,pady=5)
                             
+        self.manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text='Try Manual Download', command=self.menu_manual_downloads)
+        self.manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
+
         self.download_center_Buttons = (self.model_download_vr_Button,
                                         self.model_download_mdx_Button,
                                         self.model_download_demucs_Button,
@@ -2292,17 +2297,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.online_data_refresh()
         self.download_list_state()
         
-        def load_manual_download_button():
-            manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text='Try Manual Download', command=self.menu_manual_downloads)
-            manual_download_Button.grid(row=16,column=0,padx=0,pady=5)
-            settings_menu_download_center_Frame.update()
-        
         self.menu_placement(settings_menu, "Settings Guide", is_help_hints=True, close_function=lambda:close_window())
 
         if self.is_online:
             self.download_list_fill()
-        else:
-            load_manual_download_button()
 
         if select_tab_2:
             tabControl.select(tab2)
@@ -2315,7 +2313,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.is_menu_settings_open = False
             settings_menu.destroy()
 
-        settings_menu.bind("<m>", lambda e:load_manual_download_button())
         settings_menu.protocol("WM_DELETE_WINDOW", close_window)
 
     def menu_advanced_vr_options(self):
@@ -2806,7 +2803,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         appplication_license_Text_scroll.configure(command=appplication_license_Text.yview)
         appplication_license_Text.grid(row=4,sticky=W)
         appplication_license_Text_scroll.grid(row=4, column=1, sticky=NS)
-        appplication_license_Text.insert("insert", LICENSE_TEXT(VERSION, PATCH))
+        appplication_license_Text.insert("insert", LICENSE_TEXT(VERSION, current_patch))
         appplication_license_Text.configure(state=tk.DISABLED)
         
         application_change_log_tab_Frame = Frame(tab4)
@@ -2818,6 +2815,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         else:
             change_log_text = 'Change log unavailable.'
         
+        change_log_text = f"{CHANGE_LOG_HEADER(current_patch)}\n\n{change_log_text}".replace("~", "•")
+
         application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='UVR Change Log', font=(MAIN_FONT_NAME, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
         application_change_log_Label.grid(row=0,column=0,padx=0,pady=25)
         
@@ -3463,9 +3462,23 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             try:
                 self.online_data = json.load(urllib.request.urlopen(DOWNLOAD_CHECKS))
                 self.is_online = True
-                self.lastest_version = self.online_data["current_version"]
-                
-                if self.lastest_version == PATCH:
+
+                if user_refresh:
+                    self.download_list_state()
+                    self.download_list_fill()
+                    for widget in self.download_center_Buttons:widget.configure(state=tk.NORMAL)
+                    
+                if refresh_list_Button:
+                    self.download_progress_info_var.set('Download List Refreshed!')
+
+                if OPERATING_SYSTEM=="Darwin":
+                    self.lastest_version = self.online_data["current_version_mac"]
+                elif OPERATING_SYSTEM=="Linux":
+                    self.lastest_version = self.online_data["current_version_linux"]
+                else:
+                    self.lastest_version = self.online_data["current_version"]
+                    
+                if self.lastest_version == current_patch:
                     self.app_update_status_Text_var.set('UVR Version Current')
                 else:
                     is_new_update = True
@@ -3475,18 +3488,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
                     
                     if not user_refresh:
-                        self.new_update_notify(self.lastest_version)
+                        self.command_Text.write(f"\n\nNew Update Found: {self.lastest_version}\n\nClick the update button in the \"Settings\" menu to download and install!")
 
-                if user_refresh:
-                    self.download_list_state()
-                    self.download_list_fill()
-                    for widget in self.download_center_Buttons:widget.configure(state=tk.NORMAL)
-                    
-                if refresh_list_Button:
-                    self.download_progress_info_var.set('Download List Refreshed!')
-                    
                 self.download_model_settings()
-                    
+
             except Exception as e:
                 self.error_log_var.set(error_text('Online Data Refresh', e))
                 self.offline_state_set()
@@ -3667,6 +3672,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         for widget in self.download_center_Buttons:widget.configure(state=tk.DISABLED)
         self.refresh_list_Button.configure(state=tk.DISABLED)
+        self.manual_download_Button.configure(state=tk.DISABLED)
         
         is_demucs_newer = [True for x in DEMUCS_NEWER_ARCH_TYPES if x in self.selected_download_var.get()]
 
@@ -3725,6 +3731,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         for widget in self.download_center_Buttons:widget.configure(state=tk.NORMAL)
         self.refresh_list_Button.configure(state=tk.NORMAL)
+        self.manual_download_Button.configure(state=tk.NORMAL)
         
         self.enable_tabs()
         self.stop_download_Button_DISABLE()
@@ -4493,7 +4500,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         inputPaths = self.inputPaths
         inputPath_total_len = len(inputPaths)
         is_model_sample_mode = self.model_sample_mode_var.get()
-        
         try:
             if self.chosen_process_method_var.get() == ENSEMBLE_MODE:
                 model, ensemble = self.assemble_model_data(), Ensembler()
@@ -4528,19 +4534,19 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
                 for current_model_num, current_model in enumerate(model, start=1):
                     self.iteration += 1
-           
+
                     if is_ensemble:
                         self.command_Text.write(f'Ensemble Mode - {current_model.model_basename} - Model {current_model_num}/{len(model)}{NEW_LINES}')
 
                     model_name_text = f'({current_model.model_basename})' if not is_ensemble else ''
                     self.command_Text.write(base_text + f'Loading model {model_name_text}...')
-                    
+
                     progress_kwargs = {'model_count': true_model_count,
                                        'total_files': inputPath_total_len}
 
                     set_progress_bar = lambda step, inference_iterations=0:self.process_update_progress(**progress_kwargs, step=(step + (inference_iterations)))
                     write_to_console = lambda progress_text, base_text=base_text:self.command_Text.write(base_text + progress_text)
-                    
+
                     audio_file_base = f"{file_num}_{os.path.splitext(os.path.basename(audio_file))[0]}"
                     audio_file_base = audio_file_base if not self.is_testing_audio_var.get() or is_ensemble else f"{round(time.time())}_{audio_file_base}"
                     audio_file_base = audio_file_base if not is_ensemble else f"{audio_file_base}_{current_model.model_basename}"
@@ -4563,14 +4569,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                                     'list_all_models': self.all_models,
                                     'is_ensemble_master': is_ensemble,
                                     'is_4_stem_ensemble': True if self.ensemble_main_stem_var.get() == FOUR_STEM_ENSEMBLE and is_ensemble else False}
-
                     if current_model.process_method == VR_ARCH_TYPE:
                         seperator = SeperateVR(current_model, process_data)
                     if current_model.process_method == MDX_ARCH_TYPE:
                         seperator = SeperateMDX(current_model, process_data)
                     if current_model.process_method == DEMUCS_ARCH_TYPE:
                         seperator = SeperateDemucs(current_model, process_data)
-
                     seperator.seperate()
                     
                     if is_ensemble:
@@ -4640,7 +4644,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         for key, value in DEFAULT_DATA.items():
             if not key in data.keys():
                 data = {**data, **{key:value}}
-                print('missing setting: ', key)
         
         ## ADD_BUTTON
         self.chosen_process_method_var = tk.StringVar(value=data['chosen_process_method'])
@@ -4748,7 +4751,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         for key, value in DEFAULT_DATA.items():
             if not key in loaded_setting.keys():
                 loaded_setting = {**loaded_setting, **{key:value}}
-                print('missing setting: ', key)
         
         if not process_method or process_method == VR_ARCH_PM:
             self.vr_model_var.set(loaded_setting['vr_model'])
@@ -4986,7 +4988,8 @@ def vip_downloads(password, link_type=VIP_REPO):
             length=32,
             salt=link_type[0],
             iterations=390000,)
-
+  
+  
         key = base64.urlsafe_b64encode(kdf.derive(bytes(password, 'utf-8')))
         f = Fernet(key)
 
@@ -5000,7 +5003,8 @@ if __name__ == "__main__":
         from ctypes import windll, wintypes
         windll.user32.SetThreadDpiAwarenessContext(wintypes.HANDLE(-1))
     except Exception as e:
-        print(e)
+        if OPERATING_SYSTEM == 'Windows':
+            print(e)
 
     root = MainWindow()
     root.update_checkbox_text()

@@ -37,7 +37,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
 - Please Note:
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
-    - This .app is intended for those running macOS BigSur and above.
+    - This bundle is intended for those running macOS BigSur and above.
     - Application functionality for systems running macOS Catalina or lower.
     - Application functionality for older or budget Mac systems is not guaranteed.
 

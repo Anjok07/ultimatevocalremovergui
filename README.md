@@ -22,7 +22,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 ### Windows Installation
 
 - Please Note:
-    - You must install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
+    - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
@@ -38,7 +38,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 - Please Note:
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
     - This bundle is intended for those running macOS BigSur and above.
-    - Application functionality for systems running macOS Catalina or lower.
+    - Application functionality for systems running macOS Catalina or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
 
 - Download the UVR dmg for MacOS via one of the links below:

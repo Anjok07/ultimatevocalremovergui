@@ -29,7 +29,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
 - Download the UVR installer for Windows via the link below:
     - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file/jc1r7azhabv0z1v/UVR_v5.5.0_setup.exe/file)
+    - [Main Download Link mirror](https://www.mediafire.com/file/ov1a4s91kwrith1/UVR_v5.5.0_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
     - If you already have UVR installed you can install this package over it or download it straight from the application.
 

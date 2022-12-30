@@ -3,16 +3,24 @@ import numpy as np
 import soundfile as sf
 import math
 import random
-import pyrubberband
 import math
 import platform
+from . import pyrb
 
 OPERATING_SYSTEM = platform.system()
+SYSTEM_ARCH = platform.platform()
+SYSTEM_PROC = platform.processor()
+ARM = 'arm'
 
 if OPERATING_SYSTEM == 'Windows':
-    wav_resolution = "sinc_fastest"
+    from pyrubberband import pyrb
 else:
-    wav_resolution = "polyphase"
+    from . import pyrb
+
+if OPERATING_SYSTEM == 'Darwin':
+    wav_resolution = "sinc_fastest" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else 'polyphase'
+else:
+    wav_resolution = "sinc_fastest"
 
 MAX_SPEC = 'Max Spec'
 MIN_SPEC = 'Min Spec'
@@ -547,18 +555,18 @@ def to_shape_minimize(x: np.ndarray, target_shape):
     return np.pad(x, tuple(padding_list), mode='constant')
 
 def augment_audio(export_path, audio_file, rate, is_normalization, wav_type_set, save_format=None, is_pitch=False):
-    
+    print('Rate: ', rate)
     wav, sr = librosa.load(audio_file, sr=44100, mono=False)
 
     if wav.ndim == 1:
         wav = np.asfortranarray([wav,wav])
 
     if is_pitch:
-        wav_1 = pyrubberband.pyrb.pitch_shift(wav[0], sr, rate, rbargs=None)
-        wav_2 = pyrubberband.pyrb.pitch_shift(wav[1], sr, rate, rbargs=None)
+        wav_1 = pyrb.pitch_shift(wav[0], sr, rate, rbargs=None)
+        wav_2 = pyrb.pitch_shift(wav[1], sr, rate, rbargs=None)
     else:
-        wav_1 = pyrubberband.pyrb.time_stretch(wav[0], sr, rate, rbargs=None)
-        wav_2 = pyrubberband.pyrb.time_stretch(wav[1], sr, rate, rbargs=None)
+        wav_1 = pyrb.time_stretch(wav[0], sr, rate, rbargs=None)
+        wav_2 = pyrb.time_stretch(wav[1], sr, rate, rbargs=None)
 
     if wav_1.shape > wav_2.shape:
         wav_2 = to_shape(wav_2, wav_1.shape)

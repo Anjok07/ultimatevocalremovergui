@@ -63,7 +63,7 @@ class ImagePath():
         credits_path = os.path.join(img_path, 'credits.png')
         donate_path = os.path.join(img_path, 'donate.png')
         download_path = os.path.join(img_path, 'download.png')
-        efile_path = os.path.join(img_path, 'file.png')
+        efile_path = os.path.join(img_path, 'File.png')
         help_path = os.path.join(img_path, 'help.png')
         key_path = os.path.join(img_path, 'key.png')
         stop_path = os.path.join(img_path, 'stop.png')

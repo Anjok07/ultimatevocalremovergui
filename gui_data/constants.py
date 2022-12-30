@@ -1038,16 +1038,16 @@ elif OPERATING_SYSTEM=="Linux":
    LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running Linux Ubuntu 18.04+.\n' +\
                               '• Application functionality for systems running other Linux platforms is not guaranteed.\n' +\
                               '• Application functionality for older or budget systems is not guaranteed.\n\n'
-   FONT_SIZE_F1 = 13
-   FONT_SIZE_F2 = 11
-   FONT_SIZE_F3 = 12
-   FONT_SIZE_0 = 9
-   FONT_SIZE_1 = 11
-   FONT_SIZE_2 = 11
-   FONT_SIZE_3 = 12
-   FONT_SIZE_4 = 13
-   FONT_SIZE_5 = 14
-   FONT_SIZE_6 = 17
+   FONT_SIZE_F1 = 10
+   FONT_SIZE_F2 = 8
+   FONT_SIZE_F3 = 9
+   FONT_SIZE_0 = 7
+   FONT_SIZE_1 = 8
+   FONT_SIZE_2 = 9
+   FONT_SIZE_3 = 10
+   FONT_SIZE_4 = 11
+   FONT_SIZE_5 = 12
+   FONT_SIZE_6 = 15
    HELP_HINT_CHECKBOX_WIDTH = 13
    MDX_CHECKBOXS_WIDTH = 14
    VR_CHECKBOXS_WIDTH = 16
@@ -1121,10 +1121,8 @@ MAC_DND_CHECK = ('/Users/',
                  '/Applications/',
                  '/Library/',
                  '/System/')
-LINUX_DND_CHECK = ('/Users/',
-                 '/Applications/'
-                 '/Library/',
-                 '/System/')
+LINUX_DND_CHECK = ('/home/',
+                   '/usr/')
 WINDOWS_DND_CHECK = ('A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:', 'J:', 'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:', 'T:', 'U:', 'V:', 'W:', 'X:', 'Y:', 'Z:')
 
 # INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'

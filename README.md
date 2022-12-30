@@ -17,32 +17,57 @@ This application uses state-of-the-art source separation models to remove vocals
 
 ## Installation
 
+These bundles contain the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites are required.
+
 ### Windows Installation
 
-This installation bundle contains the UVR interface, Python, PyTorch, and other dependencies needed to run the application effectively. No prerequisites are required.
-
 - Please Note:
+    - You must install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
 
-- Download the UVR installer via the link below:
+- Download the UVR installer for Windows via the link below:
     - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.0_setup.exe)
     - [Main Download Link mirror](https://www.mediafire.com/file/jc1r7azhabv0z1v/UVR_v5.5.0_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
-    - Please download the patch straight through the application.
-- **Optional**
-    - Additional models and application patches can be downloaded via the "Settings" menu within the application.
-
-- **Please Note:** Please install UVR to the main C:\ drive if you use the Windows installer. Installing UVR to a secondary drive will cause application instability.
+    - If you already have UVR installed you can install this package over it or download it straight from the application.
 
 ### MacOS Installation
 
-<details id="MacInstall">
-  <summary>See Mac Installation Instructions</summary>
-<img src="https://github.com/Anjok07/ultimatevocalremovergui/blob/master/gui_data/img/UVR_v5_5_MacOS.png?raw=true" />
+- Please Note:
+    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
+    - This .app is intended for those running macOS BigSur and above.
+    - Application functionality for systems running macOS Catalina or lower.
+    - Application functionality for older or budget Mac systems is not guaranteed.
 
-**A completed stand alone version will be released soon.**
+- Download the UVR dmg for MacOS via one of the links below:
+    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS.dmg)
+    - [Main Download Link mirror](https://www.mediafire.com/file/xai2l5jsxugajgi/Ultimate_Vocal_Remover_v5_5_MacOS.dmg/file)
+
+<details id="CannotOpen">
+  <summary>MacOS Users: Having Trouble Opening UVR?</summary>
+
+> Due to Apples strict application security, you may need to follow these steps to open UVR.
+>
+> First, run the following command via Terminal.app to allow applications to run from all sources (it's recommended that you re-enable this once UVR opens properly.)
+> 
+> ```bash
+> sudo spctl --master-disable
+> ```
+> 
+> Second, run the following command to bypass Notarization: 
+> 
+> ```bash
+> sudo xattr -rd com.apple.quarantine /Applications/Ultimate\ Vocal\ Remover.app
+> ```
+
+</details>
+
+<details id="MacInstall">
+  <summary>Manual MacOS Installation</summary>
+
+### Manual MacOS Installation
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 - Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
@@ -64,8 +89,7 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 **Please Note:**
 
-- If you are running a MacBook Pro running a M1/M2 processor, you can get MPS acceleration on the VR Models. It currently doesn't work with MDX-Net or Demucs. This version of UVR has been coded to automatically detect if M1/M2 processing is available and should work out of the box if it is and allow you to toggle the "GPU Conversion" checkbox.
-- Drag-n-drop currently does not work for MacOS or Linux. It might come in a future update.
+- For manual installs, drag-n-drop currently does not work for Macs running M1.
 - So far everthing else is working as expected.
 
 </details>

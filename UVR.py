@@ -1843,6 +1843,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             window.bind(right_click_button, lambda e:right_click_menu(e))
             
         if pop_up:
+            window.attributes('-topmost', 'true') if OPERATING_SYSTEM == "Linux" else None
             window.grab_set()
             root.wait_window(window)
         

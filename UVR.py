@@ -1361,8 +1361,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         self.chosen_audio_tool_align = tk.BooleanVar(value=True)
         add_align = lambda e:(self.chosen_audio_tool_Option['menu'].add_radiobutton(label=ALIGN_INPUTS, command=tk._setit(self.chosen_audio_tool_var, ALIGN_INPUTS)), self.chosen_audio_tool_align.set(False)) if self.chosen_audio_tool_align else None
-        self.bind("<a> <s> <\>", add_align)
-        
+
         if is_dnd_compatible:
             self.filePaths_saveTo_Button.drop_target_register(DND_FILES)
             self.filePaths_saveTo_Entry.drop_target_register(DND_FILES)

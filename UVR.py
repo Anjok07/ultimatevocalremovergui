@@ -3001,17 +3001,15 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.menu_sub_LABEL_SET(manual_downloads_link_Frame, 'Download Link(s)').grid(row=0,column=0,padx=0,pady=3)
             
             if VR_ARCH_TYPE in main_selection:
-                placement_text = VR_PLACEMENT_TEXT
                 main_selection = FULL_DOWNLOAD_LIST_VR[main_selection]
+                model_dir = VR_MODELS_DIR
             elif MDX_ARCH_TYPE in main_selection:
-                placement_text = MDX_PLACEMENT_TEXT
                 main_selection = FULL_DOWNLOAD_LIST_MDX[main_selection]
+                model_dir = MDX_MODELS_DIR
             elif DEMUCS_ARCH_TYPE in main_selection:
-                placement_text = DEMUCS_V3_V4_PLACEMENT_TEXT if 'v3' in main_selection or 'v4' in main_selection else DEMUCS_PLACEMENT_TEXT
+                model_dir = DEMUCS_NEWER_REPO_DIR if 'v3' in main_selection or 'v4' in main_selection else DEMUCS_MODELS_DIR
                 main_selection = FULL_DOWNLOAD_LIST_DEMUCS[main_selection]
-            
-            info_text_var.set(placement_text)
-            
+
             if type(main_selection) is dict:
                 for links in main_selection.values():
                     MAIN_ROW += 1
@@ -3023,7 +3021,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 link_button = ttk.Button(manual_downloads_link_Frame, text="Open Link to Model", command=lambda:webbrowser.open_new_tab(link))
                 link_button.grid(row=1,column=0,padx=0,pady=10)
         
-            self.menu_sub_LABEL_SET(manual_downloads_link_Frame, '').grid(row=MAIN_ROW+2,column=0,padx=0,pady=10)
+            self.menu_sub_LABEL_SET(manual_downloads_link_Frame, 'Selected Model Placement Path').grid(row=MAIN_ROW+2,column=0,padx=0,pady=3)
+            ttk.Button(manual_downloads_link_Frame, text="Open Model Directory", command=lambda:OPEN_FILE_func(model_dir)).grid(row=MAIN_ROW+3,column=0,padx=0,pady=5)
         
         manual_downloads_menu_Frame = self.menu_FRAME_SET(manual_downloads_menu)
         manual_downloads_menu_Frame.grid(row=0,column=0,padx=0,pady=0)  
@@ -3055,9 +3054,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             manual_downloads_menu_select_DEMUCS_Option.add_radiobutton(label=model_selection_demucs, variable=model_selection_var, command=get_links)
             
         manual_downloads_menu_select_Option.grid(row=2,column=0,padx=0,pady=5)
-        
-        tk.Label(manual_downloads_menu_Frame, textvariable=info_text_var, font=(MAIN_FONT_NAME, f"{FONT_SIZE_2}"), foreground='#868687', justify="left").grid(row=3,column=0,padx=0,pady=5)
-        
+	
         self.menu_placement(manual_downloads_menu, "Manual Downloads", pop_up=True, close_function=lambda:manual_downloads_menu.destroy())
         
     def pop_up_save_current_settings(self):

@@ -383,7 +383,7 @@ MDX_NAME_SELECT = {
 DEMUCS_NAME_SELECT = {
                 'tasnet.th': 'v1 | Tasnet',
                 'tasnet_extra.th': 'v1 | Tasnet_extra',
-                'demucs.th': 'v1 | Demucs',
+                'demucs.th': 'v1 | Demucs_base',
                 'demucs_extra.th': 'v1 | Demucs_extra',
                 'light.th': 'v1 | Light',
                 'light_extra.th': 'v1 | Light_extra',
@@ -394,8 +394,8 @@ DEMUCS_NAME_SELECT = {
                 'light_extra.th.gz': "v1 | Light_extra.gz'",
                 'tasnet-beb46fac.th': 'v2 | Tasnet',
                 'tasnet_extra-df3777b2.th': 'v2 | Tasnet_extra',
-		'demucs-e07c671f.th': 'v2 | Demucs',
                 'demucs48_hq-28a1282c.th': 'v2 | Demucs48_hq',
+                'demucs-e07c671f.th': 'v2 | Demucs_base',
                 'demucs_extra-3646af93.th': 'v2 | Demucs_extra',
                 'demucs_unittest-09ebc15f.th': 'v2 | Demucs_unittest',
                 'mdx.yaml': 'v3 | mdx',

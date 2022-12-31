@@ -37,8 +37,8 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
 - Please Note:
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
-    - This bundle is intended for those running macOS BigSur and above.
-    - Application functionality for systems running macOS Catalina or lower is not guaranteed.
+    - This bundle is intended for those running macOS Catalina and above.
+    - Application functionality for systems running macOS Mojave or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
 
 - Download the UVR dmg for MacOS via one of the links below:
@@ -131,7 +131,7 @@ pip3 install -r requirements.txt
 
 ### Patch Version: 
 
-- UVR_Patch_12_29_22_07_20
+- UVR_Patch_12_31_22_4_14
 
 ### Fixes & Changes:
 

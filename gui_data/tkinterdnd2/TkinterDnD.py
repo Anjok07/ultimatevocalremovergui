@@ -28,6 +28,7 @@ import tkinter
 from tkinter import tix
 
 TkdndVersion = None
+ARM = 'arm'
 
 def _require(tkroot):
     '''Internal function.'''
@@ -37,7 +38,7 @@ def _require(tkroot):
         import platform
 
         if platform.system()=="Darwin":
-            tkdnd_platform_rep = "osx64"
+            tkdnd_platform_rep = "osx_arm" if platform.processor() == ARM or ARM in platform.platform() else "osx64"
         elif platform.system()=="Linux":
             tkdnd_platform_rep = "linux64"
         elif platform.system()=="Windows":

@@ -83,7 +83,7 @@ pip3 install -r requirements.txt
 cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile_arm64.dylib /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile.dylib
 ```
 
-- Once everything is done installing, download and unzip the archive containing ffmpeg for MacOS to the UVR directory. Archive [download here](https://www.mediafire.com/file/zl0ylz150ouh366/ffmpeg_mac.zip/file)
+- Once everything is done installing, download the correct FFmpeg binary for your system [here](http://www.osxexperts.net) and place it into the main application directory.
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
 

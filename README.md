@@ -48,7 +48,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file/2zz2ph8yt0nfc7y/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file/zfy86xjww01093f/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>

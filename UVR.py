@@ -63,7 +63,6 @@ banner_placement = -2
 
 if OPERATING_SYSTEM=="Darwin":
     OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
-    is_dnd_compatible = False if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else True
     dnd_path_check = MAC_DND_CHECK
     banner_placement = -8
     current_patch = PATCH_MAC

@@ -18,7 +18,7 @@ else:
     from . import pyrb
 
 if OPERATING_SYSTEM == 'Darwin':
-    wav_resolution = "sinc_fastest" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else 'polyphase'
+    wav_resolution = "polyphase" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else 'sinc_fastest'
 else:
     wav_resolution = "sinc_fastest"
 

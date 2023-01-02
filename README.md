@@ -121,7 +121,7 @@ pip3 install -r requirements.txt
 
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
 - This application is only compatible with 64-bit platforms. 
-- This application relies on Sox - Sound Exchange for Noise Reduction.
+- This application relies on the Rubber Band library for the Time-Stretch and Pitch-Shift options.
 - This application relies on FFmpeg to process non-wav audio files.
 - The application will automatically remember your settings when closed.
 - Conversion times will significantly depend on your hardware. 

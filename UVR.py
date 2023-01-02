@@ -132,7 +132,7 @@ def load_data() -> dict:
 
 def load_model_hash_data(dictionary):
     '''Get the model hash dictionary'''
-    
+
     with open(dictionary) as d:
         data = d.read()
 
@@ -3493,8 +3493,13 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     is_new_update = True
                     self.app_update_status_Text_var.set(f"Update Found: {self.lastest_version}")
                     self.app_update_button_Text_var.set('Click Here to Update')
-                    self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
-                    self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
+                    if OPERATING_SYSTEM == "Windows":
+                        self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
+                        self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
+                    elif OPERATING_SYSTEM == "Darwin":
+                        self.download_update_link_var.set(UPDATE_MAC_ARM_REPO if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else UPDATE_MAC_X86_64_REPO)
+                    elif OPERATING_SYSTEM == "Linux":
+                        self.download_update_link_var.set(UPDATE_LINUX_REPO)
                     
                     if not user_refresh:
                         self.command_Text.write(f"\n\nNew Update Found: {self.lastest_version}\n\nClick the update button in the \"Settings\" menu to download and install!")

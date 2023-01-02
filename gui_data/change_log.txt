@@ -15,11 +15,8 @@ Performance:
 
 MacOS M1 Notes:
 
-~ The GPU Conversion checkbox will enable MPS for GPU acceleration. However, only
-   the following models are compatible with it:
-    ~ All VR Architecture models
-    ~ All Demucs v1 and v2 models (except Tasnet).
-    ~ All other models are not supported at this time.
+~ The GPU Conversion checkbox will enable MPS for GPU acceleration. However,
+   only the VR Architecture models are compatible with it at this time.
 
 New Options:
 

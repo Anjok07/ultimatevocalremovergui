@@ -6,7 +6,7 @@ Fixes & Changes:
 ~ Fixed low-resolution icon.
 ~ Added the ability to download models manually if the application can't connect 
    to the internet.
-~ Drag-n-drop is functional across all os platforms via the stand-alone installs.
+~ Drag-n-drop is functional across all os platforms.
 
 Performance:
 
@@ -43,7 +43,7 @@ New Options:
 ~ "Sample Mode" option - Allows the user to process only part of a track to sample 
    settings or a model without running a full conversion.
     ~ The number in the parentheses is the current number of seconds the generated 
-      sample will be.
+       sample will be.
     ~ You can choose the number of seconds to extract from the track in the "Additional 
        Settings" menu.
 

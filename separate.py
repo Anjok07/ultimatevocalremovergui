@@ -373,10 +373,7 @@ class SeperateDemucs(SeperateAttributes):
             self.start_inference()
 
             if self.is_gpu_conversion >= 0:
-                if OPERATING_SYSTEM == 'Darwin':
-                    self.device = torch.device('mps' if torch.backends.mps.is_available() and self.demucs_version in [DEMUCS_V1, DEMUCS_V2] and 'Tasnet' not in self.model_name else 'cpu')
-                else:
-                    self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
+                self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
             else:
                 self.device = torch.device('cpu')
             

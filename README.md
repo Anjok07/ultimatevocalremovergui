@@ -44,11 +44,11 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg)
-       - [Main Download Link mirror]()
+       - [Main Download Link mirror](https://www.mediafire.com/file/q5th373690xh4g9/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg)
-       - [Main Download Link mirror]()
+       - [Main Download Link mirror](https://www.mediafire.com/file/2zz2ph8yt0nfc7y/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>
@@ -91,11 +91,6 @@ cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packag
 - Once everything is done installing, download the correct FFmpeg binary for your system [here](http://www.osxexperts.net) and place it into the main application directory.
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
-
-**Please Note:**
-
-- For manual installs, drag-n-drop currently does not work for Macs running M1.
-- So far everthing else is working as expected.
 
 </details>
 

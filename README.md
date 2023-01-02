@@ -129,10 +129,6 @@ pip3 install -r requirements.txt
 
 ## Change Log
 
-### Patch Version: 
-
-- UVR_Patch_12_31_22_4_14
-
 ### Fixes & Changes:
 
 - The progress bar is now fully synced up with every process in the application.

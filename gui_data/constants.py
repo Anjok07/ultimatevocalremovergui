@@ -73,6 +73,12 @@ DONATE_LINK_PATREON = "https://www.patreon.com/uvr"
 #DOWNLOAD REPOS
 NORMAL_REPO = "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/"
 UPDATE_REPO = "https://github.com/TRvlvr/model_repo/releases/download/uvr_update_patches/"
+
+UPDATE_MAC_ARM_REPO = "https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg"
+UPDATE_MAC_X86_64_REPO = "https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg"
+UPDATE_LINUX_REPO = "https://github.com/Anjok07/ultimatevocalremovergui#linux-installation"
+UPDATE_REPO = "https://github.com/TRvlvr/model_repo/releases/download/uvr_update_patches/"
+
 ISSUE_LINK = 'https://github.com/Anjok07/ultimatevocalremovergui/issues/new'
 VIP_REPO = b'\xf3\xc2W\x19\x1foI)\xc2\xa9\xcc\xb67(Z\xf5',\
            b'gAAAAABjQAIQ-NpNMMxMedpKHHb7ze_nqB05hw0YhbOy3pFzuzDrfqumn8_qvraxEoUpZC5ZXC0gGvfDxFMqyq9VWbYKlA67SUFI_wZB6QoVyGI581vs7kaGfUqlXHIdDS6tQ_U-BfjbEAK9EU_74-R2zXjz8Xzekw=='
@@ -1014,8 +1020,8 @@ CHOOSE_SEMITONES_MAIN_LABEL = 'SEMITONES'
 GPU_CONVERSION_MAIN_LABEL = 'GPU Conversion'
 
 if OPERATING_SYSTEM=="Darwin":
-   LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running macOS BigSur and above.\n' +\
-                              '• Application functionality for systems running macOS Catalina or lower.\n' +\
+   LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running macOS Catalina and above.\n' +\
+                              '• Application functionality for systems running macOS Mojave or lower.\n' +\
                               '• Application functionality for older or budget Mac systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 13
    FONT_SIZE_F2 = 11

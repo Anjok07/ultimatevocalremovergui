@@ -33,6 +33,45 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 - Update Package instructions for those who have UVR already installed:
     - If you already have UVR installed you can install this package over it or download it straight from the application.
 
+<details id="WindowsManual">
+  <summary>Windows Manual Installation</summary>
+
+### Manual Windows Installation
+
+- Download and extract the repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
+- Download Python [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe)
+   - Make sure to check "Add python.exe to PATH" during the install
+- Run the following commands from the extracted repo directory:
+
+```
+python.exe -m pip install -r requirements.txt
+```
+
+If you have a compatible Nvidia GPU, run the following command:
+
+```
+python.exe -m pip install --upgrade torch --extra-index-url https://download.pytorch.org/whl/cu117
+```
+
+If you do not have FFmpeg or Rubber Band installed and want to avoid going through the process of installing them the long way, follow the instructions below.
+
+**FFmpeg Installation**
+
+- Download the precompiled build [here](https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip)
+- From the archive, extract the following file to the UVR application directory:
+   - ```ffmpeg-5.1.2-essentials_build/bin/ffmpeg.exe```
+
+**Rubber Band Installation**
+
+In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
+
+- Download the precompiled build [here](https://breakfastquay.com/files/releases/rubberband-3.1.2-gpl-executable-windows.zip)
+- From the archive, extract the following files to the UVR application directory:
+   - ```rubberband-3.1.2-gpl-executable-windows/rubberband.exe```
+   - ```rubberband-3.1.2-gpl-executable-windows/sndfile.dll```
+
+</details>
+
 ### MacOS Installation
 
 - Please Note:

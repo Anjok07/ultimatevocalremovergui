@@ -127,7 +127,17 @@ pip3 install -r requirements.txt
 cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile_arm64.dylib /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile.dylib
 ```
 
+**FFmpeg Installation**
+
 - Once everything is done installing, download the correct FFmpeg binary for your system [here](http://www.osxexperts.net) and place it into the main application directory.
+
+**Rubber Band Installation**
+
+In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
+
+- Download the precompiled build [here](https://breakfastquay.com/files/releases/rubberband-3.1.2-gpl-executable-windows.zip)
+- From the archive, extract the following files to the UVR/lib_v5 application directory:
+   - ```rubberband-3.1.2-gpl-executable-macos/rubberband```
 
 This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 2017 and is confirmed to be working on both.
 

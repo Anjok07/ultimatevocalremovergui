@@ -22,10 +22,10 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 ### Windows Installation
 
 - Please Note:
-    - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
     - This installer is intended for those running Windows 10 or higher. 
     - Application functionality for systems running Windows 7 or lower is not guaranteed.
     - Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.
+    - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
 
 - Download the UVR installer for Windows via the link below:
     - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.0_setup.exe)
@@ -36,10 +36,10 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 ### MacOS Installation
 
 - Please Note:
-    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
     - This bundle is intended for those running macOS Catalina and above.
     - Application functionality for systems running macOS Mojave or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
+    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
 
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:

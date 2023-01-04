@@ -35,6 +35,7 @@ torch==1.13.1
 tqdm
 urllib3==1.26.12
 wget==3.2
-PySoundFile==0.9.0.post1
+PySoundFile==0.9.0.post1; sys_platform != 'windows'
+SoundFile==0.9.0; sys_platform == 'windows'
 samplerate==0.1.0
 screeninfo==0.8.1

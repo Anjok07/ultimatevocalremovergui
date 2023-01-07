@@ -3525,7 +3525,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.current_thread.start()
                 
     def offline_state_set(self):
-        """Changes relevent settings and "Download Center" buttons if no internet connection is available"""
+        """Changes relevant settings and "Download Center" buttons if no internet connection is available"""
         
         self.app_update_status_Text_var.set(f'Version Status: {NO_CONNECTION}')
         self.download_progress_info_var.set(NO_CONNECTION) 

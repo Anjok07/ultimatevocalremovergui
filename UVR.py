@@ -2609,11 +2609,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         delete_entry_Option = ttk.OptionMenu(custom_ens_opt_frame, option_var)
         delete_entry_Option.grid(row=3,column=0,padx=20,pady=5)
         
-        is_save_all_outputs_ensemble_Option = ttk.Checkbutton(custom_ens_opt_frame, text='Save All Outputs', width=25, variable=self.is_save_all_outputs_ensemble_var)
+        is_save_all_outputs_ensemble_Option = ttk.Checkbutton(custom_ens_opt_frame, text='Save All Outputs', width=ENSEMBLE_CHECKBOXS_WIDTH, variable=self.is_save_all_outputs_ensemble_var)
         is_save_all_outputs_ensemble_Option.grid(row=4,column=0,padx=0,pady=0)
         self.help_hints(is_save_all_outputs_ensemble_Option, text=IS_SAVE_ALL_OUTPUTS_ENSEMBLE_HELP)
 
-        is_append_ensemble_name_Option = ttk.Checkbutton(custom_ens_opt_frame, text='Append Ensemble Name', width=25, variable=self.is_append_ensemble_name_var) 
+        is_append_ensemble_name_Option = ttk.Checkbutton(custom_ens_opt_frame, text='Append Ensemble Name', width=ENSEMBLE_CHECKBOXS_WIDTH, variable=self.is_append_ensemble_name_var) 
         is_append_ensemble_name_Option.grid(row=5,column=0,padx=0,pady=0)
         self.help_hints(is_append_ensemble_name_Option, text=IS_APPEND_ENSEMBLE_NAME_HELP)
 

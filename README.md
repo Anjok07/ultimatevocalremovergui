@@ -39,7 +39,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 ### Manual Windows Installation
 
 - Download and extract the repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download Python [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe)
+- Download and install Python [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe)
    - Make sure to check "Add python.exe to PATH" during the install
 - Run the following commands from the extracted repo directory:
 
@@ -114,7 +114,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 ### Manual MacOS Installation
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
+- Download and install Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
 - From the saved directory run the following - 
 
 ```
@@ -168,7 +168,9 @@ pip3 install -r requirements.txt
 
 ### Other Application Notes
 
+- Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
+- AMD Radeon GPUs are not supported at this time.
 - This application is only compatible with 64-bit platforms. 
 - This application relies on the Rubber Band library for the Time-Stretch and Pitch-Shift options.
 - This application relies on FFmpeg to process non-wav audio files.

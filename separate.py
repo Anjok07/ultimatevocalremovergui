@@ -675,7 +675,7 @@ class SeperateVR(SeperateAttributes):
             if d == bands_n: # high-end band
                 X_wave[d], _ = librosa.load(self.audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
                     
-                if not X_wave[d] and self.audio_file.endswith('.mp3'):
+                if not np.any(X_wave[d]) and self.audio_file.endswith('.mp3'):
                     X_wave[d] = rerun_mp3(self.audio_file, bp['sr'])
 
                 if X_wave[d].ndim == 1:
@@ -878,7 +878,7 @@ def prepare_mix(mix, chunk_set, margin_set, mdx_net_cut=False, is_missing_mix=Fa
 
     print('mix: ', mix)
 
-    if not mix and audio_path.endswith('.mp3'):
+    if not np.any(mix) and audio_path.endswith('.mp3'):
         mix = rerun_mp3(audio_path)
         print('mix after fix: ', mix)
 

@@ -79,15 +79,15 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
     - Application functionality for systems running macOS Mojave or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
-
+    
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file/8x5g7z38qt48c18/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file/n6gkjo2l4v51ro2/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file/zfy86xjww01093f/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file/bcyxhy9ygxy8ks5/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>

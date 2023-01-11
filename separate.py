@@ -12,6 +12,7 @@ from lib_v5.vr_network import nets_new
 #from lib_v5.vr_network.model_param_init import ModelParameters
 from pathlib import Path
 from gui_data.constants import *
+import audioread
 import gzip
 import librosa
 import math
@@ -672,9 +673,11 @@ class SeperateVR(SeperateAttributes):
                 wav_resolution = bp['res_type']
         
             if d == bands_n: # high-end band
-                X_wave[d], _ = librosa.load(
-                    self.audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
+                X_wave[d], _ = librosa.load(self.audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
                     
+                if not X_wave[d] and self.audio_file.endswith('.mp3'):
+                    X_wave[d] = rerun_mp3(self.audio_file, bp['sr'])
+
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else: # lower bands
@@ -865,12 +868,19 @@ def gather_sources(primary_stem_name, secondary_stem_name, secondary_sources: di
         
 def prepare_mix(mix, chunk_set, margin_set, mdx_net_cut=False, is_missing_mix=False):
 
+    audio_path = mix
     samplerate = 44100
-
+    print('mix first: ', mix)
     if not isinstance(mix, np.ndarray):
         mix, samplerate = librosa.load(mix, mono=False, sr=44100)
     else:
         mix = mix.T
+
+    print('mix: ', mix)
+
+    if not mix and audio_path.endswith('.mp3'):
+        mix = rerun_mp3(audio_path)
+        print('mix after fix: ', mix)
 
     if mix.ndim == 1:
         mix = np.asfortranarray([mix,mix])
@@ -905,6 +915,13 @@ def prepare_mix(mix, chunk_set, margin_set, mdx_net_cut=False, is_missing_mix=Fa
         segmented_mix = get_segmented_mix()
         raw_mix = get_segmented_mix(chunk_set=0) if mdx_net_cut else mix
         return segmented_mix, raw_mix, samplerate
+
+def rerun_mp3(audio_file, sample_rate=44100):
+
+    with audioread.audio_open(audio_file) as f:
+        track_length = int(f.duration)
+
+    return librosa.load(audio_file, duration=track_length, mono=False, sr=sample_rate)[0]
 
 def save_format(audio_path, save_format, mp3_bit_set):
     

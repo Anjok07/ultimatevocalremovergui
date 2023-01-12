@@ -870,17 +870,14 @@ def prepare_mix(mix, chunk_set, margin_set, mdx_net_cut=False, is_missing_mix=Fa
 
     audio_path = mix
     samplerate = 44100
-    print('mix first: ', mix)
+
     if not isinstance(mix, np.ndarray):
         mix, samplerate = librosa.load(mix, mono=False, sr=44100)
     else:
         mix = mix.T
 
-    print('mix: ', mix)
-
     if not np.any(mix) and audio_path.endswith('.mp3'):
         mix = rerun_mp3(audio_path)
-        print('mix after fix: ', mix)
 
     if mix.ndim == 1:
         mix = np.asfortranarray([mix,mix])

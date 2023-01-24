@@ -1021,7 +1021,7 @@ GPU_CONVERSION_MAIN_LABEL = 'GPU Conversion'
 
 if OPERATING_SYSTEM=="Darwin":
    LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running macOS Catalina and above.\n' +\
-                              '• Application functionality for systems running macOS Mojave or lower.\n' +\
+                              '• Application functionality for systems running macOS Mojave or lower is not guaranteed.\n' +\
                               '• Application functionality for older or budget Mac systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 13
    FONT_SIZE_F2 = 11
@@ -1067,7 +1067,7 @@ elif OPERATING_SYSTEM=="Linux":
     
 elif OPERATING_SYSTEM=="Windows":
    LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running Windows 10 or higher.\n' +\
-                              '• Application functionality for systems running Windows 7 or lower.\n' +\
+                              '• Application functionality for systems running Windows 7 or lower is not guaranteed.\n' +\
                               '• Application functionality for Intel Pentium & Celeron CPUs systems is not guaranteed.\n\n'
    FONT_SIZE_F1 = 10
    FONT_SIZE_F2 = 8

@@ -309,6 +309,8 @@ class SeperateMDX(SeperateAttributes):
                 _ort = self.onnx_model if not is_match_mix else None
                 adjust = 1
                 spek = self.stft(mix_waves)*adjust
+                # Remove DC offset
+                spek[:, :, :3, :] *= 0 
                 
                 if not is_match_mix:
                     if self.is_denoise:

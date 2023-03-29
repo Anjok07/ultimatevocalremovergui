@@ -12,7 +12,6 @@ import onnx
 import os
 import pickle  # Save Data
 import psutil
-from pyglet import font
 import pyperclip
 import base64
 import queue
@@ -51,6 +50,7 @@ from separate import SeperateDemucs, SeperateMDX, SeperateVR, save_format
 from playsound import playsound
 from tkinter import *
 from tkinter.tix import *
+from pyglet import font
 import re
 from typing import List
 import ssl
@@ -1620,7 +1620,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         return model, sources
   
-    def cached_source_model_list_check(self, model_list: list[ModelData]):
+    def cached_source_model_list_check(self, model_list: List[ModelData]):
 
         model: ModelData
         primary_model_names = lambda process_method:[model.model_basename if model.process_method == process_method else None for model in model_list]

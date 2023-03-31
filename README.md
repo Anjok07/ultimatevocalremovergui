@@ -1,5 +1,5 @@
-# Ultimate Vocal Remover GUI v5.5.0
-<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_5_5_0.png?raw=true" />
+# Ultimate Vocal Remover GUI v5.5.1
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_5_5_1.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
@@ -28,8 +28,8 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
     - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
 
 - Download the UVR installer for Windows via the link below:
-    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file/zxonv80mwpkegjm/UVR_v5.5.0_setup.exe/file)
+    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.1_setup.exe)
+    - [Main Download Link mirror](https://www.mediafire.com/file_premium/j8hkuvbic6nqy7i/UVR_v5.5.1_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
     - If you already have UVR installed you can install this package over it or download it straight from the application.
 
@@ -180,7 +180,18 @@ pip3 install -r requirements.txt
 
 ## Change Log
 
-### Fixes & Changes:
+### Most Recent Changes:
+- Fixed Download Center model list issue.
+- Fixed audio clip in ensemble mode.
+- Fixed output model name issue in ensemble mode.
+- Added "Batch Mode" for MDX-Net to increase preformance.
+  - Batch Mode is more memory efficent.
+  - Batch Mode produces the best output, regardless of batch size.
+- Added Batch Mode for VR Architecture.
+- Added Mixer Mode for Demucs.
+  - This option may improve separation for some 4-stem models.
+
+### Fixes & Changes going from UVR v5.4 to v5.5:
 
 - The progress bar is now fully synced up with every process in the application.
 - Drag-n-drop feature should now work every time.

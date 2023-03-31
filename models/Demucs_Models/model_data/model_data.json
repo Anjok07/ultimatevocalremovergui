@@ -1,0 +1,219 @@
+{
+    "0ddfc0eb5792638ad5dc27850236c246": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "26d308f91f3423a67dc69a6d12a8793d": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 9,
+        "mdx_n_fft_scale_set": 8192,
+        "primary_stem": "Other"
+    },
+    "2cdd429caac38f0194b133884160f2c6": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "2f5501189a2f6db6349916fabe8c90de": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "398580b6d5d973af3120df54cee6759d": {
+        "compensate": 1.75,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "488b3e6f8bd3717d9d7c428476be2d75": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "4910e7827f335048bdac11fa967772f9": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 7,
+        "mdx_n_fft_scale_set": 4096,
+        "primary_stem": "Drums"
+    },
+    "53c4baf4d12c3e6c3831bb8f5b532b93": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "5d343409ef0df48c7d78cce9f0106781": {
+        "compensate": 1.075,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "5f6483271e1efb9bfb59e4a3e6d4d098": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 9,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "65ab5919372a128e4167f5e01a8fda85": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 8192,
+        "primary_stem": "Other"
+    },
+    "6703e39f36f18aa7855ee1047765621d": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 9,
+        "mdx_n_fft_scale_set": 16384,
+        "primary_stem": "Bass"
+    },
+    "6b31de20e84392859a3d09d43f089515": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "867595e9de46f6ab699008295df62798": {
+        "compensate": 1.075,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "a3cd63058945e777505c01d2507daf37": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "b33d9b3950b6cbf5fe90a32608924700": {
+        "compensate": 1.075,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "c3b29bdce8c4fa17ec609e16220330ab": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 16384,
+        "primary_stem": "Bass"
+    },
+    "ceed671467c1f64ebdfac8a2490d0d52": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "d2a1376f310e4f7fa37fb9b5774eb701": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "d7bff498db9324db933d913388cba6be": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "d94058f8c7f1fae4164868ae8ae66b20": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Vocals"
+    },
+    "dc41ede5961d50f277eb846db17f5319": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 9,
+        "mdx_n_fft_scale_set": 4096,
+        "primary_stem": "Drums"
+    },
+    "e5572e58abf111f80d8241d2e44e7fa4": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "e7324c873b1f615c35c1967f912db92a": {
+        "compensate": 1.075,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "1c56ec0224f1d559c42fd6fd2a67b154": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "Instrumental"
+    },
+    "f2df6d6863d8f435436d8b561594ff49": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "b06327a00d5e5fbc7d96e1781bbdb596": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Instrumental"
+    },
+    "94ff780b977d3ca07c7a343dab2e25dd": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Instrumental"
+    },
+    "73492b58195c3b52d34590d5474452f6": {
+        "compensate": 1.075,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "1d64a6d2c30f709b8c9b4ce1366d96ee": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "Instrumental"
+    },
+    "203f2a3955221b64df85a41af87cf8f0": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Instrumental"
+    }
+}

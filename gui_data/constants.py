@@ -67,6 +67,10 @@ AUTO_SELECT = 'Auto'
 DOWNLOAD_CHECKS = "https://raw.githubusercontent.com/TRvlvr/application_data/main/filelists/download_checks.json"
 MDX_MODEL_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/mdx_model_data/model_data.json"
 VR_MODEL_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/vr_model_data/model_data.json"
+
+DEMUCS_MODEL_NAME_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/demucs_model_data/model_name_mapper.json"
+MDX_MODEL_NAME_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/mdx_model_data/model_name_mapper.json"
+
 DONATE_LINK_BMAC = "https://www.buymeacoffee.com/uvr5"
 DONATE_LINK_PATREON = "https://www.patreon.com/uvr"
 
@@ -87,8 +91,10 @@ NO_CODE = 'incorrect_code'
 #Extensions
 
 ONNX = '.onnx'
+CKPT = '.ckpt'
 YAML = '.yaml'
 PTH = '.pth'
+TH_EXT = '.th'
 JSON = '.json'
 
 #GUI Buttons
@@ -124,6 +130,7 @@ SYNTH_STEM = 'Synthesizer'
 STRINGS_STEM = 'Strings'
 WOODWINDS_STEM = 'Woodwinds'
 BRASS_STEM = 'Brass'
+WIND_INST_STEM = 'Wind Inst'
 NO_OTHER_STEM = 'No Other'
 NO_BASS_STEM = 'No Bass'
 NO_DRUM_STEM = 'No Drums'
@@ -132,6 +139,7 @@ NO_PIANO_STEM = 'No Piano'
 NO_SYNTH_STEM = 'No Synthesizer'
 NO_STRINGS_STEM = 'No Strings'
 NO_WOODWINDS_STEM = 'No Woodwinds'
+NO_WIND_INST_STEM = 'No Wind Inst'
 NO_BRASS_STEM = 'No Brass'
 PRIMARY_STEM = 'Primary Stem'
 SECONDARY_STEM = 'Secondary Stem'
@@ -176,6 +184,7 @@ STEM_SET_MENU = (VOCAL_STEM,
                  STRINGS_STEM, 
                  WOODWINDS_STEM, 
                  BRASS_STEM,
+                 WIND_INST_STEM,
                  NO_OTHER_STEM, 
                  NO_BASS_STEM, 
                  NO_DRUM_STEM, 
@@ -184,7 +193,8 @@ STEM_SET_MENU = (VOCAL_STEM,
                  NO_SYNTH_STEM, 
                  NO_STRINGS_STEM, 
                  NO_WOODWINDS_STEM,
-                 NO_BRASS_STEM)
+                 NO_BRASS_STEM,
+                 NO_WIND_INST_STEM)
 
 STEM_PAIR_MAPPER = {
             VOCAL_STEM: INST_STEM,
@@ -198,6 +208,7 @@ STEM_PAIR_MAPPER = {
             STRINGS_STEM: NO_STRINGS_STEM,
             WOODWINDS_STEM: NO_WOODWINDS_STEM,
             BRASS_STEM: NO_BRASS_STEM,
+            WIND_INST_STEM: NO_WIND_INST_STEM,
             NO_OTHER_STEM: OTHER_STEM,
             NO_BASS_STEM: BASS_STEM,
             NO_DRUM_STEM: DRUM_STEM,
@@ -207,7 +218,21 @@ STEM_PAIR_MAPPER = {
             NO_STRINGS_STEM: STRINGS_STEM,
             NO_WOODWINDS_STEM: WOODWINDS_STEM,
             NO_BRASS_STEM: BRASS_STEM,
+            NO_WIND_INST_STEM: WIND_INST_STEM,
             PRIMARY_STEM: SECONDARY_STEM}
+
+NON_ACCOM_STEMS = (
+            VOCAL_STEM,
+            OTHER_STEM,
+            BASS_STEM,
+            DRUM_STEM,
+            GUITAR_STEM,
+            PIANO_STEM,
+            SYNTH_STEM,
+            STRINGS_STEM,
+            WOODWINDS_STEM,
+            BRASS_STEM,
+            WIND_INST_STEM)
 
 MDX_NET_FREQ_CUT = [VOCAL_STEM, INST_STEM]
 
@@ -244,10 +269,17 @@ AVE_AVE = f'{AUDIO_AVERAGE}/{AUDIO_AVERAGE}'
 ENSEMBLE_TYPE = (MAX_MIN, MAX_MAX, MAX_AVE, MIN_MAX, MIN_MIX, MIN_AVE, AVE_MAX, AVE_MIN, AVE_AVE)
 ENSEMBLE_TYPE_4_STEM = (MAX_SPEC, MIN_SPEC, AUDIO_AVERAGE)
 
+BATCH_MODE = 'Batch Mode'
+BETA_VERSION = 'BETA'
+DEF_OPT = 'Default'
+
 CHUNKS = (AUTO_SELECT, '1', '5', '10', '15', '20', 
           '25', '30', '35', '40', '45', '50', 
           '55', '60', '65', '70', '75', '80', 
           '85', '90', '95', 'Full')
+
+BATCH_SIZE = (DEF_OPT, '2', '3', '4', '5', 
+          '6', '7', '8', '9', '10')
 
 VOL_COMPENSATION = (AUTO_SELECT, '1.035', '1.08')
 
@@ -288,7 +320,6 @@ VR_AGGRESSION = (1, 2, 3, 4, 5,
 
 VR_WINDOW = ('320', '512','1024')
 VR_CROP = ('256', '512', '1024')
-VR_BATCH = ('4', '6', '8')
 POST_PROCESSES_THREASHOLD_VALUES = ('0.1', '0.2', '0.3')
 
 MDX_POP_PRO = ('MDX-NET_Noise_Profile_14_kHz', 'MDX-NET_Noise_Profile_17_kHz', 'MDX-NET_Noise_Profile_Full_Band')
@@ -358,12 +389,14 @@ REG_TIME = r'^[+]?(1[0]|[0-9]([.][0-9]*)?)$'
 REG_COMPENSATION = r'\b^(1[0]|[0-9]([.][0-9]*)?|Auto|None)$\b'
 REG_THES_POSTPORCESS = r'\b^([0]([.][0-9]{0,6})?)$\b'
 REG_CHUNKS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Auto|Full)$\b'
+REG_CHUNKS_DEMUCS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Auto|Full)$\b'
 REG_MARGIN = r'\b^[0-9]*$\b'
 REG_SEGMENTS = r'\b^(200|1[0-9][0-9]|[1-9][0-9]?|Default)$\b'
 REG_SAVE_INPUT = r'\b^([a-zA-Z0-9 -]{0,25})$\b'
 REG_AGGRESSION = r'^[-+]?[0-9]\d*?$'
 REG_WINDOW = r'\b^[0-9]{0,4}$\b'
 REG_SHIFTS = r'\b^[0-9]*$\b'
+REG_BATCHES = r'\b^([0-9]*?|Default)$\b'
 REG_OVERLAP = r'\b^([0]([.][0-9]{0,6})?|None)$\b'
 
 # Sub Menu
@@ -374,51 +407,6 @@ DEMUCS_SETTING_LOAD = 'Load for Demucs'
 ALL_ARCH_SETTING_LOAD = 'Load for Full Application'
 
 # Mappers
-
-MDX_NAME_SELECT = {
-                "UVR_MDXNET_1_9703": 'UVR-MDX-NET 1',
-                "UVR_MDXNET_2_9682": 'UVR-MDX-NET 2',
-                "UVR_MDXNET_3_9662": 'UVR-MDX-NET 3',
-                "UVR_MDXNET_KARA": 'UVR-MDX-NET Karaoke',
-                "UVR_MDXNET_Main": 'UVR-MDX-NET Main',
-                "UVR-MDX-NET-Inst_1": 'UVR-MDX-NET Inst 1',
-                "UVR-MDX-NET-Inst_2": 'UVR-MDX-NET Inst 2',
-                "UVR-MDX-NET-Inst_3": 'UVR-MDX-NET Inst 3',
-                "UVR-MDX-NET-Inst_Main": 'UVR-MDX-NET Inst Main'}
-
-DEMUCS_NAME_SELECT = {
-                'tasnet.th': 'v1 | Tasnet',
-                'tasnet_extra.th': 'v1 | Tasnet_extra',
-                'demucs.th': 'v1 | Demucs_base',
-                'demucs_extra.th': 'v1 | Demucs_extra',
-                'light.th': 'v1 | Light',
-                'light_extra.th': 'v1 | Light_extra',
-                'tasnet.th.gz': 'v1 | Tasnet.gz',
-                'tasnet_extra.th.gz': 'v1 | Tasnet_extra.gz',
-                'demucs.th.gz': 'v1 | Demucs_extra.gz',
-                'light.th.gz': 'v1 | Light.gz',
-                'light_extra.th.gz': "v1 | Light_extra.gz'",
-                'tasnet-beb46fac.th': 'v2 | Tasnet',
-                'tasnet_extra-df3777b2.th': 'v2 | Tasnet_extra',
-                'demucs48_hq-28a1282c.th': 'v2 | Demucs48_hq',
-                'demucs-e07c671f.th': 'v2 | Demucs_base',
-                'demucs_extra-3646af93.th': 'v2 | Demucs_extra',
-                'demucs_unittest-09ebc15f.th': 'v2 | Demucs_unittest',
-                'mdx.yaml': 'v3 | mdx',
-                'mdx_extra.yaml': 'v3 | mdx_extra',
-                'mdx_extra_q.yaml': 'v3 | mdx_extra_q',
-                'mdx_q.yaml': 'v3 | mdx_q',
-                'repro_mdx_a.yaml': 'v3 | repro_mdx_a',
-                'repro_mdx_a_hybrid_only.yaml': 'v3 | repro_mdx_a_hybrid',
-                'repro_mdx_a_time_only.yaml': 'v3 | repro_mdx_a_time',
-                'UVR_Demucs_Model_1.yaml': 'v3 | UVR_Model_1',
-                'UVR_Demucs_Model_2.yaml': 'v3 | UVR_Model_2',
-                'UVR_Demucs_Model_Bag.yaml': 'v3 | UVR_Model_Bag',
-                'hdemucs_mmi.yaml': 'v4 | hdemucs_mmi',
-                'htdemucs.yaml': 'v4 | htdemucs',
-                'htdemucs_ft.yaml': 'v4 | htdemucs_ft',
-                'htdemucs_6s.yaml': 'v4 | htdemucs_6s'
-                }
 
 DEFAULT_DATA = {
     
@@ -450,6 +438,7 @@ DEFAULT_DATA = {
         'chunks_demucs': CHUNKS[0],
         'margin_demucs': 44100,
         'is_chunk_demucs': False,
+        'is_chunk_mdxnet': False,
         'is_primary_stem_only_Demucs': False,
         'is_secondary_stem_only_Demucs': False,
         'is_split_mode': True,
@@ -473,6 +462,8 @@ DEFAULT_DATA = {
         'compensate': AUTO_SELECT,
         'is_denoise': False,
         'is_invert_spec': False, 
+        'is_mixer_mode': False, 
+        'mdx_batch_size': DEF_OPT,
         'mdx_voc_inst_secondary_model': NO_MODEL,
         'mdx_other_secondary_model': NO_MODEL,
         'mdx_bass_secondary_model': NO_MODEL,
@@ -557,6 +548,7 @@ SETTING_CHECK = ('vr_model',
                'compensate',
                'is_denoise',
                'is_invert_spec',
+               'mdx_batch_size',
                'mdx_voc_inst_secondary_model',
                'mdx_other_secondary_model',
                'mdx_bass_secondary_model',
@@ -609,12 +601,17 @@ STOP_HELP = 'Halts any running processes. \n A pop-up window will ask the user t
 SETTINGS_HELP = 'Opens the main settings guide. This window includes the \"Download Center\"'
 COMMAND_TEXT_HELP = 'Provides information on the progress of the current process.'
 SAVE_CURRENT_SETTINGS_HELP = 'Allows the user to open any saved settings or save the current application settings.'
-CHUNKS_HELP = ('This option allows the user to reduce (or increase) RAM or V-RAM usage.\n\n' + \
+CHUNKS_HELP = ('For MDX-Net, all values use the same amount of resources. Using chunks is no longer recommended.\n\n' + \
+                '• This option is now only for output quality.\n' + \
+                '• Some tracks may fare better depending on the value.\n' + \
+                '• Some tracks may fare worse depending on the value.\n' + \
+                '• Larger chunk sizes use will take less time to process.\n' +\
+                '• Smaller chunk sizes use will take more time to process.\n')
+CHUNKS_DEMUCS_HELP = ('This option allows the user to reduce (or increase) RAM or V-RAM usage.\n\n' + \
                 '• Smaller chunk sizes use less RAM or V-RAM but can also increase processing times.\n' + \
                 '• Larger chunk sizes use more RAM or V-RAM but can also reduce processing times.\n' + \
                 '• Selecting \"Auto\" calculates an appropriate chuck size based on how much RAM or V-RAM your system has.\n' + \
-                '• Selecting \"Full\" will process the track as one whole chunk.\n' + \
-                '• This option is only recommended for those with powerful PCs.\n' +\
+                '• Selecting \"Full\" will process the track as one whole chunk. (not recommended)\n' + \
                 '• The default selection is \"Auto\".')
 MARGIN_HELP = 'Selects the frequency margins to slice the chunks from.\n\n• The recommended margin size is 44100.\n• Other values can give unpredictable results.'
 AGGRESSION_SETTING_HELP = ('This option allows you to set how strong the primary stem extraction will be.\n\n' + \
@@ -660,7 +657,6 @@ IS_GPU_CONVERSION_HELP = ('When checked, the application will attempt to use you
 SAVE_STEM_ONLY_HELP = 'Allows the user to save only the selected stem.'
 IS_NORMALIZATION_HELP = 'Normalizes output to prevent clipping.'
 CROP_SIZE_HELP = '**Only compatible with select models only!**\n\n Setting should match training crop-size value. Leave as is if unsure.'
-BATCH_SIZE_HELP = '**Only compatible with select models only!**\n\n Lower values allows for less resource usage but longer conversion times.'
 IS_TTA_HELP = ('This option performs Test-Time-Augmentation to improve the separation quality.\n\n' +\
                'Note: Having this selected will increase the time it takes to complete a conversion')
 IS_POST_PROCESS_HELP = ('This option can potentially identify leftover instrumental artifacts within the vocal outputs. \nThis option may improve the separation of some songs.\n\n' +\
@@ -669,7 +665,8 @@ IS_HIGH_END_PROCESS_HELP = 'The application will mirror the missing frequency ra
 SHIFTS_HELP = ('Performs multiple predictions with random shifts of the input and averages them.\n\n' +\
               '• The higher number of shifts, the longer the prediction will take. \n- Not recommended unless you have a GPU.')
 OVERLAP_HELP = 'This option controls the amount of overlap between prediction windows (for Demucs one window is 10 seconds)'
-IS_CHUNK_DEMUCS_HELP = '• Enables the using \"Chunks\".\n• We recommend you not enable this option with \"Split Mode\" enabled or with the Demucs v4 Models.'
+IS_CHUNK_DEMUCS_HELP = '• Enables \"Chunks\".\n• We recommend you not enable this option with \"Split Mode\" enabled or with the Demucs v4 Models.'
+IS_CHUNK_MDX_NET_HELP = '• Enables \"Chunks\".\n• Using this option for MDX-Net no longer effects RAM usage.\n• Having this enabled will effect output quality, for better or worse depending on the set value.'
 IS_SPLIT_MODE_HELP = ('• Enables \"Segments\". \n• We recommend you not enable this option with \"Enable Chunks\".\n' +\
                       '• Deselecting this option is only recommended for those with powerful PCs or if using \"Chunk\" mode instead.')
 IS_DEMUCS_COMBINE_STEMS_HELP = 'The application will create the secondary stem by combining the remaining stems \ninstead of inverting the primary stem with the mixture.'
@@ -680,6 +677,7 @@ IS_SAVE_ALL_OUTPUTS_ENSEMBLE_HELP = 'Enabling this option will keep all indivudu
 IS_APPEND_ENSEMBLE_NAME_HELP = 'The application will append the ensemble name to the final output \nwhen this option is enabled.'
 DONATE_HELP = 'Takes the user to an external web-site to donate to this project!'
 IS_INVERT_SPEC_HELP = '• This option may produce a better secondary stem.\n• Inverts primary stem with mixture using spectragrams instead of wavforms.\n• This inversion method is slightly slower.'
+IS_MIXER_MODE_HELP = '• This option may improve separations for outputs from 4-stem models.\n• Might produce more noise.\n• This option might slow down separation time.'
 IS_TESTING_AUDIO_HELP = 'Appends a unique 10 digit number to output files so the user \ncan compare results with different settings.'
 IS_MODEL_TESTING_AUDIO_HELP = 'Appends the model name to output files so the user \ncan compare results with different settings.'
 IS_ACCEPT_ANY_INPUT_HELP = 'The application will accept any input when enabled, even if it does not have an audio format extension.\n\nThis is for experimental purposes, and having it enabled is not recommended.'
@@ -740,7 +738,12 @@ MODEL_SAMPLE_MODE_HELP = 'Allows the user to process only part of a track to sam
 POST_PROCESS_THREASHOLD_HELP = 'Allows the user to control the intensity of the Post_process option.\n\nNotes:\n\n' +\
                                '• Higher values potentially remove more artifacts. However, bleed might increase.\n' +\
                                '• Lower values limit artifact removal.'
-                         
+
+BATCH_SIZE_HELP = 'Specify the number of batches to be processed at a time.\n\nNotes:\n\n' +\
+                               '• Higher values mean more RAM usage but slightly faster processing times.\n' +\
+                               '• Lower values mean less RAM usage but slightly longer processing times.\n' +\
+                               '• Batch size value has no effect on output quality.'
+               
 # Warning Messages
 
 STORAGE_ERROR = 'Insufficient Storage', 'There is not enough storage on main drive to continue. Your main drive must have at least 3 GB\'s of storage in order for this application function properly. \n\nPlease ensure your main drive has at least 3 GB\'s of storage and try again.\n\n'
@@ -754,7 +757,7 @@ SET_TO_DEFAULT_PROCESS_ERROR = 'Active Process', 'You cannot reset all of the ap
 SET_TO_ANY_PROCESS_ERROR = 'Active Process', 'You cannot reset the application settings during an active process.'
 RESET_ALL_TO_DEFAULT_WARNING = 'Reset Settings Confirmation', 'All application settings will be set to factory default.\n\nAre you sure you wish to continue?'
 AUDIO_VERIFICATION_CHECK = lambda i, e:f'++++++++++++++++++++++++++++++++++++++++++++++++++++\n\nBroken File Removed: \n\n{i}\n\nError Details:\n\n{e}\n++++++++++++++++++++++++++++++++++++++++++++++++++++'
-INVALID_ONNX_MODEL_ERROR = 'Invalid Model', 'The file selected is not a valid onnx model. Please see the error log for more information.'
+INVALID_ONNX_MODEL_ERROR = 'Invalid Model', 'The file selected is not a valid MDX-Net model. Please see the error log for more information.'
 
 
 # Separation Text
@@ -797,7 +800,8 @@ OPTION_HEIGHT = 7
 LOW_MENU_Y = 18, 16
 FFMPEG_EXT = (".aac", ".aiff", ".alac" ,".flac", ".FLAC", ".mov", ".mp4", ".MP4", 
               ".m4a", ".M4A", ".mp2", ".mp3", "MP3", ".mpc", ".mpc8", 
-              ".mpeg", ".ogg", ".OGG", ".tta", ".wav", ".wave", ".WAV", ".WAVE", ".wma", ".webm")
+              ".mpeg", ".ogg", ".OGG", ".tta", ".wav", ".wave", ".WAV", ".WAVE", ".wma", ".webm", ".eac3", ".mkv")
+
 FFMPEG_MORE_EXT = (".aa", ".aac", ".ac3", ".aiff", ".alac", ".avi", ".f4v",".flac", ".flic", ".flv",
               ".m4v",".mlv", ".mov", ".mp4", ".m4a", ".mp2", ".mp3", ".mp4", ".mpc", ".mpc8", 
               ".mpeg", ".ogg", ".tta", ".tty", ".vcd", ".wav", ".wma")
@@ -1001,8 +1005,8 @@ FULL_DOWNLOAD_LIST_DEMUCS = {
 CHOOSE_PROC_METHOD_MAIN_LABEL = 'CHOOSE PROCESS METHOD'
 SELECT_SAVED_SETTINGS_MAIN_LABEL = 'SELECT SAVED SETTINGS'
 CHOOSE_MDX_MODEL_MAIN_LABEL = 'CHOOSE MDX-NET MODEL'
-CHUNKS_MDX_MAIN_LABEL = 'CHUNKS'
-MARGIN_MDX_MAIN_LABEL = 'MARGIN SIZE'
+BATCHES_MDX_MAIN_LABEL = 'BATCH SIZE'
+VOL_COMP_MDX_MAIN_LABEL = 'VOLUME COMPENSATION'
 SELECT_VR_MODEL_MAIN_LABEL = 'CHOOSE VR MODEL'
 AGGRESSION_SETTING_MAIN_LABEL = 'AGGRESSION SETTING'
 WINDOW_SIZE_MAIN_LABEL = 'WINDOW SIZE'
@@ -1136,79 +1140,8 @@ LINUX_DND_CHECK = ('/home/',
                    '/usr/')
 WINDOWS_DND_CHECK = ('A:', 'B:', 'C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:', 'J:', 'K:', 'L:', 'M:', 'N:', 'O:', 'P:', 'Q:', 'R:', 'S:', 'T:', 'U:', 'V:', 'W:', 'X:', 'Y:', 'Z:')
 
-# INTERNAL_MODEL_ATT = '内部模型属性 \n\n ***如果不确定，请勿更改此设置！***'
-# STOP_HELP = '停止任何正在运行的进程 \n 弹出窗口将要求用户确认操作'
-# SETTINGS_HELP = '打开设置指南此窗口包括\"下载中心\"'
-# COMMAND_TEXT_HELP = '提供有关当前进程进度的信息'
-# SAVE_CURRENT_SETTINGS_HELP = '允许用户打开任何保存的设置或保存当前应用程序设置'
-# CHUNKS_HELP = ('此选项允许用户减少（或增加）RAM或VRAM\n\n' + \
-#                 '• 较小的块大小使用较少的RAM或VRAM，但也会增加处理时间\n' + \
-#                 '• 较大的块大小使用更多的RAM或VRAM，但也可以减少处理时间\n' + \
-#                 '• 选择“自动”可根据系统的RAM或VRAM大小计算适当的运行内存\n' + \
-#                 '• 选择“完整”将使用全部电脑可用资源处理曲目\n' + \
-#                 '• 此选项仅适用于具有强大pc的用户,不要对自己电脑过于自信\n' +\
-#                 '• 默认选择为“自动”.')
-# MARGIN_HELP = '选择要从中分割块的频率\n\n- 建议的频率大小为44100\n- 其他值可能会产生不可预测的结果'
-# AGGRESSION_SETTING_HELP = ('该选项允许您设置主轨道提取的强度\n\n' + \
-#                            '• 范围为0-100\n' + \
-#                            '• 值越高，提取程度越高\n' + \
-#                            '• 乐器和声乐模型的默认值为10\n' + \
-#                            '• 超过10的值可能会导致非发声模型的乐器发出浑浊的声音')
-# WINDOW_SIZE_HELP = ('分块大小越小，转换效果越好 \n然而，较小的分块意味着更长的转换时间和更重的资源使用\n\n' + \
-#                     '可选窗口大小值的细分：\n' + \
-#                     '• 1024 - 转换质量低，转换时间短，资源使用率低\n' + \
-#                     '• 512 - 平均转换质量、平均转换时间、正常资源使用\n' + \
-#                     '• 320 - 更好的转换质量')
-# DEMUCS_STEMS_HELP = ('在这里，您可以选择使用所选模型提取某个轨道\n\n' +\
-#                      '轨道选择：\n\n' +\
-#                      '• All Stems - 保存模型能够提取的所有轨道.\n' +\
-#                      '• Vocals -仅人声轨道.\n' +\
-#                      '• Other - 仅其他轨道.\n' +\
-#                      '• Bass - 仅贝斯轨道.\n' +\
-#                      '• Drums - 仅鼓轨道.\n')
-# SEGMENT_HELP = ('此选项允许用户减少（或增加）RAM或VRAM使用\n\n' + \
-#                 '• 较小的段大小使用较少的RAM或VRAM，但也会增加处理时间.\n' + \
-#                 '• 较大的段大小使用更多的RAM或VRAM，但也可以减少处理时间\n' + \
-#                 '• 选择“默认值”使用建议的段大小\n' + \
-#                 '• 建议不要使用带有“分段”的段".')
-# ENSEMBLE_MAIN_STEM_HELP = '允许用户选择要集成的阀杆类型\n\n示例：主阀杆/次阀杆'
-# ENSEMBLE_TYPE_HELP = '允许用户选择用于生成最终输出的集成算法'
-# ENSEMBLE_LISTBOX_HELP = '所选主阀杆对的所有可用型号列表'
-# IS_GPU_CONVERSION_HELP = ('选中后，应用程序将尝试使用您的GPU（如果您有）.\n' +\
-#                          '如果您没有GPU，但选中了此项，则应用程序将默认为CPU\n\n' +\
-#                          '注：CPU转换比通过GPU处理的转换慢得多.')
-# SAVE_STEM_ONLY_HELP = '允许用户仅保存选定的阀杆'
-# IS_NORMALIZATION_HELP = '规格化输出以防止剪裁'
-# CROP_SIZE_HELP = '**仅与部分型号兼容！**\n\n 设置应与训练作物大小值相匹配，如果不确定，则保持原样'
-# BATCH_SIZE_HELP = '**仅与部分型号兼容！**\n\n 值越低，资源使用量越少，但转换时间越长'
-# IS_TTA_HELP = ('此选项执行测试时间增强以提高分离质量\n\n' +\
-#                '注意：选择此选项将增加完成转换所需的时间')
-# IS_POST_PROCESS_HELP = ('该选项可以潜在地识别声音输出中残留的乐器伪影 \n此选项可能会改进某些歌曲的分离.\n\n' +\
-#                        '注意：选择此选项可能会对转换过程产生不利影响，具体取决于曲目。因此，建议将其作为最后救命稻草')
-# IS_HIGH_END_PROCESS_HELP = '应用程序将镜像输出的缺失频率范围'
-# SHIFTS_HELP = ('使用输入的随机移位执行多个预测，并对其进行平均.\n\n' +\
-#               '• 移位次数越多，预测所需时间越长\n- 除非您有GPU最低8g，否则别瞎选电脑爆炸概不负责')
-# OVERLAP_HELP = '此选项控制预测窗口之间的重叠量（对于demucs，一个窗口为10秒）'
-# IS_CHUNK_DEMUCS_HELP = '启用使用“块”.\n\n请注意：我们建议您不要在启用“拆分模式”的情况下启用此选项'
-# IS_SPLIT_MODE_HELP = ('启用“分段”. \n\n请注意：我们建议您不要使用“启用区块”来启用此选项.\n' +\
-#                      '仅建议具有强大pc或使用“块”模式.再次提醒别瞎点,要对自己电脑负责.别选!不负责任的狗男人')
-# IS_DEMUCS_COMBINE_STEMS_HELP = '应用程序将通过组合剩余的阀杆来创建第二阀杆\n而不是用混合物反转主茎'
-# COMPENSATE_HELP = '补偿主杆的音频，以获得更好的辅助杆'
-# IS_DENOISE_HELP = '该选项消除了MDX-NET模型产生的大部分噪声\n\n请注意：启用此选项后，转换所需的时间几乎是原来的两倍'
-# CLEAR_CACHE_HELP = '清除以前无法识别的模型的任何用户选择的模型设置'
-# IS_SAVE_ALL_OUTPUTS_ENSEMBLE_HELP = '启用此选项将保留集成生成的所有单独输出'
-# IS_APPEND_ENSEMBLE_NAME_HELP = '应用程序将在最终输出中附加集成名称 \n启用此选项时'
-# DONATE_HELP = '将用户带到外部网站为该项目捐款！'
-# IS_INVERT_SPEC_HELP = '相反，使用光谱图用混合物反转主阀杆 \n这种反演方法稍慢'
-# IS_TESTING_AUDIO_HELP = '在输出文件中附加一个唯一的10位数字，以便用户\nc不同设置的比较结果'
-# IS_CREATE_MODEL_FOLDER_HELP = '将为中的输出生成两个新目录 \n每次转换后的导出目录'
-# DELETE_YOUR_SETTINGS_HELP = '此菜单包含您保存的设置，系统将要求您\n确认是否要删除所选设置'
-# SET_STEM_NAME_HELP = '为所选模型选择主阀杆'
-# MDX_DIM_T_SET_HELP = INTERNAL_MODEL_ATT
-# MDX_DIM_F_SET_HELP = INTERNAL_MODEL_ATT
-# MDX_N_FFT_SCALE_SET_HELP = '设置训练模型的N_FFT大小'
-# POPUP_COMPENSATE_HELP = f'为所选模型选择适当的体积补偿\n\n提醒： {COMPENSATE_HELP}'
-# VR_MODEL_PARAM_HELP = '选择运行所选模型所需的参数'
-# CHOSEN_ENSEMBLE_HELP = '选择保存的集合或保存当前集合\n\n默认选择：\n\n- 保存当前集合\n- 清除所有当前模型选择'
-# CHOSEN_PROCESS_METHOD_HELP = '选择要运行曲目的进程'
-# FORMAT_SETTING_HELP = '将输出另存为'
+WOOD_INST_MODEL_HASH = '0ec76fd9e65f81d8b4fbd13af4826ed8'
+WOOD_INST_PARAMS = {
+    "vr_model_param": "4band_v3",
+    "primary_stem": NO_WIND_INST_STEM
+                     }

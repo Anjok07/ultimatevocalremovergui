@@ -1,12 +1,23 @@
-Change Log:
+Most Recent Changes:
 
-Fixes & Changes:
+~ Fixed Download Center model list issue.
+~ Fixed audio clip in ensemble mode.
+~ Fixed output model name issue in ensemble mode.
+~ Added "Batch Mode" for MDX-Net to increase performance.
+    ~ Batch Mode is more memory efficient.
+    ~ Batch Mode produces the best output, regardless of batch size.
+~ Added Batch Mode for VR Architecture.
+~ Added Mixer Mode for Demucs.
+    ~ This option may improve separation for some 4-stem models.
+
+Fixes & Changes going from UVR v5.4 to v5.5:
 
 ~ The progress bar is now fully synced up with every process in the application.
 ~ Fixed low-resolution icon.
 ~ Added the ability to download models manually if the application can't connect 
    to the internet.
 ~ Drag-n-drop is functional across all os platforms.
+~ Resolved mp3 tag issue in MacOS version.
 
 Performance:
 
@@ -16,7 +27,7 @@ Performance:
 MacOS M1 Notes:
 
 ~ The GPU Conversion checkbox will enable MPS for GPU acceleration. However,
-   only the VR Architecture models are compatible with it at this time.
+   only the VR Architecture models are currently compatible with it.
 
 New Options:
 
@@ -24,7 +35,7 @@ New Options:
    of the whole application. You can also load a saved setting or reset them to 
    the default.
 ~ Right-click menu - Allows for quick access to important options.
-~ Help Hints option - When enabled, users can hover over options to see pop-up 
+~ Help Hints option - When enabled, users can hover over options to see a pop-up 
    text that describes that option. The right-clicking option also allows copying 
    the "Help Hint" text.
 ~ Secondary Model Mode - This option is an expanded version of the "Demucs Model" 
@@ -32,8 +43,7 @@ New Options:
    in all three AI Networks and for any stem. Any model can now be Secondary, and 
    the user can choose the amount of influence it has on the final result.
 ~ Robust caching for ensemble mode, allowing for much faster processing times.
-~ Clicking the "Input" field will pop-up a new window that allows the user to go 
-   through all of the selected audio inputs. Within this menu, users can:
+~ Clicking the "Input" field will pop up a window allowing the user to review the selected audio inputs. Within this menu, users can:
     ~ Remove inputs.
     ~ Verify inputs.
     ~ Create samples of chosen inputs.
@@ -54,15 +64,15 @@ VR Architecture:
 
 MDX-NET:
 
-~ Denoise Output option - When enabled, this option results in cleaner results, 
+~ Denoise Output option results in cleaner results, 
    but the processing time will be longer. This option has replaced Noise Reduction.
-~ Spectral Inversion option - This option uses spectral inversion techniques for a 
+~ Spectral Inversion option uses spectral inversion techniques for a 
    cleaner secondary stem result. This option may slow down the audio export process.
 ~ Secondary stem now has the same frequency cut-off as the main stem.
 
 Demucs:
 
-~ Demucs v4 models are now supported, including the 6 stem model.
+~ Demucs v4 models are now supported, including the 6-stem model.
 ~ Ability to combine remaining stems instead of inverting selected stem with the 
    mixture only when a user does not select "All Stems".
 ~ A Pre-process model that allows the user to run an inference through a robust 

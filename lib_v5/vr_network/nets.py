@@ -118,7 +118,7 @@ class CascadedASPPNet(nn.Module):
 
         self.offset = 128
 
-    def forward(self, x, aggressiveness=None):
+    def forward(self, x):
         mix = x.detach()
         x = x.clone()
 
@@ -155,17 +155,12 @@ class CascadedASPPNet(nn.Module):
                 mode='replicate')
             return mask * mix, aux1 * mix, aux2 * mix
         else:
-            if aggressiveness:
-                mask[:, :, :aggressiveness['split_bin']] = torch.pow(mask[:, :, :aggressiveness['split_bin']], 1 + aggressiveness['value'] / 3)
-                mask[:, :, aggressiveness['split_bin']:] = torch.pow(mask[:, :, aggressiveness['split_bin']:], 1 + aggressiveness['value'])
+            return mask# * mix
 
-            return mask * mix
-
-    def predict(self, x_mag, aggressiveness=None):
-        h = self.forward(x_mag, aggressiveness)
+    def predict_mask(self, x):
+        mask = self.forward(x)
 
         if self.offset > 0:
-            h = h[:, :, :, self.offset:-self.offset]
-            assert h.size()[3] > 0
+            mask = mask[:, :, :, self.offset:-self.offset]
 
-        return h
+        return mask

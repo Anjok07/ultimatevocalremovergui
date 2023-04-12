@@ -5,8 +5,9 @@ import math
 import random
 import math
 import platform
+import traceback
 from . import pyrb
-
+#cur
 OPERATING_SYSTEM = platform.system()
 SYSTEM_ARCH = platform.platform()
 SYSTEM_PROC = platform.processor()
@@ -18,7 +19,7 @@ else:
     from . import pyrb
 
 if OPERATING_SYSTEM == 'Darwin':
-    wav_resolution = "polyphase" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else 'sinc_fastest'
+    wav_resolution = "polyphase" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else "sinc_fastest" 
 else:
     wav_resolution = "sinc_fastest"
 
@@ -35,8 +36,6 @@ def crop_center(h1, h2):
     elif h1_shape[3] < h2_shape[3]:
         raise ValueError('h1_shape[3] must be greater than h2_shape[3]')
 
-    # s_freq = (h2_shape[2] - h1_shape[2]) // 2
-    # e_freq = s_freq + h1_shape[2]
     s_time = (h1_shape[3] - h2_shape[3]) // 2
     e_time = s_time + h2_shape[3]
     h1 = h1[:, :, :, s_time:e_time]
@@ -116,6 +115,8 @@ def normalize(wave, is_normalize=False):
         if is_normalize:
             print(f"The result was normalized.")
             wave /= maxv
+        else:
+            print(f"The result was not normalized.")
     else:
         print(f"\nNormalization Set {is_normalize}: Input not above threshold for clipping. Max:{maxv}")
     
@@ -128,11 +129,14 @@ def normalize_two_stem(wave, mix, is_normalize=False):
     max_mix = np.abs(mix).max()
     
     if maxv > 1.0:
-        print(f"\nNormalization Set {is_normalize}: Primary source above threshold for clipping. The result was normalized. Max:{maxv}")
-        print(f"\nNormalization Set {is_normalize}: Mixture above threshold for clipping. The result was normalized. Max:{max_mix}")
+        print(f"\nNormalization Set {is_normalize}: Primary source above threshold for clipping. Max:{maxv}")
+        print(f"\nNormalization Set {is_normalize}: Mixture above threshold for clipping. Max:{max_mix}")
         if is_normalize:
+            print(f"The result was normalized.")
             wave /= maxv
             mix /= maxv
+        else:
+            print(f"The result was not normalized.")
     else:
         print(f"\nNormalization Set {is_normalize}: Input not above threshold for clipping. Max:{maxv}")
     
@@ -205,75 +209,51 @@ def reduce_vocal_aggressively(X, y, softmask):
     return y_mag * np.exp(1.j * np.angle(y))
 
 def merge_artifacts(y_mask, thres=0.01, min_range=64, fade_size=32):
-    if min_range < fade_size * 2:
-        raise ValueError('min_range must be >= fade_size * 2')
-
-    idx = np.where(y_mask.min(axis=(0, 1)) > thres)[0]
-    start_idx = np.insert(idx[np.where(np.diff(idx) != 1)[0] + 1], 0, idx[0])
-    end_idx = np.append(idx[np.where(np.diff(idx) != 1)[0]], idx[-1])
-    artifact_idx = np.where(end_idx - start_idx > min_range)[0]
-    weight = np.zeros_like(y_mask)
-    if len(artifact_idx) > 0:
-        start_idx = start_idx[artifact_idx]
-        end_idx = end_idx[artifact_idx]
-        old_e = None
-        for s, e in zip(start_idx, end_idx):
-            if old_e is not None and s - old_e < fade_size:
-                s = old_e - fade_size * 2
-
-            if s != 0:
-                weight[:, :, s:s + fade_size] = np.linspace(0, 1, fade_size)
-            else:
-                s -= fade_size
-
-            if e != y_mask.shape[2]:
-                weight[:, :, e - fade_size:e] = np.linspace(1, 0, fade_size)
-            else:
-                e += fade_size
-
-            weight[:, :, s + fade_size:e - fade_size] = 1
-            old_e = e
-
-    v_mask = 1 - y_mask
-    y_mask += weight * v_mask
-
-    return y_mask
-
-def mask_silence(mag, ref, thres=0.1, min_range=64, fade_size=32):
-    if min_range < fade_size * 2:
-        raise ValueError('min_range must be >= fade_area * 2')
-
-    mag = mag.copy()
-
-    idx = np.where(ref.mean(axis=(0, 1)) < thres)[0]
-    starts = np.insert(idx[np.where(np.diff(idx) != 1)[0] + 1], 0, idx[0])
-    ends = np.append(idx[np.where(np.diff(idx) != 1)[0]], idx[-1])
-    uninformative = np.where(ends - starts > min_range)[0]
-    if len(uninformative) > 0:
-        starts = starts[uninformative]
-        ends = ends[uninformative]
-        old_e = None
-        for s, e in zip(starts, ends):
-            if old_e is not None and s - old_e < fade_size:
-                s = old_e - fade_size * 2
-
-            if s != 0:
-                weight = np.linspace(0, 1, fade_size)
-                mag[:, :, s:s + fade_size] += weight * ref[:, :, s:s + fade_size]
-            else:
-                s -= fade_size
-
-            if e != mag.shape[2]:
-                weight = np.linspace(1, 0, fade_size)
-                mag[:, :, e - fade_size:e] += weight * ref[:, :, e - fade_size:e]
-            else:
-                e += fade_size
-
-            mag[:, :, s + fade_size:e - fade_size] += ref[:, :, s + fade_size:e - fade_size]
-            old_e = e
-
-    return mag
+    mask = y_mask
     
+    try:
+        if min_range < fade_size * 2:
+            raise ValueError('min_range must be >= fade_size * 2')
+
+        idx = np.where(y_mask.min(axis=(0, 1)) > thres)[0]
+        start_idx = np.insert(idx[np.where(np.diff(idx) != 1)[0] + 1], 0, idx[0])
+        end_idx = np.append(idx[np.where(np.diff(idx) != 1)[0]], idx[-1])
+        artifact_idx = np.where(end_idx - start_idx > min_range)[0]
+        weight = np.zeros_like(y_mask)
+        if len(artifact_idx) > 0:
+            start_idx = start_idx[artifact_idx]
+            end_idx = end_idx[artifact_idx]
+            old_e = None
+            for s, e in zip(start_idx, end_idx):
+                if old_e is not None and s - old_e < fade_size:
+                    s = old_e - fade_size * 2
+
+                if s != 0:
+                    weight[:, :, s:s + fade_size] = np.linspace(0, 1, fade_size)
+                else:
+                    s -= fade_size
+
+                if e != y_mask.shape[2]:
+                    weight[:, :, e - fade_size:e] = np.linspace(1, 0, fade_size)
+                else:
+                    e += fade_size
+
+                weight[:, :, s + fade_size:e - fade_size] = 1
+                old_e = e
+
+        v_mask = 1 - y_mask
+        y_mask += weight * v_mask
+        
+        mask = y_mask
+    except Exception as e:
+        error_name = f'{type(e).__name__}'
+        traceback_text = ''.join(traceback.format_tb(e.__traceback__))
+        message = f'{error_name}: "{e}"\n{traceback_text}"'
+        print('Post Process Failed: ', message)
+        
+
+    return mask
+
 def align_wave_head_and_tail(a, b):
     l = min([a[0].size, b[0].size])  
     
@@ -386,11 +366,11 @@ def mirroring(a, spec_m, input_high_end, mp):
         
         return np.where(np.abs(input_high_end) <= np.abs(mi), input_high_end, mi)
 
-def adjust_aggr(mask, is_vocal_model, aggressiveness):
-    aggr = aggressiveness.get('value', 0.0) * 4
+def adjust_aggr(mask, is_non_accom_stem, aggressiveness):
+    aggr = aggressiveness['value']
 
     if aggr != 0:
-        if is_vocal_model:
+        if is_non_accom_stem:
             aggr = 1 - aggr
     
         aggr = [aggr, aggr]
@@ -403,6 +383,9 @@ def adjust_aggr(mask, is_vocal_model, aggressiveness):
             mask[ch, :aggressiveness['split_bin']] = np.power(mask[ch, :aggressiveness['split_bin']], 1 + aggr[ch] / 3)
             mask[ch, aggressiveness['split_bin']:] = np.power(mask[ch, aggressiveness['split_bin']:], 1 + aggr[ch])
 
+        # if is_non_accom_stem:
+        #     mask = (1.0 - mask)
+        
     return mask
 
 def stft(wave, nfft, hl):
@@ -442,36 +425,20 @@ def spec_effects(wave, algorithm='Default', value=None):
             
     return wave      
 
-def spectrogram_to_wave_bare(spec, hop_length=1024):
-    spec_left = np.asfortranarray(spec[0])
-    spec_right = np.asfortranarray(spec[1])
-    wave_left = librosa.istft(spec_left, hop_length=hop_length)
-    wave_right = librosa.istft(spec_right, hop_length=hop_length)
-    wave = np.asfortranarray([wave_left, wave_right])
-
-    return wave
-
-def spectrogram_to_wave_no_mp(spec, hop_length=1024):
-    if spec.ndim == 2:
-        wave = librosa.istft(spec, hop_length=hop_length)
-    elif spec.ndim == 3:
-        spec_left = np.asfortranarray(spec[0])
-        spec_right = np.asfortranarray(spec[1])
-
-        wave_left = librosa.istft(spec_left, hop_length=hop_length)
-        wave_right = librosa.istft(spec_right, hop_length=hop_length)
-        wave = np.asfortranarray([wave_left, wave_right])
+def spectrogram_to_wave_no_mp(spec, n_fft=2048, hop_length=1024):
+    wave = librosa.istft(spec, n_fft=n_fft, hop_length=hop_length)
+    
+    if wave.ndim == 1:
+        wave = np.asfortranarray([wave,wave])
 
     return wave
 
 def wave_to_spectrogram_no_mp(wave):
     
-    wave_left = np.asfortranarray(wave[0])
-    wave_right = np.asfortranarray(wave[1])
-
-    spec_left = librosa.stft(wave_left, n_fft=2048, hop_length=1024)
-    spec_right = librosa.stft(wave_right, n_fft=2048, hop_length=1024)
-    spec = np.asfortranarray([spec_left, spec_right])
+    spec = librosa.stft(wave, n_fft=2048, hop_length=1024)
+    
+    if spec.ndim == 1:
+        spec = np.asfortranarray([spec,spec])
 
     return spec
 
@@ -519,6 +486,8 @@ def ensembling(a, specs):
     return spec
 
 def ensemble_inputs(audio_input, algorithm, is_normalization, wav_type_set, save_path):
+
+    wavs_ = []
     
     if algorithm == AVERAGE:
         output = average_audio(audio_input)
@@ -528,10 +497,15 @@ def ensemble_inputs(audio_input, algorithm, is_normalization, wav_type_set, save
         
         for i in range(len(audio_input)):  
             wave, samplerate = librosa.load(audio_input[i], mono=False, sr=44100)
+            wavs_.append(wave)
             spec = wave_to_spectrogram_no_mp(wave)
             specs.append(spec)
         
+        wave_shapes = [w.shape[1] for w in wavs_]
+        target_shape = wavs_[wave_shapes.index(max(wave_shapes))]
+        
         output = spectrogram_to_wave_no_mp(ensembling(algorithm, specs))
+        output = to_shape(output, target_shape.shape)
 
     sf.write(save_path, normalize(output.T, is_normalization), samplerate, subtype=wav_type_set)
 
@@ -555,7 +529,7 @@ def to_shape_minimize(x: np.ndarray, target_shape):
     return np.pad(x, tuple(padding_list), mode='constant')
 
 def augment_audio(export_path, audio_file, rate, is_normalization, wav_type_set, save_format=None, is_pitch=False):
-    print('Rate: ', rate)
+
     wav, sr = librosa.load(audio_file, sr=44100, mono=False)
 
     if wav.ndim == 1:

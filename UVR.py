@@ -2821,7 +2821,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         credit_label(place=16,
                      frame=credits_Frame,
-                     text="Audio Separation and CC Karokee & Friends Discord Communities",
+                     text="Audio Separation and CC Karaoke & Friends Discord Communities",
                      message="Thank you for the support!")
 
         more_info_tab_Frame = Frame(tab2, highlightthicknes=30)

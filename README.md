@@ -168,7 +168,7 @@ pip3 install -r requirements.txt
 
 ### Other Application Notes
 
-- Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
+- Nvidia GTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
 - AMD Radeon GPUs are not supported at this time.
 - This application is only compatible with 64-bit platforms. 

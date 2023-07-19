@@ -4670,6 +4670,13 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 for current_model_num, current_model in enumerate(model, start=1):
                     self.iteration += 1
 
+                    #  here is only chance you will get Zero devision error.
+                    # math logic anything/0 is infinity or zero devision error.
+                    # in process_start here is only ' / ' symbole. so make sure the value should not be zero
+                    #  self.command_Text.write(f'Ensemble Mode - {current_model.model_basename} - Model {current_model_num}/{len(model)}{NEW_LINES}')
+                    # {len(model)}{NEW_LINES}  i think this term must be zero.
+
+
                     if is_ensemble:
                         self.command_Text.write(f'Ensemble Mode - {current_model.model_basename} - Model {current_model_num}/{len(model)}{NEW_LINES}')
 

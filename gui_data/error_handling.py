@@ -101,6 +101,6 @@ def error_dialouge(exception):
             final_message = full_text
             break
     else:
-        final_message = (f'{error_name}: {exception}\n\n{CONTACT_DEV}') 
+        final_message = (f'{error_name} Occurred.\n\n{CONTACT_DEV}') 
     
     return final_message

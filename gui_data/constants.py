@@ -600,7 +600,7 @@ DEFAULT_DATA = {
         'is_match_frequency_pitch': True,#
         'is_match_silence': True,#
         'is_spec_match': False,#
-        'is_mdx_c_seg_def': True,
+        'is_mdx_c_seg_def': False,
         'is_invert_spec': False, #
         'is_deverb_vocals': False, #
         'deverb_vocal_opt': 'Main Vocals Only', #
@@ -645,7 +645,7 @@ DEFAULT_DATA = {
         'lastDir': None,
         'time_window': "3",
         'intro_analysis': "Default",
-        'db_analysis': "Shifts: Medium",
+        'db_analysis': "Medium",
         'fileOneEntry': '',
         'fileOneEntry_Full': '',
         'fileTwoEntry': '',

@@ -1,5 +1,5 @@
 # Ultimate Vocal Remover GUI v5.5.1
-<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_5_5_1.png?raw=true" />
+<img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/v5.6/gui_data/img/UVR_5_6_0.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)
 [![Downloads](https://img.shields.io/github/downloads/anjok07/ultimatevocalremovergui/total.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases)
@@ -73,7 +73,6 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 </details>
 
 ### MacOS Installation
-
 - Please Note:
     - This bundle is intended for those running macOS Catalina and above.
     - Application functionality for systems running macOS Mojave or lower is not guaranteed.
@@ -167,7 +166,6 @@ pip3 install -r requirements.txt
 </details>
 
 ### Other Application Notes
-
 - Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
 - AMD Radeon GPUs are not supported at this time.
@@ -178,77 +176,9 @@ pip3 install -r requirements.txt
 - Conversion times will significantly depend on your hardware. 
 - These models are computationally intensive. 
 
-## Change Log
-
-### Most Recent Changes:
-- Fixed Download Center model list issue.
-- Fixed audio clip in ensemble mode.
-- Fixed output model name issue in ensemble mode.
-- Added "Batch Mode" for MDX-Net to increase performance.
-  - Batch Mode is more memory efficient.
-  - Batch Mode produces the best output, regardless of batch size.
-- Added Batch Mode for VR Architecture.
-- Added Mixer Mode for Demucs.
-  - This option may improve separation for some 4-stem models.
-
-### Fixes & Changes going from UVR v5.4 to v5.5:
-
-- The progress bar is now fully synced up with every process in the application.
-- Drag-n-drop feature should now work every time.
-- Users can now drop large batches of files and directories as inputs. When directories are dropped, the application will search for any file with an audio extension and add it to the list of inputs.
-- Fixed low-resolution icon.
-- Added the ability to download models manually if the application can't connect to the internet.
-- Various bug fixes for the Download Center.
-- Various design changes.
-
 ### Performance:
-
 - Model load times are faster.
 - Importing/exporting audio files is faster.
-
-### New Options:
-
-- "Select Saved Settings" option - Allows the user to save the current settings of the whole application. You can also load saved settings or reset them to the default.
-- "Right-click" menu - Allows for quick access to important options.
-- "Help Hints" option - When enabled, users can hover over options to see pop-up text that describes that option. The right-clicking option also allows copying the "Help Hint" text.
-- Secondary Model Mode - This option is an expanded version of the "Demucs Model" option only available to MDX-Net. Except now, this option is available in all three AI Networks and for any stem. Any model can now be Secondary, and the user can choose the amount of influence it has on the final result.
-- Robust caching for ensemble mode, allowing for much faster processing times.
-- Clicking the "Input" field will pop up a new window that allows the user to go through all of the selected audio inputs. Within this menu, users can:
-    - Remove inputs.
-    - Verify inputs.
-    - Create samples of selected inputs.
-- "Sample Mode" option - Allows the user to process only part of a track to sample settings or a model without running a complete conversion.
-    - The number in the parentheses is the current number of seconds the generated sample will be.
-    - You can choose the number of seconds to extract from the track in the "Additional Settings" menu.
-
-### VR Architecture:
-
-- Ability to toggle "High-End Processing."
-- Support for the latest VR architecture
-    - Crop Size and Batch Size are specifically for models using the latest architecture only.
-
-### MDX-NET:
-
-- "Denoise Output" option results in cleaner results, but the processing time will be longer. This option has replaced Noise Reduction.
-- "Spectral Inversion" option uses spectral inversion techniques for a cleaner secondary stem result. This option may slow down the audio export process.
-- Secondary stem now has the same frequency cut-off as the main stem.
-
-### Demucs:
-
-- Demucs v4 models are now supported, including the 6-stem model.
-- Combining remaining stems instead of inverting selected stem with the mixture only when a user does not select "All Stems."
-- A "Pre-process" model that allows the user to run an inference through a robust vocal or instrumental model and separate the remaining stems from its generated instrumental mix. This option can significantly reduce vocal bleed in other Demucs-generated non-vocal stems.
-  - The Pre-process model is intended for Demucs separations for all stems except vocals and instrumentals.
-
-### Ensemble Mode: 
-
-- Ensemble Mode has been extended to include the following:
-    - "Averaging" is a new algorithm that averages the final results.
-    - Unlimited models in the ensemble.
-    - Ability to save different ensembles.
-    - Ability to ensemble outputs for all individual stem types.
-    - Ability to choose unique ensemble algorithms.
-    - Ability to ensemble all 4 Demucs stems at once.
 
 ## Troubleshooting
 

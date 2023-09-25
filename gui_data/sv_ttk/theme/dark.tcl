@@ -140,6 +140,29 @@ namespace eval ttk::theme::sun-valley-dark {
             TSeparator.separator -sticky nsew
         }
 
+
+        # # Modify the TCombobox style
+        # ttk::style configure TCombobox -borderwidth 3
+
+        # # Define the layout of the ThickBorder.TCombobox
+        # ttk::style layout ThickBorder.TCombobox {
+        #     Combobox.field -sticky nsew -children {
+        #         Combobox.padding -expand 1 -sticky nsew -children {
+        #             Combobox.textarea -sticky nsew
+        #         }
+        #     }
+        #     null -side right -sticky ns -children {
+        #         Combobox.arrow -sticky nsew
+        #     }
+        # }
+
+        # # Use a canvas as the parent of the combobox and create a custom border
+        # canvas .c -width 200 -height 30 -highlightthickness 0
+        # canvas .c create rectangle 2 2 198 28 -width 3 -outline black
+        # pack .c
+        # ttk::combobox .c.cbox -values {"Option 1" "Option 2" "Option 3"} -style ThickBorder.TCombobox
+        # .c create window 100 15 -window .c.cbox
+
         ttk::style layout TCombobox {
             Combobox.field -sticky nsew -children {
                 Combobox.padding -expand 1 -sticky nsew -children {
@@ -453,11 +476,11 @@ namespace eval ttk::theme::sun-valley-dark {
         ttk::style element create Combobox.field \
             image [list $images(button-rest) \
                 {readonly disabled} $images(button-disabled) \
-                {readonly pressed} $images(button-pressed) \
+                {readonly pressed} $images(button-rest) \
                 {readonly hover} $images(button-hover) \
                 readonly $images(button-rest) \
                 invalid $images(entry-invalid) \
-                disabled $images(entry-disabled) \
+                disabled $images(combo-disabled) \
                 focus $images(entry-focus) \
                 hover $images(button-hover) \
             ] -border 5 -padding 8 -sticky nsew

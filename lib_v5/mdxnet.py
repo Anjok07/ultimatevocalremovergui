@@ -1,15 +1,11 @@
-from abc import ABCMeta
-
 import torch
 import torch.nn as nn
-from pytorch_lightning import LightningModule
 from .modules import TFC_TDF
+from pytorch_lightning import LightningModule
 
 dim_s = 4
 
 class AbstractMDXNet(LightningModule):
-    __metaclass__ = ABCMeta
-
     def __init__(self, target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length, overlap):
         super().__init__()
         self.target_name = target_name
@@ -24,7 +20,7 @@ class AbstractMDXNet(LightningModule):
         self.window = nn.Parameter(torch.hann_window(window_length=self.n_fft, periodic=True), requires_grad=False)
         self.freq_pad = nn.Parameter(torch.zeros([1, dim_c, self.n_bins - self.dim_f, self.dim_t]), requires_grad=False)
 
-    def configure_optimizers(self):
+    def get_optimizer(self):
         if self.optimizer == 'rmsprop':
             return torch.optim.RMSprop(self.parameters(), self.lr)
         
@@ -37,7 +33,7 @@ class ConvTDFNet(AbstractMDXNet):
 
         super(ConvTDFNet, self).__init__(
             target_name, lr, optimizer, dim_c, dim_f, dim_t, n_fft, hop_length, overlap)
-        self.save_hyperparameters()
+        #self.save_hyperparameters()
 
         self.num_blocks = num_blocks
         self.l = l

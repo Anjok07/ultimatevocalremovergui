@@ -40,26 +40,26 @@ class BaseNet(nn.Module):
 
 class CascadedNet(nn.Module):
 
-    def __init__(self, n_fft, nn_arch_size, nout=32, nout_lstm=128):
+    def __init__(self, n_fft, nn_arch_size=51000, nout=32, nout_lstm=128):
         super(CascadedNet, self).__init__()
-
         self.max_bin = n_fft // 2
         self.output_bin = n_fft // 2 + 1
         self.nin_lstm = self.max_bin // 2
         self.offset = 64
         nout = 64 if nn_arch_size == 218409 else nout
 
+        #print(nout, nout_lstm, n_fft)
+
         self.stg1_low_band_net = nn.Sequential(
             BaseNet(2, nout // 2, self.nin_lstm // 2, nout_lstm),
             layers.Conv2DBNActiv(nout // 2, nout // 4, 1, 1, 0)
-            )
-        
+        )
         self.stg1_high_band_net = BaseNet(2, nout // 4, self.nin_lstm // 2, nout_lstm // 2)
 
         self.stg2_low_band_net = nn.Sequential(
             BaseNet(nout // 4 + 2, nout, self.nin_lstm // 2, nout_lstm),
             layers.Conv2DBNActiv(nout, nout // 2, 1, 1, 0)
-            )
+        )
         self.stg2_high_band_net = BaseNet(nout // 4 + 2, nout // 2, self.nin_lstm // 2, nout_lstm // 2)
 
         self.stg3_full_band_net = BaseNet(3 * nout // 4 + 2, nout, self.nin_lstm, nout_lstm)

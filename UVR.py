@@ -3723,7 +3723,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         tabControl.add(tab1, text ='Credits')
         tabControl.add(tab2, text ='Resources')
         tabControl.add(tab3, text ='Application License & Version Information')
-        tabControl.add(tab4, text ='Additional Resources & Credits')
+        tabControl.add(tab4, text ='Additional Information')
 
         tabControl.pack(expand = 1, fill ="both")
         
@@ -3905,7 +3905,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         application_change_log_tab_Frame = tk.Frame(tab4)
         application_change_log_tab_Frame.grid(row=0,column=0,padx=0,pady=0)
 
-        application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='Additional Resources & Credits', font=(MAIN_FONT_NAME, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
+        application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='Additional Information', font=(MAIN_FONT_NAME, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
         application_change_log_Label.grid(row=0,column=0,padx=0,pady=25)
         
         application_change_log_Text = tk.Text(application_change_log_tab_Frame, font=(MAIN_FONT_NAME, f"{FONT_SIZE_4}"), fg="white", bg="black", width=72, wrap=tk.WORD if is_windows else tk.CHAR, borderwidth=0)

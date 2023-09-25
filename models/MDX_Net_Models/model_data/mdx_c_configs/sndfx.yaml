@@ -1,0 +1,41 @@
+audio:
+  chunk_size: 261120
+  dim_f: 1024
+  dim_t: 256
+  hop_length: 1024
+  min_mean_abs: 0.01
+  n_fft: 2048
+  num_channels: 2
+  sample_rate: 44100
+  stereo_prob: 0.7
+model:
+  act: gelu
+  bottleneck_factor: 4
+  growth: 64
+  norm: InstanceNorm
+  num_blocks_per_scale: 2
+  num_channels: 64
+  num_scales: 5
+  num_subbands: 4
+  scale:
+  - 2
+  - 2
+training:
+  batch_size: 8
+  ema_momentum: 0.999
+  grad_clip: null
+  instruments:
+  - Music
+  - Speech
+  - SFX
+  lr: 0.0001
+  num_steps: 30000
+  target_instrument: null
+inference:
+  batch_size: 8
+  dim_t: 256
+  instruments:
+  - Music
+  - Dialog
+  - Effect
+  num_overlap: 8

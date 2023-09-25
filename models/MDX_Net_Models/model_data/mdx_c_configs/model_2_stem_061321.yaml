@@ -1,0 +1,36 @@
+audio:
+  chunk_size: 260096
+  dim_f: 4096
+  dim_t: 256
+  hop_length: 2048
+  n_fft: 12288
+  num_channels: 2
+  sample_rate: 44100
+  min_mean_abs: 0.001
+model:
+  act: gelu
+  bottleneck_factor: 4
+  growth: 64
+  norm: InstanceNorm
+  num_blocks_per_scale: 2
+  num_channels: 128
+  num_scales: 5
+  num_subbands: 4
+  scale:
+  - 2
+  - 2
+  name: epoch_10.ckpt
+training:
+  batch_size: 16
+  grad_clip: 0
+  instruments:
+  - Vocals
+  - Instrumental
+  lr: 5.0e-05
+  target_instrument: null
+  num_epochs: 100
+  num_steps: 1000
+inference:
+  batch_size: 1
+  dim_t: 256
+  num_overlap: 8

@@ -14,7 +14,7 @@
         "primary_stem": "Other"
     },
     "2cdd429caac38f0194b133884160f2c6": {
-        "compensate": 1.035,
+        "compensate": 1.045,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
@@ -25,7 +25,8 @@
         "mdx_dim_f_set": 2048,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 6144,
-        "primary_stem": "Vocals"
+        "primary_stem": "Vocals",
+        "is_karaoke": true
     },
     "398580b6d5d973af3120df54cee6759d": {
         "compensate": 1.75,
@@ -49,7 +50,7 @@
         "primary_stem": "Drums"
     },
     "53c4baf4d12c3e6c3831bb8f5b532b93": {
-        "compensate": 1.035,
+        "compensate": 1.043,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
@@ -91,21 +92,21 @@
         "primary_stem": "Vocals"
     },
     "867595e9de46f6ab699008295df62798": {
-        "compensate": 1.075,
+        "compensate": 1.03,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
         "primary_stem": "Vocals"
     },
     "a3cd63058945e777505c01d2507daf37": {
-        "compensate": 1.035,
+        "compensate": 1.03,
         "mdx_dim_f_set": 2048,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 6144,
         "primary_stem": "Vocals"
     },
     "b33d9b3950b6cbf5fe90a32608924700": {
-        "compensate": 1.075,
+        "compensate": 1.03,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
@@ -154,21 +155,21 @@
         "primary_stem": "Drums"
     },
     "e5572e58abf111f80d8241d2e44e7fa4": {
-        "compensate": 1.035,
+        "compensate": 1.028,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
         "primary_stem": "Instrumental"
     },
     "e7324c873b1f615c35c1967f912db92a": {
-        "compensate": 1.075,
+        "compensate": 1.03,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
         "primary_stem": "Vocals"
     },
     "1c56ec0224f1d559c42fd6fd2a67b154": {
-        "compensate": 1.035,
+        "compensate": 1.025,
         "mdx_dim_f_set": 2048,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 5120,
@@ -189,25 +190,33 @@
         "primary_stem": "Instrumental"
     },
     "94ff780b977d3ca07c7a343dab2e25dd": {
-        "compensate": 1.035,
+        "compensate": 1.039,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 6144,
         "primary_stem": "Instrumental"
     },
     "73492b58195c3b52d34590d5474452f6": {
-        "compensate": 1.075,
+        "compensate": 1.043,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "970b3f9492014d18fefeedfe4773cb42": {
+        "compensate": 1.009,
         "mdx_dim_f_set": 3072,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 7680,
         "primary_stem": "Vocals"
     },
     "1d64a6d2c30f709b8c9b4ce1366d96ee": {
-        "compensate": 1.035,
+        "compensate": 1.065,
         "mdx_dim_f_set": 2048,
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 5120,
-        "primary_stem": "Instrumental"
+        "primary_stem": "Instrumental",
+        "is_karaoke": true
     },
     "203f2a3955221b64df85a41af87cf8f0": {
         "compensate": 1.035,
@@ -229,5 +238,114 @@
         "mdx_dim_t_set": 8,
         "mdx_n_fft_scale_set": 6144,
         "primary_stem": "Instrumental"
+    },
+    "cc63408db3d80b4d85b0287d1d7c9632": {
+        "compensate": 1.033,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Instrumental"
+    },
+    "cd5b2989ad863f116c855db1dfe24e39": {
+        "compensate": 1.035,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 9,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Reverb"
+    },
+    "55657dd70583b0fedfba5f67df11d711": {
+        "compensate": 1.022,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 6144,
+        "primary_stem": "Instrumental"
+    },
+    "b6bccda408a436db8500083ef3491e8b": {
+        "compensate": 1.02,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "8a88db95c7fb5dbe6a095ff2ffb428b1": {
+        "compensate": 1.026,
+        "mdx_dim_f_set": 2048,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "Instrumental"
+    },
+    "b78da4afc6512f98e4756f5977f5c6b9": {
+        "compensate": 1.021,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Instrumental"
+    },
+    "77d07b2667ddf05b9e3175941b4454a0": {
+        "compensate": 1.021,
+        "mdx_dim_f_set": 3072,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 7680,
+        "primary_stem": "Vocals"
+    },
+    "2154254ee89b2945b97a7efed6e88820": {
+        "config_yaml": "model_2_stem_061321.yaml"
+    },
+    "063aadd735d58150722926dcbf5852a9": {
+        "config_yaml": "model_2_stem_061321.yaml"
+    },
+    "c09f714d978b41d718facfe3427e6001": {
+        "config_yaml": "model_2_stem_061321.yaml"
+    },
+    "fe96801369f6a148df2720f5ced88c19": {
+        "config_yaml": "model3.yaml"
+    },
+    "02e8b226f85fb566e5db894b9931c640": {
+        "config_yaml": "model2.yaml"
+    },
+    "e3de6d861635ab9c1d766149edd680d6": {
+        "config_yaml": "model1.yaml"
+    },
+    "3f2936c554ab73ce2e396d54636bd373": {
+        "config_yaml": "modelB.yaml"
+    },
+    "890d0f6f82d7574bca741a9e8bcb8168": {
+        "config_yaml": "modelB.yaml"
+    },
+    "63a3cb8c37c474681049be4ad1ba8815": {
+        "config_yaml": "modelB.yaml"
+    },
+    "a7fc5d719743c7fd6b61bd2b4d48b9f0": {
+        "config_yaml": "modelA.yaml"
+    },
+    "3567f3dee6e77bf366fcb1c7b8bc3745": {
+        "config_yaml": "modelA.yaml"
+    },
+    "a28f4d717bd0d34cd2ff7a3b0a3d065e": {
+        "config_yaml": "modelA.yaml"
+    },
+    "c9971a18da20911822593dc81caa8be9": {
+        "config_yaml": "sndfx.yaml"
+    },
+    "57d94d5ed705460d21c75a5ac829a605": {
+        "config_yaml": "sndfx.yaml"
+    },
+    "e7a25f8764f25a52c1b96c4946e66ba2": {
+        "config_yaml": "sndfx.yaml"
+    },
+    "104081d24e37217086ce5fde09147ee1": {
+        "config_yaml": "model_2_stem_061321.yaml"
+    },
+    "1e6165b601539f38d0a9330f3facffeb": {
+        "config_yaml": "model_2_stem_061321.yaml"
+    },
+    "fe0108464ce0d8271be5ab810891bd7c": {
+        "config_yaml": "model_2_stem_full_band.yaml"
+    },
+    "e9b82ec90ee56c507a3a982f1555714c": {
+        "config_yaml": "model_2_stem_full_band_2.yaml"
+    },
+    "99b6ceaae542265a3b6d657bf9fde79f": {
+        "config_yaml": "model_2_stem_full_band_8k.yaml"
     }
 }

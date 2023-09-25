@@ -1,0 +1,39 @@
+audio:
+  chunk_size: 261120
+  dim_f: 6144
+  dim_t: 256
+  hop_length: 1024
+  n_fft: 12288
+  num_channels: 2
+  sample_rate: 44100
+  min_mean_abs: 0.001
+model:
+  act: gelu
+  bottleneck_factor: 4
+  growth: 128
+  norm: InstanceNorm
+  num_blocks_per_scale: 2
+  num_channels: 128
+  num_scales: 5
+  num_subbands: 6
+  scale:
+  - 2
+  - 2
+training:
+  batch_size: 6
+  grad_clip: 0
+  instruments:
+  - Vocals
+  - Instrumental
+  lr: 1.0e-05
+  target_instrument: null
+  num_epochs: 1000
+  num_steps: 1000
+  augmentation: 1
+  q: 0.95
+  coarse_loss_clip: true
+  ema_momentum: 0.999
+inference:
+  batch_size: 1
+  dim_t: 256
+  num_overlap: 8

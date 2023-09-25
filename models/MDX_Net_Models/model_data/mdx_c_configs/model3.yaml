@@ -1,0 +1,34 @@
+audio:
+  chunk_size: 260096
+  dim_f: 4096
+  dim_t: 128
+  hop_length: 2048
+  n_fft: 12288
+  num_channels: 2
+  sample_rate: 44100
+model:
+  act: gelu
+  bottleneck_factor: 4
+  growth: 64
+  norm: InstanceNorm
+  num_blocks_per_scale: 2
+  num_channels: 128
+  num_scales: 5
+  num_subbands: 4
+  scale:
+  - 2
+  - 2
+training:
+  batch_size: 8
+  grad_clip: 0
+  instruments:
+  - Vocals
+  - Drums
+  - Bass
+  - Other
+  lr: 5.0e-05
+  target_instrument: Vocals
+inference:
+  batch_size: 1
+  dim_t: 256
+  num_overlap: 8

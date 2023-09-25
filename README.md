@@ -1,4 +1,4 @@
-# Ultimate Vocal Remover GUI v5.5.1
+# Ultimate Vocal Remover GUI v5.6
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/v5.6/gui_data/img/UVR_5_6_0.png?raw=true" />
 
 [![Release](https://img.shields.io/github/release/anjok07/ultimatevocalremovergui.svg)](https://github.com/anjok07/ultimatevocalremovergui/releases/latest)

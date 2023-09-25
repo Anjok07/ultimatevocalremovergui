@@ -727,7 +727,7 @@ class ModelData():
                 table_entry = {self.model_path: self.model_hash}
                 model_hash_table.update(table_entry)
                 
-        print(self.model_name," - ", self.model_hash)
+        #print(self.model_name," - ", self.model_hash)
 
 class Ensembler():
     def __init__(self, is_manual_ensemble=False):

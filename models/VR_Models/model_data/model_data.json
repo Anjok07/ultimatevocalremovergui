@@ -13,7 +13,7 @@
     },
     "2aa34fbc01f8e6d2bf509726481e7142": {
         "vr_model_param": "4band_44100",
-        "primary_stem": "Other"
+        "primary_stem": "No Piano"
     },
     "3e18f639b11abea7361db1a4a91c2559": {
         "vr_model_param": "4band_44100",
@@ -29,7 +29,8 @@
     },
     "6b5916069a49be3fe29d4397ecfd73fa": {
         "vr_model_param": "3band_44100_msb2",
-        "primary_stem": "Instrumental"
+        "primary_stem": "Instrumental",
+        "is_karaoke": true
     },
     "74b3bc5fa2b69f29baf7839b858bc679": {
         "vr_model_param": "4band_44100",
@@ -85,10 +86,52 @@
     },
     "f6ea8473ff86017b5ebd586ccacf156b": {
         "vr_model_param": "4band_v2_sn",
-        "primary_stem": "Instrumental"
+        "primary_stem": "Instrumental",
+        "is_karaoke": true
     },
     "fd297a61eafc9d829033f8b987c39a3d": {
         "vr_model_param": "1band_sr32000_hl512",
         "primary_stem": "Instrumental"
+    },
+    "0ec76fd9e65f81d8b4fbd13af4826ed8": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "No Woodwinds"
+    },
+    "0fb9249ffe4ffc38d7b16243f394c0ff": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "No Reverb"
+    },
+    "6857b2972e1754913aad0c9a1678c753": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "Echo",
+        "nout": 48,
+        "nout_lstm": 128
+    },
+    "f200a145434efc7dcf0cd093f517ed52": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "No Echo",
+        "nout": 48,
+        "nout_lstm": 128
+    },
+    "44c55d8b5d2e3edea98c2b2bf93071c7": {
+        "vr_model_param": "4band_v3",
+        "primary_stem": "Noise",
+        "nout": 48,
+        "nout_lstm": 128
+    },
+    "51ea8c43a6928ed3c10ef5cb2707d57b": {
+        "vr_model_param": "1band_sr44100_hl1024",
+        "primary_stem": "Noise",
+        "nout": 16,
+        "nout_lstm": 128
+    },
+    "944950a9c5963a5eb70b445d67b7068a": {
+        "vr_model_param": "4band_v3_sn",
+        "primary_stem": "Vocals",
+        "nout": 64,
+        "nout_lstm": 128,
+        "is_karaoke": false,
+        "is_bv_model": true,
+        "is_bv_model_rebalanced": 0.9
     }
 }

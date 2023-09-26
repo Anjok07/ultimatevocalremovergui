@@ -140,6 +140,8 @@ def apply_model(model, mix, shifts=1, split=True, overlap=0.25, transition_power
             be on `device`, while the entire tracks will be stored on `mix.device`.
     """
     
+    #print("Progress Bar?: ", type(set_progress_bar))
+    
     global fut_length
     global bag_num
     global prog_bar

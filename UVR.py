@@ -78,7 +78,7 @@ def get_execution_time(function, name):
     time_difference = end - start
     print(f'{name} Execution Time: ', time_difference)
 
-PREVIOUS_PATCH_WIN = 'UVR_Patch_3_31_23_5_5'
+PREVIOUS_PATCH_WIN = 'UVR_Patch_9_25_23_2_1'
 
 is_dnd_compatible = True
 banner_placement = -2
@@ -5102,8 +5102,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                             self.download_update_link_var.set(UPDATE_LINUX_REPO)
                     
                     if not user_refresh:
-                        if not is_beta_version:
+                        if not is_beta_version and not self.lastest_version == PATCH:
                             self.command_Text.write(NEW_UPDATE_FOUND_TEXT(self.lastest_version))
+
 
                 is_update_params = self.is_auto_update_model_params if is_start_up else self.is_auto_update_model_params_var.get()
                 

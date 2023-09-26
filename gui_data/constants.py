@@ -1075,7 +1075,7 @@ DELETE_YOUR_SETTINGS_HELP = (
 )
 SET_STEM_NAME_HELP = 'Select the primary stem for the given model.'
 IS_CREATE_MODEL_FOLDER_HELP = ('Two new directories will be generated for the outputs in the export directory after each conversion.\n\n'
-                              '• Example: \n\n'
+                              '• Example: \n'
                               '─ Export Directory\n'
                               '   └── First Directory (Named after the model)\n'
                               '           └── Second Directory (Named after the track)\n'
@@ -1173,7 +1173,7 @@ AUDIO_TOOLS_HELP = (
 )
              
 PRE_PROC_MODEL_INST_MIX_HELP = 'When enabled, the application will generate a third output without the selected stem and vocals.'         
-MODEL_SAMPLE_MODE_HELP = ('Allows the user to process only part of a track to sample settings or a model without \nrunning a full conversion.\n\nNotes:\n\n'
+MODEL_SAMPLE_MODE_HELP = ('Allows the user to process only part of a track to sample settings or a model without running a full conversion.\n\nNotes:\n\n'
                          '• The number in the parentheses is the current number of seconds the generated sample will be.\n'
                          '• You can choose the number of seconds to extract from the track in the \"Additional Settings\" menu.')
                     

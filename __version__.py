@@ -1,4 +1,4 @@
-VERSION = 'v5.5.1'
+VERSION = 'v5.6.0'
 PATCH = 'UVR_Patch_9_25_23_2_1'
 PATCH_MAC = 'UVR_Patch_9_25_23_2_1'
 PATCH_LINUX = 'UVR_Patch_9_25_23_2_1'

@@ -955,7 +955,6 @@ class ToolTip(object):
         if not is_message_box:
             label_config['padx'] = 10  # horizontal padding
             label_config['pady'] = 10  # vertical padding
-            #if is_windows:
             label_config["wraplength"] = 750
         label = tk.Label(self.tooltip, **label_config)
 
@@ -1311,7 +1310,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         #Load Images
         img = ImagePath(BASE_PATH)
-        self.logo_img = img.open_image(path=img.banner_path, size=(self.winfo_width(), 9999))
+        self.logo_img = img.open_image(path=img.banner_path, size=(width, 9999))
         self.efile_img = img.efile_img
         self.stop_img = img.stop_img
         self.help_img = img.help_img
@@ -1649,7 +1648,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.console_Frame.place(x=X_CONSOLE_FRAME_1080P, y=Y_OFFSET_CONSOLE_FRAME_1080P, width=WIDTH_CONSOLE_FRAME_1080P, height=HEIGHT_CONSOLE_FRAME_1080P,
                                 relx=0, rely=0, relwidth=1, relheight=0)
 
-
         self.progressbar = ttk.Progressbar(master=self, variable=self.progress_bar_main_var)
         self.progressbar.place(x=25, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.CONVERSIONBUTTON_HEIGHT + self.COMMAND_HEIGHT + self.PADDING*4, width=-50, height=self.PROGRESS_HEIGHT,
                             relx=0, rely=0, relwidth=1, relheight=0)
@@ -1675,8 +1673,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.filePaths_musicFile_Button.place(x=MUSICFILE_BUTTON_X, y=MUSICFILE_BUTTON_Y, width=MUSICFILE_BUTTON_WIDTH, height=MUSICFILE_BUTTON_HEIGHT, relx=0, rely=0, relwidth=0.3, relheight=0.5)
         self.filePaths_musicFile_Entry = ttk.Entry(master=self.filePaths_Frame, textvariable=self.inputPathsEntry_var, font=self.font_entry, state=tk.DISABLED)
         self.filePaths_musicFile_Entry.place(x=MUSICFILE_ENTRY_X, y=MUSICFILE_BUTTON_Y, width=MUSICFILE_ENTRY_WIDTH, height=MUSICFILE_ENTRY_HEIGHT, relx=0.3, rely=0, relwidth=0.7, relheight=0.5)                                   
-        self.filePaths_musicFile_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:OPEN_FILE_func(os.path.dirname(self.inputPaths[0])) if self.inputPaths and os.path.isdir(os.path.dirname(self.inputPaths[0])) else self.error_dialoge(INVALID_INPUT))
-        self.filePaths_musicFile_Open.place(x=MUSICFILE_OPEN_X, y=MUSICFILE_OPEN_Y, width=MUSICFILE_OPEN_WIDTH, height=MUSICFILE_OPEN_HEIGHT, relx=1, rely=0, relwidth=0, relheight=0)
+        self.filePaths_musicFile_Open = ttk.Button(master=self.filePaths_Frame, image=self.efile_img, command=lambda:OPEN_FILE_func(os.path.dirname(self.inputPaths[0])) if self.inputPaths and os.path.isdir(os.path.dirname(self.inputPaths[0])) else self.error_dialoge(INVALID_INPUT))
+        self.filePaths_musicFile_Open.place(x=OPEN_BUTTON_X, y=MUSICFILE_BUTTON_Y, width=OPEN_BUTTON_WIDTH, height=MUSICFILE_ENTRY_HEIGHT, relx=0.3, rely=0, relwidth=0.7, relheight=0.5)   
 
         # Add any additional configurations or method calls here
         self.filePaths_musicFile_Entry.configure(cursor="hand2")
@@ -1689,8 +1687,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.filePaths_saveTo_Button.place(x=SAVETO_BUTTON_X, y=SAVETO_BUTTON_Y, width=SAVETO_BUTTON_WIDTH, height=SAVETO_BUTTON_HEIGHT, relx=0, rely=0.5, relwidth=0.3, relheight=0.5)
         self.filePaths_saveTo_Entry = ttk.Entry(master=self.filePaths_Frame, textvariable=self.export_path_var, font=self.font_entry, state=tk.DISABLED)
         self.filePaths_saveTo_Entry.place(x=SAVETO_ENTRY_X, y=SAVETO_BUTTON_Y, width=SAVETO_ENTRY_WIDTH, height=SAVETO_ENTRY_HEIGHT, relx=0.3, rely=0.5, relwidth=0.7, relheight=0.5)
-        self.filePaths_saveTo_Open = ttk.Button(master=self, image=self.efile_img, command=lambda:OPEN_FILE_func(Path(self.export_path_var.get())) if os.path.isdir(self.export_path_var.get()) else self.error_dialoge(INVALID_EXPORT))
-        self.filePaths_saveTo_Open.place(x=SAVETO_OPEN_X, y=SAVETO_OPEN_Y, width=SAVETO_OPEN_WIDTH, height=SAVETO_OPEN_HEIGHT, relx=1, rely=0, relwidth=0, relheight=0)
+        self.filePaths_saveTo_Open = ttk.Button(master=self.filePaths_Frame, image=self.efile_img, command=lambda:OPEN_FILE_func(Path(self.export_path_var.get())) if os.path.isdir(self.export_path_var.get()) else self.error_dialoge(INVALID_EXPORT))
+        self.filePaths_saveTo_Open.place(x=OPEN_BUTTON_X, y=SAVETO_BUTTON_Y, width=OPEN_BUTTON_WIDTH, height=SAVETO_ENTRY_HEIGHT, relx=0.3, rely=0.5, relwidth=0.7, relheight=0.5)
         self.help_hints(self.filePaths_saveTo_Button, text=OUTPUT_FOLDER_ENTRY_HELP) 
         self.help_hints(self.filePaths_saveTo_Open, text=OUTPUT_FOLDER_BUTTON_HELP)     
 
@@ -3201,7 +3199,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.app_update_button = ttk.Button(settings_menu_main_Frame, textvariable=self.app_update_button_Text_var, width=SETTINGS_BUT_WIDTH-2, command=lambda:self.pop_up_update_confirmation())
         self.app_update_button.grid(pady=MENU_PADDING_1)
         
-        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, font=(MAIN_FONT_NAME,  f"{FONT_SIZE_5}"), width=UPDATE_LABEL_WIDTH, justify="center", relief="ridge", fg="#13849f")
+        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, font=(MAIN_FONT_NAME,  f"{FONT_SIZE_4}"), width=UPDATE_LABEL_WIDTH, justify="center", relief="ridge", fg="#13849f")
         self.app_update_status_Label.grid(pady=20)
         
         donate_Button = ttk.Button(settings_menu_main_Frame, image=self.donate_img, command=lambda:webbrowser.open_new_tab(DONATE_LINK_BMAC))
@@ -5111,6 +5109,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 
                 if is_update_params and is_start_up or is_download_complete:
                     self.download_model_settings()
+                    
+                # if is_download_complete:
+                #     self.download_model_settings()
 
             except Exception as e:
                 self.offline_state_set(is_start_up)

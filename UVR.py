@@ -955,6 +955,7 @@ class ToolTip(object):
         if not is_message_box:
             label_config['padx'] = 10  # horizontal padding
             label_config['pady'] = 10  # vertical padding
+            #if is_windows:
             label_config["wraplength"] = 750
         label = tk.Label(self.tooltip, **label_config)
 
@@ -1740,7 +1741,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.help_hints(self.mdx_net_model_Label, text=CHOOSE_MODEL_HELP)
         
         # MDX-Overlap
-        self.overlap_mdx_Label = self.main_window_LABEL_SET(self.options_Frame, OVERLAP_TEXT)
+        self.overlap_mdx_Label = self.main_window_LABEL_SET(self.options_Frame, 'OVERLAP')
         self.overlap_mdx_Label_place = lambda:self.overlap_mdx_Label.place(x=MAIN_ROW_2_X[0], y=MAIN_ROW_2_Y[0], width=0, height=LABEL_HEIGHT, relx=2/3, rely=2/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
         self.overlap_mdx_Option = ComboBoxEditableMenu(self.options_Frame, values=MDX_OVERLAP, width=MENU_COMBOBOX_WIDTH, textvariable=self.overlap_mdx_var, pattern=REG_OVERLAP, default=MDX_OVERLAP)
         self.overlap_mdx_Option_place = lambda:self.overlap_mdx_Option.place(x=MAIN_ROW_2_X[1], y=MAIN_ROW_2_Y[1], width=MAIN_ROW_WIDTH, height=OPTION_HEIGHT, relx=2/3, rely=3/self.COL1_ROWS, relwidth=1/3, relheight=1/self.COL2_ROWS)
@@ -5110,9 +5111,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 
                 if is_update_params and is_start_up or is_download_complete:
                     self.download_model_settings()
-                    
-                # if is_download_complete:
-                #     self.download_model_settings()
 
             except Exception as e:
                 self.offline_state_set(is_start_up)

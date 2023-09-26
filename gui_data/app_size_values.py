@@ -38,11 +38,11 @@ SCREEN_SIZE_VALUES = {
         "small": {
             "credits_img":(50, 50),
             'IMAGE_HEIGHT': 135, 
-            'FILEPATHS_HEIGHT': 85, 
-            'OPTIONS_HEIGHT': 274, 
-            'CONVERSIONBUTTON_HEIGHT': 35, 
+            'FILEPATHS_HEIGHT': 75, 
+            'OPTIONS_HEIGHT': 262, 
+            'CONVERSIONBUTTON_HEIGHT': 30, 
             'COMMAND_HEIGHT': 80, 
-            'PROGRESS_HEIGHT': 6, 
+            'PROGRESS_HEIGHT': 25, 
             'PADDING': 5, 
             'WIDTH': 680
         },
@@ -50,11 +50,11 @@ SCREEN_SIZE_VALUES = {
             "credits_img":(50, 50),
             ## App Size
             'IMAGE_HEIGHT': 135, 
-            'FILEPATHS_HEIGHT': 85, 
-            'OPTIONS_HEIGHT': 274, 
-            'CONVERSIONBUTTON_HEIGHT': 20, 
+            'FILEPATHS_HEIGHT': 75, 
+            'OPTIONS_HEIGHT': 262, 
+            'CONVERSIONBUTTON_HEIGHT': 30, 
             'COMMAND_HEIGHT': 115, 
-            'PROGRESS_HEIGHT': 9, 
+            'PROGRESS_HEIGHT': 25, 
             'PADDING': 7, 
             'WIDTH': 680
         },
@@ -70,7 +70,7 @@ try:
 except:
         determined_size = SCREEN_SIZE_VALUES["normal"]
 
-image_scale_1, image_scale_2 = 20, 33
+image_scale_1, image_scale_2 = 20, 30
 
 class ImagePath():
     def __init__(self, base_path):
@@ -276,6 +276,8 @@ SAVETO_BUTTON_Y = 5
 SAVETO_BUTTON_WIDTH = 0
 SAVETO_BUTTON_HEIGHT = -5
 SAVETO_ENTRY_X = 7.5
+OPEN_BUTTON_X = 427.1
+OPEN_BUTTON_WIDTH = -427.4
 SAVETO_ENTRY_WIDTH = -50
 SAVETO_ENTRY_HEIGHT = -5
 SAVETO_OPEN_X = -45

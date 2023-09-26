@@ -26,6 +26,7 @@ MAXIMUM_P = "Shifts: Maximum"
 
 progress_value = 0
 last_update_time = 0
+is_macos = False
 
 if OPERATING_SYSTEM == 'Windows':
     from pyrubberband import pyrb
@@ -34,6 +35,7 @@ else:
 
 if OPERATING_SYSTEM == 'Darwin':
     wav_resolution = "polyphase" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else "sinc_fastest" 
+    is_macos = True
 else:
     wav_resolution = "sinc_fastest"
 
@@ -893,8 +895,18 @@ def align_audio(file1,
         set_progress_bar(0.1, (0.9/length*progress_value))
     
     # read tracks
-    wav1, sr1 = librosa.load(file1, sr=44100, mono=False)
-    wav2, sr2 = librosa.load(file2, sr=44100, mono=False)
+    
+    if file1.endswith(".mp3") and is_macos:
+        length1 = rerun_mp3(file1)
+        wav1, sr1 = librosa.load(file1, duration=length1, sr=44100, mono=False)
+    else:
+        wav1, sr1 = librosa.load(file1, sr=44100, mono=False)
+
+    if file2.endswith(".mp3") and is_macos:
+        length2 = rerun_mp3(file2)
+        wav2, sr2 = librosa.load(file2, duration=length2, sr=44100, mono=False)
+    else:
+        wav2, sr2 = librosa.load(file2, sr=44100, mono=False)
 
     if wav1.ndim == 1 and wav2.ndim == 1:
          is_mono = True
@@ -1220,8 +1232,8 @@ def load_audio(audio_file):
         
     return wav
 
-def rerun_mp3(audio_file, sample_rate=44100):
+def rerun_mp3(audio_file):
     with audioread.audio_open(audio_file) as f:
         track_length = int(f.duration)
 
-    return librosa.load(audio_file, duration=track_length, mono=False, sr=sample_rate)[0]
+    return track_length

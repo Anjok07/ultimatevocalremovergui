@@ -28,10 +28,10 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
     - You must install UVR to the main C:\ drive. Installing UVR to a secondary drive will cause instability.
 
 - Download the UVR installer for Windows via the link below:
-    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/UVR_v5.5.1_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file_premium/j8hkuvbic6nqy7i/UVR_v5.5.1_setup.exe/file)
+    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup.exe)
+    - [Main Download Link mirror](https://www.mediafire.com/file_premium/p5etl1t7m8n3p1k/UVR_v5.6.0_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
-    - If you already have UVR installed you can install this package over it or download it straight from the application.
+    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_9_26_23_21_48.exe).
 
 <details id="WindowsManual">
   <summary>Windows Manual Installation</summary>
@@ -78,15 +78,15 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
     - Application functionality for systems running macOS Mojave or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
-    
+
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
-       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/o0tfneebhqw554e/Ultimate_Vocal_Remover_v5_5_MacOS_arm64.dmg/file)
+       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/s1fawbqnliqur20/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
-       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.5.0/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/m19wucslk9uzpcc/Ultimate_Vocal_Remover_v5_5_MacOS_x86_64.dmg/file)
+       - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/0fc33w6842k9lwt/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>

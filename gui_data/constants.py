@@ -839,7 +839,7 @@ VR_PLACEMENT_TEXT = 'Place models in \"models/VR_Models\" directory.'
 MDX_PLACEMENT_TEXT = 'Place models in \"models/MDX_Net_Models\" directory.'
 DEMUCS_PLACEMENT_TEXT = 'Place models in \"models/Demucs_Models\" directory.'
 DEMUCS_V3_V4_PLACEMENT_TEXT = 'Place items in \"models/Demucs_Models/v3_v4_repo\" directory.'
-MDX_23_NAME = "MDX23 Model"
+MDX_23_NAME = "MDX23C Model"
 
 # Liscense info
 if OPERATING_SYSTEM=="Darwin":

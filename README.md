@@ -175,13 +175,14 @@ sudo pacman -S ffmpeg
 ```
 
 To bypass environment setup and proceed with the installation, use:
-Note: Take caution; this modifies system files.
+
+- Take caution; this modifies system files.
 
 ```
 sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED
 ```
 
-Thren procees with the following:
+Then proceed with the following in order:
 
 ```
 chmod +x install_packages.sh

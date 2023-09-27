@@ -11,7 +11,7 @@ import natsort
 import os
 import pickle
 import psutil
-from pyglet import font as pfont
+from pyglet import font as pyglet_font
 import pyperclip
 import base64
 import queue
@@ -1534,12 +1534,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         if chosen_font_name:
             gui_data.sv_ttk.set_theme("dark", chosen_font_name, 10)
             if chosen_font_file:
-                pfont.add_file(chosen_font_file)
+                pyglet_font.add_file(chosen_font_file)
             self.font_set = Font(family=chosen_font_name, size=FONT_SIZE_F2)
             self.font_entry = Font(family=chosen_font_name, size=FONT_SIZE_F2)
         else:
-            pfont.add_file(FONT_MAPPER[MAIN_FONT_NAME])
-            pfont.add_file(FONT_MAPPER[SEC_FONT_NAME])
+            pyglet_font.add_file(FONT_MAPPER[MAIN_FONT_NAME])
+            pyglet_font.add_file(FONT_MAPPER[SEC_FONT_NAME])
             gui_data.sv_ttk.set_theme("dark", MAIN_FONT_NAME, 10)
             self.font_set = Font(family=SEC_FONT_NAME, size=FONT_SIZE_F2)
             self.font_entry = Font(family=MAIN_FONT_NAME, size=FONT_SIZE_F2)
@@ -5173,7 +5173,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.current_thread.start()
 
     def offline_state_set(self, is_start_up=False):
-        """Changes relevent settings and "Download Center" buttons if no internet connection is available"""
+        """Changes relevant settings and "Download Center" buttons if no internet connection is available"""
         
         if not is_start_up and self.is_menu_settings_open:
             self.app_update_status_Text_var.set(f'Version Status: {NO_CONNECTION}')

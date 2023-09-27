@@ -162,6 +162,7 @@ sudo apt install ffmpeg
 sudo apt install python3-pip
 sudo apt-get -y install python3-tk
 pip3 install -r requirements.txt
+python UVR.py
 ```
 
 **For Arch Distributions (EndeavourOS):**
@@ -171,8 +172,21 @@ sudo pacman -Sy
 sudo pacman -S python-pip
 sudo pacman -S --noconfirm tk
 sudo pacman -S ffmpeg
+```
+
+To bypass environment setup and proceed with the installation, use:
+Note: Take caution; this modifies system files.
+
+```
+sudo rm /usr/lib/python3.11/EXTERNALLY-MANAGED
+```
+
+Thren procees with the following:
+
+```
 chmod +x install_packages.sh
 ./install_packages.sh
+python UVR.py
 ```
 
 </details>

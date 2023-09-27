@@ -149,11 +149,12 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 <br />
     
-**These install instructions are for Ubuntu 22.10.**
+**These install instructions are for Debian & Arch based Linux systems.**
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 - From the saved directory run the following commands in this order- 
 
+**Debian Based (Ubuntu, Mint, etc.):**
 ```
 sudo apt update && sudo apt upgrade
 sudo apt-get update
@@ -161,6 +162,16 @@ sudo apt install ffmpeg
 sudo apt install python3-pip
 sudo apt-get -y install python3-tk
 pip3 install -r requirements.txt
+```
+
+**For Arch Distributions (EndeavourOS):**
+```
+sudo pacman -Syu
+sudo pacman -Sy
+sudo pacman -S python-pip
+sudo pacman -S --noconfirm tk
+sudo pacman -S ffmpeg
+pip install -r requirements.txt
 ```
 
 </details>

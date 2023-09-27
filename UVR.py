@@ -93,7 +93,7 @@ if OPERATING_SYSTEM=="Darwin":
     right_click_button = '<Button-2>'
     application_extension = ".dmg"
 elif OPERATING_SYSTEM=="Linux":
-    OPEN_FILE_func = lambda input_string:subprocess.Popen(["xdg-open", input_string])
+    OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
     dnd_path_check = LINUX_DND_CHECK
     current_patch = PATCH_LINUX
     is_windows = False
@@ -2660,7 +2660,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         window.resizable(False, False)
         window.wm_transient(top_window)
         window.title(title)
-        window.iconbitmap(ICON_IMG_PATH) if is_windows else self.tk.call('wm', 'iconphoto', window._w, tk.PhotoImage(file=MAIN_ICON_IMG_PATH))
+        window.iconbitmap(ICON_IMG_PATH if is_windows else None)
         
         root_location_x = root.winfo_x()
         root_location_y = root.winfo_y()
@@ -4165,10 +4165,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 main_selection = vr_download_list[main_selection]
                 model_dir = VR_MODELS_DIR
             elif MDX_ARCH_TYPE in main_selection or MDX_23_NAME in main_selection:
-                #print(mdx_download_list)
                 if isinstance(mdx_download_list[main_selection], dict):
                     main_selection = mdx_download_list[main_selection]
-                    #print(main_selection)
                     main_selection = list(main_selection.keys())[0]
                 else:
                     main_selection = mdx_download_list[main_selection]

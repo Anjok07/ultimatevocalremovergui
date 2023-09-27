@@ -13,7 +13,7 @@ llvmlite
 matchering==2.0.6
 ml_collections==0.1.1
 natsort==8.2.0
-numpy==1.25.0
+numpy==1.23.5
 omegaconf==2.2.3
 opencv-python==4.6.0.66
 Pillow==9.3.0

@@ -162,7 +162,7 @@ sudo apt install ffmpeg
 sudo apt install python3-pip
 sudo apt-get -y install python3-tk
 pip3 install -r requirements.txt
-python UVR.py
+python3 UVR.py
 ```
 
 **For Arch Based (EndeavourOS):**

@@ -154,7 +154,7 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 - From the saved directory run the following commands in this order- 
 
-**Debian Based (Ubuntu, Mint, etc.):**
+**For Debian Based (Ubuntu, Mint, etc.):**
 ```
 sudo apt update && sudo apt upgrade
 sudo apt-get update
@@ -165,7 +165,7 @@ pip3 install -r requirements.txt
 python UVR.py
 ```
 
-**For Arch Distributions (EndeavourOS):**
+**For Arch Based (EndeavourOS):**
 ```
 sudo pacman -Syu
 sudo pacman -Sy

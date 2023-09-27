@@ -1015,7 +1015,7 @@ class ListboxBatchFrame(tk.Frame):
             self.update_displayed_index()
 
     def select_input(self, inputs=None):
-        files = inputs if inputs else filedialog.askopenfilenames()
+        files = inputs if inputs else root.show_file_dialog(dialoge_type=MULTIPLE_FILE)
         for file in files:
             if file not in self.path_list:  # only add file if it's not already in the list
                 basename = os.path.basename(file)
@@ -2111,11 +2111,57 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.fileTwo_Entry.bind('<Button-1>', lambda e:self.menu_batch_dual())
         self.fileOne_Entry.bind(right_click_button, lambda e:self.input_dual_right_click_menu(e, is_primary=True))
         self.fileTwo_Entry.bind(right_click_button, lambda e:self.input_dual_right_click_menu(e, is_primary=False))
-        if is_windows:
+        if not is_macos:
             self.bind("<Configure>", self.adjust_toplevel_positions)
         
     #--Input/Export Methods--
     
+    def linux_filebox_fix(self, is_on=True):
+        fg_color_set = '#575757' if is_on else "#F6F6F7"
+        style = ttk.Style(self)
+        style.configure('TButton', foreground='#F6F6F7')
+        style.configure('TCheckbutton', foreground='#F6F6F7')
+        style.configure('TCombobox', foreground='#F6F6F7')
+        style.configure('TEntry', foreground='#F6F6F7')
+        style.configure('TLabel', foreground='#F6F6F7')
+        style.configure('TMenubutton', foreground='#F6F6F7')
+        style.configure('TRadiobutton', foreground='#F6F6F7')
+        gui_data.sv_ttk.set_theme("dark", MAIN_FONT_NAME, 10, fg_color_set=fg_color_set)
+
+    def show_file_dialog(self, text='Select Audio files', dialoge_type=None):
+        parent_win = root
+        is_linux = not is_windows and not is_macos
+        
+        if is_linux:
+            self.linux_filebox_fix()
+            top = tk.Toplevel(root)
+            top.withdraw()
+            top.protocol("WM_DELETE_WINDOW", lambda: None)
+            parent_win = top
+        
+        if dialoge_type == MULTIPLE_FILE:
+            filenames = filedialog.askopenfilenames(parent=parent_win, 
+                                                    title=text)
+        elif dialoge_type == MAIN_MULTIPLE_FILE:
+            filenames = filedialog.askopenfilenames(parent=parent_win, 
+                                                    title=text,
+                                                    initialfile='',
+                                                    initialdir=self.lastDir)
+        elif dialoge_type == SINGLE_FILE:
+            filenames = filedialog.askopenfilename(parent=parent_win, 
+                                                   title=text)
+        elif dialoge_type == CHOOSE_EXPORT_FIR:
+            filenames = filedialog.askdirectory(
+                                    parent=parent_win,
+                                    title=f'Select Folder',)
+            
+        if is_linux:
+            print("Is Linux")
+            self.linux_filebox_fix(False)
+            top.destroy()
+            
+        return filenames
+
     def input_select_filedialog(self):
         """Make user select music files"""
 
@@ -2123,12 +2169,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             if not os.path.isdir(self.lastDir):
                 self.lastDir = None
 
-        paths = filedialog.askopenfilenames(
-            parent=root,
-            title=f'Select Audio Files',
-            initialfile='',
-            initialdir=self.lastDir)
-        
+        paths = self.show_file_dialog(dialoge_type=MAIN_MULTIPLE_FILE)
+
         if paths:  # Path selected
             self.inputPaths = paths
             
@@ -2140,9 +2182,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         export_path = None
         
-        path = filedialog.askdirectory(
-            parent=root,
-            title=f'Select Folder',)
+        path = self.show_file_dialog(dialoge_type=CHOOSE_EXPORT_FIR)
 
         if path:  # Path selected
             self.export_path_var.set(path)
@@ -2177,9 +2217,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         file_path_var, file_basename_var, file_path_2_var, file_basename_2_var = vars[is_primary]
             
         if not path:
-            path = filedialog.askopenfilename(
-                parent=root,
-                title=f'Select Audiofile',)
+            path = self.show_file_dialog(text='Select Audio file', dialoge_type=SINGLE_FILE)
 
         if path:  # Path selected
             file_path_var.set(path)
@@ -2366,16 +2404,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.vr_cache_source_mapper = {}
         self.mdx_cache_source_mapper = {}
         self.demucs_cache_source_mapper = {}
-      
-    def cached_model_source_holder(self, process_method, sources, model_name=None):
-        
-        if process_method == VR_ARCH_TYPE:
-            self.vr_cache_source_mapper = {**self.vr_cache_source_mapper, **{model_name: sources}}
-        if process_method == MDX_ARCH_TYPE:
-            self.mdx_cache_source_mapper = {**self.mdx_cache_source_mapper, **{model_name: sources}}
-        if process_method == DEMUCS_ARCH_TYPE:
-            self.demucs_cache_source_mapper = {**self.demucs_cache_source_mapper, **{model_name: sources}}
-                             
+
     def cached_source_callback(self, process_method, model_name=None):
         
         model, sources = None, None
@@ -2393,6 +2422,15 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 sources = value
         
         return model, sources
+
+    def cached_model_source_holder(self, process_method, sources, model_name=None):
+        
+        if process_method == VR_ARCH_TYPE:
+            self.vr_cache_source_mapper = {**self.vr_cache_source_mapper, **{model_name: sources}}
+        if process_method == MDX_ARCH_TYPE:
+            self.mdx_cache_source_mapper = {**self.mdx_cache_source_mapper, **{model_name: sources}}
+        if process_method == DEMUCS_ARCH_TYPE:
+            self.demucs_cache_source_mapper = {**self.demucs_cache_source_mapper, **{model_name: sources}}
   
     def cached_source_model_list_check(self, model_list: List[ModelData]):
 
@@ -2638,7 +2676,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         window.deiconify()
         window.configure(bg=BG_COLOR)
 
-        if is_windows:
+        if not is_macos:
             self.toplevels.append(window)
         
         def right_click_menu(event):
@@ -3026,7 +3064,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
             try:
                 right_click_menu.tk_popup(event.x_root,event.y_root)
-                right_click_release_linux(right_click_menu)
+                right_click_release_linux(right_click_menu, menu_batch_dual_top)
             finally:
                 right_click_menu.grab_release()
        
@@ -3907,7 +3945,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         application_change_log_Label = tk.Label(application_change_log_tab_Frame, text='Additional Information', font=(MAIN_FONT_NAME, f"{FONT_SIZE_6}", "bold"), justify="center", fg="#f4f4f4")
         application_change_log_Label.grid(row=0,column=0,padx=0,pady=25)
         
-        application_change_log_Text = tk.Text(application_change_log_tab_Frame, font=(MAIN_FONT_NAME, f"{FONT_SIZE_4}"), fg="white", bg="black", width=72, wrap=tk.WORD if is_windows else tk.CHAR, borderwidth=0)
+        application_change_log_Text = tk.Text(application_change_log_tab_Frame, font=(MAIN_FONT_NAME, f"{FONT_SIZE_4}"), fg="white", bg="black", width=72, wrap=tk.WORD, borderwidth=0)
         application_change_log_Text.grid(row=1,column=0,padx=40 if is_macos else 30,pady=0)
         application_change_log_Text_scroll = ttk.Scrollbar(application_change_log_tab_Frame, orient=tk.VERTICAL)
         application_change_log_Text.config(yscrollcommand=application_change_log_Text_scroll.set)
@@ -4802,8 +4840,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         vr_param_Frame = self.menu_FRAME_SET(vr_param_menu)
         vr_param_Frame.grid(row=0, padx=20)  
             
-        vr_param_title_title = self.menu_title_LABEL_SET(vr_param_Frame, SPECIFY_VR_MODEL_PARAMETERS_TEXT, width=25)
-        vr_param_title_title.grid(row=0,column=0,padx=0,pady=0)
+        vr_param_title_title = self.menu_title_LABEL_SET(vr_param_Frame, SPECIFY_VR_MODEL_PARAMETERS_TEXT)
+        vr_param_title_title.grid()
                 
         vr_model_stem_Label = self.menu_sub_LABEL_SET(vr_param_Frame, PRIMARY_STEM_TEXT)
         vr_model_stem_Label.grid(pady=MENU_PADDING_1)    
@@ -4825,7 +4863,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         balance_value_Option = ComboBoxMenu(vr_param_Frame, textvariable=balance_value_var, values=BALANCE_VALUES, width=COMBO_WIDTH)
         balance_value_Option.configure(state=tk.DISABLED)
         balance_value_Option.grid(pady=MENU_PADDING_1)
-        #self.help_hints(balance_value_Label, text=balance_value_HELP)
                 
         is_new_vr_model_Option = ttk.Checkbutton(vr_param_Frame, text=VR_51_MODEL_TEXT, width=SET_MENUS_CHECK_WIDTH, variable=is_new_vr_model_var, command=vr_new_toggle) 
         is_new_vr_model_Option.grid(pady=MENU_PADDING_1)
@@ -5040,7 +5077,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Checks for application updates"""
         
         def online_check():
-
             if not is_start_up:
                 self.app_update_status_Text_var.set(LOADING_VERSION_INFO_TEXT)
                 self.app_update_button_Text_var.set(CHECK_FOR_UPDATES_TEXT)
@@ -5135,7 +5171,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.current_thread = KThread(target=online_check)
             self.current_thread.setDaemon(True) if not is_windows else None
             self.current_thread.start()
-                
+
     def offline_state_set(self, is_start_up=False):
         """Changes relevent settings and "Download Center" buttons if no internet connection is available"""
         

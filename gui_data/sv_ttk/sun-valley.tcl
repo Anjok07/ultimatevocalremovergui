@@ -9,6 +9,7 @@ proc set_theme {mode} {
 		ttk::style theme use "sun-valley-dark"
 
         set fontString "$::fontName"
+        set fgSet "$::fgcolorset"
 
 		array set colors {
 		    -fg             "#F6F6F7"
@@ -20,7 +21,7 @@ proc set_theme {mode} {
         
         ttk::style configure . \
             -background $colors(-bg) \
-            -foreground $colors(-fg) \
+            -foreground $fgSet \
             -troughcolor $colors(-bg) \
             -focuscolor $colors(-selectbg) \
             -selectbackground $colors(-selectbg) \

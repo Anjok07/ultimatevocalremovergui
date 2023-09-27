@@ -38,11 +38,12 @@ def init(func):
 
 
 @init
-def set_theme(theme, font_name="Century Gothic", f_size=10):
+def set_theme(theme, font_name="Century Gothic", f_size=10, fg_color_set="#F6F6F7"):
     if theme not in {"dark", "light"}:
         raise RuntimeError(f"not a valid theme name: {theme}")
 
     root.globalsetvar("fontName", (font_name, f_size))
+    root.globalsetvar("fgcolorset", (fg_color_set))
     root.tk.call("set_theme", theme)
 
 

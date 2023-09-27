@@ -171,7 +171,8 @@ sudo pacman -Sy
 sudo pacman -S python-pip
 sudo pacman -S --noconfirm tk
 sudo pacman -S ffmpeg
-pip install -r requirements.txt
+chmod +x install_packages.sh
+./install_packages.sh
 ```
 
 </details>

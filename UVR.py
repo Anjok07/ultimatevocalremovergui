@@ -1645,15 +1645,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
          # Select Music Files Option
         self.console_Frame = tk.Frame(master=self, highlightbackground='#101012', highlightcolor='#101012', highlightthicknes=2)
-        self.console_Frame.place(x=X_CONSOLE_FRAME_1080P, y=Y_OFFSET_CONSOLE_FRAME_1080P, width=WIDTH_CONSOLE_FRAME_1080P, height=HEIGHT_CONSOLE_FRAME_1080P,
-                                relx=0, rely=0, relwidth=1, relheight=0)
-
-        self.progressbar = ttk.Progressbar(master=self, variable=self.progress_bar_main_var)
-        self.progressbar.place(x=25, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.CONVERSIONBUTTON_HEIGHT + self.COMMAND_HEIGHT + self.PADDING*4, width=-50, height=self.PROGRESS_HEIGHT,
-                            relx=0, rely=0, relwidth=1, relheight=0)
-
-         # Select Music Files Option
-        self.console_Frame = tk.Frame(master=self, highlightbackground='#101012', highlightcolor='#101012', highlightthicknes=2)
         self.console_Frame.place(x=15, y=self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT + self.CONVERSIONBUTTON_HEIGHT + self.PADDING + 5 *3, width=-30, height=self.COMMAND_HEIGHT+7,
                                 relx=0, rely=0, relwidth=1, relheight=0)
 
@@ -5607,7 +5598,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         if not self.mdx_net_model_var.get() == DOWNLOAD_MORE:
             self.update_main_widget_states()
 
-
     def move_widget_offscreen(self, widget, step=10):
         current_x = widget.winfo_x()
         current_y = widget.winfo_y()
@@ -6251,7 +6241,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             if audio_tool.audio_tool == MATCH_INPUTS:
                 audio_tool.match_inputs(audio_file, audio_file_base, command_Text)
             else:
-                command_Text(PROCESS_STARTING_TEXT)
+                command_Text(f"{PROCESS_STARTING_TEXT}\n")
                 audio_tool.align_inputs(audio_file, audio_file_base, audio_file_2_base, command_Text, set_progress_bar)
             self.progress_bar_main_var.set(base * file_num)
             self.command_Text.write(f"{DONE}\n")
@@ -6286,7 +6276,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         try:
             total_files = len(inputPaths)
-
             if self.chosen_audio_tool_var.get() == TIME_STRETCH:
                 audio_tool = AudioTools(TIME_STRETCH)
                 self.progress_bar_main_var.set(2)

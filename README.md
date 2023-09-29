@@ -29,9 +29,9 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
 - Download the UVR installer for Windows via the link below:
     - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file_premium/g1xpb8z5r95h9rm/UVR_v5.6.0_setup.exe/file)
+    - [Main Download Link mirror](https://www.mediafire.com/file_premium/wpxo3mvbw95364l/UVR_v5.6.0_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
-    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_9_26_23_21_48.exe).
+    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_9_29_23_1_39.exe).
 
 <details id="WindowsManual">
   <summary>Windows Manual Installation</summary>
@@ -82,11 +82,11 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/s1fawbqnliqur20/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/8lh5ntbclbig7ab/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/0fc33w6842k9lwt/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/w1tl4j4hc01y9ph/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>

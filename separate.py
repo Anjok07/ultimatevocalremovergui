@@ -26,11 +26,9 @@ import torch
 import warnings
 import pydub
 import soundfile as sf
-import traceback
 import lib_v5.mdxnet as MdxnetSet
 import math
 #import random
-from tqdm import tqdm
 from onnx import load
 from onnx2pytorch import ConvertModel
 
@@ -231,6 +229,7 @@ class SeperateAttributes:
             self.batch_size = model_data.batch_size
             self.window_size = model_data.window_size
             self.input_high_end_h = None
+            self.input_high_end = None
             self.post_process_threshold = model_data.post_process_threshold
             self.aggressiveness = {'value': model_data.aggression_setting, 
                                    'split_bin': self.mp.param['band'][1]['crop_stop'], 
@@ -454,9 +453,7 @@ class SeperateMDX(SeperateAttributes):
                     self.model_run = ConvertModel(load(self.model_path))
                     self.model_run.to(self.device).eval()
 
-            self.initialize_model_settings()
             self.running_inference_console_write()
-            self.stft = STFT(self.n_fft, self.hop, self.dim_f)
             mix = prepare_mix(self.audio_file)
             source = self.demix(mix)
             
@@ -499,9 +496,11 @@ class SeperateMDX(SeperateAttributes):
         self.trim = self.n_fft//2
         self.chunk_size = self.hop * (self.mdx_segment_size-1)
         self.gen_size = self.chunk_size-2*self.trim
+        self.stft = STFT(self.n_fft, self.hop, self.dim_f)
 
     def demix(self, mix, is_match_mix=False):
-
+        self.initialize_model_settings()
+        
         org_mix = mix
         tar_waves_ = []
 
@@ -1178,14 +1177,14 @@ class SeperateVR(SeperateAttributes):
         return y_spec, v_spec
 
     def spec_to_wav(self, spec):
-        if self.high_end_process.startswith('mirroring'):        
+        if self.high_end_process.startswith('mirroring') and isinstance(self.input_high_end, np.ndarray) and self.input_high_end_h:        
             input_high_end_ = spec_utils.mirroring(self.high_end_process, spec, self.input_high_end, self.mp)
             wav = spec_utils.cmb_spectrogram_to_wave(spec, self.mp, self.input_high_end_h, input_high_end_, is_v51_model=self.is_vr_51_model)       
         else:
             wav = spec_utils.cmb_spectrogram_to_wave(spec, self.mp, is_v51_model=self.is_vr_51_model)
             
         return wav
-   
+
 def process_secondary_model(secondary_model: ModelData, 
                             process_data, 
                             main_model_primary_stem_4_stem=None, 

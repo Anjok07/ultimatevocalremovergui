@@ -93,7 +93,7 @@ if OPERATING_SYSTEM=="Darwin":
     right_click_button = '<Button-2>'
     application_extension = ".dmg"
 elif OPERATING_SYSTEM=="Linux":
-    OPEN_FILE_func = lambda input_string:subprocess.Popen(["open", input_string])
+    OPEN_FILE_func = lambda input_string:subprocess.Popen(["xdg-open", input_string])
     dnd_path_check = LINUX_DND_CHECK
     current_patch = PATCH_LINUX
     is_windows = False
@@ -2651,7 +2651,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         window.resizable(False, False)
         window.wm_transient(top_window)
         window.title(title)
-        window.iconbitmap(ICON_IMG_PATH if is_windows else None)
+        window.iconbitmap(ICON_IMG_PATH) if is_windows else self.tk.call('wm', 'iconphoto', window._w, tk.PhotoImage(file=MAIN_ICON_IMG_PATH))
         
         root_location_x = root.winfo_x()
         root_location_y = root.winfo_y()

@@ -212,7 +212,7 @@ python UVR.py
 ### Common Issues
 
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
-- Memory allocation errors can usually be resolved by lowering the "Chunk Size".
+- Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
 
 ### Issue Reporting
 

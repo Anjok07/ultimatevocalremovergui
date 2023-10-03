@@ -33,6 +33,7 @@
 import math
 
 import torch
+
 import torch.nn as nn
 import torch.nn.functional as F
 
@@ -42,6 +43,20 @@ EPS = 1e-8
 
 
 def overlap_and_add(signal, frame_step):
+    """
+    Perform the overlap-and-add algorithm on a given signal.
+
+    This function takes a signal and a frame step value as input. It splits the signal
+    into frames with a specified overlap and adds the overlapping frames together to
+    reconstruct the original signal.
+
+    Parameters:
+        signal (torch.Tensor): The input signal to perform the overlap-and-add algorithm on.
+        frame_step (int): The frame step value for splitting the signal into frames.
+
+    Returns:
+        torch.Tensor: The reconstructed signal after performing the overlap-and-add algorithm.
+    """
     outer_dimensions = signal.size()[:-2]
     frames, frame_length = signal.size()[-2:]
 
@@ -65,6 +80,9 @@ def overlap_and_add(signal, frame_step):
 
 
 class ConvTasNet(nn.Module):
+    """
+    This class represents a Convolutional Time-domain Audio Separation Network (ConvTasNet) model.
+    """
     @capture_init
     def __init__(self,
                  N=256,
@@ -81,18 +99,22 @@ class ConvTasNet(nn.Module):
                  causal=False,
                  mask_nonlinear='relu'):
         """
+        Initializes a new ConvTasNet model with the specified hyperparameters.
+
         Args:
-            N: Number of filters in autoencoder
-            L: Length of the filters (in samples)
-            B: Number of channels in bottleneck 1 × 1-conv block
-            H: Number of channels in convolutional blocks
-            P: Kernel size in convolutional blocks
-            X: Number of convolutional blocks in each repeat
-            R: Number of repeats
-            C: Number of speakers
-            norm_type: BN, gLN, cLN
-            causal: causal or non-causal
-            mask_nonlinear: use which non-linear function to generate mask
+            N: Number of filters in the autoencoder.
+            L: Length of the filters (in samples).
+            B: Number of channels in the bottleneck 1 × 1-conv block.
+            H: Number of channels in the convolutional blocks.
+            P: Kernel size in the convolutional blocks.
+            X: Number of convolutional blocks in each repeat.
+            R: Number of repeats.
+            C: Number of speakers.
+            audio_channels: Number of audio channels in the input.
+            samplerate: The samplerate of the audio signal.
+            norm_type: Type of normalization to be applied (BN, gLN, cLN).
+            causal: Whether the model should be causal or non-causal.
+            mask_nonlinear: The non-linear function to generate the mask.
         """
         super(ConvTasNet, self).__init__()
         # Hyper-parameter
@@ -112,12 +134,24 @@ class ConvTasNet(nn.Module):
                 nn.init.xavier_normal_(p)
 
     def valid_length(self, length):
+        """
+        This function takes in a length and returns it.
+
+        Parameters:
+            length: The length to be returned.
+
+        Returns:
+            int: The input length.
+        """
         return length
 
     def forward(self, mixture):
         """
+        This function takes in a mixture tensor and performs a series of operations on it.
+
         Args:
             mixture: [M, T], M is batch size, T is #samples
+
         Returns:
             est_source: [M, C, T]
         """
@@ -136,6 +170,14 @@ class Encoder(nn.Module):
     """Estimation of the nonnegative mixture weight by a 1-D conv layer.
     """
     def __init__(self, L, N, audio_channels):
+        """
+        Initialize the Encoder class.
+
+        Parameters:
+            L (int): The kernel size.
+            N (int): The number of output channels.
+            audio_channels (int): The number of input channels.
+        """
         super(Encoder, self).__init__()
         # Hyper-parameter
         self.L, self.N = L, N
@@ -145,8 +187,11 @@ class Encoder(nn.Module):
 
     def forward(self, mixture):
         """
+        Forward pass of the Encoder class.
+
         Args:
             mixture: [M, T], M is batch size, T is #samples
+
         Returns:
             mixture_w: [M, N, K], where K = (T-L)/(L/2)+1 = 2T/L-1
         """
@@ -155,6 +200,10 @@ class Encoder(nn.Module):
 
 
 class Decoder(nn.Module):
+    """A class representing a decoder.
+
+    This class is a subclass of nn.Module and is used to decode mixture signals into estimated source signals.
+    """
     def __init__(self, N, L, audio_channels):
         super(Decoder, self).__init__()
         # Hyper-parameter
@@ -164,12 +213,16 @@ class Decoder(nn.Module):
         self.basis_signals = nn.Linear(N, audio_channels * L, bias=False)
 
     def forward(self, mixture_w, est_mask):
-        """
+        """Forward pass of the decoder.
+
+        This method takes mixture_w and est_mask as input and calculates the estimated source signals.
+
         Args:
-            mixture_w: [M, N, K]
-            est_mask: [M, C, N, K]
+            mixture_w: A tensor of shape [M, N, K], representing the mixture signals in the frequency domain.
+            est_mask: A tensor of shape [M, C, N, K], representing the estimated masks for each source.
+
         Returns:
-            est_source: [M, C, T]
+            est_source: A tensor of shape [M, C, T], representing the estimated source signals in the time domain.
         """
         # D = W * M
         source_w = torch.unsqueeze(mixture_w, 1) * est_mask  # [M, C, N, K]
@@ -252,6 +305,9 @@ class TemporalConvNet(nn.Module):
 
 
 class TemporalBlock(nn.Module):
+    """
+    This class represents a temporal block used in a neural network.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -274,19 +330,23 @@ class TemporalBlock(nn.Module):
 
     def forward(self, x):
         """
+        Forward pass of the temporal block.
+
         Args:
-            x: [M, B, K]
+            x: [M, B, K] input tensor
         Returns:
-            [M, B, K]
+            [M, B, K] output tensor
         """
         residual = x
         out = self.net(x)
         # TODO: when P = 3 here works fine, but when P = 2 maybe need to pad?
         return out + residual  # look like w/o F.relu is better than w/ F.relu
-        # return F.relu(out + residual)
 
 
 class DepthwiseSeparableConv(nn.Module):
+    """
+    This class implements a depthwise separable convolutional layer.
+    """
     def __init__(self,
                  in_channels,
                  out_channels,
@@ -321,10 +381,15 @@ class DepthwiseSeparableConv(nn.Module):
 
     def forward(self, x):
         """
+        Forward pass of the depthwise separable convolutional layer.
+
         Args:
             x: [M, H, K]
+                The input tensor.
+
         Returns:
             result: [M, B, K]
+                The output tensor.
         """
         return self.net(x)
 
@@ -333,13 +398,22 @@ class Chomp1d(nn.Module):
     """To ensure the output length is the same as the input.
     """
     def __init__(self, chomp_size):
+        """
+        Initialize the Chomp1d module.
+
+        Args:
+            chomp_size (int): The size of the chomp.
+        """
         super(Chomp1d, self).__init__()
         self.chomp_size = chomp_size
 
     def forward(self, x):
         """
+        Perform the forward pass of the Chomp1d module.
+
         Args:
             x: [M, H, Kpad]
+
         Returns:
             [M, H, K]
         """
@@ -347,8 +421,17 @@ class Chomp1d(nn.Module):
 
 
 def chose_norm(norm_type, channel_size):
-    """The input of normlization will be (M, C, K), where M is batch size,
+    """Select the appropriate normalization method based on the given norm_type and channel_size.
+
+       The input of normlization will be (M, C, K), where M is batch size,
        C is channel size and K is sequence length.
+
+    Args:
+        norm_type (str): The type of normalization to use.
+        channel_size (int): The size of the channel.
+
+    Returns:
+        torch.nn.Module: The chosen normalization method.
     """
     if norm_type == "gLN":
         return GlobalLayerNorm(channel_size)
@@ -372,13 +455,17 @@ class ChannelwiseLayerNorm(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        """Reset the parameters gamma and beta."""
         self.gamma.data.fill_(1)
         self.beta.data.zero_()
 
     def forward(self, y):
         """
+        Perform Channel-wise Layer Normalization (cLN) on the input tensor y.
+
         Args:
             y: [M, N, K], M is batch size, N is channel size, K is length
+
         Returns:
             cLN_y: [M, N, K]
         """
@@ -391,19 +478,31 @@ class ChannelwiseLayerNorm(nn.Module):
 class GlobalLayerNorm(nn.Module):
     """Global Layer Normalization (gLN)"""
     def __init__(self, channel_size):
+        """
+        Initialize a new GlobalLayerNorm module with a specified channel size.
+
+        Parameters:
+            channel_size (int): The number of channels in the input tensor.
+        """
         super(GlobalLayerNorm, self).__init__()
         self.gamma = nn.Parameter(torch.Tensor(1, channel_size, 1))  # [1, N, 1]
         self.beta = nn.Parameter(torch.Tensor(1, channel_size, 1))  # [1, N, 1]
         self.reset_parameters()
 
     def reset_parameters(self):
+        """
+        Reset the parameters of the gLN module.
+        """
         self.gamma.data.fill_(1)
         self.beta.data.zero_()
 
     def forward(self, y):
         """
+        Perform the gLN operation on the input tensor.
+
         Args:
             y: [M, N, K], M is batch size, N is channel size, K is length
+
         Returns:
             gLN_y: [M, N, K]
         """

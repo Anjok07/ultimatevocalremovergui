@@ -46,6 +46,7 @@ def add_model_flags(parser):
 
 
 def _parse_remote_files(remote_file_list) -> tp.Dict[str, str]:
+    """Parses a list of remote files and returns a dictionary of model names and their corresponding URLs."""
     root: str = ''
     models: tp.Dict[str, str] = {}
     for line in remote_file_list.read_text().split('\n'):
@@ -88,6 +89,7 @@ def get_model_from_args(args):
     """
     return get_model(name=args.name, repo=args.repo)
 
+
 logger = logging.getLogger(__name__)
 ROOT = "https://dl.fbaipublicfiles.com/demucs/v3.0/"
 
@@ -105,14 +107,41 @@ SOURCES = ["drums", "bass", "other", "vocals"]
 
 
 def get_url(name):
+    """
+    Get the URL for a pretrained model.
+
+    Parameters:
+        name (str): The name of the pretrained model.
+
+    Returns:
+        str: The URL for the pretrained model.
+    """
     sig = PRETRAINED_MODELS[name]
     return ROOT + name + "-" + sig[:8] + ".th"
 
 def is_pretrained(name):
+    """
+    Check if a model is pretrained.
+
+    Parameters:
+        name (str): The name of the model.
+
+    Returns:
+        bool: True if the model is pretrained, False otherwise.
+    """
     return name in PRETRAINED_MODELS
 
 
 def load_pretrained(name):
+    """
+    Load a pretrained model.
+
+    Parameters:
+        name (str): The name of the pretrained model.
+
+    Returns:
+        torch.nn.Module: The loaded pretrained model.
+    """
     if name == "demucs":
         return demucs(pretrained=True)
     elif name == "demucs48_hq":
@@ -132,6 +161,14 @@ def load_pretrained(name):
 
 
 def _load_state(name, model, quantizer=None):
+    """
+    Load the state of a pretrained model.
+
+    Parameters:
+        name (str): The name of the pretrained model.
+        model (torch.nn.Module): The model to load the state into.
+        quantizer (optional): The quantizer to use for quantized models.
+    """
     url = get_url(name)
     state = torch.hub.load_state_dict_from_url(url, map_location='cpu', check_hash=True)
     set_state(model, quantizer, state)
@@ -140,6 +177,18 @@ def _load_state(name, model, quantizer=None):
 
 
 def demucs_unittest(pretrained=True):
+    """
+    Unittest function for Demucs model.
+
+    This function creates an instance of the Demucs model with 4 channels and pre-defined sources.
+    Optionally, it loads pre-trained weights for the model.
+
+    Parameters:
+        pretrained (bool, optional): If True, load pre-trained weights. Defaults to True.
+
+    Returns:
+        Demucs: An instance of the Demucs model.
+    """
     model = Demucs(channels=4, sources=SOURCES)
     if pretrained:
         _load_state('demucs_unittest', model)
@@ -147,6 +196,26 @@ def demucs_unittest(pretrained=True):
 
 
 def demucs(pretrained=True, extra=False, quantized=False, hq=False, channels=64):
+    """
+    Create an instance of the Demucs model.
+
+    This function creates an instance of the Demucs model with customizable options such as the number of channels.
+    Optionally, it loads pre-trained weights based on the specified options.
+
+    Parameters:
+        pretrained (bool, optional): If True, load pre-trained weights. Defaults to True.
+        extra (bool, optional): If True, enable extra options. Defaults to False.
+        quantized (bool, optional): If True, use quantized weights. Defaults to False.
+        hq (bool, optional): If True, use high-quality weights. Defaults to False.
+        channels (int, optional): Number of channels for the model. Defaults to 64.
+
+    Returns:
+        Demucs: An instance of the Demucs model.
+
+    Raises:
+        ValueError: If extra or quantized is True and pretrained is False.
+        ValueError: If more than one of extra, quantized, hq is True.
+    """
     if not pretrained and (extra or quantized or hq):
         raise ValueError("if extra or quantized is True, pretrained must be True.")
     model = Demucs(sources=SOURCES, channels=channels)
@@ -169,6 +238,22 @@ def demucs(pretrained=True, extra=False, quantized=False, hq=False, channels=64)
 
 
 def tasnet(pretrained=True, extra=False):
+    """
+    Create an instance of the ConvTasNet model.
+
+    This function creates an instance of the ConvTasNet model with customizable options.
+    Optionally, it loads pre-trained weights based on the specified options.
+
+    Parameters:
+        pretrained (bool, optional): If True, load pre-trained weights. Defaults to True.
+        extra (bool, optional): If True, enable extra options. Defaults to False.
+
+    Returns:
+        ConvTasNet: An instance of the ConvTasNet model.
+
+    Raises:
+        ValueError: If extra is True and pretrained is False.
+    """
     if not pretrained and extra:
         raise ValueError("if extra is True, pretrained must be True.")
     model = ConvTasNet(X=10, sources=SOURCES)
@@ -178,3 +263,4 @@ def tasnet(pretrained=True, extra=False):
             name = 'tasnet_extra'
         _load_state(name, model)
     return model
+

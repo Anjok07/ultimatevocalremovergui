@@ -50,13 +50,17 @@ class ModelOnlyRepo:
 
 
 class RemoteRepo(ModelOnlyRepo):
+    """A class representing a remote repository with models."""
     def __init__(self, models: tp.Dict[str, str]):
+        """Initialize the RemoteRepo with a dictionary of models."""
         self._models = models
 
     def has_model(self, sig: str) -> bool:
+        """Check if a model with the given signature exists in the repository."""
         return sig in self._models
 
     def get_model(self, sig: str) -> Model:
+        """Get a Model object based on the given signature."""
         try:
             url = self._models[sig]
         except KeyError:
@@ -66,11 +70,25 @@ class RemoteRepo(ModelOnlyRepo):
 
 
 class LocalRepo(ModelOnlyRepo):
+    """
+    A class representing a local repository for pre-trained models.
+    Inherits from the 'ModelOnlyRepo' class.
+    """
     def __init__(self, root: Path):
+        """
+        Initialize a new 'LocalRepo' instance with the root path.
+
+        Parameters:
+            root (Path): The root path of the repository.
+        """
         self.root = root
         self.scan()
 
     def scan(self):
+        """
+        Scan the repository and populate the models and checksums dictionaries.
+
+        """
         self._models = {}
         self._checksums = {}
         for file in self.root.iterdir():
@@ -88,9 +106,30 @@ class LocalRepo(ModelOnlyRepo):
                 self._models[xp_sig] = file
 
     def has_model(self, sig: str) -> bool:
+        """
+        Check if a model with the specified signature exists.
+
+        Parameters:
+            sig (str): The model signature.
+
+        Returns:
+            bool: True if the model exists, False otherwise.
+        """
         return sig in self._models
 
     def get_model(self, sig: str) -> Model:
+        """
+        Retrieve a model with the specified signature.
+
+        Parameters:
+            sig (str): The model signature.
+
+        Returns:
+            Model: The retrieved model.
+
+        Raises:
+            ModelLoadingError: If the model with the specified signature cannot be found.
+        """
         try:
             file = self._models[sig]
         except KeyError:
@@ -105,20 +144,44 @@ class BagOnlyRepo:
     model loading to some Repo.
     """
     def __init__(self, root: Path, model_repo: ModelOnlyRepo):
+        """Initialize the BagOnlyRepo object.
+
+        Parameters:
+            root (Path): The root directory to scan for YAML files.
+            model_repo (ModelOnlyRepo): The model repository object.
+        """
         self.root = root
         self.model_repo = model_repo
         self.scan()
 
     def scan(self):
+        """Scan the root directory for YAML files and store them in a dictionary.
+        """
         self._bags = {}
         for file in self.root.iterdir():
             if file.suffix == '.yaml':
                 self._bags[file.stem] = file
 
     def has_model(self, name: str) -> bool:
+        """Check if a model exists in the bag.
+
+        Parameters:
+            name (str): The name of the model.
+
+        Returns:
+            bool: True if the model exists, False otherwise.
+        """
         return name in self._bags
 
     def get_model(self, name: str) -> BagOfModels:
+        """Retrieve a bag of models from a YAML file.
+
+        Parameters:
+            name (str): The name of the YAML file.
+
+        Returns:
+            BagOfModels: The bag of models.
+        """
         try:
             yaml_file = self._bags[name]
         except KeyError:
@@ -133,14 +196,40 @@ class BagOnlyRepo:
 
 
 class AnyModelRepo:
+    """This class represents a repository for models."""
     def __init__(self, model_repo: ModelOnlyRepo, bag_repo: BagOnlyRepo):
+        """Initialize the AnyModelRepo with a model repository and a bag repository."""
         self.model_repo = model_repo
         self.bag_repo = bag_repo
 
     def has_model(self, name_or_sig: str) -> bool:
+        """Check if a model exists in the repository.
+
+        This method checks if a model with the specified name or signature exists in the
+        model repository or the bag repository. It returns True if the model exists and
+        False otherwise.
+
+        Parameters:
+            name_or_sig (str): The name or signature of the model.
+
+        Returns:
+            bool: True if the model exists, False otherwise.
+        """
         return self.model_repo.has_model(name_or_sig) or self.bag_repo.has_model(name_or_sig)
 
     def get_model(self, name_or_sig: str) -> AnyModel:
+        """Get a model from the repository.
+
+        This method retrieves a model with the specified name or signature from the model
+        repository or the bag repository. If the model exists in the model repository, it
+        is returned. Otherwise, the model is retrieved from the bag repository.
+
+        Parameters:
+            name_or_sig (str): The name or signature of the model.
+
+        Returns:
+            AnyModel: The retrieved model.
+        """
         print('name_or_sig: ', name_or_sig)
         if self.model_repo.has_model(name_or_sig):
             return self.model_repo.get_model(name_or_sig)

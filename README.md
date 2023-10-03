@@ -214,6 +214,15 @@ python UVR.py
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
 - Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
 
+#### MacOS Sonoma Left-click Bug
+There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This seems to be impacting all applications built with Tkinter on Sonoma.
+
+Temporary solutions:
+- Ensure you move your mouse slightly when left-clicking within the application; this ensures the left-click is registered.
+- I'm developing a temporary fix that lets you use the middle mouse button or space bar as substitutes for left-clicks until the issue is fully resolved.
+
+This issue is being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).
+
 ### Issue Reporting
 
 Please be as detailed as possible when posting a new issue. 

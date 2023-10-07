@@ -117,7 +117,7 @@ class SeperateAttributes:
         self.main_model_primary = main_model_primary
         self.ensemble_primary_stem = model_data.ensemble_primary_stem
         self.is_multi_stem_ensemble = model_data.is_multi_stem_ensemble
-        self.is_gpu = False
+        self.is_mps = False
         self.is_deverb = True
         self.DENOISER_MODEL = model_data.DENOISER_MODEL
         self.DEVERBER_MODEL = model_data.DEVERBER_MODEL
@@ -137,6 +137,8 @@ class SeperateAttributes:
         self.stem_path_init = os.path.join(self.export_path, f'{self.audio_file_base}_({self.secondary_stem}).wav')
         self.deverb_vocal_opt = model_data.deverb_vocal_opt
         self.is_save_vocal_only = model_data.is_save_vocal_only
+        self.device = 'cpu'
+        self.run_type = ['CPUExecutionProvider']
         
         if self.is_inst_only_voc_splitter or self.is_sec_bv_rebalance:
             self.is_primary_stem_only = False
@@ -144,6 +146,14 @@ class SeperateAttributes:
         
         if main_model_primary and self.is_multi_stem_ensemble:
             self.primary_stem, self.secondary_stem = main_model_primary, secondary_stem(main_model_primary)
+
+        if self.is_gpu_conversion >= 0:
+            if OPERATING_SYSTEM == 'Darwin' and torch.backends.mps.is_available():
+                self.device = 'mps'
+                self.is_mps = True
+            elif torch.cuda.is_available():
+                self.device = 'cuda:0'
+                self.run_type = ['CUDAExecutionProvider']
 
         if model_data.process_method == MDX_ARCH_TYPE:
             self.is_mdx_ckpt = model_data.is_mdx_ckpt
@@ -170,13 +180,6 @@ class SeperateAttributes:
             self.dim_c = 4
             self.hop = 1024
 
-            if self.is_gpu_conversion >= 0 and torch.cuda.is_available():
-                self.is_gpu = True
-                self.device, self.run_type = torch.device('cuda:0'), ['CUDAExecutionProvider']
-            else:
-                self.is_gpu = False
-                self.device, self.run_type = torch.device('cpu'), ['CPUExecutionProvider']
-                
         if model_data.process_method == DEMUCS_ARCH_TYPE:
             self.demucs_stems = model_data.demucs_stems if not main_process_method in [MDX_ARCH_TYPE, VR_ARCH_TYPE] else None
             self.secondary_model_4_stem = model_data.secondary_model_4_stem
@@ -189,7 +192,8 @@ class SeperateAttributes:
             self.is_demucs_combine_stems = model_data.is_demucs_combine_stems
             self.demucs_stem_count = model_data.demucs_stem_count
             self.pre_proc_model = model_data.pre_proc_model
-            
+            self.device = 'cpu' if self.is_mps and not self.demucs_version == DEMUCS_V4 else self.device
+
             self.primary_stem = model_data.ensemble_primary_stem if process_data['is_ensemble_master'] else model_data.primary_stem
             self.secondary_stem = model_data.ensemble_secondary_stem if process_data['is_ensemble_master'] else model_data.secondary_stem
 
@@ -218,7 +222,6 @@ class SeperateAttributes:
             self.primary_model_name, self.primary_sources = self.cached_source_callback(DEMUCS_ARCH_TYPE, model_name=self.model_basename)
 
         if model_data.process_method == VR_ARCH_TYPE:
-            self.device = torch.device('cuda:0') if torch.cuda.is_available() else torch.device('cpu')
             self.check_label_secondary_stem_runs()
             self.primary_model_name, self.primary_sources = self.cached_source_callback(VR_ARCH_TYPE, model_name=self.model_basename)
             self.mp = model_data.vr_model_param
@@ -446,7 +449,7 @@ class SeperateMDX(SeperateAttributes):
                 separator = MdxnetSet.ConvTDFNet(**model_params)
                 self.model_run = separator.load_from_checkpoint(self.model_path).to(self.device).eval()
             else:
-                if self.mdx_segment_size == self.dim_t:
+                if self.mdx_segment_size == self.dim_t and not self.is_mps:
                     ort_ = ort.InferenceSession(self.model_path, providers=self.run_type)
                     self.model_run = lambda spek:ort_.run(None, {'input': spek.cpu().numpy()})[0]
                 else:
@@ -600,7 +603,7 @@ class SeperateMDXC(SeperateAttributes):
     def seperate(self):
         samplerate = 44100
         sources = None
-        
+
         if self.primary_model_name == self.model_basename and isinstance(self.primary_sources, tuple):
             mix, sources = self.primary_sources
             self.load_cached_sources()
@@ -786,11 +789,6 @@ class SeperateDemucs(SeperateAttributes):
         mix = prepare_mix(self.audio_file)
 
         if is_no_cache:
-            if self.is_gpu_conversion >= 0:
-                self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
-            else:
-                self.device = torch.device('cpu')
-            
             if self.demucs_version == DEMUCS_V1:
                 if str(self.model_path).endswith(".gz"):
                     self.model_path = gzip.open(self.model_path, "rb")
@@ -1002,13 +1000,8 @@ class SeperateVR(SeperateAttributes):
             self.load_cached_sources()
         else:
             self.start_inference_console_write()
-            if self.is_gpu_conversion >= 0:
-                if OPERATING_SYSTEM == 'Darwin':
-                    device = torch.device('mps' if torch.backends.mps.is_available() else 'cpu')
-                else:
-                    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu') 
-            else:
-                device = torch.device('cpu')
+
+            device = self.device
 
             nn_arch_sizes = [
                 31191, # default

@@ -78,7 +78,7 @@ def get_execution_time(function, name):
     time_difference = end - start
     print(f'{name} Execution Time: ', time_difference)
 
-PREVIOUS_PATCH_WIN = 'UVR_Patch_9_25_23_2_1'
+PREVIOUS_PATCH_WIN = 'UVR_Patch_10_6_23_4_27'
 
 is_dnd_compatible = True
 banner_placement = -2
@@ -108,7 +108,7 @@ elif OPERATING_SYSTEM=="Windows":
     is_macos = False
     right_click_button = '<Button-3>'
     application_extension = ".exe"
-    
+
 def right_click_release_linux(window, top_win=None):
     if OPERATING_SYSTEM=="Linux":
         root.bind('<Button-1>', lambda e:window.destroy())
@@ -3228,7 +3228,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.app_update_button = ttk.Button(settings_menu_main_Frame, textvariable=self.app_update_button_Text_var, width=SETTINGS_BUT_WIDTH-2, command=lambda:self.pop_up_update_confirmation())
         self.app_update_button.grid(pady=MENU_PADDING_1)
         
-        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, font=(MAIN_FONT_NAME,  f"{FONT_SIZE_4}"), width=UPDATE_LABEL_WIDTH, justify="center", relief="ridge", fg="#13849f")
+        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, padx=3, pady=3, font=(MAIN_FONT_NAME,  f"{FONT_SIZE_4}"), width=UPDATE_LABEL_WIDTH, justify="center", relief="ridge", fg="#13849f")
         self.app_update_status_Label.grid(pady=20)
         
         donate_Button = ttk.Button(settings_menu_main_Frame, image=self.donate_img, command=lambda:webbrowser.open_new_tab(DONATE_LINK_BMAC))

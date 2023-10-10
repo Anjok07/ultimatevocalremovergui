@@ -74,6 +74,8 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 
 ### MacOS Installation
 - Please Note:
+    - The MacOS Sonoma mouse clicking issue has been fixed.
+    - MPS (GPU) acceleration for Mac M1 has been expanded to work with Demucs v4 and all MDX-Net models.
     - This bundle is intended for those running macOS Catalina and above.
     - Application functionality for systems running macOS Mojave or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
@@ -82,11 +84,11 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/8lh5ntbclbig7ab/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/dxautmv78peegem/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/w1tl4j4hc01y9ph/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/kz8k5b0g8pgf4er/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>
@@ -213,6 +215,15 @@ python UVR.py
 
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
 - Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
+
+#### MacOS Sonoma Left-click Bug
+There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This seems to be impacting all applications built with Tkinter on Sonoma.
+
+Temporary solutions:
+- Ensure you move your mouse slightly when left-clicking within the application; this ensures the left-click is registered.
+- I'm developing a temporary fix that lets you use the middle mouse button or space bar as substitutes for left-clicks until the issue is fully resolved.
+
+This issue is being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).
 
 ### Issue Reporting
 

@@ -2122,6 +2122,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def show_file_dialog(self, text='Select Audio files', dialoge_type=None):
         parent_win = root
         is_linux = not is_windows and not is_macos
+
+        lastDir = self.lastDir.get(dialoge_type)
         
         if is_linux:
             self.linux_filebox_fix()
@@ -2137,11 +2139,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             filenames = filedialog.askopenfilenames(parent=parent_win, 
                                                     title=text,
                                                     initialfile='',
-                                                    initialdir=self.lastDir)
+                                                    initialdir=lastDir)
         elif dialoge_type == SINGLE_FILE:
             filenames = filedialog.askopenfilename(parent=parent_win, 
                                                    title=text)
-        elif dialoge_type == CHOOSE_EXPORT_FIR:
+        elif dialoge_type == CHOOSE_EXPORT_DIR:
             filenames = filedialog.askdirectory(
                                     parent=parent_win,
                                     title=f'Select Folder',)
@@ -2156,10 +2158,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def input_select_filedialog(self):
         """Make user select music files"""
 
-        if self.lastDir is not None:
-            if not os.path.isdir(self.lastDir):
-                self.lastDir = None
-
         paths = self.show_file_dialog(dialoge_type=MAIN_MULTIPLE_FILE)
 
         if paths:  # Path selected
@@ -2173,7 +2171,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         export_path = None
         
-        path = self.show_file_dialog(dialoge_type=CHOOSE_EXPORT_FIR)
+        path = self.show_file_dialog(dialoge_type=CHOOSE_EXPORT_DIR)
 
         if path:  # Path selected
             self.export_path_var.set(path)
@@ -6775,6 +6773,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.export_path_var = tk.StringVar(value=data['export_path'])
         self.inputPaths = data['input_paths']
         self.lastDir = data['lastDir']
+
+        if not instanceof(self.lastDir, dict):
+            self.lastDir = {dt: self.lastDir for dt in DIALOGUE_TYPES}
         
         #DualPaths-Align
         self.time_window_var = tk.StringVar(value=data['time_window'])#

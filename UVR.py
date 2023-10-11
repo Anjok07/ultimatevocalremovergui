@@ -2134,7 +2134,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         if dialoge_type == MULTIPLE_FILE:
             filenames = filedialog.askopenfilenames(parent=parent_win, 
-                                                    title=text)
+                                                    title=text,
+                                                    initialdir=lastDir)
         elif dialoge_type == MAIN_MULTIPLE_FILE:
             filenames = filedialog.askopenfilenames(parent=parent_win, 
                                                     title=text,
@@ -2142,17 +2143,32 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                                                     initialdir=lastDir)
         elif dialoge_type == SINGLE_FILE:
             filenames = filedialog.askopenfilename(parent=parent_win, 
-                                                   title=text)
+                                                   title=text,
+                                                   initialdir=lastDir)
         elif dialoge_type == CHOOSE_EXPORT_DIR:
             filenames = filedialog.askdirectory(
                                     parent=parent_win,
-                                    title=f'Select Folder',)
+                                    title=f'Select Folder',
+                                    initialdir=lastDir)
             
         if is_linux:
             print("Is Linux")
             self.linux_filebox_fix(False)
             top.destroy()
             
+
+        # save the last dir
+        if isinstance(filenames, tuple):
+            some_path = filenames[0]
+        else:
+            some_path = filenames
+
+        if some_path is not None:
+            if os.path.isdir(some_path):
+                self.lastDir[dialoge_type] = some_path
+            elif os.path.isdir(os.path.dirname(some_path)):
+                self.lastDir[dialoge_type] = os.path.dirname(some_path)
+
         return filenames
 
     def input_select_filedialog(self):
@@ -6774,7 +6790,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.inputPaths = data['input_paths']
         self.lastDir = data['lastDir']
 
-        if not instanceof(self.lastDir, dict):
+        if not isinstance(self.lastDir, dict):
             self.lastDir = {dt: self.lastDir for dt in DIALOGUE_TYPES}
         
         #DualPaths-Align

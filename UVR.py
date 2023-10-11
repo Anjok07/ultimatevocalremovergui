@@ -2247,6 +2247,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         if confirm:
             self.save_values(app_close=True, is_restart=True)
         
+
+    def quit(self):
+        self.save_values(app_close=True)
+        super().quit()
+
+
     def delete_temps(self, is_start_up=False):  
         """Deletes temp files"""
         
@@ -7194,6 +7200,11 @@ if __name__ == "__main__":
     root.update_checkbox_text()
     root.is_root_defined_var.set(True)
     root.is_check_splash = True
+
+    # macOS - intercept the Quit event to make sure we save our preferences
+    # the default implementation completely shortcuts python and directly exits the process
+    # even atexit handlers are not called!
+    root.createcommand('tk::mac::Quit', root.quit)
 
     root.update() if is_windows else root.update_idletasks()
     root.deiconify()

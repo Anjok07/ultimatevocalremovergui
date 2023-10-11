@@ -2258,6 +2258,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         DIRECTORIES = (BASE_PATH, VR_MODELS_DIR, MDX_MODELS_DIR, DEMUCS_MODELS_DIR, DEMUCS_NEWER_REPO_DIR)
         EXTENSIONS = (('.aes', '.txt', '.tmp'))
+        EXCEPTIONS = {'requirements.txt', 'demucs_models.txt'}
         
         try:
             if os.path.isfile(f"{current_patch}{application_extension}"):
@@ -2267,11 +2268,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 if os.path.isfile(SPLASH_DOC):
                     os.remove(SPLASH_DOC)
             
-            for dir in DIRECTORIES:
-                for temp_file in os.listdir(dir):
-                    if temp_file.endswith(EXTENSIONS):
-                        if os.path.isfile(os.path.join(dir, temp_file)):
-                            os.remove(os.path.join(dir, temp_file))
+            for directory in DIRECTORIES:
+                for temp_file in os.listdir(directory):
+                    if temp_file.endswith(EXTENSIONS) and temp_file not in EXCEPTIONS:
+                        if os.path.isfile(os.path.join(directory, temp_file)):
+                            os.remove(os.path.join(directory, temp_file))
         except Exception as e:
             self.error_log_var.set(error_text(TEMP_FILE_DELETION_TEXT, e))
         

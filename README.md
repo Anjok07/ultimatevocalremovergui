@@ -84,7 +84,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/8vt6wa28vx0mhgj/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/bsidy0eromihuuw/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
@@ -218,13 +218,9 @@ python UVR.py
 - Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
 
 #### MacOS Sonoma Left-click Bug
-There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This seems to be impacting all applications built with Tkinter on Sonoma.
+There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This was impacting all applications built with Tkinter on Sonoma and has since been resolved. Please download the latest version via the following link if you are still experiencing issues - [link](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.6)
 
-Temporary solutions:
-- Ensure you move your mouse slightly when left-clicking within the application; this ensures the left-click is registered.
-- I'm developing a temporary fix that lets you use the middle mouse button or space bar as substitutes for left-clicks until the issue is fully resolved.
-
-This issue is being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).
+This issue was being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).
 
 ### Issue Reporting
 

@@ -32,11 +32,18 @@ import math
 from onnx import load
 from onnx2pytorch import ConvertModel
 
+if is_macos:
+    from torch.mps import empty_cache
+else:
+    from torch.cuda import empty_cache
+
 if TYPE_CHECKING:
     from UVR import ModelData
 
 warnings.filterwarnings("ignore")
 cpu = torch.device('cpu')
+
+clear_gpu_cache = empty_cache
 
 class SeperateAttributes:
     def __init__(self, model_data: ModelData, 
@@ -485,7 +492,7 @@ class SeperateMDX(SeperateAttributes):
                 
             self.primary_source_map = self.final_process(primary_stem_path, self.primary_source, self.secondary_source_primary, self.primary_stem, samplerate)
             
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
 
         secondary_sources = {**self.primary_source_map, **self.secondary_source_map}
         
@@ -685,7 +692,7 @@ class SeperateMDXC(SeperateAttributes):
 
                 self.primary_source_map = self.final_process(primary_stem_path, self.primary_source, self.secondary_source_primary, self.primary_stem, samplerate)
 
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         
         secondary_sources = {**self.primary_source_map, **self.secondary_source_map}
         self.process_vocal_split_chain(secondary_sources)
@@ -830,7 +837,7 @@ class SeperateDemucs(SeperateAttributes):
             self.write_to_console(DONE, base_text='')
             
             del self.demucs
-            torch.cuda.empty_cache()
+            clear_gpu_cache()
             
         if isinstance(inst_source, np.ndarray):
             source_reshape = spec_utils.reshape_sources(inst_source[self.demucs_source_map[VOCAL_STEM]], source[self.demucs_source_map[VOCAL_STEM]])
@@ -1050,7 +1057,7 @@ class SeperateVR(SeperateAttributes):
             
             self.secondary_source_map = self.final_process(secondary_stem_path, self.secondary_source, self.secondary_source_secondary, self.secondary_stem, 44100)
             
-        torch.cuda.empty_cache()
+        clear_gpu_cache()
         secondary_sources = {**self.primary_source_map, **self.secondary_source_map}
         
         self.process_vocal_split_chain(secondary_sources)

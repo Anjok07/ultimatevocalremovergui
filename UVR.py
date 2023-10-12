@@ -109,6 +109,13 @@ elif OPERATING_SYSTEM=="Windows":
     right_click_button = '<Button-3>'
     application_extension = ".exe"
 
+if is_macos:
+    from torch.mps import empty_cache
+else:
+    from torch.cuda import empty_cache
+
+clear_gpu_cache = empty_cache
+
 def right_click_release_linux(window, top_win=None):
     if OPERATING_SYSTEM=="Linux":
         root.bind('<Button-1>', lambda e:window.destroy())
@@ -1279,7 +1286,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         style.configure('TCombobox', selectbackground='#0c0c0c')
         #style.configure('TCheckbutton', indicatorsize=30)
         
-        
         # Calculate window height
         height = self.IMAGE_HEIGHT + self.FILEPATHS_HEIGHT + self.OPTIONS_HEIGHT
         height += self.CONVERSIONBUTTON_HEIGHT + self.COMMAND_HEIGHT + self.PROGRESS_HEIGHT
@@ -1310,7 +1316,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         #Load Images
         img = ImagePath(BASE_PATH)
-        self.logo_img = img.open_image(path=img.banner_path, size=(width, 9999))
+        self.logo_img = img.open_image(path=img.banner_path, size=(width, height))
         self.efile_img = img.efile_img
         self.stop_img = img.stop_img
         self.help_img = img.help_img
@@ -2105,6 +2111,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         if not is_macos:
             self.bind("<Configure>", self.adjust_toplevel_positions)
         
+    def auto_save(self):
+        try:
+            self.save_values(app_close=False, is_auto_save=True)
+        except Exception as e:
+            print(e)
+
     #--Input/Export Methods--
     
     def linux_filebox_fix(self, is_on=True):
@@ -5478,10 +5490,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Update the model dropdown menus"""
             
         if self.clear_cache_torch:
-            #self.set_app_font(is_chosen_font=True)
-            torch.cuda.empty_cache()
+            clear_gpu_cache()
             self.clear_cache_torch = False
-            
+
         if self.is_process_stopped:
             if self.thread_check(self.active_processing_thread):
                 self.conversion_Button_Text_var.set(STOP_PROCESSING)
@@ -5492,9 +5503,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 self.conversion_Button_Text_var.set(START_PROCESSING)
                 self.conversion_Button.configure(state=tk.NORMAL)
                 self.progress_bar_main_var.set(0)
-                torch.cuda.empty_cache()
+                clear_gpu_cache()
                 self.is_process_stopped = False
-
+            
         if self.is_confirm_error_var.get():
             self.check_is_menu_open(ERROR_OPTION)
             self.is_confirm_error_var.set(False)
@@ -5507,6 +5518,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
             close_process(self.msg_queue)
             self.is_check_splash = False
+
+        #self.auto_save()
 
         self.update_available_models()
         self.after(600, self.update_loop)
@@ -5551,7 +5564,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
             option_menu['values'] = option_list_option_menu
             option_menu.set(current_selection)
-            option_menu.update_dropdown_size(model_list, model_type)
+            option_menu.update_dropdown_size(option_list, model_type)
             
             if self.is_root_defined_var.get() and model_type == MDX_ARCH_TYPE and self.chosen_process_method_var.get() == MDX_ARCH_TYPE:
                 self.selection_action_models_sub(current_selection, model_type, option_var)
@@ -6147,6 +6160,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.active_processing_thread.start()
 
     def process_button_init(self):
+        self.auto_save()
         self.conversion_Button_Text_var.set(WAIT_PROCESSING)
         self.conversion_Button.configure(state=tk.DISABLED)
         self.command_Text.clear()
@@ -6177,6 +6191,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def confirm_stop_process(self):
         """Asks for confirmation before halting active process"""
         
+        self.auto_save()
+
         if self.thread_check(self.active_processing_thread):
             confirm = messagebox.askyesno(parent=root, title=STOP_PROCESS_CONFIRM[0], message=STOP_PROCESS_CONFIRM[1])
 
@@ -6192,6 +6208,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def process_end(self, error=None):
         """End of process actions"""
         
+        self.auto_save()
         self.cached_sources_clear()
         self.clear_cache_torch = True
         self.conversion_Button_Text_var.set(START_PROCESSING)
@@ -6589,7 +6606,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     if os.path.isfile(audio_file):
                         os.remove(audio_file)
                     
-                torch.cuda.empty_cache()
+                clear_gpu_cache()
                 
             shutil.rmtree(export_path) if is_ensemble and len(os.listdir(export_path)) == 0 else None
 
@@ -6923,7 +6940,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.model_sample_mode_duration_checkbox_var.set(SAMPLE_MODE_CHECKBOX(self.model_sample_mode_duration_var.get()))
         self.model_sample_mode_duration_label_var.set(f'{self.model_sample_mode_duration_var.get()} Seconds')
               
-    def save_values(self, app_close=True, is_restart=False):
+    def save_values(self, app_close=True, is_restart=False, is_auto_save=False):
         """Saves application data"""
 
         # -Save Data-
@@ -7079,6 +7096,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
             self.destroy()
             
+        elif is_auto_save:
+            save_data(data={**main_settings, **other_data})
         else:
             return {**main_settings, **user_saved_extras}
 

@@ -6,8 +6,10 @@ SYSTEM_ARCH = platform.platform()
 SYSTEM_PROC = platform.processor()
 ARM = 'arm'
 
+is_macos = False
+
 #MAIN_FONT_NAME = "Century Gothic"
-OPT_SEPARATOR_SAVE = '—'*25
+OPT_SEPARATOR_SAVE = '─'*25
 BG_COLOR = '#0e0e0f'
 FG_COLOR = '#13849f'
 
@@ -317,7 +319,7 @@ BATCH_MODE = 'Batch Mode'
 BETA_VERSION = 'BETA'
 DEF_OPT = 'Default'
 USER_INPUT = "User Input"
-OPT_SEPARATOR = '—'*65
+OPT_SEPARATOR = '─'*65
 
 CHUNKS = (AUTO_SELECT, '1', '5', '10', '15', '20', 
           '25', '30', '35', '40', '45', '50', 
@@ -843,6 +845,7 @@ MDX_23_NAME = "MDX23C Model"
 
 # Liscense info
 if OPERATING_SYSTEM=="Darwin":
+   is_macos = True
    LICENSE_OS_SPECIFIC_TEXT = '• This application is intended for those running macOS Catalina and above.\n' +\
                               '• Application functionality for systems running macOS Mojave or lower is not guaranteed.\n' +\
                               '• Application functionality for older or budget Mac systems is not guaranteed.\n\n'
@@ -1549,7 +1552,7 @@ CONFIRM_RESTART_TEXT = 'Restart Confirmation', 'This will restart the applicatio
 ERROR_LOADING_FILE_TEXT = 'Error Loading the Following File', 'Raw Error Details'
 LOADING_MODEL_TEXT = 'Loading model'
 FULL_APP_SET_TEXT = 'Full Application Settings'
-PROCESS_STARTING_TEXT = 'Process starting... \n'
+PROCESS_STARTING_TEXT = 'Process starting... '
 PROCESS_STOPPED_BY_USER = '\n\nProcess stopped by user.'
 NEW_UPDATE_FOUND_TEXT = lambda version:f"\n\nNew Update Found: {version}\n\nClick the update button in the \"Settings\" menu to download and install!"
 ROLL_BACK_TEXT = 'Click Here to Roll Back'

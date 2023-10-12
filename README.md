@@ -88,7 +88,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/kz8k5b0g8pgf4er/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/ofehlojwgbgwmrz/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
   <summary>MacOS Users: Having Trouble Opening UVR?</summary>

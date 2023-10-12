@@ -35,9 +35,11 @@ else:
 
 if OPERATING_SYSTEM == 'Darwin':
     wav_resolution = "polyphase" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else "sinc_fastest" 
+    wav_resolution_float_resampling = "kaiser_best" if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else wav_resolution 
     is_macos = True
 else:
     wav_resolution = "sinc_fastest"
+    wav_resolution_float_resampling = wav_resolution 
 
 MAX_SPEC = 'Max Spec'
 MIN_SPEC = 'Min Spec'
@@ -711,10 +713,11 @@ def match_mono_array_shapes(array_1: np.ndarray, array_2: np.ndarray):
     return array_1
 
 def change_pitch_semitones(y, sr, semitone_shift):
+    
     factor = 2 ** (semitone_shift / 12)  # Convert semitone shift to factor for resampling
     y_pitch_tuned = []
     for y_channel in y:
-        y_pitch_tuned.append(librosa.resample(y_channel, sr, sr*factor, res_type=wav_resolution))
+        y_pitch_tuned.append(librosa.resample(y_channel, sr, sr*factor, res_type=wav_resolution_float_resampling))
     y_pitch_tuned = np.array(y_pitch_tuned)
     new_sr = sr * factor
     return y_pitch_tuned, new_sr

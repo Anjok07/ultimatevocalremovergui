@@ -97,6 +97,7 @@ class SeperateAttributes:
         self.model_name = model_data.model_name
         self.model_basename = model_data.model_basename
         self.wav_type_set = model_data.wav_type_set
+        self.cuda_set = model_data.cuda_set
         self.mp3_bit_set = model_data.mp3_bit_set
         self.save_format = model_data.save_format
         self.is_gpu_conversion = model_data.is_gpu_conversion
@@ -159,7 +160,8 @@ class SeperateAttributes:
                 self.device = 'mps'
                 self.is_mps = True
             elif torch.cuda.is_available():
-                self.device = 'cuda:0'
+                #print("CUDA: ", self.cuda_set)
+                self.device = 'cuda' if self.cuda_set == DEFAULT else f'cuda:{self.cuda_set}'
                 self.run_type = ['CUDAExecutionProvider']
 
         if model_data.process_method == MDX_ARCH_TYPE:

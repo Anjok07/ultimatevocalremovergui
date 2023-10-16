@@ -361,7 +361,8 @@ class ModelData():
         self.mdx_stem_count = 1
         self.compensate = None
         self.mdx_n_fft_scale_set = None
-        self.wav_type_set = root.wav_type_set
+        self.wav_type_set = root.wav_type_set#cuda_type
+        self.cuda_set = root.cuda_set_var.get()#cuda_type
         self.mp3_bit_set = root.mp3_bit_set_var.get()
         self.save_format = root.save_format_var.get()
         self.is_invert_spec = root.is_invert_spec_var.get()#
@@ -3268,7 +3269,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         mp3_bit_set_Option = ComboBoxMenu(settings_menu_format_Frame, textvariable=self.mp3_bit_set_var, values=MP3_BIT_RATES, width=HELP_HINT_CHECKBOX_WIDTH)
         mp3_bit_set_Option.grid(padx=20,pady=MENU_PADDING_1)
-        
+
         audio_format_title_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, GENERAL_PROCESS_SETTINGS_TEXT)
         audio_format_title_Label.grid(pady=MENU_PADDING_2)
         
@@ -3300,6 +3301,14 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         change_model_default_Button.grid(pady=MENU_PADDING_4)
         
         self.vocal_splitter_Button_opt(settings_menu, settings_menu_format_Frame, width=SETTINGS_BUT_WIDTH-2, pady=MENU_PADDING_4)
+        
+        if not is_macos and self.is_gpu_available:
+            cuda_set_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, CUDA_NUM_TEXT)
+            cuda_set_Label.grid(pady=MENU_PADDING_2)
+            
+            cuda_set_Option = ComboBoxMenu(settings_menu_format_Frame, textvariable=self.cuda_set_var, values=CUDA_TYPE, width=HELP_HINT_CHECKBOX_WIDTH)
+            cuda_set_Option.grid(padx=20,pady=MENU_PADDING_1)
+            self.help_hints(cuda_set_Label, text=IS_CUDA_SELECT_HELP)
         
         model_sample_mode_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, MODEL_SAMPLE_MODE_SETTINGS_TEXT)
         model_sample_mode_Label.grid(pady=MENU_PADDING_2)
@@ -6765,7 +6774,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.semitone_shift_var = tk.StringVar(value=data['semitone_shift'])
         self.mp3_bit_set_var = tk.StringVar(value=data['mp3_bit_set'])
         self.save_format_var = tk.StringVar(value=data['save_format'])
-        self.wav_type_set_var = tk.StringVar(value=data['wav_type_set'])
+        self.wav_type_set_var = tk.StringVar(value=data['wav_type_set'])#
+        self.cuda_set_var = tk.StringVar(value=data['cuda_set'])#
         self.user_code_var = tk.StringVar(value=data['user_code']) 
         self.is_gpu_conversion_var = tk.BooleanVar(value=data['is_gpu_conversion'])
         self.is_primary_stem_only_var = tk.BooleanVar(value=data['is_primary_stem_only'])
@@ -6907,7 +6917,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.mp3_bit_set_var.set(loaded_setting['mp3_bit_set'])
             self.semitone_shift_var.set(loaded_setting['semitone_shift'])#
             self.save_format_var.set(loaded_setting['save_format'])
-            self.wav_type_set_var.set(loaded_setting['wav_type_set'])
+            self.wav_type_set_var.set(loaded_setting['wav_type_set'])#
+            self.cuda_set_var.set(loaded_setting['cuda_set'])#
             self.user_code_var.set(loaded_setting['user_code'])
             self.phase_option_var.set(loaded_setting['phase_option'])#
             self.phase_shifts_var.set(loaded_setting['phase_shifts'])#
@@ -7040,7 +7051,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             'mp3_bit_set': self.mp3_bit_set_var.get(),
             'semitone_shift': self.semitone_shift_var.get(),#
             'save_format': self.save_format_var.get(),
-            'wav_type_set': self.wav_type_set_var.get(),
+            'wav_type_set': self.wav_type_set_var.get(),#
+            'cuda_set': self.cuda_set_var.get(),#
             'user_code': self.user_code_var.get(),
             'help_hints_var': self.help_hints_var.get(),
             'set_vocal_splitter': self.set_vocal_splitter_var.get(),

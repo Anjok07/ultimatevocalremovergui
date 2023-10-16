@@ -18,6 +18,7 @@ SYSTEM_MEMORY_ERROR = "DefaultCPUAllocator: not enough memory"
 MISSING_MODEL_ERROR = "'NoneType\' object has no attribute \'model_basename\'"
 ARRAY_SIZE_ERROR = "ValueError: \"array is too big; `arr.size * arr.dtype.itemsize` is larger than the maximum possible size.\""
 GPU_INCOMPATIBLE_ERROR = "no kernel image is available for execution on the device"
+SELECT_CORRECT_GPU = "CUDA kernel errors might be asynchronously reported at some other API call,so the stacktrace below might be incorrect."
 
 CONTACT_DEV = 'If this error persists, please contact the developers with the error details.'
 
@@ -27,7 +28,7 @@ ERROR_MAPPER = {
                         'Please close any GPU intensive applications and try again.\n' + 
                         'If the error persists, your GPU might not be supported.') ,
     CUDA_RUNTIME_ERROR:
-                        (f'Your PC cannot process this audio file with the chunk size selected. Please lower the chunk size and try again.\n\n{CONTACT_DEV}'),
+                        (f'Your PC cannot process this audio file with the segment size selected. Please lower the segment size and try again.\n\n{CONTACT_DEV}'),
     DEMUCS_MODEL_MISSING_ERROR:
                         ('The selected Demucs model is missing. ' + 
                         'Please download the model or make sure it is in the correct directory.'),
@@ -43,7 +44,7 @@ ERROR_MAPPER = {
                         (f'Missing file error raised. Please address the error and try again.\n\n{CONTACT_DEV}'),
     MDX_MEMORY_ERROR:
                         ('The application was unable to allocate enough GPU memory to use this model.\n\n' + 
-                        'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                        'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set segment size.\n3. Then try again.\n\n' + 
                         'If the error persists, your GPU might not be supported.'),
     MDX_MODEL_MISSING:
                         ('The application could not detect this MDX-Net model on your system. ' + 
@@ -51,7 +52,7 @@ ERROR_MAPPER = {
                         'If the error persists, please reinstall application or contact the developers.'),
     MDX_RUNTIME_ERROR:
                         ('The application was unable to allocate enough GPU memory to use this model.\n\n' + 
-                        'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set chunk size.\n3. Then try again.\n\n' + 
+                        'Please do the following:\n\n1. Close any GPU intensive applications.\n2. Lower the set segment size.\n3. Then try again.\n\n' + 
                         'If the error persists, your GPU might not be supported.'),
     WINDOW_SIZE_ERROR:
                         ('Invalid window size.\n\n' + 
@@ -70,6 +71,9 @@ ERROR_MAPPER = {
     GPU_INCOMPATIBLE_ERROR:
                         ('This process is not compatible with your GPU.\n\n' + 
                         'Please uncheck \"GPU Conversion\" and try again'),
+    SELECT_CORRECT_GPU:
+                        ('Make sure you\'ve chosen the correct GPU.\n\n'
+                        'Go to the "Settings Guide", click the "Additional Settings" tab and select the correct GPU device.'),
     ARRAY_SIZE_ERROR:
                         ('The application was not able to process the given audiofile. Please convert the audiofile to another format and try again.'),
 }

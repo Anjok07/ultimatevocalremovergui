@@ -502,6 +502,7 @@ MP3 = 'MP3'
 
 MP3_BIT_RATES = ('96k', '128k', '160k', '224k', '256k', '320k')
 WAV_TYPE = ('PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
+CUDA_TYPE = (DEFAULT, '0', '1', '2', '3', '4', '5', '6', '7', '8')
 
 SELECT_SAVED_SET = 'Choose Option'
 SAVE_SETTINGS = 'Save Current Settings'
@@ -646,12 +647,13 @@ DEFAULT_DATA = {
         'semitone_shift': '0',#
         'save_format': WAV,
         'wav_type_set': 'PCM_16',
+        'cuda_set': DEFAULT,
         'user_code': '',
         'export_path': '',
         'input_paths': [],
         'lastDir': None,
         'time_window': "3",
-        'intro_analysis': "Default",
+        'intro_analysis': DEFAULT,
         'db_analysis': "Medium",
         'fileOneEntry': '',
         'fileOneEntry_Full': '',
@@ -756,6 +758,7 @@ SETTING_CHECK = ('vr_model',
                'semitone_shift',#
                'save_format',
                'wav_type_set',
+               'cuda_set',
                'user_code',
                'is_gpu_conversion',
                'is_normalization',
@@ -1018,6 +1021,7 @@ else:
 IS_TIME_CORRECTION_HELP = ('When checked, the output will retain the original BPM of the input.')
 SAVE_STEM_ONLY_HELP = 'Allows the user to save only the selected stem.'
 IS_NORMALIZATION_HELP = 'Normalizes output to prevent clipping.'
+IS_CUDA_SELECT_HELP = "If you have more than one GPU, you can pick which one to use for processing."
 CROP_SIZE_HELP = '**Only compatible with select models only!**\n\n Setting should match training crop-size value. Leave as is if unsure.'
 IS_TTA_HELP = ('This option performs Test-Time-Augmentation to improve the separation quality.\n\n'
                'Note: Having this selected will increase the time it takes to complete a conversion')
@@ -1502,6 +1506,7 @@ VOLUME_COMPENSATION_TEXT = 'Volume Compensation'
 VR_51_MODEL_TEXT = 'VR 5.1 Model'
 VR_ARCH_TEXT = 'VR Arch'
 WAV_TYPE_TEXT = 'Wav Type'
+CUDA_NUM_TEXT = 'GPU Device'
 WINDOW_SIZE_TEXT = 'Window Size'
 YES_TEXT = 'Yes'
 VERIFY_INPUTS_TEXT = 'Verify Inputs'

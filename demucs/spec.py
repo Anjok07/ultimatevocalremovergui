@@ -11,8 +11,11 @@ import torch as th
 def spectro(x, n_fft=512, hop_length=None, pad=0):
     *other, length = x.shape
     x = x.reshape(-1, length)
-    is_mps = x.device.type == 'mps'
-    if is_mps:
+    
+    device_type = x.device.type
+    is_other_gpu = not device_type in ["cuda", "cpu"]
+
+    if is_other_gpu:
         x = x.cpu()
     z = th.stft(x,
                 n_fft * (1 + pad),
@@ -32,8 +35,11 @@ def ispectro(z, hop_length=None, length=None, pad=0):
     n_fft = 2 * freqs - 2
     z = z.view(-1, freqs, frames)
     win_length = n_fft // (1 + pad)
-    is_mps = z.device.type == 'mps'
-    if is_mps:
+    
+    device_type = z.device.type
+    is_other_gpu = not device_type in ["cuda", "cpu"]
+    
+    if is_other_gpu:
         z = z.cpu()
     x = th.istft(z,
                  n_fft,

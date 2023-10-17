@@ -713,7 +713,6 @@ def match_mono_array_shapes(array_1: np.ndarray, array_2: np.ndarray):
     return array_1
 
 def change_pitch_semitones(y, sr, semitone_shift):
-    
     factor = 2 ** (semitone_shift / 12)  # Convert semitone shift to factor for resampling
     y_pitch_tuned = []
     for y_channel in y:

@@ -79,8 +79,8 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 - Please Note:
     - The MacOS Sonoma mouse clicking issue has been fixed.
     - MPS (GPU) acceleration for Mac M1 has been expanded to work with Demucs v4 and all MDX-Net models.
-    - This bundle is intended for those running macOS Catalina and above.
-    - Application functionality for systems running macOS Mojave or lower is not guaranteed.
+    - This bundle is intended for those running macOS Big Sur and above.
+    - Application functionality for systems running macOS Catalina or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
     - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
 

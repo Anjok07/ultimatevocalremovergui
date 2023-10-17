@@ -33,6 +33,9 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 - Update Package instructions for those who have UVR already installed:
     - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_10_6_23_4_27.exe).
 
+- If you are an AMD GPU user, you can try the OpenCL version:
+    - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup_opencl.exe)
+
 <details id="WindowsManual">
   <summary>Windows Manual Installation</summary>
 

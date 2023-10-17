@@ -8,6 +8,10 @@ ARM = 'arm'
 
 is_macos = False
 
+CPU = 'cpu'
+CUDA_DEVICE = 'cuda'
+DIRECTML_DEVICE = "privateuseone"
+
 #MAIN_FONT_NAME = "Century Gothic"
 OPT_SEPARATOR_SAVE = '─'*25
 BG_COLOR = '#0e0e0f'
@@ -502,7 +506,7 @@ MP3 = 'MP3'
 
 MP3_BIT_RATES = ('96k', '128k', '160k', '224k', '256k', '320k')
 WAV_TYPE = ('PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
-CUDA_TYPE = (DEFAULT, '0', '1', '2', '3', '4', '5', '6', '7', '8')
+GPU_DEVICE_NUM_OPTS = (DEFAULT, '0', '1', '2', '3', '4', '5', '6', '7', '8')
 
 SELECT_SAVED_SET = 'Choose Option'
 SAVE_SETTINGS = 'Save Current Settings'
@@ -641,13 +645,14 @@ DEFAULT_DATA = {
         'is_accept_any_input': False,
         'is_task_complete': False,
         'is_normalization': False,
+        'is_use_opencl': False,
         'is_wav_ensemble': False,
         'is_create_model_folder': False,
         'mp3_bit_set': '320k',#
         'semitone_shift': '0',#
         'save_format': WAV,
         'wav_type_set': 'PCM_16',
-        'cuda_set': DEFAULT,
+        'device_set': DEFAULT,
         'user_code': '',
         'export_path': '',
         'input_paths': [],
@@ -758,10 +763,11 @@ SETTING_CHECK = ('vr_model',
                'semitone_shift',#
                'save_format',
                'wav_type_set',
-               'cuda_set',
+               'device_set',
                'user_code',
                'is_gpu_conversion',
                'is_normalization',
+               'is_use_opencl',
                'is_wav_ensemble',
                'help_hints_var',
                'set_vocal_splitter',
@@ -1075,7 +1081,7 @@ IS_INVERT_SPEC_HELP = (
     '• Inverts primary stem using spectrograms, instead of waveforms.\n'
     '• Slightly slower inversion method.'
 )
-IS_TESTING_AUDIO_HELP = 'Adds a unique 10-digit number to outputs so prevent users from overwriting files.'
+IS_TESTING_AUDIO_HELP = 'Adds a unique 10-digit number to outputs to prevent users from overwriting files.'
 IS_MODEL_TESTING_AUDIO_HELP = 'Appends the model name to outputs for comparison across different models.'
 IS_ACCEPT_ANY_INPUT_HELP = (
     'Allows all types of inputs when enabled, even non-audio formats.\n'
@@ -1445,6 +1451,7 @@ NAME_SETTINGS_TEXT = 'Name Settings'
 NO_DEFINED_PARAMETERS_FOUND_TEXT = 'No Defined Parameters Found'
 NO_TEXT = 'No'
 NORMALIZE_OUTPUT_TEXT = 'Normalize Output'
+USE_OPENCL_TEXT = 'Use OpenCL'
 NOT_ENOUGH_MODELS_TEXT = 'Not Enough Models'
 NOTIFICATION_CHIMES_TEXT = 'Notification Chimes'
 OPEN_APPLICATION_DIRECTORY_TEXT = 'Open Application Directory'

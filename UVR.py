@@ -44,7 +44,11 @@ from lib_v5.vr_network.model_param_init import ModelParameters
 from kthread import KThread
 from lib_v5 import spec_utils
 from pathlib  import Path
-from separate import SeperateDemucs, SeperateMDX, SeperateMDXC, SeperateVR, save_format
+from separate import (
+    SeperateDemucs, SeperateMDX, SeperateMDXC, SeperateVR,  # Model-related
+    save_format, clear_gpu_cache,  # Utility functions
+    cuda_available, mps_available, #directml_available,
+)
 from playsound import playsound
 from typing import List
 import onnx
@@ -53,6 +57,15 @@ import sys
 import yaml
 from ml_collections import ConfigDict
 from collections import Counter
+
+# if not is_macos:
+#     import torch_directml
+
+# is_choose_arch = cuda_available and directml_available
+# is_opencl_only = not cuda_available and directml_available
+# is_cuda_only = cuda_available and not directml_available
+
+is_gpu_available = cuda_available or mps_available# or directml_available
 
 # Change the current working directory to the directory
 # this file sits in
@@ -108,13 +121,6 @@ elif OPERATING_SYSTEM=="Windows":
     is_macos = False
     right_click_button = '<Button-3>'
     application_extension = ".exe"
-
-if is_macos:
-    from torch.mps import empty_cache
-else:
-    from torch.cuda import empty_cache
-
-clear_gpu_cache = empty_cache
 
 def right_click_release_linux(window, top_win=None):
     if OPERATING_SYSTEM=="Linux":
@@ -332,13 +338,15 @@ class ModelData():
                  is_get_hash_dir_only=False,
                  is_vocal_split_model=False):
 
+        device_set = root.device_set_var.get()
         self.DENOISER_MODEL = DENOISER_MODEL_PATH
         self.DEVERBER_MODEL = DEVERBER_MODEL_PATH
         self.is_deverb_vocals = root.is_deverb_vocals_var.get() if os.path.isfile(DEVERBER_MODEL_PATH) else False
         self.deverb_vocal_opt = DEVERB_MAPPER[root.deverb_vocal_opt_var.get()]
         self.is_denoise_model = True if root.denoise_option_var.get() == DENOISE_M and os.path.isfile(DENOISER_MODEL_PATH) else False
         self.is_gpu_conversion = 0 if root.is_gpu_conversion_var.get() else -1
-        self.is_normalization = root.is_normalization_var.get()
+        self.is_normalization = root.is_normalization_var.get()#
+        self.is_use_opencl = False#True if is_opencl_only else root.is_use_opencl_var.get()
         self.is_primary_stem_only = root.is_primary_stem_only_var.get()
         self.is_secondary_stem_only = root.is_secondary_stem_only_var.get()
         self.is_denoise = True if not root.denoise_option_var.get() == DENOISE_NONE else False
@@ -361,8 +369,8 @@ class ModelData():
         self.mdx_stem_count = 1
         self.compensate = None
         self.mdx_n_fft_scale_set = None
-        self.wav_type_set = root.wav_type_set#cuda_type
-        self.cuda_set = root.cuda_set_var.get()#cuda_type
+        self.wav_type_set = root.wav_type_set#
+        self.device_set = device_set.split(':')[-1].strip() if ':' in device_set else device_set
         self.mp3_bit_set = root.mp3_bit_set_var.get()
         self.save_format = root.save_format_var.get()
         self.is_invert_spec = root.is_invert_spec_var.get()#
@@ -1444,7 +1452,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.mdx_hash_MAPPER = load_model_hash_data(MDX_HASH_JSON)
         self.mdx_name_select_MAPPER = load_model_hash_data(MDX_MODEL_NAME_SELECT)
         self.demucs_name_select_MAPPER = load_model_hash_data(DEMUCS_MODEL_NAME_SELECT)
-        self.is_gpu_available = torch.cuda.is_available() if not OPERATING_SYSTEM == 'Darwin' else torch.backends.mps.is_available()
+        self.is_gpu_available = is_gpu_available
         self.is_process_stopped = False
         self.inputs_from_dir = []
         self.iteration = 0
@@ -1492,6 +1500,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.change_state_lambda = None
         self.file_one_sub_var = tk.StringVar(value=FILE_ONE_MAIN_LABEL) 
         self.file_two_sub_var = tk.StringVar(value=FILE_TWO_MAIN_LABEL) 
+        self.cuda_device_list = GPU_DEVICE_NUM_OPTS
+        self.opencl_list = GPU_DEVICE_NUM_OPTS
         
         #Model Update
         self.last_found_ensembles = ENSEMBLE_OPTIONS
@@ -1518,6 +1528,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.check_dual_paths()
         if not is_windows:
             self.update_idletasks()
+        self.fill_gpu_list()
         self.online_data_refresh(user_refresh=False, is_start_up=True)
         
     # Menu Functions
@@ -3157,6 +3168,30 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
         return self.DualBatch_inputPaths
 
+    def fill_gpu_list(self):
+        try:
+            if cuda_available:
+                self.cuda_device_list = [f"{torch.cuda.get_device_properties(i).name}:{i}" for i in range(torch.cuda.device_count())]
+                self.cuda_device_list.insert(0, DEFAULT)
+                #print(self.cuda_device_list)
+            
+            # if directml_available:
+            #     self.opencl_list = [f"{torch_directml.device_name(i)}:{i}" for i in range(torch_directml.device_count())]
+            #     self.opencl_list.insert(0, DEFAULT)
+        except Exception as e:
+            print(e)
+            
+        # if is_cuda_only:
+        #     self.is_use_opencl_var.set(False)
+            
+        check_gpu_list = self.cuda_device_list#self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list
+        if not self.device_set_var.get() in check_gpu_list:
+            self.device_set_var.set(DEFAULT)
+
+    def loop_gpu_list(self, option_menu:ComboBoxMenu, menu_name, option_list):
+        option_menu['values'] = option_list
+        option_menu.update_dropdown_size(option_list, menu_name)
+
     def menu_settings(self, select_tab_2=False, select_tab_3=False):#**
         """Open Settings and Download Center"""
 
@@ -3210,7 +3245,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         select_Label = self.menu_sub_LABEL_SET(settings_menu_main_Frame, ADDITIONAL_MENUS_INFORMATION_TEXT)
         select_Label.grid(pady=MENU_PADDING_1)
         
-        select_Option = ComboBoxMenu(settings_menu_main_Frame, textvariable=self.main_menu_var, values=OPTION_LIST, width=GEN_SETTINGS_WIDTH+(3 if is_windows else 3))
+        select_Option = ComboBoxMenu(settings_menu_main_Frame, textvariable=self.main_menu_var, values=OPTION_LIST, width=GEN_SETTINGS_WIDTH+3)
         select_Option.update_dropdown_size(OPTION_LIST, 'menuchoose', command=lambda e:(self.check_is_menu_open(self.main_menu_var.get()), close_window()))
         select_Option.grid(pady=MENU_PADDING_1)
         
@@ -3231,7 +3266,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         delete_your_settings_Label.grid(pady=MENU_PADDING_2)
         self.help_hints(delete_your_settings_Label, text=DELETE_YOUR_SETTINGS_HELP)
         
-        delete_your_settings_Option = ComboBoxMenu(settings_menu_main_Frame, textvariable=option_var, width=GEN_SETTINGS_WIDTH+(3 if is_windows else 3))
+        delete_your_settings_Option = ComboBoxMenu(settings_menu_main_Frame, textvariable=option_var, width=GEN_SETTINGS_WIDTH+3)
         delete_your_settings_Option.grid(padx=20,pady=MENU_PADDING_1)
         self.deletion_list_fill(delete_your_settings_Option, option_var, SETTINGS_CACHE_DIR, SELECT_SAVED_SETTING, menu_name='deletesetting')
 
@@ -3299,17 +3334,29 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         change_model_default_Button = ttk.Button(settings_menu_format_Frame, text=CHANGE_MODEL_DEFAULTS_TEXT, command=lambda:self.pop_up_change_model_defaults(settings_menu), width=SETTINGS_BUT_WIDTH-2)#
         change_model_default_Button.grid(pady=MENU_PADDING_4)
-        
+
+        #if not is_choose_arch:
         self.vocal_splitter_Button_opt(settings_menu, settings_menu_format_Frame, width=SETTINGS_BUT_WIDTH-2, pady=MENU_PADDING_4)
-        
+
         if not is_macos and self.is_gpu_available:
-            cuda_set_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, CUDA_NUM_TEXT)
-            cuda_set_Label.grid(pady=MENU_PADDING_2)
+            gpu_list_options = lambda:self.loop_gpu_list(device_set_Option, 'gpudevice', self.cuda_device_list)#self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list)
+            device_set_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, CUDA_NUM_TEXT)
+            device_set_Label.grid(pady=MENU_PADDING_2)
             
-            cuda_set_Option = ComboBoxMenu(settings_menu_format_Frame, textvariable=self.cuda_set_var, values=CUDA_TYPE, width=HELP_HINT_CHECKBOX_WIDTH)
-            cuda_set_Option.grid(padx=20,pady=MENU_PADDING_1)
-            self.help_hints(cuda_set_Label, text=IS_CUDA_SELECT_HELP)
-        
+            device_set_Option = ComboBoxMenu(settings_menu_format_Frame, textvariable=self.device_set_var, values=GPU_DEVICE_NUM_OPTS, width=GEN_SETTINGS_WIDTH+1)
+            device_set_Option.grid(padx=20,pady=MENU_PADDING_1)
+            gpu_list_options()
+            self.help_hints(device_set_Label, text=IS_CUDA_SELECT_HELP)
+            
+            # if is_choose_arch:
+            #     is_use_opencl_Option = ttk.Checkbutton(settings_menu_format_Frame, 
+            #                                            text=USE_OPENCL_TEXT, 
+            #                                            width=9, 
+            #                                            variable=self.is_use_opencl_var, 
+            #                                            command=lambda:(gpu_list_options(), self.device_set_var.set(DEFAULT))) 
+            #     is_use_opencl_Option.grid()
+            #     self.help_hints(is_use_opencl_Option, text=IS_NORMALIZATION_HELP)
+
         model_sample_mode_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, MODEL_SAMPLE_MODE_SETTINGS_TEXT)
         model_sample_mode_Label.grid(pady=MENU_PADDING_2)
         
@@ -5147,7 +5194,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                             self.download_update_link_var.set(UPDATE_LINUX_REPO)
                     
                     if not user_refresh:
-                        if not is_beta_version and not self.lastest_version == PATCH:
+                        if not is_beta_version and not self.lastest_version == current_patch:
                             self.command_Text.write(NEW_UPDATE_FOUND_TEXT(self.lastest_version))
 
 
@@ -5497,7 +5544,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
     def update_loop(self):
         """Update the model dropdown menus"""
-            
+
         if self.clear_cache_torch:
             clear_gpu_cache()
             self.clear_cache_torch = False
@@ -6775,7 +6822,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.mp3_bit_set_var = tk.StringVar(value=data['mp3_bit_set'])
         self.save_format_var = tk.StringVar(value=data['save_format'])
         self.wav_type_set_var = tk.StringVar(value=data['wav_type_set'])#
-        self.cuda_set_var = tk.StringVar(value=data['cuda_set'])#
+        self.device_set_var = tk.StringVar(value=data['device_set'])#
         self.user_code_var = tk.StringVar(value=data['user_code']) 
         self.is_gpu_conversion_var = tk.BooleanVar(value=data['is_gpu_conversion'])
         self.is_primary_stem_only_var = tk.BooleanVar(value=data['is_primary_stem_only'])
@@ -6787,6 +6834,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.is_accept_any_input_var = tk.BooleanVar(value=data['is_accept_any_input'])
         self.is_task_complete_var = tk.BooleanVar(value=data['is_task_complete'])
         self.is_normalization_var = tk.BooleanVar(value=data['is_normalization'])#
+        self.is_use_opencl_var = tk.BooleanVar(value=False)#True if is_opencl_only else data['is_use_opencl'])#
         self.is_wav_ensemble_var = tk.BooleanVar(value=data['is_wav_ensemble'])#
         self.is_create_model_folder_var = tk.BooleanVar(value=data['is_create_model_folder'])
         self.help_hints_var = tk.BooleanVar(value=data['help_hints_var'])
@@ -6918,7 +6966,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.semitone_shift_var.set(loaded_setting['semitone_shift'])#
             self.save_format_var.set(loaded_setting['save_format'])
             self.wav_type_set_var.set(loaded_setting['wav_type_set'])#
-            self.cuda_set_var.set(loaded_setting['cuda_set'])#
+            self.device_set_var.set(loaded_setting['device_set'])#
             self.user_code_var.set(loaded_setting['user_code'])
             self.phase_option_var.set(loaded_setting['phase_option'])#
             self.phase_shifts_var.set(loaded_setting['phase_shifts'])#
@@ -6936,6 +6984,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
         self.is_gpu_conversion_var.set(loaded_setting['is_gpu_conversion'])
         self.is_normalization_var.set(loaded_setting['is_normalization'])#
+        self.is_use_opencl_var.set(False)#True if is_opencl_only else loaded_setting['is_use_opencl'])#
         self.is_wav_ensemble_var.set(loaded_setting['is_wav_ensemble'])#
         self.help_hints_var.set(loaded_setting['help_hints_var'])
         self.is_wav_ensemble_var.set(loaded_setting['is_wav_ensemble'])
@@ -7046,13 +7095,14 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             'is_accept_any_input': self.is_accept_any_input_var.get(),
             'is_task_complete': self.is_task_complete_var.get(),
             'is_normalization': self.is_normalization_var.get(),#
+            'is_use_opencl': self.is_use_opencl_var.get(),#
             'is_wav_ensemble': self.is_wav_ensemble_var.get(),#
             'is_create_model_folder': self.is_create_model_folder_var.get(),
             'mp3_bit_set': self.mp3_bit_set_var.get(),
             'semitone_shift': self.semitone_shift_var.get(),#
             'save_format': self.save_format_var.get(),
             'wav_type_set': self.wav_type_set_var.get(),#
-            'cuda_set': self.cuda_set_var.get(),#
+            'device_set': self.device_set_var.get(),#
             'user_code': self.user_code_var.get(),
             'help_hints_var': self.help_hints_var.get(),
             'set_vocal_splitter': self.set_vocal_splitter_var.get(),

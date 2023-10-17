@@ -29,9 +29,9 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 
 - Download the UVR installer for Windows via the link below:
     - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_v5.6.0_setup.exe)
-    - [Main Download Link mirror](https://www.mediafire.com/file_premium/d7y3qcacczyisnw/UVR_v5.6.0_setup.exe/file)
+    - [Main Download Link mirror](https://www.mediafire.com/file_premium/45ipdrowehm913d/UVR_v5.6.0_setup.exe/file)
 - Update Package instructions for those who have UVR already installed:
-    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_9_29_23_1_39.exe).
+    - If you already have UVR installed you can install this package over it or download it straight from the application or [click here for the patch](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/UVR_Patch_10_6_23_4_27.exe).
 
 <details id="WindowsManual">
   <summary>Windows Manual Installation</summary>
@@ -84,7 +84,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 - Download the UVR dmg for MacOS via one of the links below:
     - Mac M1 (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
-       - [Main Download Link mirror](https://www.mediafire.com/file_premium/9b7nq6c38bxo1pb/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
+       - [Main Download Link mirror](https://www.mediafire.com/file_premium/ye5we87hr791hy4/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
     - Mac Intel (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)

@@ -1081,7 +1081,7 @@ IS_INVERT_SPEC_HELP = (
     '• Inverts primary stem using spectrograms, instead of waveforms.\n'
     '• Slightly slower inversion method.'
 )
-IS_TESTING_AUDIO_HELP = 'Adds a unique 10-digit number to outputs to prevent users from overwriting files.'
+IS_TESTING_AUDIO_HELP = 'Appends a 10-digit number to saved files to avoid accidental overwrites.'
 IS_MODEL_TESTING_AUDIO_HELP = 'Appends the model name to outputs for comparison across different models.'
 IS_ACCEPT_ANY_INPUT_HELP = (
     'Allows all types of inputs when enabled, even non-audio formats.\n'

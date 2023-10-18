@@ -34,6 +34,7 @@ diffq
 playsound
 onnx
 onnxruntime
+onnxruntime-gpu
 onnx2pytorch
 SoundFile==0.11.0; sys_platform != 'darwin'
 PySoundFile==0.9.0.post1; sys_platform == 'darwin'

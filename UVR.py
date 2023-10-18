@@ -5947,7 +5947,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     
                 self.update_button_states()
             else:
-                if model_data.is_mdx_c and len(model_data.mdx_model_stems) >= 2:
+                if model_data.is_mdx_c and len(model_data.mdx_model_stems) >= 1:
                     if len(model_data.mdx_model_stems) >= 3:
                         self.mdxnet_stems_Label_place()
                         self.mdxnet_stems_Option_place()

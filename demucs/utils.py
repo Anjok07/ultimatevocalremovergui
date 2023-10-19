@@ -55,6 +55,13 @@ def center_trim(tensor: torch.Tensor, reference: tp.Union[torch.Tensor, int]):
     Center trim `tensor` with respect to `reference`, along the last dimension.
     `reference` can also be a number, representing the length to trim to.
     If the size difference != 0 mod 2, the extra sample is removed on the right side.
+
+    Parameters:
+        tensor (torch.Tensor): The tensor to be trimmed.
+        reference (Union[torch.Tensor, int]): The reference tensor or length to trim to.
+
+    Returns:
+        torch.Tensor: The trimmed tensor.
     """
     ref_size: int
     if isinstance(reference, torch.Tensor):
@@ -70,6 +77,16 @@ def center_trim(tensor: torch.Tensor, reference: tp.Union[torch.Tensor, int]):
 
 
 def pull_metric(history: tp.List[dict], name: str):
+    """
+    Retrieve a specific metric from a list of dictionaries.
+
+    Parameters:
+        history (List[dict]): The list of dictionaries containing the metrics.
+        name (str): The name of the metric to retrieve.
+
+    Returns:
+        List: The list of retrieved metrics.
+    """
     out = []
     for metrics in history:
         metric = metrics
@@ -124,10 +141,18 @@ def temp_filenames(count: int, delete=True):
             for name in names:
                 os.unlink(name)
 
+
 def average_metric(metric, count=1.):
     """
     Average `metric` which should be a float across all hosts. `count` should be
     the weight for this particular host (i.e. number of examples).
+
+    Parameters:
+        metric (float): The metric to be averaged.
+        count (float): The weight for this particular host (default is 1.0).
+
+    Returns:
+        float: The average metric across all hosts.
     """
     metric = th.tensor([count, count * metric], dtype=th.float32, device='cuda')
     distributed.all_reduce(metric, op=distributed.ReduceOp.SUM)
@@ -139,6 +164,14 @@ def free_port(host='', low=20000, high=40000):
     Return a port number that is most likely free.
     This could suffer from a race condition although
     it should be quite rare.
+
+    Parameters:
+        host (str): The host name or IP address (default is '').
+        low (int): The lower bound of the port number range (default is 20000).
+        high (int): The upper bound of the port number range (default is 40000).
+
+    Returns:
+        int: A port number that is most likely free.
     """
     sock = socket.socket()
     while True:
@@ -156,6 +189,13 @@ def sizeof_fmt(num, suffix='B'):
     """
     Given `num` bytes, return human readable size.
     Taken from https://stackoverflow.com/a/1094933
+
+    Parameters:
+        num (int): The number of bytes.
+        suffix (str): The suffix for the size (default is 'B').
+
+    Returns:
+        str: The human-readable size.
     """
     for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
@@ -167,6 +207,13 @@ def sizeof_fmt(num, suffix='B'):
 def human_seconds(seconds, display='.2f'):
     """
     Given `seconds` seconds, return human readable duration.
+
+    Parameters:
+        seconds (float): Number of seconds.
+        display (str): Format specifier for the output value.
+
+    Returns:
+        str: Human readable duration.
     """
     value = seconds * 1e6
     ratios = [1e3, 1e3, 60, 60, 24]
@@ -181,7 +228,18 @@ def human_seconds(seconds, display='.2f'):
 
 
 class TensorChunk:
+    """
+    This class represents a chunk of a tensor.
+    """
     def __init__(self, tensor, offset=0, length=None):
+        """
+        Initialize a new TensorChunk object.
+
+        Parameters:
+            tensor: The tensor object.
+            offset (int): The starting position of the chunk.
+            length (int, optional): The length of the chunk.
+        """
         total_length = tensor.shape[-1]
         assert offset >= 0
         assert offset < total_length
@@ -198,11 +256,26 @@ class TensorChunk:
 
     @property
     def shape(self):
+        """
+        Get the shape of the chunk.
+
+        Returns:
+            list: The shape of the chunk.
+        """
         shape = list(self.tensor.shape)
         shape[-1] = self.length
         return shape
 
     def padded(self, target_length):
+        """
+        Pad the chunk to a target length.
+
+        Parameters:
+            target_length (int): The target length of the padded chunk.
+
+        Returns:
+            tensor: The padded chunk.
+        """
         delta = target_length - self.length
         total_length = self.tensor.shape[-1]
         assert delta >= 0
@@ -222,6 +295,15 @@ class TensorChunk:
 
 
 def tensor_chunk(tensor_or_chunk):
+    """
+    Convert a tensor or TensorChunk object to a TensorChunk object.
+
+    Parameters:
+        tensor_or_chunk: The input tensor or TensorChunk object.
+
+    Returns:
+        TensorChunk: The converted TensorChunk object.
+    """
     if isinstance(tensor_or_chunk, TensorChunk):
         return tensor_or_chunk
     else:
@@ -234,6 +316,8 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
     Apply model to a given mixture.
 
     Args:
+        model: The model to be applied.
+        mix: The input mixture.
         shifts (int): if > 0, will shift in time `mix` by a random amount between 0 and 0.5 sec
             and apply the oppositve shift to the output. This is repeated `shifts` time and
             all predictions are averaged. This effectively makes the model time equivariant
@@ -242,12 +326,16 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
             and predictions will be performed individually on each and concatenated.
             Useful for model with large memory footprint like Tasnet.
         progress (bool): if True, show a progress bar (requires split=True)
+        set_progress_bar: A callback function to update the progress bar.
+
+    Returns:
+        The output of the model applied to the input mixture.
     """
 
     channels, length = mix.size()
     device = mix.device
     progress_value = 0
-    
+
     if split:
         out = th.zeros(4, channels, length, device=device)
         shift = model.samplerate * 10
@@ -289,6 +377,7 @@ def apply_model_v1(model, mix, shifts=None, split=False, progress=False, set_pro
             out = model(padded.unsqueeze(0))[0]
         return center_trim(out, mix)
 
+
 def apply_model_v2(model, mix, shifts=None, split=False,
                 overlap=0.25, transition_power=1., progress=False, set_progress_bar=None): 
     """
@@ -304,12 +393,12 @@ def apply_model_v2(model, mix, shifts=None, split=False,
             Useful for model with large memory footprint like Tasnet.
         progress (bool): if True, show a progress bar (requires split=True)
     """
-    
+
     assert transition_power >= 1, "transition_power < 1 leads to weird behavior."
     device = mix.device
     channels, length = mix.shape
     progress_value = 0
-    
+
     if split:
         out = th.zeros(len(model.sources), channels, length, device=device)
         sum_weight = th.zeros(length, device=device)
@@ -351,7 +440,7 @@ def apply_model_v2(model, mix, shifts=None, split=False,
         for _ in range(shifts):
             offset = random.randint(0, max_shift)
             shifted = TensorChunk(padded_mix, offset, length + max_shift - offset)
-            
+
             if set_progress_bar:
                 progress_value += 1
                 shifted_out = apply_model_v2(model, shifted, set_progress_bar=set_progress_bar)
@@ -371,6 +460,22 @@ def apply_model_v2(model, mix, shifts=None, split=False,
 
 @contextmanager
 def temp_filenames(count, delete=True):
+    """
+    Context manager that generates temporary file names.
+
+    This context manager generates a specified number of temporary file names
+    using the tempfile.NamedTemporaryFile() function. The generated file names
+    are stored in a list and yielded. If the delete flag is set to True, the
+    generated files will be deleted upon exiting the context.
+
+    Parameters:
+        count (int): The number of temporary file names to generate.
+        delete (bool, optional): Flag to control whether to delete the generated files.
+            Defaults to True.
+
+    Yields:
+        list: A list of generated temporary file names.
+    """
     names = []
     try:
         for _ in range(count):
@@ -383,6 +488,22 @@ def temp_filenames(count, delete=True):
 
 
 def get_quantizer(model, args, optimizer=None):
+    """
+    Get a quantizer object based on the provided arguments.
+
+    This function returns a quantizer object based on the provided model and
+    arguments. If the 'diffq' flag is set in the args, it creates a DiffQuantizer
+    object with the given parameters. If the 'qat' flag is set, it creates a
+    UniformQuantizer object with the specified number of bits.
+
+    Parameters:
+        model: The model to be quantized.
+        args: The arguments containing flags and parameters for quantization.
+        optimizer: The optimizer used for quantization. Defaults to None.
+
+    Returns:
+        quantizer: The quantizer object based on the provided arguments.
+    """
     quantizer = None
     if args.diffq:
         quantizer = DiffQuantizer(
@@ -396,6 +517,23 @@ def get_quantizer(model, args, optimizer=None):
 
 
 def load_model(path, strict=False):
+    """
+    Load a model from a given path.
+
+    This function loads a model from the specified path. It deserializes the
+    model and its associated state using torch.load(). It then creates an instance
+    of the model class using the loaded arguments and keyword arguments. If the
+    'strict' flag is set to True, it raises a warning and drops any keyword
+    arguments that are not found in the signature of the model class.
+
+    Parameters:
+        path (str): The path to the serialized model.
+        strict (bool, optional): Flag to control strict parameter checking.
+            Defaults to False.
+
+    Returns:
+        model: The loaded model.
+    """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         load_from = path
@@ -424,6 +562,20 @@ def load_model(path, strict=False):
 
 
 def get_state(model, quantizer):
+    """
+    Get the current state of the model.
+
+    This function retrieves the current state of the model. If the quantizer is None, it uses the 'state_dict'
+    method of the model to obtain the state and converts the data to CPU. If the quantizer is not None, it
+    calls the 'get_quantized_state' method of the quantizer and compresses the data using zlib.
+
+    Parameters:
+        model: The model to get the state from.
+        quantizer: The quantizer used for quantization, or None if not applicable.
+
+    Returns:
+        dict: The current state of the model.
+    """
     if quantizer is None:
         state = {k: p.data.to('cpu') for k, p in model.state_dict().items()}
     else:
@@ -435,6 +587,22 @@ def get_state(model, quantizer):
 
 
 def set_state(model, quantizer, state):
+    """
+    Set the state of the model.
+
+    This function restores the state of the model. If the quantizer is None, it calls the 'load_state_dict'
+    method of the model with the provided state. If the quantizer is not None, it decompresses the data from
+    the 'compressed' key of the state, loads the state using 'th.load', and restores the quantized state
+    using the 'restore_quantized_state' method of the quantizer.
+
+    Parameters:
+        model: The model to set the state for.
+        quantizer: The quantizer used for quantization, or None if not applicable.
+        state: The state dictionary to restore.
+
+    Returns:
+        dict: The restored state.
+    """
     if quantizer is None:
         model.load_state_dict(state)
     else:
@@ -446,6 +614,16 @@ def set_state(model, quantizer, state):
 
 
 def save_state(state, path):
+    """
+    Save the state to a file.
+
+    This function saves the provided state to the specified path. It calculates the SHA256 hash of the
+    state data, appends it to the file name, and saves the state as a binary file.
+
+    Parameters:
+        state: The state dictionary to save.
+        path: The path to save the state to.
+    """
     buf = io.BytesIO()
     th.save(state, buf)
     sig = hashlib.sha256(buf.getvalue()).hexdigest()[:8]
@@ -455,6 +633,18 @@ def save_state(state, path):
 
 
 def save_model(model, quantizer, training_args, path):
+    """
+    Save the model, state, and training arguments to a file.
+
+    This function saves the provided model, its initialization arguments, the model's state, and the training
+    arguments to the specified path using 'th.save'.
+
+    Parameters:
+        model: The model to save.
+        quantizer: The quantizer used for quantization, or None if not applicable.
+        training_args: The training arguments to save.
+        path: The path to save the model to.
+    """
     args, kwargs = model._init_args_kwargs
     klass = model.__class__
 
@@ -472,6 +662,18 @@ def save_model(model, quantizer, training_args, path):
 
 
 def capture_init(init):
+    """
+    Decorator to capture the initialization arguments of a class.
+
+    This decorator captures the arguments and keyword arguments passed to the __init__ method of a class
+    and stores them in the '_init_args_kwargs' attribute of the instance.
+
+    Parameters:
+        init: The __init__ method of the class to decorate.
+
+    Returns:
+        function: The decorated __init__ method.
+    """
     @functools.wraps(init)
     def __init__(self, *args, **kwargs):
         self._init_args_kwargs = (args, kwargs)
@@ -479,7 +681,9 @@ def capture_init(init):
 
     return __init__
 
+
 class DummyPoolExecutor:
+    """A dummy implementation of the concurrent.futures.Executor interface."""
     class DummyResult:
         def __init__(self, func, *args, **kwargs):
             self.func = func
@@ -490,13 +694,17 @@ class DummyPoolExecutor:
             return self.func(*self.args, **self.kwargs)
 
     def __init__(self, workers=0):
+        """Initialize a new DummyPoolExecutor instance with an optional number of workers."""
         pass
 
     def submit(self, func, *args, **kwargs):
+        """Submit a task to be executed by creating a new DummyResult instance with the provided function and arguments."""
         return DummyPoolExecutor.DummyResult(func, *args, **kwargs)
 
     def __enter__(self):
+        """Enter a context and return self."""
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        """Exit a context."""
         return

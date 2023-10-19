@@ -96,7 +96,15 @@ def _inv(z: torch.Tensor, out: Optional[torch.Tensor] = None) -> torch.Tensor:
 def _conj(z, out: Optional[torch.Tensor] = None) -> torch.Tensor:
     """Element-wise complex conjugate of a Tensor with complex entries
     described through their real and imaginary parts.
-    can work in place in case out is z"""
+    can work in place in case out is z
+
+    Parameters:
+        z (torch.Tensor): The input tensor with complex entries.
+        out (Optional[torch.Tensor], optional): The output tensor. Defaults to None.
+
+    Returns:
+        torch.Tensor: The tensor with element-wise complex conjugates of the input tensor.
+    """
     if out is None or out.shape != z.shape:
         out = torch.zeros_like(z)
     out[..., 0] = z[..., 0]

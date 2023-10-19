@@ -22,7 +22,17 @@ class BLSTM(nn.Module):
     If `max_steps` is not None, input will be splitting in overlapping
     chunks and the LSTM applied separately on each chunk.
     """
+
     def __init__(self, dim, layers=1, max_steps=None, skip=False):
+        """
+        Initialize the BLSTM.
+
+        Parameters:
+            dim (int): The input and output dimensionality of the LSTM.
+            layers (int): The number of LSTM layers.
+            max_steps (int): The maximum number of steps to split the input into chunks.
+            skip (bool): Whether to skip the linear layer and directly output the LSTM outputs.
+        """
         super().__init__()
         assert max_steps is None or max_steps % 4 == 0
         self.max_steps = max_steps
@@ -31,6 +41,15 @@ class BLSTM(nn.Module):
         self.skip = skip
 
     def forward(self, x):
+        """
+        Forward pass through the network.
+
+        Args:
+            x (tensor): The input tensor.
+
+        Returns:
+            tensor: The output tensor.
+        """
         B, C, T = x.shape
         y = x
         framed = False
@@ -68,6 +87,10 @@ class BLSTM(nn.Module):
 
 def rescale_conv(conv, reference):
     """Rescale initial weight scale. It is unclear why it helps but it certainly does.
+
+    Parameters:
+        conv: The convolutional layer to be rescaled.
+        reference: The reference value used for scaling.
     """
     std = conv.weight.std().detach()
     scale = (std / reference)**0.5
@@ -77,6 +100,12 @@ def rescale_conv(conv, reference):
 
 
 def rescale_module(module, reference):
+    """Rescale all convolutional layers in a given module.
+
+    Parameters:
+        module: The module containing convolutional layers.
+        reference: The reference value used for scaling.
+    """
     for sub in module.modules():
         if isinstance(sub, (nn.Conv1d, nn.ConvTranspose1d, nn.Conv2d, nn.ConvTranspose2d)):
             rescale_conv(sub, reference)
@@ -85,13 +114,31 @@ def rescale_module(module, reference):
 class LayerScale(nn.Module):
     """Layer scale from [Touvron et al 2021] (https://arxiv.org/pdf/2103.17239.pdf).
     This rescales diagonaly residual outputs close to 0 initially, then learnt.
+
+    Parameters:
+        channels (int): The number of channels in the layer.
+        init (float): The initial value of the scale parameter.
     """
     def __init__(self, channels: int, init: float = 0):
+        """Initialize the LayerScale instance.
+
+        Parameters:
+            channels (int): The number of channels in the layer.
+            init (float): The initial value of the scale parameter.
+        """
         super().__init__()
         self.scale = nn.Parameter(torch.zeros(channels, requires_grad=True))
         self.scale.data[:] = init
 
     def forward(self, x):
+        """Apply the layer scaling to the input.
+
+        Parameters:
+            x: The input tensor.
+
+        Returns:
+            The scaled input tensor.
+        """
         return self.scale[:, None] * x
 
 
@@ -102,6 +149,7 @@ class DConv(nn.Module):
     Also before entering each residual branch, dimension is projected on a smaller subspace,
     e.g. of dim `channels // compress`.
     """
+
     def __init__(self, channels: int, compress: float = 4, depth: int = 2, init: float = 1e-4,
                  norm=True, attn=False, heads=4, ndecay=4, lstm=False, gelu=True,
                  kernel=3, dilate=True):
@@ -159,8 +207,20 @@ class DConv(nn.Module):
                 mods.insert(3, BLSTM(hidden, layers=2, max_steps=200, skip=True))
             layer = nn.Sequential(*mods)
             self.layers.append(layer)
-
     def forward(self, x):
+        """
+        Apply the forward pass of the neural network.
+
+        This method iterates over each layer in the neural network and applies the layer
+        to the input 'x'. The result of each layer is added to 'x'. Finally, the updated
+        'x' is returned.
+
+        Parameters:
+            x: The input to the neural network.
+
+        Returns:
+            The output of the neural network.
+        """
         for layer in self.layers:
             x = x + layer(x)
         return x
@@ -172,7 +232,17 @@ class LocalState(nn.Module):
 
     Also a failed experiments with trying to provide some frequency based attention.
     """
+
     def __init__(self, channels: int, heads: int = 4, nfreqs: int = 0, ndecay: int = 4):
+        """
+        Initialize the LocalState class.
+
+        Parameters:
+            channels (int): The number of channels.
+            heads (int, optional): The number of heads. Defaults to 4.
+            nfreqs (int, optional): The number of frequencies. Defaults to 0.
+            ndecay (int, optional): The number of decays. Defaults to 4.
+        """
         super().__init__()
         assert channels % heads == 0, (channels, heads)
         self.heads = heads
@@ -192,6 +262,15 @@ class LocalState(nn.Module):
         self.proj = nn.Conv1d(channels + heads * nfreqs, channels, 1)
 
     def forward(self, x):
+        """
+        Perform forward pass of the model.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (B, C, T).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (B, C, T).
+        """
         B, C, T = x.shape
         heads = self.heads
         indexes = torch.arange(T, device=x.device, dtype=x.dtype)
@@ -229,6 +308,10 @@ class LocalState(nn.Module):
 
 
 class Demucs(nn.Module):
+    """
+    This class represents the Demucs neural network model for source separation in audio signals.
+    """
+
     @capture_init
     def __init__(self,
                  sources,
@@ -393,6 +476,12 @@ class Demucs(nn.Module):
 
         Note that input are automatically padded if necessary to ensure that the output
         has the same length as the input.
+
+        Parameters:
+            length (int): The initial length value.
+
+        Returns:
+            int: The calculated valid length.
         """
         if self.resample:
             length *= 2
@@ -409,6 +498,15 @@ class Demucs(nn.Module):
         return int(length)
 
     def forward(self, mix):
+        """
+        Perform forward propagation on the input tensor.
+
+        Args:
+            mix (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The processed tensor.
+        """
         x = mix
         length = x.shape[-1]
 
@@ -448,6 +546,20 @@ class Demucs(nn.Module):
         return x
 
     def load_state_dict(self, state, strict=True):
+        """
+        Load the state dictionary into the model.
+
+        This function fixes a mismatch with previous generation Demucs models
+        by replacing certain keys in the state dictionary. It then calls the
+        'load_state_dict' method of the superclass to load the state dictionary
+        into the model.
+
+        Parameters:
+            state (dict): The state dictionary to be loaded.
+            strict (bool, optional): Whether to strictly enforce that the keys
+                in the state dictionary must exactly match the keys in the model.
+                Defaults to True.
+        """
         # fix a mismatch with previous generation Demucs models.
         for idx in range(self.depth):
             for a in ['encoder', 'decoder']:

@@ -10,8 +10,6 @@ import logging
 from pathlib import Path
 import typing as tp
 
-#from dora.log import fatal
-
 import logging
 
 from diffq import DiffQuantizer

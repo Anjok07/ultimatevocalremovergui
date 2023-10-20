@@ -32,7 +32,9 @@ ALIGNMENT_TOOL = 'Alignment Tool Options'
 SINGLE_FILE = 'SINGLE_FILE'
 MULTIPLE_FILE = 'MULTI_FILE'
 MAIN_MULTIPLE_FILE = 'MAIN_MULTI_FILE'
-CHOOSE_EXPORT_FIR = 'CHOOSE_EXPORT_FIR'
+CHOOSE_EXPORT_DIR = 'CHOOSE_EXPORT_DIR'
+
+DIALOGUE_TYPES = (SINGLE_FILE, MULTIPLE_FILE, MAIN_MULTIPLE_FILE, CHOOSE_EXPORT_DIR)
 
 DUAL = "dual"
 FOUR_STEM = "fourstem"
@@ -656,7 +658,7 @@ DEFAULT_DATA = {
         'user_code': '',
         'export_path': '',
         'input_paths': [],
-        'lastDir': None,
+        'lastDir': {},
         'time_window': "3",
         'intro_analysis': DEFAULT,
         'db_analysis': "Medium",

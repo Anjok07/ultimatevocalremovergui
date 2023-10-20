@@ -2146,6 +2146,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def show_file_dialog(self, text='Select Audio files', dialoge_type=None):
         parent_win = root
         is_linux = not is_windows and not is_macos
+
+        lastDir = self.lastDir.get(dialoge_type)
         
         if is_linux:
             self.linux_filebox_fix()
@@ -2156,33 +2158,45 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         if dialoge_type == MULTIPLE_FILE:
             filenames = filedialog.askopenfilenames(parent=parent_win, 
-                                                    title=text)
+                                                    title=text,
+                                                    initialdir=lastDir)
         elif dialoge_type == MAIN_MULTIPLE_FILE:
             filenames = filedialog.askopenfilenames(parent=parent_win, 
                                                     title=text,
                                                     initialfile='',
-                                                    initialdir=self.lastDir)
+                                                    initialdir=lastDir)
         elif dialoge_type == SINGLE_FILE:
             filenames = filedialog.askopenfilename(parent=parent_win, 
-                                                   title=text)
-        elif dialoge_type == CHOOSE_EXPORT_FIR:
+                                                   title=text,
+                                                   initialdir=lastDir)
+        elif dialoge_type == CHOOSE_EXPORT_DIR:
             filenames = filedialog.askdirectory(
                                     parent=parent_win,
-                                    title=f'Select Folder',)
+                                    title=f'Select Folder',
+                                    initialdir=lastDir)
             
         if is_linux:
             print("Is Linux")
             self.linux_filebox_fix(False)
             top.destroy()
             
+
+        # save the last dir
+        if isinstance(filenames, tuple):
+            some_path = filenames[0]
+        else:
+            some_path = filenames
+
+        if some_path is not None:
+            if os.path.isdir(some_path):
+                self.lastDir[dialoge_type] = some_path
+            elif os.path.isdir(os.path.dirname(some_path)):
+                self.lastDir[dialoge_type] = os.path.dirname(some_path)
+
         return filenames
 
     def input_select_filedialog(self):
         """Make user select music files"""
-
-        if self.lastDir is not None:
-            if not os.path.isdir(self.lastDir):
-                self.lastDir = None
 
         paths = self.show_file_dialog(dialoge_type=MAIN_MULTIPLE_FILE)
 
@@ -2197,7 +2211,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         export_path = None
         
-        path = self.show_file_dialog(dialoge_type=CHOOSE_EXPORT_FIR)
+        path = self.show_file_dialog(dialoge_type=CHOOSE_EXPORT_DIR)
 
         if path:  # Path selected
             self.export_path_var.set(path)
@@ -2257,11 +2271,18 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         if confirm:
             self.save_values(app_close=True, is_restart=True)
         
+
+    def quit(self):
+        self.save_values(app_close=True)
+        super().quit()
+
+
     def delete_temps(self, is_start_up=False):  
         """Deletes temp files"""
         
         DIRECTORIES = (BASE_PATH, VR_MODELS_DIR, MDX_MODELS_DIR, DEMUCS_MODELS_DIR, DEMUCS_NEWER_REPO_DIR)
         EXTENSIONS = (('.aes', '.txt', '.tmp'))
+        EXCEPTIONS = {'requirements.txt', 'demucs_models.txt'}
         
         try:
             if os.path.isfile(f"{current_patch}{application_extension}"):
@@ -2271,11 +2292,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 if os.path.isfile(SPLASH_DOC):
                     os.remove(SPLASH_DOC)
             
-            for dir in DIRECTORIES:
-                for temp_file in os.listdir(dir):
-                    if temp_file.endswith(EXTENSIONS):
-                        if os.path.isfile(os.path.join(dir, temp_file)):
-                            os.remove(os.path.join(dir, temp_file))
+            for directory in DIRECTORIES:
+                for temp_file in os.listdir(directory):
+                    if temp_file.endswith(EXTENSIONS) and temp_file not in EXCEPTIONS:
+                        if os.path.isfile(os.path.join(directory, temp_file)):
+                            os.remove(os.path.join(directory, temp_file))
         except Exception as e:
             self.error_log_var.set(error_text(TEMP_FILE_DELETION_TEXT, e))
         
@@ -6850,6 +6871,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.export_path_var = tk.StringVar(value=data['export_path'])
         self.inputPaths = data['input_paths']
         self.lastDir = data['lastDir']
+
+        if not isinstance(self.lastDir, dict):
+            self.lastDir = {dt: self.lastDir for dt in DIALOGUE_TYPES}
         
         #DualPaths-Align
         self.time_window_var = tk.StringVar(value=data['time_window'])#
@@ -7258,6 +7282,11 @@ if __name__ == "__main__":
     root.update_checkbox_text()
     root.is_root_defined_var.set(True)
     root.is_check_splash = True
+
+    # macOS - intercept the Quit event to make sure we save our preferences
+    # the default implementation completely shortcuts python and directly exits the process
+    # even atexit handlers are not called!
+    root.createcommand('tk::mac::Quit', root.quit)
 
     root.update() if is_windows else root.update_idletasks()
     root.deiconify()

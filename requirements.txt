@@ -23,7 +23,7 @@ pyrubberband==0.3.0
 pytorch_lightning==2.0.0
 PyYAML==6.0
 resampy==0.4.2
-scipy==1.9.3
+scipy==1.10.0
 soundstretch==1.2
 torch
 urllib3==1.26.12

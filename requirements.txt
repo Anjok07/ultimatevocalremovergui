@@ -2,7 +2,7 @@ altgraph==0.17.3
 audioread==3.0.0
 certifi==2022.12.07
 cffi==1.15.1
-cryptography==3.4.6
+cryptography==41.0.6
 einops==0.6.0
 future==0.18.3
 julius==0.2.7

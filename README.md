@@ -164,8 +164,12 @@ sudo apt update && sudo apt upgrade
 sudo apt-get update
 sudo apt install ffmpeg
 sudo apt install python3-pip
+sudo apt install python3-venv
 sudo apt-get -y install python3-tk
-pip3 install -r requirements.txt
+cd /path/to/UVR
+python3 -m venv ./venv
+source ./venv/bin/activate
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True pip3 install -r requirements.txt
 python3 UVR.py
 ```
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 while read package; do
     pip install "$package"

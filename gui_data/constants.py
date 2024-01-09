@@ -649,6 +649,7 @@ DEFAULT_DATA = {
         'is_wav_ensemble': False,
         'is_create_model_folder': False,
         'is_create_parent_folder': False,
+        'is_files_numbered': True,
         'mp3_bit_set': '320k',#
         'semitone_shift': '0',#
         'save_format': WAV,
@@ -761,6 +762,7 @@ SETTING_CHECK = ('vr_model',
                'is_task_complete',
                'is_create_model_folder',
                'is_create_parent_folder',
+               'is_files_numbered',
                'mp3_bit_set',#
                'semitone_shift',#
                'save_format',
@@ -1117,6 +1119,15 @@ IS_CREATE_PARENT_FOLDER_HELP = ('Output files will have the same parent folder a
                                 '        └── Album_B\n'
                                 '            └── Audio_B_(Vocals).wav\n'
                                 '            └── Audio_B_(Instrumental).wav')
+IS_FILES_NUMBERED_HELP = ('Prepends a number to the saved files based on processing order.\n\n'
+                          '• Example:\n\n'
+                          '─ Export Directory\n'
+                          '    └── 1_Audio_X_(Vocals).wav\n'
+                          '    └── 1_Audio_X_(Instrumental).wav\n'
+                          '    └── 2_Audio_Y_(Vocals).wav\n'
+                          '    └── 2_Audio_Y_(Instrumental).wav\n'
+                          '    └── 3_Audio_Z_(Vocals).wav\n'
+                          '    └── 3_Audio_Z_(Instrumental).wav')
 MDX_DIM_T_SET_HELP = INTERNAL_MODEL_ATT
 MDX_DIM_F_SET_HELP = INTERNAL_MODEL_ATT
 
@@ -1452,6 +1463,7 @@ GENERAL_MENU_TEXT = 'General Menu'
 GENERAL_PROCESS_SETTINGS_TEXT = 'General Process Settings'
 GENERATE_MODEL_FOLDER_TEXT = 'Generate Model Folder'
 GENERATE_PARENT_FOLDER_TEXT = 'Generate Parent Folder'
+GENERATE_FILES_NUMBERED_TEXT = 'Prepend File Numbers'
 HIGHEND_PROCESS_TEXT = 'High-End Process'
 INPUT_CODE_TEXT = 'Input Code'
 INPUT_STEM_NAME_TEXT = 'Input Stem Name'

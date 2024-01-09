@@ -1421,6 +1421,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.is_menu_settings_open = False
         self.is_root_defined_var = tk.BooleanVar(value=False)
         self.is_check_splash = False
+        self.stime = None
         
         self.is_open_menu_advanced_vr_options = tk.BooleanVar(value=False)
         self.is_open_menu_advanced_demucs_options = tk.BooleanVar(value=False)
@@ -6249,8 +6250,17 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         progress += base * step
 
         self.progress_bar_main_var.set(progress)
-        
-        self.conversion_Button_Text_var.set(f'Process Progress: {int(progress)}%')
+
+        elapsed_time = time.perf_counter() - self.stime
+        total_time = elapsed_time / (progress / 100)
+        remaining_time = int(total_time - elapsed_time)
+        eta_minutes, eta_seconds = divmod(remaining_time, 60)
+        eta_hours, eta_minutes = divmod(eta_minutes, 60)
+        eta_h = f"{eta_hours}h " if eta_hours else ""
+        eta_m = f"{eta_minutes}m " if eta_minutes else ""
+        eta_s = f"{eta_seconds}s"
+
+        self.conversion_Button_Text_var.set(f'Process Progress: {int(progress)}% (ETA {eta_h}{eta_m}{eta_s})')
 
     def confirm_stop_process(self):
         """Asks for confirmation before halting active process"""
@@ -6298,7 +6308,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Start the conversion for all the given mp3 and wav files"""
 
         def time_elapsed():
-            return f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}'
+            return f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - self.stime)))}'
 
         def get_audio_file_base(audio_file):
             if audio_tool.audio_tool == MANUAL_ENSEMBLE:
@@ -6333,7 +6343,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.command_Text.write(DONE)
 
         multiple_files = False
-        stime = time.perf_counter()
+        self.stime = time.perf_counter()
         self.process_button_init()
         inputPaths = self.inputPaths
         is_verified_audio = True
@@ -6554,8 +6564,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def process_start(self):
         """Start the conversion for all the given mp3 and wav files"""
         
-        stime = time.perf_counter()
-        time_elapsed = lambda:f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - stime)))}'
+        self.stime = time.perf_counter()
+        time_elapsed = lambda:f'Time Elapsed: {time.strftime("%H:%M:%S", time.gmtime(int(time.perf_counter() - self.stime)))}'
         export_path = self.export_path_var.get()
         is_ensemble = False
         self.true_model_count = 0

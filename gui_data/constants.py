@@ -648,6 +648,7 @@ DEFAULT_DATA = {
         'is_use_opencl': False,
         'is_wav_ensemble': False,
         'is_create_model_folder': False,
+        'is_create_parent_folder': False,
         'mp3_bit_set': '320k',#
         'semitone_shift': '0',#
         'save_format': WAV,
@@ -759,6 +760,7 @@ SETTING_CHECK = ('vr_model',
                "is_accept_any_input",
                'is_task_complete',
                'is_create_model_folder',
+               'is_create_parent_folder',
                'mp3_bit_set',#
                'semitone_shift',#
                'save_format',
@@ -1098,6 +1100,23 @@ IS_CREATE_MODEL_FOLDER_HELP = ('Two new directories will be generated for the ou
                               '   └── First Directory (Named after the model)\n'
                               '           └── Second Directory (Named after the track)\n'
                               '                    └── Output File(s)')
+IS_CREATE_PARENT_FOLDER_HELP = ('Output files will have the same parent folder as their input file.\n\n'
+                                '• Example: \n'
+                                'Input Files:\n'
+                                '    └── Album_A\n'
+                                '        └── Audio_A.mp3\n'
+                                '    └── Album_B\n'
+                                '        └── Audio_B.mp3\n\n'
+                                'Export Directory:\n'
+                                '    └── Exports\n\n'
+                                'Output Files:\n'
+                                '    └── Exports\n'
+                                '        └── Album_A\n'
+                                '            └── Audio_A_(Vocals).wav\n'
+                                '            └── Audio_A_(Instrumental).wav\n'
+                                '        └── Album_B\n'
+                                '            └── Audio_B_(Vocals).wav\n'
+                                '            └── Audio_B_(Instrumental).wav')
 MDX_DIM_T_SET_HELP = INTERNAL_MODEL_ATT
 MDX_DIM_F_SET_HELP = INTERNAL_MODEL_ATT
 
@@ -1432,6 +1451,7 @@ ERROR_CONSOLE_TEXT = 'Error Console'
 GENERAL_MENU_TEXT = 'General Menu'
 GENERAL_PROCESS_SETTINGS_TEXT = 'General Process Settings'
 GENERATE_MODEL_FOLDER_TEXT = 'Generate Model Folder'
+GENERATE_PARENT_FOLDER_TEXT = 'Generate Parent Folder'
 HIGHEND_PROCESS_TEXT = 'High-End Process'
 INPUT_CODE_TEXT = 'Input Code'
 INPUT_STEM_NAME_TEXT = 'Input Stem Name'

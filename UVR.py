@@ -3324,6 +3324,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         is_create_parent_folder_Option.grid()
         self.help_hints(is_create_parent_folder_Option, text=IS_CREATE_PARENT_FOLDER_HELP)
 
+        is_files_numbered_Option = ttk.Checkbutton(settings_menu_format_Frame, text=GENERATE_FILES_NUMBERED_TEXT, width=GEN_SETTINGS_WIDTH, variable=self.is_files_numbered_var) 
+        is_files_numbered_Option.grid()
+        self.help_hints(is_files_numbered_Option, text=IS_FILES_NUMBERED_HELP)
+        
         is_accept_any_input_Option = ttk.Checkbutton(settings_menu_format_Frame, text=ACCEPT_ANY_INPUT_TEXT, width=GEN_SETTINGS_WIDTH, variable=self.is_accept_any_input_var) 
         is_accept_any_input_Option.grid()
         self.help_hints(is_accept_any_input_Option, text=IS_ACCEPT_ANY_INPUT_HELP)
@@ -6608,7 +6612,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     set_progress_bar = lambda step, inference_iterations=0:self.process_update_progress(total_files=inputPath_total_len, step=(step + (inference_iterations)))
                     write_to_console = lambda progress_text, base_text=base_text:self.command_Text.write(base_text + progress_text)
 
-                    audio_file_base = f"{file_num}_{os.path.splitext(os.path.basename(audio_file))[0]}"
+                    audio_file_base = os.path.splitext(os.path.basename(audio_file))[0]
+                    audio_file_base = f"{file_num}_{audio_file_base}" if self.is_files_numbered_var.get() else audio_file_base
                     audio_file_base = audio_file_base if not self.is_testing_audio_var.get() or is_ensemble else f"{round(time.time())}_{audio_file_base}"
                     audio_file_base = audio_file_base if not is_ensemble else f"{audio_file_base}_{current_model.model_basename}"
                     if not is_ensemble:
@@ -6846,6 +6851,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.is_wav_ensemble_var = tk.BooleanVar(value=data['is_wav_ensemble'])#
         self.is_create_model_folder_var = tk.BooleanVar(value=data['is_create_model_folder'])
         self.is_create_parent_folder_var = tk.BooleanVar(value=data['is_create_parent_folder'])
+        self.is_files_numbered_var = tk.BooleanVar(value=data['is_files_numbered'])
         self.help_hints_var = tk.BooleanVar(value=data['help_hints_var'])
         self.model_sample_mode_var = tk.BooleanVar(value=data['model_sample_mode'])
         self.model_sample_mode_duration_var = tk.StringVar(value=data['model_sample_mode_duration'])
@@ -6972,6 +6978,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.is_task_complete_var.set(loaded_setting['is_task_complete'])
             self.is_create_model_folder_var.set(loaded_setting['is_create_model_folder'])
             self.is_create_parent_folder_var.set(loaded_setting['is_create_parent_folder'])
+            self.is_files_numbered_var.set(loaded_setting['is_files_numbered'])
             self.mp3_bit_set_var.set(loaded_setting['mp3_bit_set'])
             self.semitone_shift_var.set(loaded_setting['semitone_shift'])#
             self.save_format_var.set(loaded_setting['save_format'])
@@ -7109,6 +7116,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             'is_wav_ensemble': self.is_wav_ensemble_var.get(),#
             'is_create_model_folder': self.is_create_model_folder_var.get(),
             'is_create_parent_folder': self.is_create_parent_folder_var.get(),
+            'is_files_numbered': self.is_files_numbered_var.get(),
             'mp3_bit_set': self.mp3_bit_set_var.get(),
             'semitone_shift': self.semitone_shift_var.get(),#
             'save_format': self.save_format_var.get(),

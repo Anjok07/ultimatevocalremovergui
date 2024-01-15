@@ -197,7 +197,7 @@ python UVR.py
 </details>
 
 ### Other Application Notes
-- Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
+- Nvidia GTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
 - AMD Radeon GPU supported is limited at this time.
    - There is currently a working branch for AMD GPU users [here](https://github.com/Anjok07/ultimatevocalremovergui/tree/v5.6-amd-gpu)

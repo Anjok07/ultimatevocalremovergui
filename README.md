@@ -1,3 +1,43 @@
+# Ultimate Vocal Remove CLI? 
+
+This is a fork of the original Ultimate Vocal Remover GUI. 
+Our goal in forking the project is to run the models and code in our own environment. In order to do so, we're dockerizing the project and creating a CLI alternative to the GUI version.
+
+The dockerization of the project is complete. The CLI is still in development.
+
+## Usage 
+Please note that the image is very large, and that you may need to prune frequently and/or allocate more disk space to docker.
+
+After pulling this repo, build the docker image. This image is intended to be compatible with x86_64 machines. 
+If you are running a x86_64 machine, all you need is: 
+```bash 
+docker build -t uvr .
+```
+If you are running and amd machine, such as an M1/M2 mac, you will need to specify the platform: 
+```bash
+docker build --platform=linux/amd64 -t uvr .
+```
+
+The image currently only has a bash entrypoint, and is intended to be run in interactive mode. This is because the CLI is still in development.
+It's usually helpful to run with a mounted directory to access test files. 
+For x86_64 machines: 
+```bash
+docker run -v $LOCAL_DIR:$CONTAINER_DIR -it uvr:latest bash
+```
+For amd machines: 
+```bash 
+docker run --platform linux/amd64 -v $LOCAL_DIR:$CONTAINER_DIR -it uvr:latest bash
+```
+
+## CLI Development 
+The beginnings of the cli are located in `cli.py` on the branch `tk_nogui`. It's currently hard-coded to use an MDX model and a single input file. 
+
+I have copied and modified code from `UVR.py` to validate the input file and run the model on it. 
+However, the `ModelData` class implemented in `UVR.py` has many references to the `MainWindow` class, which is a tkinter class. This is causing issues when trying to run the model without the GUI. All references to `root` in the `ModelData` class need to be converted to something that doesn't require a tkinter window. I've pulled out ModelData into a separate file, `model_data.py`, but haven't made many edits yet. 
+
+That's about it. Keep reading for the original README. 
+
+
 # Ultimate Vocal Remover GUI v5.6
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_v5.6.png?raw=true" />
 

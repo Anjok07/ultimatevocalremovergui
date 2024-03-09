@@ -49,7 +49,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 python.exe -m pip install -r requirements.txt
 ```
 
-If you have a compatible Nvidia GPU, run the following command:
+If you have a compatible NVIDIA GPU, run the following command:
 
 ```
 python.exe -m pip install --upgrade torch --extra-index-url https://download.pytorch.org/whl/cu117
@@ -74,28 +74,28 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 
 </details>
 
-### MacOS Installation
+### macOS Installation
 - Please Note:
-    - The MacOS Sonoma mouse clicking issue has been fixed.
-    - MPS (GPU) acceleration for Mac M1 has been expanded to work with Demucs v4 and all MDX-Net models.
+    - The macOS Sonoma mouse clicking issue has been fixed.
+    - MPS (GPU) acceleration for Apple Silicon Macs has been expanded to work with Demucs v4 and all MDX-Net models.
     - This bundle is intended for those running macOS Big Sur and above.
     - Application functionality for systems running macOS Catalina or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
-    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Macbook).
+    - Once everything is installed, the application may take up to 5-10 minutes to start for the first time (depending on your Mac).
 
-- Download the UVR dmg for MacOS via one of the links below:
-    - Mac M1 (arm64) users:
+- Download the UVR dmg for macOS via one of the links below:
+    - Apple silicon Macs (arm64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg)
        - [Main Download Link mirror](https://www.mediafire.com/file_premium/u3rk54wsqadpy93/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg/file)
 
-    - Mac Intel (x86_64) users:
+    - Intel-based Macs (x86_64) users:
        - [Main Download Link](https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg)
        - [Main Download Link mirror](https://www.mediafire.com/file_premium/2gf1werx5ly5ylz/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg/file)
 
 <details id="CannotOpen">
-  <summary>MacOS Users: Having Trouble Opening UVR?</summary>
+  <summary>macOS Users: Having Trouble Opening UVR?</summary>
 
-> Due to Apples strict application security, you may need to follow these steps to open UVR.
+> Due to Apple's strict application security, you may need to follow these steps to open UVR.
 >
 > First, run the following command via Terminal.app to allow applications to run from all sources (it's recommended that you re-enable this once UVR opens properly.)
 > 
@@ -112,9 +112,9 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 </details>
 
 <details id="MacInstall">
-  <summary>Manual MacOS Installation</summary>
+  <summary>Manual macOS Installation</summary>
 
-### Manual MacOS Installation
+### Manual macOS Installation
 
 - Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
 - Download and install Python 3.10 [here](https://www.python.org/ftp/python/3.10.9/python-3.10.9-macos11.pkg)
@@ -124,7 +124,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 pip3 install -r requirements.txt
 ```
 
-- If your Mac is running with an M1, please run the following command next. If not, skip this step. - 
+- If your Mac is running with an Apple silicon chip (M1/M2/M3), please run the following command next. If not, skip this step. - 
 
 ```
 cp /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile_arm64.dylib /Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/_soundfile_data/libsndfile.dylib
@@ -197,9 +197,9 @@ python UVR.py
 </details>
 
 ### Other Application Notes
-- Nvidia RTX 1060 6GB is the minimum requirement for GPU conversions.
-- Nvidia GPUs with at least 8GBs of V-RAM are recommended.
-- AMD Radeon GPU supported is limited at this time.
+- NVIDIA GeForce GTX 1060 6GB is the minimum requirement for GPU conversions.
+- NVIDIA GPUs with at least 8GBs of V-RAM are recommended.
+- AMD Radeon GPU support is limited at this time.
    - There is currently a working branch for AMD GPU users [here](https://github.com/Anjok07/ultimatevocalremovergui/tree/v5.6-amd-gpu)
 - This application is only compatible with 64-bit platforms. 
 - This application relies on the Rubber Band library for the Time-Stretch and Pitch-Shift options.
@@ -219,7 +219,7 @@ python UVR.py
 - If FFmpeg is not installed, the application will throw an error if the user attempts to convert a non-WAV file.
 - Memory allocation errors can usually be resolved by lowering the "Segment" or "Window" sizes.
 
-#### MacOS Sonoma Left-click Bug
+#### macOS Sonoma Left-click Bug
 There's a known issue on MacOS Sonoma where left-clicks aren't registering correctly within the app. This was impacting all applications built with Tkinter on Sonoma and has since been resolved. Please download the latest version via the following link if you are still experiencing issues - [link](https://github.com/Anjok07/ultimatevocalremovergui/releases/tag/v5.6)
 
 This issue was being tracked [here](https://github.com/Anjok07/ultimatevocalremovergui/issues/840).

@@ -11,6 +11,8 @@ from lib_v5 import spec_utils
 from lib_v5.vr_network import nets
 from lib_v5.vr_network import nets_new
 from lib_v5.vr_network.model_param_init import ModelParameters
+from lib_v5.mel_band_roformer import MelBandRoformer
+from lib_v5.bs_roformer import BSRoformer
 from pathlib import Path
 from gui_data.constants import *
 from gui_data.error_handling import *
@@ -32,28 +34,29 @@ import math
 from onnx import load
 from onnx2pytorch import ConvertModel
 import gc
- 
+
 if TYPE_CHECKING:
     from UVR import ModelData
 
-# if not is_macos:
-#     import torch_directml
+if not is_macos:
+    import torch_directml
 
 mps_available = torch.backends.mps.is_available() if is_macos else False
 cuda_available = torch.cuda.is_available()
+default_sr = 44100
 
-# def get_gpu_info():
-#     directml_device, directml_available = DIRECTML_DEVICE, False
+def get_gpu_info():
+    directml_device, directml_available = DIRECTML_DEVICE, False
     
-#     if not is_macos:
-#         directml_available = torch_directml.is_available()
+    if not is_macos:
+        directml_available = torch_directml.is_available()
 
-#         if directml_available:
-#             directml_device = str(torch_directml.device()).partition(":")[0]
+        if directml_available:
+            directml_device = str(torch_directml.device()).partition(":")[0]
 
-#     return directml_device, directml_available
+    return directml_device, directml_available
 
-# DIRECTML_DEVICE, directml_available = get_gpu_info()
+DIRECTML_DEVICE, directml_available = get_gpu_info()
 
 def clear_gpu_cache():
     gc.collect()
@@ -169,6 +172,10 @@ class SeperateAttributes:
         self.is_opencl = False
         self.device_set = model_data.device_set
         self.is_use_opencl = model_data.is_use_opencl
+        #Roformer
+        self.roformer_config = model_data.mdx_c_configs
+        self.is_roformer = model_data.is_roformer
+
         
         if self.is_inst_only_voc_splitter or self.is_sec_bv_rebalance:
             self.is_primary_stem_only = False
@@ -183,12 +190,12 @@ class SeperateAttributes:
             else:
                 device_prefix = None
                 if self.device_set != DEFAULT:
-                    device_prefix = CUDA_DEVICE#DIRECTML_DEVICE if self.is_use_opencl and directml_available else CUDA_DEVICE
+                    device_prefix = DIRECTML_DEVICE if self.is_use_opencl and directml_available else CUDA_DEVICE
 
-                # if directml_available and self.is_use_opencl:
-                #     self.device = torch_directml.device() if not device_prefix else f'{device_prefix}:{self.device_set}'
-                #     self.is_other_gpu = True
-                if cuda_available:# and not self.is_use_opencl:
+                if directml_available and self.is_use_opencl:
+                    self.device = torch_directml.device() if not device_prefix else f'{device_prefix}:{self.device_set}'
+                    self.is_other_gpu = True
+                elif cuda_available and not self.is_use_opencl:
                     self.device = CUDA_DEVICE if not device_prefix else f'{device_prefix}:{self.device_set}'
                     self.run_type = ['CUDAExecutionProvider']
 
@@ -639,6 +646,7 @@ class SeperateMDX(SeperateAttributes):
 class SeperateMDXC(SeperateAttributes):        
 
     def seperate(self):
+        self.is_vocal_main_target = True if self.mdx_c_configs.training.target_instrument == VOCAL_STEM else False
         samplerate = 44100
         sources = None
 
@@ -654,7 +662,7 @@ class SeperateMDXC(SeperateAttributes):
                 self.cache_source((mix, sources))
             self.write_to_console(DONE, base_text='')
 
-        stem_list = [self.mdx_c_configs.training.target_instrument] if self.mdx_c_configs.training.target_instrument else [i for i in self.mdx_c_configs.training.instruments]
+        stem_list = [self.mdx_c_configs.training.target_instrument] if self.mdx_c_configs.training.target_instrument and not self.is_vocal_main_target else [i for i in self.mdx_c_configs.training.instruments]
 
         if self.is_secondary_model:
             if self.is_pre_proc_model:
@@ -684,6 +692,7 @@ class SeperateMDXC(SeperateAttributes):
                 source_primary = sources  
             else:
                 source_primary = sources[stem_list[0]] if self.is_multi_stem_ensemble and len(stem_list) == 2 else sources[self.mdxnet_stem_select]
+                
             if self.is_secondary_model_activated and self.secondary_model:
                 self.secondary_source_primary, self.secondary_source_secondary = process_secondary_model(self.secondary_model, 
                                                                                                          self.process_data, 
@@ -731,57 +740,124 @@ class SeperateMDXC(SeperateAttributes):
         if self.is_secondary_model or self.is_pre_proc_model:
             return secondary_sources
 
+    def overlap_add(self, result, x, weights, start, length):
+        if self.device == 'mps':
+            x = x.to(self.device)
+        result[..., start:start+length] += x[..., :length] * weights[:length]
+        return result
     def demix(self, mix):
         sr_pitched = 441000
         org_mix = mix
         if self.is_pitch_change:
             mix, sr_pitched = spec_utils.change_pitch_semitones(mix, 44100, semitone_shift=-self.semitone_shift)
 
-        model = TFC_TDF_net(self.mdx_c_configs, device=self.device)
-        model.load_state_dict(torch.load(self.model_path, map_location=cpu))
-        model.to(self.device).eval()
-        mix = torch.tensor(mix, dtype=torch.float32)
+        if self.is_roformer:
+            overlap = self.overlap_mdx23
+            device = self.device
 
-        try:
-            S = model.num_target_instruments
-        except Exception as e:
-            S = model.module.num_target_instruments
+            # Determine the model type based on the configuration and instantiate it
+            if 'num_bands' in self.roformer_config.model:
+                model = MelBandRoformer(**self.roformer_config.model)
+            elif 'freqs_per_bands' in self.roformer_config.model:
+                model = BSRoformer(**self.roformer_config.model)
+            else:
+                raise ValueError('Unknown model type in the configuration.')
 
-        mdx_segment_size = self.mdx_c_configs.inference.dim_t if self.is_mdx_c_seg_def else self.mdx_segment_size
+            # Load model checkpoint
+            checkpoint = torch.load(self.model_path, map_location='cpu')
+            model = model if not isinstance(model, torch.nn.DataParallel) else model.module
+            model.load_state_dict(checkpoint)
+            model.to(device).eval()
+            mix = torch.tensor(mix, dtype=torch.float32)
+
+            segment_size = self.mdx_c_configs.inference.dim_t if self.is_mdx_c_seg_def else self.mdx_segment_size
+
+            S = 1 if self.roformer_config.training.target_instrument else len(self.roformer_config.training.instruments)
+            C = self.roformer_config.audio.hop_length * (segment_size - 1)
+            step = int(overlap * self.roformer_config.audio.sample_rate)
+            
+            # Create a weighting table and convert it to a PyTorch tensor
+            window = torch.tensor(signal.hamming(C), dtype=torch.float32)
+
+            device = next(model.parameters()).device
+            # Transfer to the weighting plate for the same device as the other tensors
+            window = window.to(device)
+            
+            batch_len = int(mix.shape[1]/step)
+            
+            #with torch.cuda.amp.autocast():
+            with torch.no_grad():
+                req_shape = (len(self.roformer_config.training.instruments), ) + tuple(mix.shape)
+                result = torch.zeros(req_shape, dtype=torch.float32).to(device)
+                counter = torch.zeros(req_shape, dtype=torch.float32).to(device)
+                for i in range(0, mix.shape[1], step):
+                    self.running_inference_progress_bar(batch_len)
+                    part = mix[:, i:i + C]
+                    length = part.shape[-1]
+                    if i + C > mix.shape[1]:
+                        part = mix[:, -C:]
+                        length = C
+                    part = part.to(device)
+                    x = model(part.unsqueeze(0))[0]
+                    if i + C > mix.shape[1]:
+                        # Corrigido para adicionar corretamente ao final do tensor
+                        result = self.overlap_add(result, x, window, result.shape[-1] - C, length)
+                        counter[..., result.shape[-1] - C:] += window[:length]
+                    else:
+                        result = self.overlap_add(result, x, window, i, length)
+                        counter[..., i:i+length] += window[:length]
+
+            estimated_sources = result / counter.clamp(min=1e-10)
+        else:
+            model = TFC_TDF_net(self.mdx_c_configs, device=self.device)
+            model.load_state_dict(torch.load(self.model_path, map_location=cpu))
+            model.to(self.device).eval()
+            mix = torch.tensor(mix, dtype=torch.float32)
+
+            try:
+                S = model.num_target_instruments
+            except Exception as e:
+                S = model.module.num_target_instruments
+
+            mdx_segment_size = self.mdx_c_configs.inference.dim_t if self.is_mdx_c_seg_def else self.mdx_segment_size
+            
+            batch_size = self.mdx_batch_size
+            chunk_size = self.mdx_c_configs.audio.hop_length * (mdx_segment_size - 1)
+            overlap = self.overlap_mdx23
+
+            hop_size = chunk_size // overlap
+            mix_shape = mix.shape[1]
+            pad_size = hop_size - (mix_shape - chunk_size) % hop_size
+            mix = torch.cat([torch.zeros(2, chunk_size - hop_size), mix, torch.zeros(2, pad_size + chunk_size - hop_size)], 1)
+
+            chunks = mix.unfold(1, chunk_size, hop_size).transpose(0, 1)
+            batches = [chunks[i : i + batch_size] for i in range(0, len(chunks), batch_size)]
+            
+            X = torch.zeros(S, *mix.shape) if S > 1 else torch.zeros_like(mix)
+            X = X.to(self.device)
         
-        batch_size = self.mdx_batch_size
-        chunk_size = self.mdx_c_configs.audio.hop_length * (mdx_segment_size - 1)
-        overlap = self.overlap_mdx23
+            with torch.no_grad():
+                cnt = 0
+                for batch in batches:
+                    self.running_inference_progress_bar(len(batches))
+                    x = model(batch.to(self.device))
+                    
+                    for w in x:
+                        X[..., cnt * hop_size : cnt * hop_size + chunk_size] += w
+                        cnt += 1
 
-        hop_size = chunk_size // overlap
-        mix_shape = mix.shape[1]
-        pad_size = hop_size - (mix_shape - chunk_size) % hop_size
-        mix = torch.cat([torch.zeros(2, chunk_size - hop_size), mix, torch.zeros(2, pad_size + chunk_size - hop_size)], 1)
+            estimated_sources = X[..., chunk_size - hop_size:-(pad_size + chunk_size - hop_size)] / overlap
 
-        chunks = mix.unfold(1, chunk_size, hop_size).transpose(0, 1)
-        batches = [chunks[i : i + batch_size] for i in range(0, len(chunks), batch_size)]
-        
-        X = torch.zeros(S, *mix.shape) if S > 1 else torch.zeros_like(mix)
-        X = X.to(self.device)
-
-        with torch.no_grad():
-            cnt = 0
-            for batch in batches:
-                self.running_inference_progress_bar(len(batches))
-                x = model(batch.to(self.device))
-                
-                for w in x:
-                    X[..., cnt * hop_size : cnt * hop_size + chunk_size] += w
-                    cnt += 1
-
-        estimated_sources = X[..., chunk_size - hop_size:-(pad_size + chunk_size - hop_size)] / overlap
-        del X
         pitch_fix = lambda s:self.pitch_fix(s, sr_pitched, org_mix)
 
-        if S > 1:
+        if S > 1 or self.is_vocal_main_target:
             sources = {k: pitch_fix(v) if self.is_pitch_change else v for k, v in zip(self.mdx_c_configs.training.instruments, estimated_sources.cpu().detach().numpy())}
-            del estimated_sources
-            if self.is_denoise_model:
+            if self.is_vocal_main_target:
+                if sources[VOCAL_STEM].shape[1] != org_mix.shape[1]:
+                    sources[VOCAL_STEM] = spec_utils.match_array_shapes(sources[VOCAL_STEM], org_mix)
+                sources[INST_STEM] = org_mix - sources[VOCAL_STEM]
+                
+            if self.is_denoise_model and not self.is_roformer:
                 if VOCAL_STEM in sources.keys() and INST_STEM in sources.keys():
                     sources[VOCAL_STEM] = vr_denoiser(sources[VOCAL_STEM], self.device, model_path=self.DENOISER_MODEL)
                     if sources[VOCAL_STEM].shape[1] != org_mix.shape[1]:
@@ -790,8 +866,12 @@ class SeperateMDXC(SeperateAttributes):
                             
             return sources
         else:
-            est_s = estimated_sources.cpu().detach().numpy()
-            del estimated_sources
+            if self.is_roformer:
+                sources = {k: v.cpu().detach().numpy() for k, v in zip([self.mdx_c_configs.training.target_instrument], estimated_sources)}
+                est_s = sources[self.mdx_c_configs.training.target_instrument]
+            else:
+                est_s = estimated_sources.cpu().detach().numpy()
+
             return pitch_fix(est_s) if self.is_pitch_change else est_s
 
 class SeperateDemucs(SeperateAttributes):

@@ -40,3 +40,13 @@ SoundFile==0.11.0; sys_platform != 'darwin'
 PySoundFile==0.9.0.post1; sys_platform == 'darwin'
 Dora==0.0.3
 numpy==1.23.5
+segmentation_models_pytorch==0.3.3
+timm==0.9.2
+audiomentations==0.24.0
+beartype==0.14.1
+rotary_embedding_torch==0.3.5
+transformers==4.35.0
+spafe==0.3.2
+protobuf==3.20.3
+torch_audiomentations
+asteroid==0.7.0

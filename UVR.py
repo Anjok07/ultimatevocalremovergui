@@ -47,7 +47,7 @@ from pathlib  import Path
 from separate import (
     SeperateDemucs, SeperateMDX, SeperateMDXC, SeperateVR,  # Model-related
     save_format, clear_gpu_cache,  # Utility functions
-    cuda_available, mps_available, #directml_available,
+    cuda_available, directml_available, mps_available
 )
 from playsound import playsound
 from typing import List
@@ -58,14 +58,14 @@ import yaml
 from ml_collections import ConfigDict
 from collections import Counter
 
-# if not is_macos:
-#     import torch_directml
+if not is_macos:
+    import torch_directml
 
-# is_choose_arch = cuda_available and directml_available
-# is_opencl_only = not cuda_available and directml_available
-# is_cuda_only = cuda_available and not directml_available
+is_choose_arch = cuda_available and directml_available
+is_opencl_only = not cuda_available and directml_available
+is_cuda_only = cuda_available and not directml_available
 
-is_gpu_available = cuda_available or mps_available# or directml_available
+is_gpu_available = cuda_available or directml_available or mps_available
 
 # Change the current working directory to the directory
 # this file sits in
@@ -212,6 +212,21 @@ def font_checker(font_file):
     chosen_font = chosen_font_name, chosen_font_file
      
     return chosen_font
+
+def get_yaml_data(yamml_path, is_get_dict=False):
+    config = None
+    try:
+        if os.path.isfile(yamml_path):
+            with open(yamml_path) as f:
+                config = ConfigDict(yaml.load(f, Loader=yaml.FullLoader))
+                
+            if is_get_dict:
+                config = dict(config)
+                
+    except Exception as e:
+        print(e)
+        
+    return config
         
 debugger = []
 
@@ -346,7 +361,7 @@ class ModelData():
         self.is_denoise_model = True if root.denoise_option_var.get() == DENOISE_M and os.path.isfile(DENOISER_MODEL_PATH) else False
         self.is_gpu_conversion = 0 if root.is_gpu_conversion_var.get() else -1
         self.is_normalization = root.is_normalization_var.get()#
-        self.is_use_opencl = False#True if is_opencl_only else root.is_use_opencl_var.get()
+        self.is_use_opencl = True if is_opencl_only else root.is_use_opencl_var.get()
         self.is_primary_stem_only = root.is_primary_stem_only_var.get()
         self.is_secondary_stem_only = root.is_secondary_stem_only_var.get()
         self.is_denoise = True if not root.denoise_option_var.get() == DENOISE_NONE else False
@@ -431,6 +446,7 @@ class ModelData():
         self.is_save_inst_vocal_splitter = root.is_save_inst_set_vocal_splitter_var.get()
         self.is_inst_only_voc_splitter = root.check_only_selection_stem(INST_STEM_ONLY)
         self.is_save_vocal_only = root.check_only_selection_stem(IS_SAVE_VOC_ONLY)
+        self.is_roformer = False
 
         if selected_process_method == ENSEMBLE_MODE:
             self.process_method, _, self.model_name = model_name.partition(ENSEMBLE_PARTITION)
@@ -497,13 +513,15 @@ class ModelData():
                     self.model_data = self.get_model_data(MDX_HASH_DIR, root.mdx_hash_MAPPER)
                 if self.model_data:
                     
+                    if "is_roformer" in self.model_data:
+                        self.is_roformer = self.model_data["is_roformer"]
+                    
                     if "config_yaml" in self.model_data:
                         self.is_mdx_c = True
                         config_path = os.path.join(MDX_C_CONFIG_PATH, self.model_data["config_yaml"])
-                        if os.path.isfile(config_path):
-                            with open(config_path) as f:
-                                config = ConfigDict(yaml.load(f, Loader=yaml.FullLoader))
-
+                        config = get_yaml_data(config_path)
+                        
+                        if config:
                             self.mdx_c_configs = config
                                 
                             if self.mdx_c_configs.training.target_instrument:
@@ -511,6 +529,10 @@ class ModelData():
                                 target = self.mdx_c_configs.training.target_instrument
                                 self.mdx_model_stems = [target]
                                 self.primary_stem = target
+                                
+                                if self.is_roformer and self.mdx_c_configs.training.target_instrument == VOCAL_STEM and self.is_ensemble_mode:
+                                    self.mdxnet_stem_select = self.ensemble_primary_stem
+                                
                             else:
                                 # If no specific target_instrument, use all instruments in the training config
                                 self.mdx_model_stems = self.mdx_c_configs.training.instruments
@@ -525,6 +547,7 @@ class ModelData():
                                 # Update mdxnet_stem_select based on ensemble mode
                                 if self.is_ensemble_mode:
                                     self.mdxnet_stem_select = self.ensemble_primary_stem
+                                      
                         else:
                             self.model_status = False
                     else:
@@ -3173,18 +3196,18 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             if cuda_available:
                 self.cuda_device_list = [f"{torch.cuda.get_device_properties(i).name}:{i}" for i in range(torch.cuda.device_count())]
                 self.cuda_device_list.insert(0, DEFAULT)
-                #print(self.cuda_device_list)
+                print(self.cuda_device_list)
             
-            # if directml_available:
-            #     self.opencl_list = [f"{torch_directml.device_name(i)}:{i}" for i in range(torch_directml.device_count())]
-            #     self.opencl_list.insert(0, DEFAULT)
+            if directml_available:
+                self.opencl_list = [f"{torch_directml.device_name(i)}:{i}" for i in range(torch_directml.device_count())]
+                self.opencl_list.insert(0, DEFAULT)
         except Exception as e:
             print(e)
             
-        # if is_cuda_only:
-        #     self.is_use_opencl_var.set(False)
+        if is_cuda_only:
+            self.is_use_opencl_var.set(False)
             
-        check_gpu_list = self.cuda_device_list#self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list
+        check_gpu_list = self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list
         if not self.device_set_var.get() in check_gpu_list:
             self.device_set_var.set(DEFAULT)
 
@@ -3335,11 +3358,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         change_model_default_Button = ttk.Button(settings_menu_format_Frame, text=CHANGE_MODEL_DEFAULTS_TEXT, command=lambda:self.pop_up_change_model_defaults(settings_menu), width=SETTINGS_BUT_WIDTH-2)#
         change_model_default_Button.grid(pady=MENU_PADDING_4)
 
-        #if not is_choose_arch:
-        self.vocal_splitter_Button_opt(settings_menu, settings_menu_format_Frame, width=SETTINGS_BUT_WIDTH-2, pady=MENU_PADDING_4)
+        if not is_choose_arch:
+            self.vocal_splitter_Button_opt(settings_menu, settings_menu_format_Frame, width=SETTINGS_BUT_WIDTH-2, pady=MENU_PADDING_4)
 
         if not is_macos and self.is_gpu_available:
-            gpu_list_options = lambda:self.loop_gpu_list(device_set_Option, 'gpudevice', self.cuda_device_list)#self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list)
+            gpu_list_options = lambda:self.loop_gpu_list(device_set_Option, 'gpudevice', self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list)
             device_set_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, CUDA_NUM_TEXT)
             device_set_Label.grid(pady=MENU_PADDING_2)
             
@@ -3348,14 +3371,14 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             gpu_list_options()
             self.help_hints(device_set_Label, text=IS_CUDA_SELECT_HELP)
             
-            # if is_choose_arch:
-            #     is_use_opencl_Option = ttk.Checkbutton(settings_menu_format_Frame, 
-            #                                            text=USE_OPENCL_TEXT, 
-            #                                            width=9, 
-            #                                            variable=self.is_use_opencl_var, 
-            #                                            command=lambda:(gpu_list_options(), self.device_set_var.set(DEFAULT))) 
-            #     is_use_opencl_Option.grid()
-            #     self.help_hints(is_use_opencl_Option, text=IS_NORMALIZATION_HELP)
+            if is_choose_arch:
+                is_use_opencl_Option = ttk.Checkbutton(settings_menu_format_Frame, 
+                                                       text=USE_OPENCL_TEXT, 
+                                                       width=9, 
+                                                       variable=self.is_use_opencl_var, 
+                                                       command=lambda:(gpu_list_options(), self.device_set_var.set(DEFAULT))) 
+                is_use_opencl_Option.grid()
+                self.help_hints(is_use_opencl_Option, text=IS_NORMALIZATION_HELP)
 
         model_sample_mode_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, MODEL_SAMPLE_MODE_SETTINGS_TEXT)
         model_sample_mode_Label.grid(pady=MENU_PADDING_2)
@@ -4783,10 +4806,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         get_mdx_c_params = lambda dir, ext:tuple(os.path.splitext(x)[0] for x in os.listdir(dir) if x.endswith(ext))
         new_mdx_c_params = get_mdx_c_params(MDX_C_CONFIG_PATH, YAML)
         mdx_c_model_param_var = tk.StringVar(value=NONE_SELECTED)
+        is_roformer_model_var = tk.BooleanVar(value=False)
         
         def pull_data():
             mdx_c_model_params = {
-                'config_yaml': f"{mdx_c_model_param_var.get()}{YAML}"}
+                'config_yaml': f"{mdx_c_model_param_var.get()}{YAML}",
+                'is_roformer': is_roformer_model_var.get()}
             
             if not mdx_c_model_param_var.get() == NONE_SELECTED:
                 self.pop_up_mdx_model_sub_json_dump(mdx_c_model_params, mdx_model_hash)
@@ -4809,6 +4834,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         mdx_c_model_param_Option = ComboBoxMenu(mdx_c_param_Frame, textvariable=mdx_c_model_param_var, values=new_mdx_c_params, width=30)
         mdx_c_model_param_Option.grid(padx=20,pady=MENU_PADDING_1)
         self.help_hints(mdx_c_model_param_Label, text=VR_MODEL_PARAM_HELP)
+
+        is_roformer_model_Option = ttk.Checkbutton(mdx_c_param_Frame, text=ROFORMER_MODEL_TEXT, width=SET_MENUS_CHECK_WIDTH, variable=is_roformer_model_var) 
+        is_roformer_model_Option.grid(pady=3)
 
         mdx_c_param_confrim_Button = ttk.Button(mdx_c_param_Frame, text=CONFIRM_TEXT, command=lambda:pull_data())
         mdx_c_param_confrim_Button.grid(pady=MENU_PADDING_1)
@@ -5276,6 +5304,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.mdx_download_list = self.online_data["mdx_download_list"]
         self.demucs_download_list = self.online_data["demucs_download_list"]
         self.mdx_download_list.update(self.online_data["mdx23c_download_list"])
+        self.mdx_download_list.update(self.online_data["roformer_download_list"])
         
         if not self.decoded_vip_link is NO_CODE:
             self.vr_download_list.update(self.online_data["vr_download_vip_list"])
@@ -6721,6 +6750,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             if not key in data.keys():
                 data = {**data, **{key:value}}
                 data['batch_size'] = DEF_OPT
+                data['is_mdx_c_seg_def'] = True
 
         ## ADD_BUTTON
         self.chosen_process_method_var = tk.StringVar(value=data['chosen_process_method'])
@@ -6834,7 +6864,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.is_accept_any_input_var = tk.BooleanVar(value=data['is_accept_any_input'])
         self.is_task_complete_var = tk.BooleanVar(value=data['is_task_complete'])
         self.is_normalization_var = tk.BooleanVar(value=data['is_normalization'])#
-        self.is_use_opencl_var = tk.BooleanVar(value=False)#True if is_opencl_only else data['is_use_opencl'])#
+        self.is_use_opencl_var = tk.BooleanVar(value=True if is_opencl_only else data['is_use_opencl'])#
         self.is_wav_ensemble_var = tk.BooleanVar(value=data['is_wav_ensemble'])#
         self.is_create_model_folder_var = tk.BooleanVar(value=data['is_create_model_folder'])
         self.help_hints_var = tk.BooleanVar(value=data['help_hints_var'])
@@ -6869,6 +6899,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             if not key in loaded_setting.keys():
                 loaded_setting = {**loaded_setting, **{key:value}}
                 loaded_setting['batch_size'] = DEF_OPT
+                loaded_setting['is_mdx_c_seg_def'] = True
                 
         is_default_reset = True if process_method == ENSEMBLE_MODE or is_default_reset else False
         
@@ -6984,7 +7015,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             
         self.is_gpu_conversion_var.set(loaded_setting['is_gpu_conversion'])
         self.is_normalization_var.set(loaded_setting['is_normalization'])#
-        self.is_use_opencl_var.set(False)#True if is_opencl_only else loaded_setting['is_use_opencl'])#
+        self.is_use_opencl_var.set(True if is_opencl_only else loaded_setting['is_use_opencl'])#
         self.is_wav_ensemble_var.set(loaded_setting['is_wav_ensemble'])#
         self.help_hints_var.set(loaded_setting['help_hints_var'])
         self.is_wav_ensemble_var.set(loaded_setting['is_wav_ensemble'])

@@ -903,10 +903,10 @@ LICENSE_TEXT = lambda a, p:f'Current Application Version: Ultimate Vocal Remover
                'SOFTWARE.'
 
 # Message Box Text
-INVALID_INPUT = 'Invalid Input', 'The input is invalid.\n\nPlease verify the input still exists or is valid and try again.'
-INVALID_EXPORT = 'Invalid Export Directory', 'You have selected an invalid export directory.\n\nPlease make sure the selected directory still exists.'
+INVALID_INPUT = 'Invalid Input', 'The input is invalid.\n\nPlease verify the input exists or is valid and try again.'
+INVALID_EXPORT = 'Invalid Export Directory', 'You have selected an invalid export directory.\n\nPlease make sure the selected directory exists.'
 INVALID_ENSEMBLE = 'Not Enough Models', 'You must select 2 or more models to run ensemble.'
-INVALID_MODEL = 'No Model Chosen', 'You must select an model to continue.'
+INVALID_MODEL = 'No Model Chosen', 'You must select a model to continue.'
 MISSING_MODEL = 'Model Missing', 'The selected model is missing or not valid.'
 ERROR_OCCURED = 'Error Occured', '\n\nWould you like to open the error log for more details?\n'
 PROCESS_COMPLETE = '\nProcess complete\n'

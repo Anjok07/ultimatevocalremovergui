@@ -541,7 +541,9 @@ def ensembling(a, inputs, is_wavs=False):
         if MIN_SPEC == a:
             input = np.where(np.abs(inputs[i]) <= np.abs(input), inputs[i], input)
         if MAX_SPEC == a:
-            input = np.where(np.abs(inputs[i]) >= np.abs(input), inputs[i], input)  
+            #input = np.array(np.where(np.greater_equal(np.abs(inputs[i]), np.abs(input)), inputs[i], input), dtype=object)
+            input = np.where(np.abs(inputs[i]) >= np.abs(input), inputs[i], input)
+            #max_spec = np.array([np.where(np.greater_equal(np.abs(inputs[i]), np.abs(input)), s, specs[0]) for s in specs[1:]], dtype=object)[-1]
 
     #linear_ensemble
     #input = ensemble_wav(inputs, split_size=1)

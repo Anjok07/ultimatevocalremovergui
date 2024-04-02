@@ -50,3 +50,4 @@ spafe==0.3.2
 protobuf==3.20.3
 torch_audiomentations
 asteroid==0.7.0
+chardet

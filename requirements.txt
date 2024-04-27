@@ -38,6 +38,4 @@ onnxruntime-gpu
 onnx2pytorch
 soundfile==0.12.1; sys_platform != 'darwin'
 PySoundFile==0.9.0.post1; sys_platform == 'darwin'
-Dora==0.0.3
 numpy==1.24.2
-scikit-learn

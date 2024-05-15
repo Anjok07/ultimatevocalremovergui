@@ -106,7 +106,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 > Second, run the following command to bypass Notarization: 
 > 
 > ```bash
-> sudo xattr -rd com.apple.quarantine /Applications/Ultimate\ Vocal\ Remover.app
+> sudo xattr -d com.apple.quarantine /Applications/Ultimate\ Vocal\ Remover.app
 > ```
 
 </details>

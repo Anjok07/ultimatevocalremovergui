@@ -41,7 +41,7 @@ These bundles contain the UVR interface, Python, PyTorch, and other dependencies
 ### Manual Windows Installation
 
 - Download and extract the repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- Download and install Python [here](https://www.python.org/ftp/python/3.9.8/python-3.9.8-amd64.exe)
+- Download and install Python [here](https://www.python.org/ftp/python/3.12.3/python-3.12.3-amd64.exe)
    - Make sure to check "Add python.exe to PATH" during the install
 - Run the following commands from the extracted repo directory:
 

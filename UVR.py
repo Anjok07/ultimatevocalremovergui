@@ -58,6 +58,13 @@ import yaml
 from ml_collections import ConfigDict
 from collections import Counter
 
+try:
+    from plyer import filechooser
+    is_native_filepicker = True
+except ModuleNotFoundError:
+    is_native_filepicker = False
+    pass
+
 # if not is_macos:
 #     import torch_directml
 
@@ -964,7 +971,7 @@ class ToolTip(object):
 
         # Create the actual tooltip
         self.tooltip = tk.Toplevel(self.widget)
-        self.tooltip.wm_overrideredirect(True)  
+        self.tooltip.wm_attributes('-type', 'splash')
         self.tooltip.wm_geometry(f"+{x}+{y}")
 
         label_config = create_label_config()
@@ -2144,6 +2151,25 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         gui_data.sv_ttk.set_theme("dark", MAIN_FONT_NAME, 10, fg_color_set=fg_color_set)
 
     def show_file_dialog(self, text='Select Audio files', dialoge_type=None):
+        if is_native_filepicker:
+            if dialoge_type == MULTIPLE_FILE:
+                filenames = filechooser.open_file(title=text, multiple=True)
+            elif dialoge_type == MAIN_MULTIPLE_FILE:
+                filenames = filechooser.open_file(title=text, path=self.lastDir, multiple=True)
+            elif dialoge_type == SINGLE_FILE:
+                filenames = filechooser.open_file(title=text)
+            elif dialoge_type == CHOOSE_EXPORT_FIR:
+                filenames = filechooser.choose_dir(title=f'Select Folder')
+                if filenames is not None:
+                    return filenames[0]
+                else:
+                    return None
+
+            if filenames is not None:
+                return tuple(filenames)
+            else:
+                return None
+
         parent_win = root
         is_linux = not is_windows and not is_macos
         
@@ -2171,7 +2197,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                                     title=f'Select Folder',)
             
         if is_linux:
-            print("Is Linux")
             self.linux_filebox_fix(False)
             top.destroy()
             

@@ -1,8 +1,9 @@
 import platform
+from pathlib import Path
 
 #Platform Details
 OPERATING_SYSTEM = platform.system()
-SYSTEM_ARCH = platform.platform()
+SYSTEM_ARCH = platform.platform()#"----------------------------------"]
 SYSTEM_PROC = platform.processor()
 ARM = 'arm'
 
@@ -13,7 +14,7 @@ CUDA_DEVICE = 'cuda'
 DIRECTML_DEVICE = "privateuseone"
 
 #MAIN_FONT_NAME = "Century Gothic"
-OPT_SEPARATOR_SAVE = '─'*25
+OPT_SEPARATOR_SAVE = '─'*13
 BG_COLOR = '#0e0e0f'
 FG_COLOR = '#13849f'
 
@@ -323,7 +324,7 @@ BATCH_MODE = 'Batch Mode'
 BETA_VERSION = 'BETA'
 DEF_OPT = 'Default'
 USER_INPUT = "User Input"
-OPT_SEPARATOR = '─'*65
+OPT_SEPARATOR = '─'*20
 
 CHUNKS = (AUTO_SELECT, '1', '5', '10', '15', '20', 
           '25', '30', '35', '40', '45', '50', 
@@ -612,7 +613,8 @@ DEFAULT_DATA = {
         'is_match_frequency_pitch': True,#
         'is_match_silence': True,#
         'is_spec_match': False,#
-        'is_mdx_c_seg_def': False,
+        'is_mdx_c_seg_def': True,
+        'is_mdx_c_seg_def_check': True,
         'is_invert_spec': False, #
         'is_deverb_vocals': False, #
         'deverb_vocal_opt': 'Main Vocals Only', #
@@ -643,6 +645,7 @@ DEFAULT_DATA = {
         'is_auto_update_model_params': True,#
         'is_add_model_name': False,
         'is_accept_any_input': False,
+        'is_save_to_input_path': False,
         'is_task_complete': False,
         'is_normalization': False,
         'is_use_opencl': False,
@@ -655,6 +658,7 @@ DEFAULT_DATA = {
         'device_set': DEFAULT,
         'user_code': '',
         'export_path': '',
+        'last_export_path':'',
         'input_paths': [],
         'lastDir': None,
         'time_window': "3",
@@ -757,6 +761,8 @@ SETTING_CHECK = ('vr_model',
                'is_auto_update_model_params',#
                'is_add_model_name',
                "is_accept_any_input",
+               'last_export_path',
+               "is_save_to_input_path",
                'is_task_complete',
                'is_create_model_folder',
                'mp3_bit_set',#
@@ -851,6 +857,7 @@ MDX_PLACEMENT_TEXT = 'Place models in \"models/MDX_Net_Models\" directory.'
 DEMUCS_PLACEMENT_TEXT = 'Place models in \"models/Demucs_Models\" directory.'
 DEMUCS_V3_V4_PLACEMENT_TEXT = 'Place items in \"models/Demucs_Models/v3_v4_repo\" directory.'
 MDX_23_NAME = "MDX23C Model"
+ROFORMER_MODEL_NAME = "Roformer Model"
 
 # Liscense info
 if OPERATING_SYSTEM=="Darwin":
@@ -1081,7 +1088,8 @@ IS_INVERT_SPEC_HELP = (
     '• Inverts primary stem using spectrograms, instead of waveforms.\n'
     '• Slightly slower inversion method.'
 )
-IS_TESTING_AUDIO_HELP = 'Appends a 10-digit number to saved files to avoid accidental overwrites.'
+IS_TESTING_AUDIO_HELP = 'Adds a unique 10-digit number to outputs to prevent users from overwriting files.'
+IS_SAVE_TO_INPUT_HELP = 'Saves all output audio to input audio path.'
 IS_MODEL_TESTING_AUDIO_HELP = 'Appends the model name to outputs for comparison across different models.'
 IS_ACCEPT_ANY_INPUT_HELP = (
     'Allows all types of inputs when enabled, even non-audio formats.\n'
@@ -1438,6 +1446,7 @@ INPUT_STEM_NAME_TEXT = 'Input Stem Name'
 INPUT_UNIQUE_STEM_NAME_TEXT = 'Input Unique Stem Name'
 IS_INVERSE_STEM_TEXT = 'Is Inverse Stem'
 KARAOKE_MODEL_TEXT = 'Karaoke Model'
+ROFORMER_MODEL_TEXT = 'Roformer Model'
 MANUAL_DOWNLOADS_TEXT = 'Manual Downloads'
 MATCH_FREQ_CUTOFF_TEXT = 'Match Freq Cut-off'
 MDXNET_C_MODEL_PARAMETERS_TEXT = 'MDX-Net C Model Parameters'
@@ -1487,6 +1496,7 @@ SELECT_MODEL_PARAM_TEXT = 'Select Model Param'
 SELECT_VOCAL_TYPE_TO_DEVERB_TEXT = 'Select Vocal Type to Deverb'
 SELECTED_MODEL_PLACEMENT_PATH_TEXT = 'Selected Model Placement Path'
 SETTINGS_GUIDE_TEXT = 'Settings Guide'
+SAVE_TO_INPUT_PATH_TEXT = 'Save to Input Path'
 SETTINGS_TEST_MODE_TEXT = 'Settings Test Mode'
 SHIFT_CONVERSION_PITCH_TEXT = 'Shift Conversion Pitch'
 SHIFTS_TEXT = 'Shifts'
@@ -1502,6 +1512,7 @@ STOP_DOWNLOAD_TEXT = 'Stop Download'
 SUPPORT_UVR_TEXT = 'Support UVR'
 TRY_MANUAL_DOWNLOAD_TEXT = 'Try Manual Download'
 UPDATE_FOUND_TEXT = 'Update Found'
+ROLLBACK_FOUND_TEXT = 'Roll Back'
 USER_DOWNLOAD_CODES_TEXT = 'User Download Codes'
 UVR_BUY_ME_A_COFFEE_LINK_TEXT = 'UVR \'Buy Me a Coffee\' Link'
 UVR_ERROR_LOG_TEXT = 'UVR Error Log'
@@ -1556,6 +1567,7 @@ ENSEMBLE_WARNING_NOT_ENOUGH_SHORT_TEXT = "Not Enough Models"
 ENSEMBLE_WARNING_NOT_ENOUGH_TEXT = "You must select 2 or more models to save an ensemble."
 NOT_ENOUGH_ERROR_TEXT = "Not enough files to process.\n"
 INVALID_FOLDER_ERROR_TEXT = 'Invalid Folder', 'Your given export path is not a valid folder!'
+INVALID_FOLDER_ERROR_UNWRITABLE_TEXT = 'Folder Not Writable', 'The provided directory is not writable or read only.'
 
 GET_DL_VIP_CODE_TEXT = ("Obtain codes by visiting one of the following links below."
                         "\nFrom there you can donate, pledge, "
@@ -1568,6 +1580,7 @@ PROCESS_STARTING_TEXT = 'Process starting... '
 PROCESS_STOPPED_BY_USER = '\n\nProcess stopped by user.'
 NEW_UPDATE_FOUND_TEXT = lambda version:f"\n\nNew Update Found: {version}\n\nClick the update button in the \"Settings\" menu to download and install!"
 ROLL_BACK_TEXT = 'Click Here to Roll Back'
+INPUT_DIR_FAIL_TEXT = 'Output path is not writable. Using default save path...\n'
 
 def secondary_stem(stem:str):
     """Determines secondary stem"""
@@ -1582,3 +1595,23 @@ def secondary_stem(stem:str):
         secondary_stem = stem.replace(NO_STEM, "") if NO_STEM in stem else f"{NO_STEM}{stem}"
     
     return secondary_stem
+
+def can_write_to_directory(directory_path):
+    # Convert to Path object for compatibility
+    path = Path(directory_path)
+    
+    # Check if the directory exists and is indeed a directory
+    if not path.exists() or not path.is_dir():
+        return False
+    
+    # Try to write a temporary file
+    try:
+        test_file = path / ".write_test.tmp"
+        with open(test_file, "w") as f:
+            f.write("test")
+        test_file.unlink()  # Clean up test file after successful write
+        return True
+    except (OSError, IOError) as e:
+        # If there's an OS or IO error, we assume we don't have write permission
+        print(f"Error: {e}")
+        return False

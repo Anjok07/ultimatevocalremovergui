@@ -526,6 +526,7 @@ class ModelData():
             self.mdx_segment_size = int(root.mdx_segment_size_var.get())
             self.get_mdx_model_path()
             self.get_model_hash()
+            print(self.model_hash)
             if self.model_hash:
                 self.model_hash_dir = os.path.join(MDX_HASH_DIR, f"{self.model_hash}.json")
                 if is_change_def:
@@ -554,8 +555,11 @@ class ModelData():
                                 
                                 if self.is_roformer and self.mdx_c_configs.training.target_instrument == VOCAL_STEM and self.is_ensemble_mode:
                                     self.mdxnet_stem_select = self.ensemble_primary_stem
+                                    
+                                if self.is_roformer and self.mdx_c_configs.training.target_instrument == INST_STEM and self.is_ensemble_mode:
+                                    self.mdxnet_stem_select = self.ensemble_primary_stem
                                 
-                                print("self.primary_stem target", self.primary_stem)
+                                #print("self.primary_stem target", self.primary_stem)
 
                             else:
                                 # If no specific target_instrument, use all instruments in the training config
@@ -583,10 +587,12 @@ class ModelData():
                         self.check_if_karaokee_model()
                         
 
-                    print("self.primary_stem final", self.primary_stem)
+                    #print("self.primary_stem final", self.primary_stem)
                     self.secondary_stem = secondary_stem(self.primary_stem)
                 else:
                     self.model_status = False
+                    
+                #print("self.mdxnet_stem_select", self.mdxnet_stem_select)
 
         if self.process_method == DEMUCS_ARCH_TYPE:
             self.is_secondary_model_activated = root.demucs_is_secondary_model_activate_var.get() if not is_secondary_model else False
@@ -1217,9 +1223,6 @@ class ComboBoxEditableMenu(ttk.Combobox):
         self.bind('<FocusIn>', self.focusin)
         self.bind('<FocusOut>', lambda e: self.var_validation(is_focus_only=True))
         self.bind('<MouseWheel>', lambda e: "break")
-        #self.bind('<MouseWheel>', lambda e: print("Scrolling"))
-        # self.bind('<Shift-MouseWheel>', lambda e: "break")
-        # self.bind('<Control-MouseWheel>', lambda e: "break")
 
         if is_macos:
             self.bind('<Enter>', lambda e:self.button_released())

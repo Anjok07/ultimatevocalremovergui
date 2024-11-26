@@ -134,9 +134,11 @@ class SeperateAttributes:
         self.primary_model_primary_stem = model_data.primary_model_primary_stem
         self.primary_stem_native = model_data.primary_stem_native
         self.primary_stem = model_data.primary_stem #
+        print(self.primary_stem)
         self.secondary_stem = model_data.secondary_stem #
         self.is_invert_spec = model_data.is_invert_spec #
         self.is_deverb_vocals = model_data.is_deverb_vocals
+        self.is_target_instrument = model_data.is_target_instrument
         self.is_mixer_mode = model_data.is_mixer_mode #
         self.secondary_model_scale = model_data.secondary_model_scale #
         self.is_demucs_pre_proc_model_inst_mix = model_data.is_demucs_pre_proc_model_inst_mix #
@@ -172,7 +174,7 @@ class SeperateAttributes:
         self.is_save_vocal_only = model_data.is_save_vocal_only
         self.device = cpu
         self.run_type = ['CPUExecutionProvider']
-        self.is_opencl = False
+        self.is_using_opencl = False
         self.device_set = model_data.device_set
         self.is_use_opencl = model_data.is_use_opencl
         #Roformer
@@ -198,6 +200,7 @@ class SeperateAttributes:
                 if directml_available and self.is_use_opencl:
                     self.device = torch_directml.device() if not device_prefix else f'{device_prefix}:{self.device_set}'
                     self.is_other_gpu = True
+                    self.is_using_opencl = True
                 elif cuda_available and not self.is_use_opencl:
                     self.device = CUDA_DEVICE if not device_prefix else f'{device_prefix}:{self.device_set}'
                     self.run_type = ['CUDAExecutionProvider']
@@ -214,8 +217,9 @@ class SeperateAttributes:
             
             if self.is_mdx_c:
                 if not self.is_4_stem_ensemble:
-                    self.primary_stem = model_data.ensemble_primary_stem if process_data['is_ensemble_master'] else model_data.primary_stem
-                    self.secondary_stem = model_data.ensemble_secondary_stem if process_data['is_ensemble_master'] else model_data.secondary_stem
+                    if not self.is_target_instrument:
+                        self.primary_stem = model_data.ensemble_primary_stem if process_data['is_ensemble_master'] else model_data.primary_stem
+                        self.secondary_stem = model_data.ensemble_secondary_stem if process_data['is_ensemble_master'] else model_data.secondary_stem
             else:
                 self.dim_f, self.dim_t = model_data.mdx_dim_f_set, 2**model_data.mdx_dim_t_set
                 
@@ -286,13 +290,10 @@ class SeperateAttributes:
                                    'aggr_correction': self.mp.param.get('aggr_correction')}
             
     def check_label_secondary_stem_runs(self):
-
-        # For ensemble master that's not a 4-stem ensemble, and not mdx_c
-        if self.process_data['is_ensemble_master'] and not self.is_4_stem_ensemble and not self.is_mdx_c:
+        if (self.process_data['is_ensemble_master'] and not self.is_4_stem_ensemble and not self.is_mdx_c) or (self.process_data['is_ensemble_master'] and self.is_target_instrument):
             if self.ensemble_primary_stem != self.primary_stem:
-                self.is_primary_stem_only, self.is_secondary_stem_only = self.is_secondary_stem_only, self.is_primary_stem_only
-            
-        # For secondary models
+                self.is_primary_stem_only, self.is_secondary_stem_only = self.is_secondary_stem_only, self.is_primary_stem_only   
+
         if self.is_pre_proc_model or self.is_secondary_model:
             self.is_primary_stem_only = False
             self.is_secondary_stem_only = False
@@ -695,10 +696,14 @@ class SeperateMDXC(SeperateAttributes):
                 if stem == VOCAL_STEM and not self.is_sec_bv_rebalance:
                     self.process_vocal_split_chain({VOCAL_STEM:stem})
         else:
+            print(stem_list)
             if len(stem_list) == 1:
                 source_primary = sources  
             else:
-                source_primary = sources[stem_list[0]] if self.is_multi_stem_ensemble and len(stem_list) == 2 else sources[self.mdxnet_stem_select]
+                if self.is_multi_stem_ensemble or len(stem_list) == 2:
+                    source_primary = sources[stem_list[0]]
+                else: 
+                    sources[self.mdxnet_stem_select]
                 
             if self.is_secondary_model_activated and self.secondary_model:
                 self.secondary_source_primary, self.secondary_source_secondary = process_secondary_model(self.secondary_model, 
@@ -748,7 +753,7 @@ class SeperateMDXC(SeperateAttributes):
             return secondary_sources
 
     def overlap_add(self, result, x, l, j, start, window):
-        if self.device == 'mps':
+        if self.device == 'mps' or self.is_other_gpu:
             x = x.to(self.device)
         result[..., start:start + l] += x[j][..., :l] * window[..., :l]
         return result
@@ -808,7 +813,7 @@ class SeperateMDXC(SeperateAttributes):
 
         batch_len = int(mix.shape[1] / step)
 
-        with torch.inference_mode():
+        with torch.no_grad() if self.is_using_opencl else torch.inference_mode():
             req_shape = (S, ) + tuple(mix.shape)
             result = torch.zeros(req_shape, dtype=torch.float32, device=device)
             counter = torch.zeros(req_shape, dtype=torch.float32, device=device)

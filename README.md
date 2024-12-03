@@ -142,26 +142,88 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 </details>
 
-### Linux Installation
+### Linux Installation (Updated Instructions)
 
 <details id="LinuxInstall">
   <summary>See Linux Installation Instructions</summary>
 
 <br />
-    
-**These install instructions are for Ubuntu 22.10.**
 
-- Download and save this repository [here](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip)
-- From the saved directory run the following commands in this order- 
+**These installation instructions are for Debian & Arch-based Linux systems.**
 
-```
+---
+
+#### **Step 1: Download the Repository**
+- Download and save this repository from [GitHub](https://github.com/Anjok07/ultimatevocalremovergui/archive/refs/heads/master.zip).
+- Extract the downloaded file to a directory of your choice.
+
+---
+
+#### **Step 2: Install Dependencies**
+Use the following commands based on your system type:
+
+**For Debian-based systems (Ubuntu, Mint, etc.):**
+```bash
 sudo apt update && sudo apt upgrade
-sudo apt-get update
-sudo apt install ffmpeg
-sudo apt install python3-pip
-sudo apt-get -y install python3-tk
-pip3 install -r requirements.txt
+sudo apt-get install -y ffmpeg python3-pip python3-tk
 ```
+
+**For Arch-based systems (EndeavourOS):**
+```bash
+sudo pacman -Syu
+sudo pacman -S ffmpeg python-pip tk
+```
+
+---
+
+#### **Step 3: Set Up a Virtual Environment (Recommended)**
+Setting up a virtual environment (venv) ensures that the program's dependencies do not interfere with system-wide Python packages.
+
+1. **Navigate to the extracted repository directory:**
+   ```bash
+   cd /path/to/ultimatevocalremovergui
+   ```
+
+2. **Create a virtual environment:**
+   ```bash
+   python3 -m venv venv
+   ```
+
+3. **Activate the virtual environment:**
+   - For **Debian-based and Arch-based systems:**
+     ```bash
+     source venv/bin/activate
+     ```
+
+4. **Install dependencies in the virtual environment:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+---
+
+#### **Step 4: Run the Application**
+While the virtual environment is activated, start the application:
+```bash
+python UVR.py
+```
+
+---
+
+#### **Important Notes**
+1. **Avoid Modifying System Files:**  
+   Previous instructions suggested deleting the `/usr/lib/python3.11/EXTERNALLY-MANAGED` file, which is dangerous and can break Python package management. Do **NOT** delete this file.
+
+2. **Why Use Virtual Environments?**  
+   Virtual environments isolate the program's dependencies, preventing conflicts with system Python packages. More information is available [here](https://stackoverflow.com/questions/75602063/pip-install-r-requirements-txt-is-failing-this-environment-is-externally-mana/75696359#75696359).
+
+3. **Known Issues and Discussions:**  
+   - [Issue #1578](https://github.com/Anjok07/ultimatevocalremovergui/issues/1578)  
+   - [Pull Request #1068](https://github.com/Anjok07/ultimatevocalremovergui/pull/1068)
+
+---
+
+If you encounter issues, refer to the [GitHub Issues](https://github.com/Anjok07/ultimatevocalremovergui/issues) page for help. 
 
 </details>
 

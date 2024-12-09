@@ -1,0 +1,100 @@
+exp:
+  dir: ./Exps
+  name: Apollo
+datas:
+  _target_: look2hear.datas.MusdbMoisesdbDataModule
+  train_dir: ./dataset/restoration/train
+  eval_dir: ./dataset/restoration/test
+  codec_type: mp3
+  codec_options:
+    bitrate: random
+    compression: random
+    complexity: random
+    vbr: random
+  sr: 44100
+  segments: 5.4
+  num_stems: 8
+  snr_range:
+  - -10
+  - 10
+  num_samples: 3000
+  batch_size: 1
+  num_workers: 8
+model:
+  _target_: look2hear.models.apollo.Apollo
+  sr: 44100
+  win: 20
+  feature_dim: 384
+  layer: 6
+discriminator:
+  _target_: look2hear.discriminators.frequencydis.MultiFrequencyDiscriminator
+  nch: 2
+  window:
+  - 32
+  - 64
+  - 128
+  - 256
+  - 512
+  - 1024
+  - 2048
+optimizer_g:
+  _target_: bitsandbytes.optim.AdamW8bit
+  lr: 0.001
+  weight_decay: 0.01
+optimizer_d:
+  _target_: bitsandbytes.optim.AdamW8bit
+  lr: 0.0001
+  weight_decay: 0.01
+  betas:
+  - 0.5
+  - 0.99
+scheduler_g:
+  _target_: torch.optim.lr_scheduler.StepLR
+  step_size: 4
+  gamma: 0.98
+scheduler_d:
+  _target_: torch.optim.lr_scheduler.StepLR
+  step_size: 4
+  gamma: 0.98
+loss_g:
+  _target_: look2hear.losses.gan_losses.MultiFrequencyGenLoss
+  eps: 2.0e-08
+loss_d:
+  _target_: look2hear.losses.gan_losses.MultiFrequencyDisLoss
+  eps: 2.0e-08
+metrics:
+  _target_: look2hear.losses.MultiSrcNegSDR
+  sdr_type: sisdr
+system:
+  _target_: look2hear.system.audio_litmodule.AudioLightningModule
+early_stopping:
+  _target_: pytorch_lightning.callbacks.EarlyStopping
+  monitor: val_loss
+  patience: 50
+  mode: min
+  verbose: true
+checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  dirpath: ${exp.dir}/${exp.name}/checkpoints
+  monitor: val_loss
+  mode: min
+  verbose: true
+  save_top_k: 5
+  save_last: true
+  filename: '{epoch}-{val_loss:.4f}'
+logger:
+  _target_: pytorch_lightning.loggers.WandbLogger
+  name: ${exp.name}
+  save_dir: ${exp.dir}/${exp.name}/logs
+  offline: true
+  project: Audio-Restoration
+trainer:
+  _target_: pytorch_lightning.Trainer
+  devices:
+  - 0
+  max_epochs: 500
+  sync_batchnorm: true
+  default_root_dir: ${exp.dir}/${exp.name}/
+  accelerator: cuda
+  limit_train_batches: 1.0
+  fast_dev_run: false

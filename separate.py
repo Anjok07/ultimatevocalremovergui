@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from UVR import ModelData
 
 if not is_macos:
-    import torch_directml
+    import torch_directml # type:ignore
 
 mps_available = torch.backends.mps.is_available() if is_macos else False
 cuda_available = torch.cuda.is_available()
@@ -174,9 +174,9 @@ class SeperateAttributes:
         self.is_save_vocal_only = model_data.is_save_vocal_only
         self.device = cpu
         self.run_type = ['CPUExecutionProvider']
-        self.is_using_opencl = False
+        self.is_using_directml = False
         self.device_set = model_data.device_set
-        self.is_use_opencl = model_data.is_use_opencl
+        self.is_use_directml = model_data.is_use_directml
         #Roformer
         self.roformer_config = model_data.mdx_c_configs
         self.is_roformer = model_data.is_roformer
@@ -195,13 +195,13 @@ class SeperateAttributes:
             else:
                 device_prefix = None
                 if self.device_set != DEFAULT:
-                    device_prefix = DIRECTML_DEVICE if self.is_use_opencl and directml_available else CUDA_DEVICE
+                    device_prefix = DIRECTML_DEVICE if self.is_use_directml and directml_available else CUDA_DEVICE
 
-                if directml_available and self.is_use_opencl:
+                if directml_available and self.is_use_directml:
                     self.device = torch_directml.device() if not device_prefix else f'{device_prefix}:{self.device_set}'
                     self.is_other_gpu = True
-                    self.is_using_opencl = True
-                elif cuda_available and not self.is_use_opencl:
+                    self.is_using_directml = True
+                elif cuda_available and not self.is_use_directml:
                     self.device = CUDA_DEVICE if not device_prefix else f'{device_prefix}:{self.device_set}'
                     self.run_type = ['CUDAExecutionProvider']
 
@@ -324,6 +324,10 @@ class SeperateAttributes:
     def running_inference_progress_bar(self, length, is_match_mix=False):
         if not is_match_mix:
             self.progress_value += 1
+
+            # Avoid division by zero
+            if length <= 0:
+                length = 1
 
             if (0.8/length*self.progress_value) >= 0.8:
                 length = self.progress_value + 1
@@ -813,7 +817,7 @@ class SeperateMDXC(SeperateAttributes):
 
         batch_len = int(mix.shape[1] / step)
 
-        with torch.no_grad() if self.is_using_opencl else torch.inference_mode():
+        with torch.no_grad() if self.is_using_directml else torch.inference_mode():
             req_shape = (S, ) + tuple(mix.shape)
             result = torch.zeros(req_shape, dtype=torch.float32, device=device)
             counter = torch.zeros(req_shape, dtype=torch.float32, device=device)

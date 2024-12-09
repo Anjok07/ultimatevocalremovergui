@@ -12,6 +12,7 @@ is_macos = False
 CPU = 'cpu'
 CUDA_DEVICE = 'cuda'
 DIRECTML_DEVICE = "privateuseone"
+MPS_DEVICE = "mps"
 
 #MAIN_FONT_NAME = "Century Gothic"
 OPT_SEPARATOR_SAVE = '─'*13
@@ -78,6 +79,7 @@ DOWNLOADING_ITEM = 'Downloading Item'
 FILE_EXISTS = 'File already exists!'
 DOWNLOADING_UPDATE = 'Downloading Update...'
 DOWNLOAD_MORE = 'Download More Models'
+OPEN_MODELS_FOLDER = 'Open Model Folder'
 IS_KARAOKEE = "is_karaoke"
 IS_BV_MODEL = "is_bv_model"
 IS_BV_MODEL_REBAL = "is_bv_model_rebalanced"
@@ -114,6 +116,7 @@ VIP_REPO = b'\xf3\xc2W\x19\x1foI)\xc2\xa9\xcc\xb67(Z\xf5',\
 NO_CODE = 'incorrect_code'
 
 #Extensions
+BIN_EXT = '.bin'
 ONNX = '.onnx'
 CKPT = '.ckpt'
 CKPT_C = '.ckptc'
@@ -345,10 +348,12 @@ TIME_STRETCH = 'Time Stretch'
 CHANGE_PITCH = 'Change Pitch'
 ALIGN_INPUTS = 'Align Inputs'
 MATCH_INPUTS = 'Matchering'
+PHASE_REPAIR = 'Phase Swapper'
+APOLLO_RESTORE = 'Apollo Restore'
 COMBINE_INPUTS = 'Combine Inputs'
 
 if OPERATING_SYSTEM == 'Windows' or OPERATING_SYSTEM == 'Darwin':  
-   AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, TIME_STRETCH, CHANGE_PITCH, ALIGN_INPUTS, MATCH_INPUTS)
+   AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, TIME_STRETCH, CHANGE_PITCH, ALIGN_INPUTS, MATCH_INPUTS, APOLLO_RESTORE, PHASE_REPAIR)
 else:
    AUDIO_TOOL_OPTIONS = (MANUAL_ENSEMBLE, ALIGN_INPUTS, MATCH_INPUTS)
 
@@ -374,7 +379,14 @@ NOUT_LSTM_SEL = (64, 128)
 DEMUCS_OVERLAP = (0.25, 0.50, 0.75, 0.99)
 MDX_OVERLAP = (DEF_OPT, 0.25, 0.50, 0.75, 0.99)
 MDX23_OVERLAP = range(2, 51)
+APOLLO_OVERLAP = range(0, 51)
 VR_AGGRESSION = range(0, 51)
+APOLLO_CHUNK = range(1, 51)
+
+PHASH_FIXER_MAPPER = {
+            "Swap Phase": [False, True],
+            "Swap Magnatude": [True, False]
+}
 
 TIME_WINDOW_MAPPER = {
             "None": None,
@@ -505,7 +517,7 @@ WAV = 'WAV'
 FLAC = 'FLAC'
 MP3 = 'MP3'
 
-MP3_BIT_RATES = ('96k', '128k', '160k', '224k', '256k', '320k')
+MP3_BIT_RATES = ('32k', '48k', '64k', '96k', '128k', '160k', '224k', '256k', '320k')
 WAV_TYPE = ('PCM_U8', 'PCM_16', 'PCM_24', 'PCM_32', '32-bit Float', '64-bit Float')
 GPU_DEVICE_NUM_OPTS = (DEFAULT, '0', '1', '2', '3', '4', '5', '6', '7', '8')
 
@@ -516,6 +528,10 @@ RESET_FULL_TO_DEFAULT = 'Reset to Default'
 RESET_PM_TO_DEFAULT = 'Reset All Application Settings to Default'
 
 SAVE_SET_OPTIONS = [OPT_SEPARATOR_SAVE, SAVE_SETTINGS, RESET_TO_DEFAULT]
+
+
+PHASE_LOW_CUT = ('500', '700')
+PHASE_HIGH_CUT = ('5000', '7000')
 
 TIME_PITCH = ('1.0', '2.0', '3.0', '4.0')
 TIME_TEXT = '_time_stretched'
@@ -534,6 +550,8 @@ REG_SAVE_INPUT = r'\b^([a-zA-Z0-9 -]{0,25})$\b'
 REG_INPUT_STEM_NAME = r'^(Wind Inst|[a-zA-Z]{1,25})$'
 REG_SEMITONES = r'^-?(20\.00|[01]?\d(\.\d{1,2})?|20)$'
 REG_AGGRESSION = r'^[-+]?[0-9]\d*?$'
+REG_CHUNK_APO = r'^[1-9]\d*$'
+REG_OVERLAP_APO = r'^[0-9]\d*$'
 REG_WINDOW = r'\b^[0-9]{0,4}$\b'
 REG_SHIFTS = r'\b^[0-9]*$\b'
 REG_BATCHES = r'\b^([0-9]*?|Default)$\b'
@@ -633,6 +651,9 @@ DEFAULT_DATA = {
         'mdx_stems': ALL_STEMS,
         'is_save_all_outputs_ensemble': True,
         'is_append_ensemble_name': False,
+        'apollo_overlap': '5',
+        'apollo_chunk_size': '10',
+        'apollo_model': CHOOSE_MODEL,
         'chosen_audio_tool': AUDIO_TOOL_OPTIONS[0],
         'choose_algorithm': MANUAL_ENSEMBLE_OPTIONS[0],
         'time_stretch_rate': 2.0,
@@ -648,7 +669,7 @@ DEFAULT_DATA = {
         'is_save_to_input_path': False,
         'is_task_complete': False,
         'is_normalization': False,
-        'is_use_opencl': False,
+        'is_use_directml': False,
         'is_wav_ensemble': False,
         'is_create_model_folder': False,
         'mp3_bit_set': '320k',#
@@ -662,6 +683,8 @@ DEFAULT_DATA = {
         'input_paths': [],
         'lastDir': None,
         'time_window': "3",
+        'phase_low_cutoff': "500",
+        'phase_high_cutoff': "5000",
         'intro_analysis': DEFAULT,
         'db_analysis': "Medium",
         'fileOneEntry': '',
@@ -760,6 +783,9 @@ SETTING_CHECK = ('vr_model',
                'is_testing_audio',#
                'is_auto_update_model_params',#
                'is_add_model_name',
+               'apollo_overlap',
+               'apollo_chunk_size',
+               'apollo_model',
                "is_accept_any_input",
                'last_export_path',
                "is_save_to_input_path",
@@ -773,7 +799,7 @@ SETTING_CHECK = ('vr_model',
                'user_code',
                'is_gpu_conversion',
                'is_normalization',
-               'is_use_opencl',
+               'is_use_directml',
                'is_wav_ensemble',
                'help_hints_var',
                'set_vocal_splitter',
@@ -781,6 +807,8 @@ SETTING_CHECK = ('vr_model',
                'is_save_inst_set_vocal_splitter',#
                'model_sample_mode',
                'model_sample_mode_duration',
+               'phase_low_cutoff',
+               'phase_high_cutoff',
                'time_window',
                'intro_analysis',
                'db_analysis',
@@ -946,6 +974,11 @@ MDX_SEGMENT_SIZE_HELP = ('Pick a segment size to balance speed, resource use, an
                          '• Smaller sizes consume less resources.\n'
                          '• Bigger sizes consume more resources, but may provide better results.\n'
                          '• Default size is 256. Quality can change based on your pick.')
+
+APOLLO_CHUNK_SIZE_HELP = ('Pick a chunk size to balance speed, resource use, and quality:\n'
+                         '• Smaller sizes consume less resources.\n'
+                         '• Bigger sizes consume more resources, but may provide better results.\n'
+                         '• Default size is 10. Quality can change based on your pick.')
 DEMUCS_STEMS_HELP = ('Select a stem for extraction with the chosen model:\n\n'
                      '• All Stems - Extracts all available stems.\n'
                      '• Vocals - Only the "vocals" stem.\n'
@@ -1034,6 +1067,8 @@ else:
 IS_TIME_CORRECTION_HELP = ('When checked, the output will retain the original BPM of the input.')
 SAVE_STEM_ONLY_HELP = 'Allows the user to save only the selected stem.'
 IS_NORMALIZATION_HELP = 'Normalizes output to prevent clipping.'
+IS_DIRECTML_HELP = ('• Utilizes DirectML instead of CUDA when checked. This option is useful for non-Nvidia GPU\'s.\n'
+                    '       - This option is experimental and may not work correctly with some networks.')
 IS_CUDA_SELECT_HELP = "If you have more than one GPU, you can pick which one to use for processing."
 CROP_SIZE_HELP = '**Only compatible with select models only!**\n\n Setting should match training crop-size value. Leave as is if unsure.'
 IS_TTA_HELP = ('This option performs Test-Time-Augmentation to improve the separation quality.\n\n'
@@ -1160,6 +1195,11 @@ FORMAT_SETTING_HELP = 'Save Outputs As: '
 SECONDARY_MODEL_ACTIVATE_HELP = (
     'When enabled, the application will perform an additional inference using the selected model(s) above.'
 )
+
+CHOOSE_APOLLO_MODEL_HELP = (
+    'Choose the Apollo model to use to restore audio.'
+)
+
 SECONDARY_MODEL_HELP = (
     'Choose the Secondary Model:\n'
     'Select the secondary model associated with the stem you want to process with the current method.'
@@ -1195,7 +1235,10 @@ AUDIO_TOOLS_HELP = (
     '    - This tool provides similar functionality to "Utagoe."\n'
     '    - Primary Audio: This is usually a mixture.\n'
     '    - Secondary Audio: This is usually an instrumental.\n'
-    '• Matchering: Choose 2 audio files. The matchering algorithm will master the target audio to have the same RMS, FR, peak amplitude, and stereo width as the reference audio.'
+    '• Matchering: Choose 2 audio files. The matchering algorithm will master the target audio to have the same RMS, FR, peak amplitude, and stereo width as the reference audio.\n'
+    '• Apollo Restore: Apollo is a music restoration AI that fixes distortions and artifacts from audio codecs, especially at low bitrates. It effectively restores MP3s at 32 kbps and above, improving audio quality across compression levels.\n'
+    #'    - It effectively restores MP3s at 32 kbps and above, improving audio quality across compression levels.\n'
+    '• Phase Swapper: Choose 2 audio files. The phase of the reference audio is applied to the target audio.'
 )
              
 PRE_PROC_MODEL_INST_MIX_HELP = 'When enabled, the application will generate a third output without the selected stem and vocals.'         
@@ -1214,6 +1257,11 @@ BATCH_SIZE_HELP = ('Specify the number of batches to be processed at a time.\n\n
          
 VR_MODEL_NOUT_HELP = ""
 VR_MODEL_NOUT_LSTM_HELP = ""
+  
+  
+PHASE_LOW_HELP = 'Select where to cut off phase correction on the low end.'
+PHASE_HIGH_HELP = 'Select where to cut off phase correction on the high end.'
+#IS_PHASE_HELP = 'Select the phase for the secondary audio.\n• Note: Using the "Automatic" option is strongly recommended.'
   
 IS_PHASE_HELP = 'Select the phase for the secondary audio.\n• Note: Using the "Automatic" option is strongly recommended.'
 IS_ALIGN_TRACK_HELP = 'Enable this to save the secondary track once aligned.'
@@ -1352,6 +1400,7 @@ SEGMENT_MDX_MAIN_LABEL = 'SEGMENT SIZE'
 SELECT_VR_MODEL_MAIN_LABEL = 'CHOOSE VR MODEL'
 AGGRESSION_SETTING_MAIN_LABEL = 'AGGRESSION SETTING'
 WINDOW_SIZE_MAIN_LABEL = 'WINDOW SIZE'
+CHOOSE_APOLLO_MODEL_MAIN_LABEL = 'CHOOSE APOLLO MODEL'
 CHOOSE_DEMUCS_MODEL_MAIN_LABEL = 'CHOOSE DEMUCS MODEL'
 CHOOSE_STEMS_MAIN_LABEL = 'CHOOSE STEM(S)'
 CHOOSE_SEGMENT_MAIN_LABEL = 'SEGMENT'
@@ -1378,6 +1427,15 @@ FILE_TWO_MATCH_MAIN_LABEL = "REFERENCE AUDIO"
 TIME_WINDOW_MAIN_LABEL = "TIME ADJUSTMENT"
 INTRO_ANALYSIS_MAIN_LABEL = "INTRO ANALYSIS"
 VOLUME_ADJUSTMENT_MAIN_LABEL = "VOLUME ADJUSTMENT"
+
+APOLLO_OVERLAP_MAIN_LABEL = 'OVERLAP'
+APOLLO_CHUNK_MAIN_LABEL = 'CHUNK SIZE'
+#WINDOW_SIZE_MAIN_LABEL = 'WINDOW SIZE'
+
+PHASE_OPT_MAIN_LABEL = "Swap Option"
+PHASE_LOW_MAIN_LABEL = "LOW CUTOFF (HZ)"
+PHASE_HIGH_MAIN_LABEL = "HIGH CUTOFF (HZ)"
+
 SELECT_INPUTS = "Select Input(s)"
 SELECTED_INPUTS = 'Selected Inputs'
 WIDEN_BOX = 'Widen Box'
@@ -1450,6 +1508,7 @@ ROFORMER_MODEL_TEXT = 'Roformer Model'
 MANUAL_DOWNLOADS_TEXT = 'Manual Downloads'
 MATCH_FREQ_CUTOFF_TEXT = 'Match Freq Cut-off'
 MDXNET_C_MODEL_PARAMETERS_TEXT = 'MDX-Net C Model Parameters'
+APOLLO_MODEL_PARAMETERS_TEXT = 'Apollo Model Parameters'
 MDXNET_MODEL_SETTINGS_TEXT = 'MDX-Net Model Settings'
 MDXNET_TEXT = 'MDX-Net'
 MODEL_PARAMETERS_CHANGED_TEXT = 'Model Parameters Changed'
@@ -1460,7 +1519,7 @@ NAME_SETTINGS_TEXT = 'Name Settings'
 NO_DEFINED_PARAMETERS_FOUND_TEXT = 'No Defined Parameters Found'
 NO_TEXT = 'No'
 NORMALIZE_OUTPUT_TEXT = 'Normalize Output'
-USE_OPENCL_TEXT = 'Use OpenCL'
+USE_DIRECTML_TEXT = 'Use DirectML'
 NOT_ENOUGH_MODELS_TEXT = 'Not Enough Models'
 NOTIFICATION_CHIMES_TEXT = 'Notification Chimes'
 OPEN_APPLICATION_DIRECTORY_TEXT = 'Open Application Directory'
@@ -1577,6 +1636,9 @@ ERROR_LOADING_FILE_TEXT = 'Error Loading the Following File', 'Raw Error Details
 LOADING_MODEL_TEXT = 'Loading model'
 FULL_APP_SET_TEXT = 'Full Application Settings'
 PROCESS_STARTING_TEXT = 'Process starting... '
+
+APOLLO_MODEL_FAIL_TEXT = 'Apollo model not valid.\n'
+
 PROCESS_STOPPED_BY_USER = '\n\nProcess stopped by user.'
 NEW_UPDATE_FOUND_TEXT = lambda version:f"\n\nNew Update Found: {version}\n\nClick the update button in the \"Settings\" menu to download and install!"
 ROLL_BACK_TEXT = 'Click Here to Roll Back'

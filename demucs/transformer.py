@@ -19,6 +19,22 @@ from einops import rearrange
 def create_sin_embedding(
     length: int, dim: int, shift: int = 0, device="cpu", max_period=10000
 ):
+    """
+    Create a sinusoidal embedding for a given length and dimension.
+
+    This function generates a sequence of sinusoidal values by computing the cosine and sine
+    of a phase value based on the position. The resulting sinusoidal embedding is returned as a tensor.
+
+    Parameters:
+        length (int): The length of the embedding.
+        dim (int): The dimension of the embedding.
+        shift (int, optional): The shift value for the position. Default is 0.
+        device (str, optional): The device to use. Default is 'cpu'.
+        max_period (int, optional): The maximum period for the phase value. Default is 10000.
+
+    Returns:
+        torch.Tensor: The sinusoidal embedding.
+    """
     # We aim for TBC format
     assert dim % 2 == 0
     pos = shift + torch.arange(length, device=device).view(-1, 1, 1)
@@ -36,10 +52,17 @@ def create_sin_embedding(
 
 def create_2d_sin_embedding(d_model, height, width, device="cpu", max_period=10000):
     """
-    :param d_model: dimension of the model
-    :param height: height of the positions
-    :param width: width of the positions
-    :return: d_model*height*width position matrix
+    Create a d_model*height*width position matrix for sinusoidal positional encoding.
+
+    Parameters:
+        d_model (int): Dimension of the model.
+        height (int): Height of the positions.
+        width (int): Width of the positions.
+        device (str, optional): Device to use (default is "cpu").
+        max_period (int, optional): Maximum period (default is 10000).
+
+    Returns:
+        torch.Tensor: d_model*height*width position matrix.
     """
     if d_model % 4 != 0:
         raise ValueError(
@@ -82,6 +105,35 @@ def create_sin_embedding_cape(
     device: str = "cpu",
     max_period: float = 10000.0,
 ):
+    """
+    Create a sinusoidal embedding cape.
+
+    This function takes in various parameters such as length, dim, batch_size,
+    mean_normalize, augment, max_global_shift, max_local_shift, max_scale, device,
+    and max_period. The function first checks if dim is divisible by 2. Then it
+    creates a position tensor based on the length and batch_size parameters. If
+    mean_normalize is True, it subtracts the mean of the position tensor. If
+    augment is True, it adds random shifts and scales to the position tensor.
+    Finally, it calculates the phase tensor and returns the concatenation of the
+    cosine and sine tensors.
+
+    Parameters:
+        length (int): The length of the embedding cape.
+        dim (int): The dimension of the embedding cape.
+        batch_size (int): The batch size of the embedding cape.
+        mean_normalize (bool): Whether to mean normalize the position tensor.
+        augment (bool): Whether to augment the position tensor.
+        max_global_shift (float, optional): The maximum global shift value.
+            Defaults to 0.0.
+        max_local_shift (float, optional): The maximum local shift value.
+            Defaults to 0.0.
+        max_scale (float, optional): The maximum scale value. Defaults to 1.0.
+        device (str, optional): The device to use. Defaults to 'cpu'.
+        max_period (float, optional): The maximum period value. Defaults to 10000.0.
+
+    Returns:
+        torch.Tensor: The sinusoidal embedding cape.
+    """
     # We aim for TBC format
     assert dim % 2 == 0
     pos = 1.0 * torch.arange(length).view(-1, 1, 1)  # (length, 1, 1)
@@ -116,6 +168,17 @@ def create_sin_embedding_cape(
 
 
 def get_causal_mask(length):
+    """
+    Get a causal mask.
+
+    This function generates a causal mask based on the length parameter.
+
+    Parameters:
+        length (int): The length of the causal mask.
+
+    Returns:
+        torch.Tensor: The causal mask.
+    """
     pos = torch.arange(length)
     return pos > pos[:, None]
 
@@ -133,6 +196,19 @@ def get_elementary_mask(
     """
     When the input of the Decoder has length T1 and the output T2
     The mask matrix has shape (T2, T1)
+
+    Parameters:
+        T1 (int): Length of the input.
+        T2 (int): Length of the output.
+        mask_type (str): Type of the mask ('diag', 'jmask', 'random', 'global').
+        sparse_attn_window (int): Sparse attention window size for 'diag' mask.
+        global_window (int): Global attention window size for 'global' mask.
+        mask_random_seed (int): Random seed for 'random' mask.
+        sparsity (float): Sparsity value for 'random' mask.
+        device: Device on which to generate the mask.
+
+    Returns:
+        torch.Tensor: Generated mask matrix.
     """
     assert mask_type in ["diag", "jmask", "random", "global"]
 
@@ -249,6 +325,15 @@ class LayerScale(nn.Module):
         self.scale.data[:] = init
 
     def forward(self, x):
+        """
+        Forward pass of the layer scale module.
+
+        Parameters:
+            x: The input tensor.
+
+        Returns:
+            The scaled tensor.
+        """
         if self.channel_last:
             return self.scale * x
         else:
@@ -261,14 +346,22 @@ class MyGroupNorm(nn.GroupNorm):
 
     def forward(self, x):
         """
-        x: (B, T, C)
+        Forward pass of the MyGroupNorm module.
+
         if num_groups=1: Normalisation on all T and C together for each B
+
+        Parameters:
+            x: The input tensor (B, T, C).
+
+        Returns:
+            The normalized tensor.
         """
         x = x.transpose(1, 2)
         return super().forward(x).transpose(1, 2)
 
 
 class MyTransformerEncoderLayer(nn.TransformerEncoderLayer):
+    """Subclass of nn.TransformerEncoderLayer with additional functionality and customization options."""
     def __init__(
         self,
         d_model,
@@ -293,6 +386,31 @@ class MyTransformerEncoderLayer(nn.TransformerEncoderLayer):
         sparsity=0.95,
         batch_first=False,
     ):
+        """Initialize a MyTransformerEncoderLayer instance with the specified parameters.
+
+        Args:
+            d_model (int): Dimensionality of the input features.
+            nhead (int): Number of attention heads.
+            dim_feedforward (int, optional): Dimension of the feedforward network. Defaults to 2048.
+            dropout (float, optional): Dropout probability. Defaults to 0.1.
+            activation (torch.nn.functional, optional): Activation function. Defaults to F.relu.
+            group_norm (int, optional): Number of groups for group normalization. Defaults to 0.
+            norm_first (bool, optional): Whether to apply normalization before the self-attention layer. Defaults to False.
+            norm_out (bool, optional): Whether to apply normalization after the self-attention layer. Defaults to False.
+            layer_norm_eps (float, optional): Epsilon value for layer normalization. Defaults to 1e-5.
+            layer_scale (bool, optional): Whether to use layer scale. Defaults to False.
+            init_values (float, optional): Initialization values for layer scale. Defaults to 1e-4.
+            device (torch.device, optional): Device to store tensors. Defaults to None.
+            dtype (torch.dtype, optional): Data type of tensors. Defaults to None.
+            sparse (bool, optional): Whether to use sparse attention. Defaults to False.
+            mask_type (str, optional): Type of mask to apply in sparse attention. Defaults to "diag".
+            mask_random_seed (int, optional): Random seed for mask generation. Defaults to 42.
+            sparse_attn_window (int, optional): Attention window size for sparse attention. Defaults to 500.
+            global_window (int, optional): Global attention window size. Defaults to 50.
+            auto_sparsity (bool, optional): Whether to use automatic sparsity. Defaults to False.
+            sparsity (float, optional): Sparsity value for automatic sparsity. Defaults to 0.95.
+            batch_first (bool, optional): Whether the input is batch-first. Defaults to False.
+        """
         factory_kwargs = {"device": device, "dtype": dtype}
         super().__init__(
             d_model=d_model,
@@ -340,6 +458,14 @@ class MyTransformerEncoderLayer(nn.TransformerEncoderLayer):
         """
         if batch_first = False, src shape is (T, B, C)
         the case where batch_first=True is not covered
+
+        Parameters:
+            src (Tensor): The input tensor of shape (T, B, C).
+            src_mask (Tensor, optional): The mask tensor for the input. Default is None.
+            src_key_padding_mask (Tensor, optional): The padding mask tensor for the input. Default is None.
+
+        Returns:
+            Tensor: The modified input tensor after applying self-attention and feed-forward blocks.
         """
         device = src.device
         x = src
@@ -508,10 +634,31 @@ class CrossTransformerEncoderLayer(nn.Module):
 
     # feed forward block
     def _ff_block(self, x):
+        """
+        Perform a feedforward operation using two linear layers, dropout, and an activation function.
+
+        Args:
+            x: The input tensor.
+
+        Returns:
+            The output tensor after the feedforward operation.
+        """
         x = self.linear2(self.dropout(self.activation(self.linear1(x))))
         return self.dropout2(x)
 
     def _get_activation_fn(self, activation):
+        """
+        Get the activation function based on the provided activation name.
+
+        Args:
+            activation: The name of the activation function (relu or gelu).
+
+        Returns:
+            The corresponding activation function.
+
+        Raises:
+            RuntimeError: If the provided activation name is not 'relu' or 'gelu'.
+        """
         if activation == "relu":
             return F.relu
         elif activation == "gelu":
@@ -524,6 +671,9 @@ class CrossTransformerEncoderLayer(nn.Module):
 
 
 class CrossTransformerEncoder(nn.Module):
+    """
+    Class representing a multi-block model for encoding sequences.
+    """
     def __init__(
         self,
         dim: int,
@@ -646,6 +796,17 @@ class CrossTransformerEncoder(nn.Module):
                 )
 
     def forward(self, x, xt):
+        """
+        Forward pass of the model.
+
+        Args:
+            x (torch.Tensor): Input tensor of shape (B, C, Fr, T1).
+            xt (torch.Tensor): Input tensor of shape (B, C, T2).
+
+        Returns:
+            torch.Tensor: Output tensor of shape (B, C, Fr, T1).
+            torch.Tensor: Output tensor of shape (B, C, T2).
+        """
         B, C, Fr, T1 = x.shape
         pos_emb_2d = create_2d_sin_embedding(
             C, Fr, T1, x.device, self.max_period
@@ -676,6 +837,28 @@ class CrossTransformerEncoder(nn.Module):
         return x, xt
 
     def _get_pos_embedding(self, T, B, C, device):
+        """
+        Private helper method to generate positional embeddings.
+
+        This method takes in several parameters including the sequence length (T), batch size (B),
+        number of channels (C), and the device on which to create the embeddings. It first checks
+        the value of the 'emb' attribute and based on its value, it creates positional embeddings using
+        different methods. If 'emb' is set to 'sin', it calls the 'create_sin_embedding' function to
+        generate sinusoidal embeddings with a random shift. If 'emb' is set to 'cape', it calls the
+        'create_sin_embedding_cape' function to generate CAPE (Contextualized and Positional Embeddings)
+        embeddings. The method also handles different cases for training and inference. If 'emb' is set
+        to 'scaled', it uses the 'position_embeddings' attribute to generate scaled embeddings based on
+        the sequence length. The method returns the positional embeddings.
+
+        Parameters:
+            T (int): The sequence length.
+            B (int): The batch size.
+            C (int): The number of channels.
+            device: The device on which to create the embeddings.
+
+        Returns:
+            Tensor: The positional embeddings.
+        """
         if self.emb == "sin":
             shift = random.randrange(self.sin_random_shift + 1)
             pos_emb = create_sin_embedding(
@@ -713,6 +896,17 @@ class CrossTransformerEncoder(nn.Module):
         return pos_emb
 
     def make_optim_group(self):
+        """
+        Create an optimization group for the object.
+
+        This function returns a dictionary representing the optimization group for the object. The dictionary contains the following keys:
+        - 'params': A list of the parameters of the object.
+        - 'weight_decay': The weight decay value of the object.
+        - 'lr' (optional): The learning rate value of the object, if available.
+
+        Returns:
+            dict: A dictionary representing the optimization group.
+        """
         group = {"params": list(self.parameters()), "weight_decay": self.weight_decay}
         if self.lr is not None:
             group["lr"] = self.lr
@@ -723,6 +917,9 @@ class CrossTransformerEncoder(nn.Module):
 
 
 class MultiheadAttention(nn.Module):
+    """
+    This class implements a multi-head attention mechanism.
+    """
     def __init__(
         self,
         embed_dim,
@@ -758,6 +955,23 @@ class MultiheadAttention(nn.Module):
         attn_mask=None,
         average_attn_weights=True,
     ):
+        """
+        Perform a forward pass through the transformer layer.
+
+        This function takes several inputs, including 'query', 'key', and 'value' tensors, and performs operations such as matrix permutation, reshaping, and transpose. The result is a tensor 'x' that is passed through a projection layer and returned as the output of the forward pass.
+
+        Parameters:
+            query (Tensor): The query tensor.
+            key (Tensor): The key tensor.
+            value (Tensor): The value tensor.
+            key_padding_mask (Tensor, optional): The key padding mask tensor.
+            need_weights (bool, optional): Whether to compute attention weights.
+            attn_mask (Tensor, optional): The attention mask tensor.
+            average_attn_weights (bool, optional): Whether to average attention weights.
+
+        Returns:
+            Tuple[Tensor, None]: The output tensor 'x'.
+        """
 
         if not self.batch_first:  # N, B, C
             query = query.permute(1, 0, 2)  # B, N_q, C
@@ -801,6 +1015,21 @@ class MultiheadAttention(nn.Module):
 
 
 def scaled_query_key_softmax(q, k, att_mask):
+    """
+    Compute scaled query-key softmax attention scores.
+
+    This function divides the query vectors by the square root of the key vector size,
+    applies a masked matrix multiplication with transpose of key vectors and an attention mask,
+    and then applies a softmax function to obtain the attention weights.
+
+    Args:
+        q: The query vectors.
+        k: The key vectors.
+        att_mask: The attention mask.
+
+    Returns:
+        The attention weights.
+    """
     from xformers.ops import masked_matmul
     q = q / (k.size(-1)) ** 0.5
     att = masked_matmul(q, k.transpose(-2, -1), att_mask)
@@ -809,6 +1038,23 @@ def scaled_query_key_softmax(q, k, att_mask):
 
 
 def scaled_dot_product_attention(q, k, v, att_mask, dropout):
+    """
+    Compute scaled dot product attention.
+
+    This function calculates the attention weights using the scaled_query_key_softmax function,
+    applies dropout to the attention weights, and performs a matrix multiplication
+    between the attention weights and value vectors to obtain the attended output.
+
+    Args:
+        q: The query vectors.
+        k: The key vectors.
+        v: The value vectors.
+        att_mask: The attention mask.
+        dropout: The dropout layer.
+
+    Returns:
+        The attended output.
+    """
     att = scaled_query_key_softmax(q, k, att_mask=att_mask)
     att = dropout(att)
     y = att @ v
@@ -816,6 +1062,19 @@ def scaled_dot_product_attention(q, k, v, att_mask, dropout):
 
 
 def _compute_buckets(x, R):
+    """
+    Compute bucket indices based on input and projection matrices.
+
+    This function performs an einsum operation to calculate the product of input and projection matrices,
+    concatenates the positive and negative values along the last dimension, and finds the argmax along that dimension.
+
+    Args:
+        x: The input matrix.
+        R: The projection matrix.
+
+    Returns:
+        The bucket indices.
+    """
     qq = torch.einsum('btf,bfhi->bhti', x, R)
     qq = torch.cat([qq, -qq], dim=-1)
     buckets = qq.argmax(dim=-1)
@@ -824,6 +1083,23 @@ def _compute_buckets(x, R):
 
 
 def dynamic_sparse_attention(query, key, value, sparsity, infer_sparsity=True, attn_bias=None):
+    """
+    Compute dynamic sparse attention.
+
+    This function implements a custom sparse attention mechanism using randomly generated projections,
+    bucketing, and memory efficient attention.
+
+    Args:
+        query: The query vectors.
+        key: The key vectors.
+        value: The value vectors.
+        sparsity: The desired sparsity level.
+        infer_sparsity: Whether to infer sparsity based on the input size.
+        attn_bias: The attention bias.
+
+    Returns:
+        The attended output.
+    """
     # assert False, "The code for the custom sparse kernel is not ready for release yet."
     from xformers.ops import find_locations, sparse_memory_efficient_attention
     n_hashes = 32

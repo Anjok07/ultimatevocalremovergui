@@ -9,6 +9,20 @@ import torch as th
 
 
 def spectro(x, n_fft=512, hop_length=None, pad=0):
+    """
+    Perform Short-Time Fourier Transform (STFT) on the input signal 'x'.
+
+    This function computes the STFT of the input signal using the provided parameters.
+
+    Parameters:
+        x (torch.Tensor): The input signal.
+        n_fft (int): The number of FFT points.
+        hop_length (int): The number of samples between successive frames.
+        pad (int): The amount of padding to apply to the signal.
+
+    Returns:
+        torch.Tensor: The spectrogram of the input signal.
+    """
     *other, length = x.shape
     x = x.reshape(-1, length)
     
@@ -31,6 +45,20 @@ def spectro(x, n_fft=512, hop_length=None, pad=0):
 
 
 def ispectro(z, hop_length=None, length=None, pad=0):
+    """
+    Perform inverse Short-Time Fourier Transform (iSTFT) on the input spectrogram 'z'.
+
+    This function computes the inverse STFT of the input spectrogram using the provided parameters.
+
+    Parameters:
+        z (torch.Tensor): The input spectrogram.
+        hop_length (int): The number of samples between successive frames.
+        length (int): The desired length of the output signal.
+        pad (int): The amount of padding to apply to the signal.
+
+    Returns:
+        torch.Tensor: The inverse STFT of the input spectrogram.
+    """
     *other, freqs, frames = z.shape
     n_fft = 2 * freqs - 2
     z = z.view(-1, freqs, frames)

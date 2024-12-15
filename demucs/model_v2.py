@@ -41,22 +41,39 @@ def rescale_module(module, reference):
             rescale_conv(sub, reference)
 
 def auto_load_demucs_model_v2(sources, demucs_model_name):
-    
+    """
+    Load a Demucs model based on the specified sources and model name.
+
+    This function takes in two parameters:
+        sources: A list of sources to separate.
+        demucs_model_name: The name of the Demucs model to load.
+
+    The function first checks the value of 'demucs_model_name' to determine the value of the 'channels' variable. If '48' is present in 'demucs_model_name', 'channels' is set to 48. If 'unittest' is present in 'demucs_model_name', 'channels' is set to 4. Otherwise, 'channels' is set to 64.
+
+    Next, the function checks if 'tasnet' is present in 'demucs_model_name'. If so, it initializes 'init_demucs_model' using the 'ConvTasNet' class with the 'sources' parameter and X=10. Otherwise, it initializes 'init_demucs_model' using the 'Demucs' class with the 'sources' and 'channels' parameters.
+
+    Finally, the function returns the initialized 'init_demucs_model' object.
+    """
+
     if '48' in demucs_model_name:
         channels=48
     elif 'unittest' in demucs_model_name:
         channels=4
     else:
         channels=64
-    
+
     if 'tasnet' in demucs_model_name:
         init_demucs_model = ConvTasNet(sources, X=10)
     else:
         init_demucs_model = Demucs(sources, channels=channels)
-        
+
     return init_demucs_model
 
+
 class Demucs(nn.Module):
+    """
+    This class represents a neural network module for source separation of audio signals.
+    """
     @capture_init
     def __init__(self,
                  sources,
@@ -76,6 +93,8 @@ class Demucs(nn.Module):
                  samplerate=44100,
                  segment_length=4 * 10 * 44100):
         """
+        Initialize a new Demucs object with the given parameters.
+
         Args:
             sources (list[str]): list of source names
             audio_channels (int): stereo or mono
@@ -185,6 +204,17 @@ class Demucs(nn.Module):
         return int(length)
 
     def forward(self, mix):
+        """
+        Forward pass through the network.
+
+        This function takes in an input 'mix' and performs several operations on it based on the values of the attributes 'normalize' and 'resample', and the presence of an 'encoder', 'lstm', and 'decoder'. The result of the operations is returned.
+
+        Parameters:
+            mix: The input to the network.
+
+        Returns:
+            The final result after all the operations.
+        """
         x = mix
 
         if self.normalize:

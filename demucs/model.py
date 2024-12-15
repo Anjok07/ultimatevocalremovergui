@@ -54,11 +54,21 @@ def upsample(x, stride):
 def downsample(x, stride):
     """
     Downsample x by decimation.
+
+    Parameters:
+        x: The input array to be downsampled.
+        stride: The decimation factor for downsampling.
+
+    Returns:
+        The downsampled result.
     """
     return x[:, :, ::stride]
 
 
 class Demucs(nn.Module):
+    """
+    This class represents a neural network module for audio source separation.
+    """
     @capture_init
     def __init__(self,
                  sources=4,
@@ -76,7 +86,9 @@ class Demucs(nn.Module):
                  context=3,
                  samplerate=44100):
         """
-        Args:
+        Initialize a new Demucs object with the specified parameters.
+
+        Parameters:
             sources (int): number of sources to separate
             audio_channels (int): stereo or mono
             channels (int): first convolution channels
@@ -194,6 +206,9 @@ class Demucs(nn.Module):
         return int(length)
 
     def forward(self, mix):
+        """
+        Perform forward pass on the input 'mix'.
+        """
         x = mix
         saved = [x]
         for encode in self.encoder:

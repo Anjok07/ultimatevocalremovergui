@@ -271,8 +271,8 @@ def wave_to_spectrogram(wave, hop_length, n_fft, mp, band, is_v51_model=False):
         wave_left = np.asfortranarray(wave[0])
         wave_right = np.asfortranarray(wave[1])
 
-    spec_left = librosa.stft(wave_left, n_fft, hop_length=hop_length)
-    spec_right = librosa.stft(wave_right, n_fft, hop_length=hop_length)
+    spec_left = librosa.stft(wave_left, n_fft=n_fft, hop_length=hop_length)
+    spec_right = librosa.stft(wave_right, n_fft=n_fft, hop_length=hop_length)
     
     spec = np.asfortranarray([spec_left, spec_right])
 
@@ -337,7 +337,7 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None, is_v
                     spec_s *= get_lp_filter_mask(spec_s.shape[1], bp['lpf_start'], bp['lpf_stop'])
                 else:
                     spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
-                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp, d, is_v51_model), bp['sr'], sr, res_type=wav_resolution)
+                wave = librosa.resample(spectrogram_to_wave(spec_s, bp['hl'], mp, d, is_v51_model), orig_sr=bp['sr'], target_sr=sr, res_type=wav_resolution)
             else: # mid
                 if is_v51_model:
                     spec_s *= get_hp_filter_mask(spec_s.shape[1], bp['hpf_start'], bp['hpf_stop'] - 1)
@@ -347,7 +347,7 @@ def cmb_spectrogram_to_wave(spec_m, mp, extra_bins_h=None, extra_bins=None, is_v
                     spec_s = fft_lp_filter(spec_s, bp['lpf_start'], bp['lpf_stop'])
                     
                 wave2 = np.add(wave, spectrogram_to_wave(spec_s, bp['hl'], mp, d, is_v51_model))
-                wave = librosa.resample(wave2, bp['sr'], sr, res_type=wav_resolution)
+                wave = librosa.resample(wave2, orig_sr=bp['sr'], target_sr=sr, res_type=wav_resolution)
         
     return wave
 
@@ -406,8 +406,8 @@ def wave_to_spectrogram_old(wave, hop_length, n_fft):
     wave_left = np.asfortranarray(wave[0])
     wave_right = np.asfortranarray(wave[1])
 
-    spec_left = librosa.stft(wave_left, n_fft, hop_length=hop_length)
-    spec_right = librosa.stft(wave_right, n_fft, hop_length=hop_length)
+    spec_left = librosa.stft(wave_left, n_fft=n_fft, hop_length=hop_length)
+    spec_right = librosa.stft(wave_right, n_fft=n_fft, hop_length=hop_length)
     
     spec = np.asfortranarray([spec_left, spec_right])
 
@@ -716,7 +716,7 @@ def change_pitch_semitones(y, sr, semitone_shift):
     factor = 2 ** (semitone_shift / 12)  # Convert semitone shift to factor for resampling
     y_pitch_tuned = []
     for y_channel in y:
-        y_pitch_tuned.append(librosa.resample(y_channel, sr, sr*factor, res_type=wav_resolution_float_resampling))
+        y_pitch_tuned.append(librosa.resample(y_channel, orig_sr=sr, target_sr=sr*factor, res_type=wav_resolution_float_resampling))
     y_pitch_tuned = np.array(y_pitch_tuned)
     new_sr = sr * factor
     return y_pitch_tuned, new_sr

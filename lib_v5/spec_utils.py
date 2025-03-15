@@ -5,6 +5,7 @@ import soundfile as sf
 import math
 import platform
 import traceback
+import scipy
 from . import pyrb
 from scipy.signal import correlate, hilbert
 import io
@@ -43,10 +44,12 @@ else:
 
 MAX_SPEC = 'Max Spec'
 MIN_SPEC = 'Min Spec'
+DIFF_SPEC = 'Diff Spec'
 LIN_ENSE = 'Linear Ensemble'
 
 MAX_WAV = MAX_SPEC
 MIN_WAV = MIN_SPEC
+DIFF_WAV = DIFF_SPEC
 
 AVERAGE = 'Average'
 
@@ -541,7 +544,9 @@ def ensembling(a, inputs, is_wavs=False):
         if MIN_SPEC == a:
             input = np.where(np.abs(inputs[i]) <= np.abs(input), inputs[i], input)
         if MAX_SPEC == a:
-            input = np.where(np.abs(inputs[i]) >= np.abs(input), inputs[i], input)  
+            input = np.where(np.abs(inputs[i]) >= np.abs(input), inputs[i], input)
+        if DIFF_SPEC == a:
+            input = np.abs(np.abs(input) - np.abs(inputs[i])) * np.exp(1j * np.angle(input + inputs[i]))
 
     #linear_ensemble
     #input = ensemble_wav(inputs, split_size=1)

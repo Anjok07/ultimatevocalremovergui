@@ -17,6 +17,7 @@ from .demucs import DConv, rescale_module
 from .states import capture_init
 from .spec import spectro, ispectro
 
+
 def pad1d(x: torch.Tensor, paddings: tp.Tuple[int, int], mode: str = 'constant', value: float = 0.):
     """Tiny wrapper around F.pad, just to allow for reflect padding on small input.
     If this is the case, we insert extra 0 padding to the right before the reflection happen."""
@@ -36,6 +37,7 @@ def pad1d(x: torch.Tensor, paddings: tp.Tuple[int, int], mode: str = 'constant',
     assert (out[..., padding_left: padding_left + length] == x0).all()
     return out
 
+
 class ScaledEmbedding(nn.Module):
     """
     Boost learning rate for embeddings (with `scale`).
@@ -43,6 +45,15 @@ class ScaledEmbedding(nn.Module):
     """
     def __init__(self, num_embeddings: int, embedding_dim: int,
                  scale: float = 10., smooth=False):
+        """
+        Initialize a scaled embedding layer.
+
+        Parameters:
+            num_embeddings (int): The size of the dictionary of embeddings.
+            embedding_dim (int): The size of each embedding vector.
+            scale (float, optional): The scale factor to boost the learning rate.
+            smooth (bool, optional): Whether to make the embeddings continuous.
+        """
         super().__init__()
         self.embedding = nn.Embedding(num_embeddings, embedding_dim)
         if smooth:
@@ -55,14 +66,46 @@ class ScaledEmbedding(nn.Module):
 
     @property
     def weight(self):
+        """
+        Get the scaled weight of the embedding layer.
+
+        Returns:
+            torch.Tensor: The scaled weight of the embedding layer.
+        """
         return self.embedding.weight * self.scale
 
     def forward(self, x):
+        """
+        Perform forward pass of the scaled embedding layer.
+
+        Parameters:
+            x: The input tensor.
+
+        Returns:
+            torch.Tensor: The scaled embeddings.
+        """
         out = self.embedding(x) * self.scale
         return out
 
 
 class HEncLayer(nn.Module):
+    """Encoder layer. This used both by the time and the frequency branch.
+
+    Args:
+        chin: number of input channels.
+        chout: number of output channels.
+        norm_groups: number of groups for group norm.
+        empty: used to make a layer with just the first conv. this is used
+            before merging the time and freq. branches.
+        freq: this is acting on frequencies.
+        dconv: insert DConv residual branches.
+        norm: use GroupNorm.
+        context: context size for the 1x1 conv.
+        dconv_kw: list of kwargs for the DConv class.
+        pad: pad the input. Padding is done so that the output size is
+            always the input size / stride.
+        rewrite: add 1x1 conv at the end of the layer.
+    """
     def __init__(self, chin, chout, kernel_size=8, stride=4, norm_groups=1, empty=False,
                  freq=True, dconv=True, norm=True, context=0, dconv_kw={}, pad=True,
                  rewrite=True):
@@ -162,6 +205,7 @@ class MultiWrap(nn.Module):
     This is a bit over-engineered to avoid edge artifacts when splitting
     the frequency bands, but it is possible the naive implementation would work as well...
     """
+
     def __init__(self, layer, split_ratios):
         """
         Args:
@@ -189,6 +233,18 @@ class MultiWrap(nn.Module):
             self.layers.append(lay)
 
     def forward(self, x, skip=None, length=None):
+        """
+        Perform forward pass through the network.
+
+        Args:
+            self: The instance of the class.
+            x (torch.Tensor): The input tensor.
+            skip (Optional[torch.Tensor]): The skip tensor.
+            length (Optional[int]): The length.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         B, C, Fr, T = x.shape
 
         ratios = list(self.split_ratios) + [1]
@@ -250,11 +306,31 @@ class MultiWrap(nn.Module):
 
 
 class HDecLayer(nn.Module):
+    """
+    HDecLayer class represents a decoder layer in a neural network model.
+    """
     def __init__(self, chin, chout, last=False, kernel_size=8, stride=4, norm_groups=1, empty=False,
                  freq=True, dconv=True, norm=True, context=1, dconv_kw={}, pad=True,
                  context_freq=True, rewrite=True):
         """
-        Same as HEncLayer but for decoder. See `HEncLayer` for documentation.
+        Initializes a new instance of the HDecLayer class.
+
+        Parameters:
+            chin (int): The number of input channels.
+            chout (int): The number of output channels.
+            last (bool): Flag indicating if this is the last layer (default False).
+            kernel_size (int): The size of the convolution kernel (default 8).
+            stride (int): The stride of the convolution (default 4).
+            norm_groups (int): The number of groups for group normalization (default 1).
+            empty (bool): Flag indicating if the layer is empty (default False).
+            freq (bool): Flag indicating if frequency domain convolution should be used (default True).
+            dconv (bool): Flag indicating if depthwise convolution should be used (default True).
+            norm (bool): Flag indicating if normalization should be applied (default True).
+            context (int): The context size for rewriting (default 1).
+            dconv_kw (dict): Additional keyword arguments for depthwise convolution (default {}).
+            pad (bool): Flag indicating if padding should be applied (default True).
+            context_freq (bool): Flag indicating if frequency domain context should be used (default True).
+            rewrite (bool): Flag indicating if rewriting should be performed (default True).
         """
         super().__init__()
         norm_fn = lambda d: nn.Identity()  # noqa
@@ -298,6 +374,20 @@ class HDecLayer(nn.Module):
             self.dconv = DConv(chin, **dconv_kw)
 
     def forward(self, x, skip, length):
+        """
+        Perform forward propagation on the input tensor.
+
+        This function applies a series of operations on the input tensor 'x' based on certain conditions and returns the final result.
+
+        Parameters:
+            self: The instance of the class.
+            x: The input tensor.
+            skip: The tensor to be added to 'x' if not empty.
+            length: The length of the tensor 'z'.
+
+        Returns:
+            Tuple[torch.Tensor]: A tuple containing the final tensor 'z' and intermediate tensor 'y'.
+        """
         if self.freq and x.dim() == 3:
             B, C, T = x.shape
             x = x.view(B, self.chin, -1, T)
@@ -358,6 +448,7 @@ class HDemucs(nn.Module):
 
     Unlike classic Demucs, there is no resampling here, and normalization is always applied.
     """
+
     @capture_init
     def __init__(self,
                  sources,
@@ -404,8 +495,9 @@ class HDemucs(nn.Module):
                  # Metadata
                  samplerate=44100,
                  segment=4 * 10):
-        
         """
+        Initialize the model with the given parameters.
+
         Args:
             sources (list[str]): list of source names.
             audio_channels (int): input/output audio channels.
@@ -446,10 +538,11 @@ class HDemucs(nn.Module):
             dconv_lstm: adds a LSTM layer in DConv branch starting at this layer.
             dconv_init: initial scale for the DConv branch LayerScale.
             rescale: weight recaling trick
-
+            samplerate: sample rate of the audio.
+            segment: segment size for processing.
         """
         super().__init__()
-        
+
         self.cac = cac
         self.wiener_residual = wiener_residual
         self.audio_channels = audio_channels
@@ -583,6 +676,15 @@ class HDemucs(nn.Module):
             rescale_module(self, reference=rescale)
 
     def _spec(self, x):
+        """
+        Perform signal processing operations on the input x and return the spectroscopy result.
+
+        Parameters:
+            x: The input signal.
+
+        Returns:
+            z: The spectroscopy result.
+        """
         hl = self.hop_length
         nfft = self.nfft
         x0 = x  # noqa
@@ -610,6 +712,18 @@ class HDemucs(nn.Module):
         return z
 
     def _ispec(self, z, length=None, scale=0):
+        """
+        Private method to perform some calculations and return the result.
+
+        Args:
+            self: The object instance.
+            z: The input data.
+            length (int, optional): The desired length.
+            scale (int, optional): The scale.
+
+        Returns:
+            The calculated result.
+        """
         hl = self.hop_length // (4 ** scale)
         z = F.pad(z, (0, 0, 0, 1))
         if self.hybrid:
@@ -629,6 +743,16 @@ class HDemucs(nn.Module):
         return x
 
     def _magnitude(self, z):
+        """
+        Private method to calculate the magnitude of the spectrogram.
+
+        Args:
+            self: The object instance.
+            z: The input data.
+
+        Returns:
+            The calculated magnitude.
+        """
         # return the magnitude of the spectrogram, except when cac is True,
         # in which case we just move the complex dimension to the channel one.
         if self.cac:
@@ -640,6 +764,21 @@ class HDemucs(nn.Module):
         return m
 
     def _mask(self, z, m):
+        """
+        Apply masking given the mixture spectrogram `z` and the estimated mask `m`.
+
+        If `cac` is True, `m` is actually a full spectrogram and `z` is ignored.
+
+        Parameters:
+            z: torch.Tensor
+                Mixture spectrogram.
+            m: torch.Tensor
+                Estimated mask or full spectrogram.
+
+        Returns:
+            out: torch.Tensor
+                Result of applying the masking.
+        """
         # Apply masking given the mixture spectrogram `z` and the estimated mask `m`.
         # If `cac` is True, `m` is actually a full spectrogram and `z` is ignored.
         niters = self.wiener_iters
@@ -657,6 +796,24 @@ class HDemucs(nn.Module):
             return self._wiener(m, z, niters)
 
     def _wiener(self, mag_out, mix_stft, niters):
+        """
+        Apply wiener filtering to the given input spectrogram.
+
+        This function applies the wiener filtering algorithm to the input spectrogram data.
+        It iterates through the input spectrogram frames and applies the wiener function to each frame.
+        The resulting filtered frames are concatenated to form the output spectrogram.
+        The filtered spectrogram is then reshaped and permuted to match the original shape of the input spectrogram.
+        If the residual flag is True, the last frame of the filtered spectrogram is removed.
+        The filtered spectrogram is returned as the final output.
+
+        Parameters:
+            mag_out (torch.Tensor): The magnitude spectrogram.
+            mix_stft (torch.Tensor): The mixture STFT.
+            niters (int): The number of iterations to apply the wiener algorithm.
+
+        Returns:
+            torch.Tensor: The filtered spectrogram.
+        """
         # apply wiener filtering from OpenUnmix.
         init = mix_stft.dtype
         wiener_win_len = 300
@@ -685,6 +842,15 @@ class HDemucs(nn.Module):
         return out.to(init)
 
     def forward(self, mix):
+        """
+        Forward pass of the neural network.
+
+        Args:
+            mix (torch.Tensor): Input tensor to the network.
+
+        Returns:
+            torch.Tensor: Output tensor of the network.
+        """
         x = mix
         length = x.shape[-1]
 
@@ -793,4 +959,5 @@ class HDemucs(nn.Module):
             xt = xt.view(B, S, -1, length)
             xt = xt * stdt[:, None] + meant[:, None]
             x = xt + x
+
         return x

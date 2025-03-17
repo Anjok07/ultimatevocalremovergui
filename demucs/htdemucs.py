@@ -418,6 +418,19 @@ class HTDemucs(nn.Module):
             self.crosstransformer = None
 
     def _spec(self, x):
+        """
+        Compute the spectrogram of a signal.
+
+        This function takes in a signal x and computes its spectrogram using the
+        parameters hop_length and nfft. It pads the signal to ensure the output
+        size is exactly the size of the input divided by the stride, when divisible.
+
+        Parameters:
+            x: The input signal.
+
+        Returns:
+            The spectrogram of the input signal.
+        """
         hl = self.hop_length
         nfft = self.nfft
         x0 = x  # noqa
@@ -440,6 +453,21 @@ class HTDemucs(nn.Module):
         return z
 
     def _ispec(self, z, length=None, scale=0):
+        """
+        Reconstruct the original signal from a spectrogram.
+
+        This function takes in a spectrogram z and reconstructs the original
+        signal using the parameters hop_length, length, and scale. It pads the
+        spectrogram and applies the ispectro function to perform the reconstruction.
+
+        Parameters:
+            z: The input spectrogram.
+            length: The desired length of the reconstructed signal.
+            scale: The scale of the spectrogram.
+
+        Returns:
+            The reconstructed signal.
+        """
         hl = self.hop_length // (4**scale)
         z = F.pad(z, (0, 0, 0, 1))
         z = F.pad(z, (2, 2))
@@ -450,6 +478,17 @@ class HTDemucs(nn.Module):
         return x
 
     def _magnitude(self, z):
+        """
+        Calculate the magnitude of the spectrogram.
+
+        If self.cac is True, reshape the complex dimension to the channel dimension.
+
+        Parameters:
+            z: The input spectrogram.
+
+        Returns:
+            The magnitude of the spectrogram.
+        """
         # return the magnitude of the spectrogram, except when cac is True,
         # in which case we just move the complex dimension to the channel one.
         if self.cac:
@@ -461,6 +500,19 @@ class HTDemucs(nn.Module):
         return m
 
     def _mask(self, z, m):
+        """
+        Apply masking to the mixture spectrogram.
+
+        If self.cac is True, m is treated as a full spectrogram and z is ignored.
+        If self.training is True, the number of iterations is set to self.end_iters.
+
+        Parameters:
+            z: The mixture spectrogram.
+            m: The estimated mask.
+
+        Returns:
+            The masked spectrogram.
+        """
         # Apply masking given the mixture spectrogram `z` and the estimated mask `m`.
         # If `cac` is True, `m` is actually a full spectrogram and `z` is ignored.
         niters = self.wiener_iters
@@ -478,6 +530,20 @@ class HTDemucs(nn.Module):
             return self._wiener(m, z, niters)
 
     def _wiener(self, mag_out, mix_stft, niters):
+        """
+        Apply Wiener filtering to the given input data.
+
+        This function performs the Wiener filtering algorithm on the magnitude spectrogram 'mag_out' and the mixed STFT spectrogram 'mix_stft' using 'niters' number of iterations.
+        The function uses a window length of 300 frames to process the data.
+
+        Parameters:
+            mag_out (torch.Tensor): The magnitude spectrogram of the output data.
+            mix_stft (torch.Tensor): The mixed STFT spectrogram.
+            niters (int): The number of iterations to perform.
+
+        Returns:
+            torch.Tensor: The filtered output spectrogram.
+        """
         # apply wiener filtering from OpenUnmix.
         init = mix_stft.dtype
         wiener_win_len = 300
@@ -514,6 +580,15 @@ class HTDemucs(nn.Module):
         In our case, always return the training length, unless
         it is smaller than the given length, in which case this
         raises an error.
+
+        Parameters:
+            length (int): The length to be evaluated.
+
+        Returns:
+            int: The appropriate length for evaluation.
+
+        Raises:
+            ValueError: If the given length is longer than the training length.
         """
         if not self.use_train_segment:
             return length
@@ -525,6 +600,17 @@ class HTDemucs(nn.Module):
         return training_length
 
     def forward(self, mix):
+        """
+        Perform forward pass of the separation model on the provided mixed audio signal.
+
+        This method applies various transformations to the mixed audio signal, including spectral analysis, normalization, encoding, decoding, and masking. It also handles cases where the input signal length is shorter than the desired training length.
+
+        Parameters:
+            mix (torch.Tensor): The mixed audio signal.
+
+        Returns:
+            torch.Tensor: The separated sources of the mixed audio signal.
+        """
         length = mix.shape[-1]
         length_pre_pad = None
         if self.use_train_segment:

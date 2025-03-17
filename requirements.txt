@@ -1,6 +1,6 @@
 altgraph==0.17.3
 audioread==3.0.0
-certifi==2022.12.07
+certifi==2023.7.22
 cffi==1.15.1
 cryptography==3.4.6
 einops==0.6.0

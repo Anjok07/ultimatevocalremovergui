@@ -190,6 +190,9 @@ Setting up a virtual environment (venv) ensures that the program's dependencies 
    ```
 
 2. **Create a virtual environment:**
+
+   *Use Python 3.9. You can use virtualenv to create a python-specific virtual environment*
+
    ```bash
    python3 -m venv venv
    ```

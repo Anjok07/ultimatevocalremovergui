@@ -63,11 +63,8 @@ DEMUCS_VERSION_MAPPER = {
 DOWNLOAD_FAILED = 'Download Failed'
 DOWNLOAD_STOPPED = 'Download Stopped'
 DOWNLOAD_COMPLETE = 'Download Complete'
-DOWNLOAD_UPDATE_COMPLETE = 'Update Download Complete'
 SETTINGS_MENU_EXIT = 'exit'
 NO_CONNECTION = 'No Internet Connection'
-VIP_SELECTION = 'VIP:'
-DEVELOPER_SELECTION = 'VIP:'
 NO_NEW_MODELS = 'All Available Models Downloaded'
 ENSEMBLE_PARTITION = ': '
 NO_MODEL = 'No Model Selected'
@@ -75,7 +72,6 @@ CHOOSE_MODEL = 'Choose Model'
 SINGLE_DOWNLOAD = 'Downloading Item 1/1...'
 DOWNLOADING_ITEM = 'Downloading Item'
 FILE_EXISTS = 'File already exists!'
-DOWNLOADING_UPDATE = 'Downloading Update...'
 DOWNLOAD_MORE = 'Download More Models'
 IS_KARAOKEE = "is_karaoke"
 IS_BV_MODEL = "is_bv_model"
@@ -91,26 +87,14 @@ DOWNLOAD_CHECKS = "https://raw.githubusercontent.com/TRvlvr/application_data/mai
 MDX_MODEL_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/mdx_model_data/model_data_new.json"
 VR_MODEL_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/vr_model_data/model_data_new.json"
 MDX23_CONFIG_CHECKS = "https://raw.githubusercontent.com/TRvlvr/application_data/main/mdx_model_data/mdx_c_configs/"
-BULLETIN_CHECK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/bulletin.txt"
 
 DEMUCS_MODEL_NAME_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/demucs_model_data/model_name_mapper.json"
 MDX_MODEL_NAME_DATA_LINK = "https://raw.githubusercontent.com/TRvlvr/application_data/main/mdx_model_data/model_name_mapper.json"
 
-DONATE_LINK_BMAC = "https://www.buymeacoffee.com/uvr5"
-DONATE_LINK_PATREON = "https://www.patreon.com/uvr"
-
 #DOWNLOAD REPOS
 NORMAL_REPO = "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/"
-UPDATE_REPO = "https://github.com/TRvlvr/model_repo/releases/download/uvr_update_patches/"
-
-UPDATE_MAC_ARM_REPO = "https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_arm64.dmg"
-UPDATE_MAC_X86_64_REPO = "https://github.com/Anjok07/ultimatevocalremovergui/releases/download/v5.6/Ultimate_Vocal_Remover_v5_6_MacOS_x86_64.dmg"
-UPDATE_LINUX_REPO = "https://github.com/Anjok07/ultimatevocalremovergui#linux-installation"
 
 ISSUE_LINK = 'https://github.com/Anjok07/ultimatevocalremovergui/issues/new'
-VIP_REPO = b'\xf3\xc2W\x19\x1foI)\xc2\xa9\xcc\xb67(Z\xf5',\
-           b'gAAAAABjQAIQ-NpNMMxMedpKHHb7ze_nqB05hw0YhbOy3pFzuzDrfqumn8_qvraxEoUpZC5ZXC0gGvfDxFMqyq9VWbYKlA67SUFI_wZB6QoVyGI581vs7kaGfUqlXHIdDS6tQ_U-BfjbEAK9EU_74-R2zXjz8Xzekw=='
-NO_CODE = 'incorrect_code'
 
 #Extensions
 ONNX = '.onnx'
@@ -653,7 +637,6 @@ DEFAULT_DATA = {
         'save_format': WAV,
         'wav_type_set': 'PCM_16',
         'device_set': DEFAULT,
-        'user_code': '',
         'export_path': '',
         'input_paths': [],
         'lastDir': None,
@@ -764,7 +747,6 @@ SETTING_CHECK = ('vr_model',
                'save_format',
                'wav_type_set',
                'device_set',
-               'user_code',
                'is_gpu_conversion',
                'is_normalization',
                'is_use_opencl',
@@ -1397,7 +1379,6 @@ ADVANCED_VR_OPTIONS_TEXT = 'Advanced VR Options'
 AGGRESSION_SETTING_TEXT = 'Aggression Setting'
 APPEND_ENSEMBLE_NAME_TEXT = 'Append Ensemble Name'
 APPLICATION_DOWNLOAD_CENTER_TEXT = 'Application Download Center'
-APPLICATION_UPDATES_TEXT = 'Application Updates'
 AUDIO_FORMAT_SETTINGS_TEXT = 'Audio Format Settings'
 BALANCE_VALUE_TEXT = 'Balance Value'
 BATCH_SIZE_TEXT = 'Batch Size'
@@ -1409,7 +1390,6 @@ CHOOSE_ADVANCED_MENU_TEXT = 'Choose Advanced Menu'
 CHOOSE_MODEL_PARAM_TEXT = 'Choose Model Param'
 CLEAR_AUTOSET_CACHE_TEXT = 'Clear Auto-Set Cache'
 COMBINE_STEMS_TEXT = 'Combine Stems'
-CONFIRM_UPDATE_TEXT = 'Confirm Update'
 COPIED_TEXT = 'Copied!'
 COPY_ALL_TEXT_TEXT = 'Copy All Text'
 DEFINED_PARAMETERS_DELETED_TEXT = 'Defined Parameters Deleted'
@@ -1422,7 +1402,6 @@ DONE_TEXT = 'Done'
 DOWNLOAD_CENTER_TEXT = 'Download Center'
 DOWNLOAD_CODE_TEXT = 'Download Code'
 DOWNLOAD_LINKS_TEXT = 'Download Link(s)'
-DOWNLOAD_UPDATE_IN_APPLICATION_TEXT = 'Download Update in Application'
 ENABLE_HELP_HINTS_TEXT = 'Enable Help Hints'
 ENABLE_TTA_TEXT = 'Enable TTA'
 ENABLE_VOCAL_SPLIT_MODE_TEXT = 'Enable Vocal Split Mode'
@@ -1501,7 +1480,6 @@ STEM_NAME_TEXT = 'Stem Name'
 STOP_DOWNLOAD_TEXT = 'Stop Download'
 SUPPORT_UVR_TEXT = 'Support UVR'
 TRY_MANUAL_DOWNLOAD_TEXT = 'Try Manual Download'
-UPDATE_FOUND_TEXT = 'Update Found'
 USER_DOWNLOAD_CODES_TEXT = 'User Download Codes'
 UVR_BUY_ME_A_COFFEE_LINK_TEXT = 'UVR \'Buy Me a Coffee\' Link'
 UVR_ERROR_LOG_TEXT = 'UVR Error Log'
@@ -1522,10 +1500,7 @@ MDX23C_ONLY_OPTIONS_TEXT = 'MDXNET23 Only Options'
 PROCESS_STARTING_TEXT = 'Process starting... '
 MISSING_MESS_TEXT = 'is missing or currupted.'
 SIMILAR_TEXT = "are the same."
-LOADING_VERSION_INFO_TEXT = 'Loading version information...'
-CHECK_FOR_UPDATES_TEXT = 'Check for Updates'
 INFO_UNAVAILABLE_TEXT = "Information unavailable."
-UPDATE_CONFIRMATION_TEXT = 'Are you sure you want to continue?\n\nThe application will need to be restarted.\n'
 BROKEN_OR_INCOM_TEXT = 'Broken or Incompatible File(s) Removed. Check Error Log for details.'
 BMAC_UVR_TEXT = 'UVR \"Buy Me a Coffee\" Link'
 MDX_MENU_WAR_TEXT = '(Leave this setting as is if you are unsure.)'
@@ -1542,7 +1517,6 @@ TIME_CORRECTION_TEXT = 'Time Correction'
 UVR_LIS_INFO_TEXT = 'UVR License Information'
 ADDITIONAL_RES_CREDITS_TEXT = 'Additional Resources & Credits'
 SAVE_INST_MIXTURE_TEXT = 'Save Instrumental Mixture'
-DOWNLOAD_UPDATE_IN_APP_TEXT = 'Download Update in Application'
 WAVE_TYPE_TEXT = 'WAVE TYPE'
 OPEN_LINK_TO_MODEL_TEXT = "Open Link to Model"
 OPEN_MODEL_DIRECTORY = "Open Model Directory"
@@ -1557,17 +1531,13 @@ ENSEMBLE_WARNING_NOT_ENOUGH_TEXT = "You must select 2 or more models to save an 
 NOT_ENOUGH_ERROR_TEXT = "Not enough files to process.\n"
 INVALID_FOLDER_ERROR_TEXT = 'Invalid Folder', 'Your given export path is not a valid folder!'
 
-GET_DL_VIP_CODE_TEXT = ("Obtain codes by visiting one of the following links below."
-                        "\nFrom there you can donate, pledge, "
-                        "or just obatain the code!\n (Donations are not required to obtain VIP code)")
 CONFIRM_RESTART_TEXT = 'Restart Confirmation', 'This will restart the application and halt any running processes. Your current settings will be saved. \n\n Are you sure you wish to continue?'
 ERROR_LOADING_FILE_TEXT = 'Error Loading the Following File', 'Raw Error Details'
 LOADING_MODEL_TEXT = 'Loading model'
 FULL_APP_SET_TEXT = 'Full Application Settings'
 PROCESS_STARTING_TEXT = 'Process starting... '
 PROCESS_STOPPED_BY_USER = '\n\nProcess stopped by user.'
-NEW_UPDATE_FOUND_TEXT = lambda version:f"\n\nNew Update Found: {version}\n\nClick the update button in the \"Settings\" menu to download and install!"
-ROLL_BACK_TEXT = 'Click Here to Roll Back'
+
 
 def secondary_stem(stem:str):
     """Determines secondary stem"""

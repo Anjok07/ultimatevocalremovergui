@@ -1469,7 +1469,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.online_data = {}
         self.bulletin_data = INFO_UNAVAILABLE_TEXT
         self.is_online = False
-        self.lastest_version = ''
         self.model_download_demucs_var = tk.StringVar(value='')
         self.model_download_mdx_var = tk.StringVar(value='')
         self.model_download_vr_var = tk.StringVar(value='')
@@ -1479,14 +1478,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.download_progress_percent_var = tk.StringVar(value='')
         self.download_progress_bar_var = tk.IntVar(value=0)
         self.download_stop_var = tk.StringVar(value='') 
-        self.app_update_status_Text_var = tk.StringVar(value=LOADING_VERSION_INFO_TEXT)
-        self.app_update_button_Text_var = tk.StringVar(value=CHECK_FOR_UPDATES_TEXT)
         
-        self.user_code_validation_var = tk.StringVar(value='')
         self.download_link_path_var = tk.StringVar(value='') 
         self.download_save_path_var = tk.StringVar(value='')
-        self.download_update_link_var = tk.StringVar(value='') 
-        self.download_update_path_var = tk.StringVar(value='') 
         self.download_demucs_models_list = []
         self.download_demucs_newer_models = []
         self.refresh_list_Button = None
@@ -1520,7 +1514,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.update_main_widget_states()
         self.update_loop()
         self.update_button_states()
-        self.download_validate_code()
         self.delete_temps(is_start_up=True)
         self.ensemble_listbox_Option.configure(state=tk.DISABLED)
         self.command_Text.write(f'Ultimate Vocal Remover {VERSION} [{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}]')
@@ -2171,7 +2164,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                                     title=f'Select Folder',)
             
         if is_linux:
-            print("Is Linux")
             self.linux_filebox_fix(False)
             top.destroy()
             
@@ -3270,19 +3262,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         delete_your_settings_Option.grid(padx=20,pady=MENU_PADDING_1)
         self.deletion_list_fill(delete_your_settings_Option, option_var, SETTINGS_CACHE_DIR, SELECT_SAVED_SETTING, menu_name='deletesetting')
 
-        app_update_Label = self.menu_title_LABEL_SET(settings_menu_main_Frame, APPLICATION_UPDATES_TEXT)
-        app_update_Label.grid(pady=MENU_PADDING_2)
-        
-        self.app_update_button = ttk.Button(settings_menu_main_Frame, textvariable=self.app_update_button_Text_var, width=SETTINGS_BUT_WIDTH-2, command=lambda:self.pop_up_update_confirmation())
-        self.app_update_button.grid(pady=MENU_PADDING_1)
-        
-        self.app_update_status_Label = tk.Label(settings_menu_main_Frame, textvariable=self.app_update_status_Text_var, padx=3, pady=3, font=(MAIN_FONT_NAME,  f"{FONT_SIZE_4}"), width=UPDATE_LABEL_WIDTH, justify="center", relief="ridge", fg="#13849f")
-        self.app_update_status_Label.grid(pady=20)
-        
-        donate_Button = ttk.Button(settings_menu_main_Frame, image=self.donate_img, command=lambda:webbrowser.open_new_tab(DONATE_LINK_BMAC))
-        donate_Button.grid(pady=MENU_PADDING_2)
-        self.help_hints(donate_Button, text=DONATE_HELP)
-        
         close_settings_win_Button = ttk.Button(settings_menu_main_Frame, text=CLOSE_WINDOW, command=lambda:close_window())
         close_settings_win_Button.grid(pady=MENU_PADDING_1)      
           
@@ -3411,9 +3390,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         self.refresh_list_Button = ttk.Button(settings_menu_download_center_Frame, text=REFRESH_LIST_TEXT, command=lambda:self.online_data_refresh(refresh_list_Button=True))#, command=refresh_list)
         self.refresh_list_Button.grid(pady=MENU_PADDING_1)
-        
-        self.download_key_Button = ttk.Button(settings_menu_download_center_Frame, image=self.key_img, command=lambda:self.pop_up_user_code_input())
-        self.download_key_Button.grid(pady=MENU_PADDING_1)
                             
         self.manual_download_Button = ttk.Button(settings_menu_download_center_Frame, text=TRY_MANUAL_DOWNLOAD_TEXT, command=self.menu_manual_downloads)
         self.manual_download_Button.grid(pady=MENU_PADDING_1)
@@ -3421,8 +3397,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.download_center_Buttons = (self.model_download_vr_Button,
                                         self.model_download_mdx_Button,
                                         self.model_download_demucs_Button,
-                                        self.download_Button,
-                                        self.download_key_Button)
+                                        self.download_Button)
         
         self.download_lists = (self.model_download_vr_Option,
                                self.model_download_mdx_Option,
@@ -4380,92 +4355,9 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             with open(os.path.join(SETTINGS_CACHE_DIR, f'{settings_save_name}.json'), "w") as outfile:
                 outfile.write(saved_data_dump)
 
-    def pop_up_update_confirmation(self):
-        """Ask user is they want to update"""
-        
-        is_new_update = self.online_data_refresh(confirmation_box=True)
-        is_download_in_app_var = tk.BooleanVar(value=False)
-        
-        def update_type():
-            if is_download_in_app_var.get():
-                self.download_item(is_update_app=True)
-            else:
-                webbrowser.open_new_tab(self.download_update_link_var.get())
 
-            update_confirmation_win.destroy()
-            
-        if is_new_update:
-            
-            update_confirmation_win = tk.Toplevel()
 
-            update_confirmation_Frame = self.menu_FRAME_SET(update_confirmation_win)
-            update_confirmation_Frame.grid(row=0)  
-            
-            update_found_label = self.menu_title_LABEL_SET(update_confirmation_Frame, UPDATE_FOUND_TEXT, width=15)
-            update_found_label.grid(row=0,column=0,padx=0,pady=MENU_PADDING_2)
-            
-            confirm_update_label = self.menu_sub_LABEL_SET(update_confirmation_Frame, UPDATE_CONFIRMATION_TEXT, font_size=FONT_SIZE_3)
-            confirm_update_label.grid(row=1,column=0,padx=0,pady=MENU_PADDING_1)
-                    
-            yes_button = ttk.Button(update_confirmation_Frame, text=YES_TEXT, command=update_type)
-            yes_button.grid(row=2,column=0,padx=0,pady=MENU_PADDING_1)
-            
-            no_button = ttk.Button(update_confirmation_Frame, text=NO_TEXT, command=lambda:(update_confirmation_win.destroy()))
-            no_button.grid(row=3,column=0,padx=0,pady=MENU_PADDING_1)
-            
-            if is_windows:
-                download_outside_application_button = ttk.Checkbutton(update_confirmation_Frame, variable=is_download_in_app_var, text='Download Update in Application')
-                download_outside_application_button.grid(row=4,column=0,padx=0,pady=MENU_PADDING_1)
 
-            self.menu_placement(update_confirmation_win, CONFIRM_UPDATE_TEXT, pop_up=True)
-
-    def pop_up_user_code_input(self):
-        """Input VIP Code"""
-
-        self.user_code_validation_var.set('')
-        
-        self.user_code = tk.Toplevel()
-        
-        user_code_Frame = self.menu_FRAME_SET(self.user_code)
-        user_code_Frame.grid(row=0)  
-                
-        user_code_title_Label = self.menu_title_LABEL_SET(user_code_Frame, USER_DOWNLOAD_CODES_TEXT, width=20)
-        user_code_title_Label.grid(row=0,column=0,padx=0,pady=MENU_PADDING_1)    
-        
-        user_code_Label = self.menu_sub_LABEL_SET(user_code_Frame, DOWNLOAD_CODE_TEXT)
-        user_code_Label.grid(pady=MENU_PADDING_1)       
-                
-        self.user_code_Entry = ttk.Entry(user_code_Frame, textvariable=self.user_code_var, justify='center')
-        self.user_code_Entry.grid(pady=MENU_PADDING_1)
-        self.user_code_Entry.bind(right_click_button, self.right_click_menu_popup)
-        self.current_text_box = self.user_code_Entry
-        
-        tooltip = ToolTip(self.user_code_Entry)
-        def invalid_message_(text, is_success_message):
-            tooltip.hidetip()
-            tooltip.showtip(text, True, is_success_message)
-        
-        self.spacer_label(user_code_Frame)
-
-        user_code_confrim_Button = ttk.Button(user_code_Frame, text=CONFIRM_TEXT, command=lambda:self.download_validate_code(confirm=True, code_message=invalid_message_))
-        user_code_confrim_Button.grid(pady=MENU_PADDING_1)
-        
-        user_code_cancel_Button = ttk.Button(user_code_Frame, text=CANCEL_TEXT, command=lambda:self.user_code.destroy())
-        user_code_cancel_Button.grid(pady=MENU_PADDING_1)
-        
-        support_title_Label = self.menu_title_LABEL_SET(user_code_Frame, text=SUPPORT_UVR_TEXT, width=20)
-        support_title_Label.grid(pady=MENU_PADDING_1)    
-        
-        support_sub_Label = tk.Label(user_code_Frame, text=GET_DL_VIP_CODE_TEXT, font=(MAIN_FONT_NAME, f"{FONT_SIZE_1}"), foreground=FG_COLOR)
-        support_sub_Label.grid(pady=MENU_PADDING_1)
-        
-        uvr_patreon_Button = ttk.Button(user_code_Frame, text=UVR_PATREON_LINK_TEXT, command=lambda:webbrowser.open_new_tab(DONATE_LINK_PATREON))
-        uvr_patreon_Button.grid(pady=MENU_PADDING_1)
-        
-        bmac_patreon_Button=ttk.Button(user_code_Frame, text=BMAC_UVR_TEXT, command=lambda:webbrowser.open_new_tab(DONATE_LINK_BMAC))
-        bmac_patreon_Button.grid(pady=MENU_PADDING_1)
-        
-        self.menu_placement(self.user_code, INPUT_CODE_TEXT, pop_up=True)
 
     def pop_up_change_model_defaults(self, top_window):
         """
@@ -5134,27 +5026,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Checks for application updates"""
         
         def online_check():
-            if not is_start_up:
-                self.app_update_status_Text_var.set(LOADING_VERSION_INFO_TEXT)
-                self.app_update_button_Text_var.set(CHECK_FOR_UPDATES_TEXT)
-
             is_new_update = False
             try:
                 self.online_data = json.load(urllib.request.urlopen(DOWNLOAD_CHECKS))
                 self.is_online = True
-
-                try:
-                    with urllib.request.urlopen(BULLETIN_CHECK) as response:
-                        self.bulletin_data = response.read().decode('utf-8')
-
-                    if not is_windows:
-                        self.bulletin_data = read_bulliten_text_mac(CR_TEXT, self.bulletin_data)
-                    else:
-                        self.bulletin_data = self.bulletin_data.replace("~", "•")
-
-                except Exception as e:
-                    self.bulletin_data = INFO_UNAVAILABLE_TEXT
-                    print(e)
 
                 if user_refresh:
                     self.download_list_state()
@@ -5163,40 +5038,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     
                 if refresh_list_Button:
                     self.download_progress_info_var.set('Download List Refreshed!')
-
-                if OPERATING_SYSTEM=="Darwin":
-                    self.lastest_version = self.online_data["current_version_mac"]
-                elif OPERATING_SYSTEM=="Linux":
-                    self.lastest_version = self.online_data["current_version_linux"]
-                else:
-                    self.lastest_version = self.online_data["current_version"]
-                    
-                if self.lastest_version == current_patch and not is_start_up:
-                    self.app_update_status_Text_var.set('UVR Version Current')
-                else:
-                    is_new_update = True
-                    is_beta_version = True if self.lastest_version == PREVIOUS_PATCH_WIN and BETA_VERSION in current_patch else False
-                    
-                    if not is_start_up:
-                        if is_beta_version:
-                            self.app_update_status_Text_var.set(f"Roll Back: {self.lastest_version}")
-                            self.app_update_button_Text_var.set(ROLL_BACK_TEXT)
-                        else:
-                            self.app_update_status_Text_var.set(f"Update Found: {self.lastest_version}")
-                            self.app_update_button_Text_var.set('Click Here to Update')
-                        
-                        if OPERATING_SYSTEM == "Windows":
-                            self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
-                            self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
-                        elif OPERATING_SYSTEM == "Darwin":
-                            self.download_update_link_var.set(UPDATE_MAC_ARM_REPO if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else UPDATE_MAC_X86_64_REPO)
-                        elif OPERATING_SYSTEM == "Linux":
-                            self.download_update_link_var.set(UPDATE_LINUX_REPO)
-                    
-                    if not user_refresh:
-                        if not is_beta_version and not self.lastest_version == current_patch:
-                            self.command_Text.write(NEW_UPDATE_FOUND_TEXT(self.lastest_version))
-
 
                 is_update_params = self.is_auto_update_model_params if is_start_up else self.is_auto_update_model_params_var.get()
                 
@@ -5233,35 +5074,14 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         """Changes relevant settings and "Download Center" buttons if no internet connection is available"""
         
         if not is_start_up and self.is_menu_settings_open:
-            self.app_update_status_Text_var.set(f'Version Status: {NO_CONNECTION}')
             self.download_progress_info_var.set(NO_CONNECTION) 
-            self.app_update_button_Text_var.set('Refresh')
             self.refresh_list_Button.configure(state=tk.NORMAL)
             self.stop_download_Button_DISABLE()
             self.enable_tabs()
             
         self.is_online = False
 
-    def download_validate_code(self, confirm=False, code_message=None):
-        """Verifies the VIP download code"""
-        
-        self.decoded_vip_link = vip_downloads(self.user_code_var.get())
-        
-        if confirm:
-            if not self.decoded_vip_link == NO_CODE:
-                info_text = 'VIP Models Added!'
-                is_success_message = True
-            else:
-                info_text = 'Incorrect Code'
-                is_success_message = False
-                
-            self.download_progress_info_var.set(info_text)
-            self.user_code_validation_var.set(info_text)
-            
-            if code_message:
-                code_message(info_text, is_success_message)
-                
-            self.download_list_fill()
+
 
     def download_list_fill(self, model_type=ALL_TYPES):
         """Fills the download lists with the data retrieved from the update check."""
@@ -5276,11 +5096,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.mdx_download_list = self.online_data["mdx_download_list"]
         self.demucs_download_list = self.online_data["demucs_download_list"]
         self.mdx_download_list.update(self.online_data["mdx23c_download_list"])
-        
-        if not self.decoded_vip_link is NO_CODE:
-            self.vr_download_list.update(self.online_data["vr_download_vip_list"])
-            self.mdx_download_list.update(self.online_data["mdx_download_vip_list"])
-            self.mdx_download_list.update(self.online_data["mdx23c_download_vip_list"])
                      
         def configure_combobox(combobox:ComboBoxMenu, values:list, variable:tk.StringVar, arch_type, name):
             values = [NO_NEW_MODELS] if not values else values
@@ -5406,7 +5221,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             selection = NO_MODEL
             var.set(NO_MODEL)
         
-        model_repo = self.decoded_vip_link if VIP_SELECTION in selection else NORMAL_REPO
+        model_repo = NORMAL_REPO
         is_demucs_newer = [True for x in DEMUCS_NEWER_ARCH_TYPES if x in selection]
 
         if type == VR_ARCH_TYPE:
@@ -5464,30 +5279,21 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         def push_download():
             self.is_download_thread_active = True
             try:
-                if is_update_app:
-                    self.download_progress_info_var.set(DOWNLOADING_UPDATE)
-                    if os.path.isfile(self.download_update_path_var.get()):
+                if self.select_download_var.get() == DEMUCS_ARCH_TYPE and is_demucs_newer:
+                    for model_num, model_data in enumerate(self.download_demucs_newer_models, start=1):
+                        self.download_progress_info_var.set('{} {}/{}...'.format(DOWNLOADING_ITEM, model_num, len(self.download_demucs_newer_models)))
+                        if os.path.isfile(model_data[0]):
+                            continue
+                        else:
+                            wget.download(model_data[1], model_data[0], bar=download_progress_bar)
+                else:
+                    self.download_progress_info_var.set(SINGLE_DOWNLOAD)
+                    if os.path.isfile(self.download_save_path_var.get()):
                         self.download_progress_info_var.set(FILE_EXISTS)
                     else:
-                        wget.download(self.download_update_link_var.get(), self.download_update_path_var.get(), bar=download_progress_bar)
+                        wget.download(self.download_link_path_var.get(), self.download_save_path_var.get(), bar=download_progress_bar)
                         
-                    self.download_post_action(DOWNLOAD_UPDATE_COMPLETE)
-                else:
-                    if self.select_download_var.get() == DEMUCS_ARCH_TYPE and is_demucs_newer:
-                        for model_num, model_data in enumerate(self.download_demucs_newer_models, start=1):
-                            self.download_progress_info_var.set('{} {}/{}...'.format(DOWNLOADING_ITEM, model_num, len(self.download_demucs_newer_models)))
-                            if os.path.isfile(model_data[0]):
-                                continue
-                            else:
-                                wget.download(model_data[1], model_data[0], bar=download_progress_bar)
-                    else:
-                        self.download_progress_info_var.set(SINGLE_DOWNLOAD)
-                        if os.path.isfile(self.download_save_path_var.get()):
-                            self.download_progress_info_var.set(FILE_EXISTS)
-                        else:
-                            wget.download(self.download_link_path_var.get(), self.download_save_path_var.get(), bar=download_progress_bar)
-                            
-                    self.download_post_action(DOWNLOAD_COMPLETE)
+                self.download_post_action(DOWNLOAD_COMPLETE)
                 
             except Exception as e:
                 self.error_log_var.set(error_text(DOWNLOADING_ITEM, e))
@@ -5529,11 +5335,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.online_data_refresh(is_download_complete=True)
             self.download_progress_info_var.set(DOWNLOAD_COMPLETE)
             self.download_list_state()
-        if action == DOWNLOAD_UPDATE_COMPLETE:
-            self.download_progress_info_var.set(DOWNLOAD_UPDATE_COMPLETE)
-            if os.path.isfile(self.download_update_path_var.get()):
-                subprocess.Popen(self.download_update_path_var.get())
-            self.download_list_state()
+
         
         
         self.is_download_thread_active = False
@@ -6823,7 +6625,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.save_format_var = tk.StringVar(value=data['save_format'])
         self.wav_type_set_var = tk.StringVar(value=data['wav_type_set'])#
         self.device_set_var = tk.StringVar(value=data['device_set'])#
-        self.user_code_var = tk.StringVar(value=data['user_code']) 
         self.is_gpu_conversion_var = tk.BooleanVar(value=data['is_gpu_conversion'])
         self.is_primary_stem_only_var = tk.BooleanVar(value=data['is_primary_stem_only'])
         self.is_secondary_stem_only_var = tk.BooleanVar(value=data['is_secondary_stem_only'])
@@ -6967,7 +6768,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.save_format_var.set(loaded_setting['save_format'])
             self.wav_type_set_var.set(loaded_setting['wav_type_set'])#
             self.device_set_var.set(loaded_setting['device_set'])#
-            self.user_code_var.set(loaded_setting['user_code'])
             self.phase_option_var.set(loaded_setting['phase_option'])#
             self.phase_shifts_var.set(loaded_setting['phase_shifts'])#
             self.is_save_align_var.set(loaded_setting['is_save_align'])#i
@@ -7103,7 +6903,6 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             'save_format': self.save_format_var.get(),
             'wav_type_set': self.wav_type_set_var.get(),#
             'device_set': self.device_set_var.get(),#
-            'user_code': self.user_code_var.get(),
             'help_hints_var': self.help_hints_var.get(),
             'set_vocal_splitter': self.set_vocal_splitter_var.get(),
             'is_set_vocal_splitter': self.is_set_vocal_splitter_var.get(),#
@@ -7166,7 +6965,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def get_settings_list(self):
         
         settings_dict = self.save_values(app_close=False)
-        settings_list = '\n'.join(''.join(f"{key}: {value}") for key, value in settings_dict.items() if not key == 'user_code')
+        settings_list = '\n'.join(''.join(f"{key}: {value}") for key, value in settings_dict.items())
 
         return f"\n{FULL_APP_SET_TEXT}:\n\n{settings_list}"
 
@@ -7212,22 +7011,7 @@ def auto_hyperlink(text_widget:tk.Text):
         text_widget.tag_bind(url, "<Enter>", lambda e: text_widget.config(cursor="hand2"))
         text_widget.tag_bind(url, "<Leave>", lambda e: text_widget.config(cursor="arrow"))
 
-def vip_downloads(password, link_type=VIP_REPO):
-    """Attempts to decrypt VIP model link with given input code"""
-    
-    try:
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=link_type[0],
-            iterations=390000,)
 
-        key = base64.urlsafe_b64encode(kdf.derive(bytes(password, 'utf-8')))
-        f = Fernet(key)
-
-        return str(f.decrypt(link_type[1]), 'UTF-8')
-    except Exception:
-        return NO_CODE
 
 def extract_stems(audio_file_base, export_path):
     

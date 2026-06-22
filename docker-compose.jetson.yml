@@ -1,0 +1,23 @@
+# GPU override for NVIDIA Jetson (arm64 / L4T). Layers on docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.jetson.yml up --build
+#
+# IMPORTANT — set BASE_IMAGE to the l4t-pytorch tag matching the JetPack/L4T
+# version flashed on your device (run `cat /etc/nv_tegra_release` to check).
+# The tag below is a placeholder. Browse tags at:
+#   https://catalog.ngc.nvidia.com/orgs/nvidia/containers/l4t-pytorch
+#
+# Jetson exposes the integrated GPU through the `nvidia` container runtime
+# (installed with JetPack), not the device-reservation syntax used on x86.
+# INSTALL_TORCH=0 because the L4T PyTorch base already ships CUDA-enabled
+# torch/torchvision (and usually onnxruntime); the venv sees them via
+# --system-site-packages. If the MDX (onnxruntime) path needs GPU, install the
+# Jetson onnxruntime-gpu wheel into the image — see API_README.md.
+services:
+  api:
+    build:
+      args:
+        BASE_IMAGE: nvcr.io/nvidia/l4t-pytorch:r35.2.1-pth2.0-py3
+        INSTALL_TORCH: "0"
+    environment:
+      UVR_USE_GPU: auto
+    runtime: nvidia

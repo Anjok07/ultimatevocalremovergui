@@ -1,0 +1,27 @@
+# GPU override for x86_64 + NVIDIA. Layers on top of docker-compose.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build
+#
+# Requires the host to have an NVIDIA driver + the nvidia-container-toolkit
+# (https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/). The app
+# auto-detects CUDA at runtime, so nothing else changes.
+#
+# For an NVIDIA Jetson (arm64), use docker-compose.jetson.yml instead — see
+# API_README.md (different base image + the `nvidia` container runtime).
+services:
+  api:
+    build:
+      args:
+        BASE_IMAGE: nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04
+        TORCH_INDEX_URL: https://download.pytorch.org/whl/cu121
+        ONNXRUNTIME_PKG: onnxruntime-gpu
+    environment:
+      # auto = use the GPU when torch sees one (it will here); set to 0 to force CPU.
+      UVR_USE_GPU: auto
+    # Expose the host GPU(s) to the container (compose GPU device reservation).
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

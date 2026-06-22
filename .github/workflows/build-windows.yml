@@ -1,0 +1,52 @@
+name: Build Windows (web service)
+
+# Builds the standalone Windows launcher (server + UI) with PyInstaller and
+# uploads it as an artifact. Run manually, or on a tag.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["web-v*"]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Build the SPA -> web/dist
+      - name: Build web UI
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
+      # CPU torch/torchvision pair + the rest + PyInstaller. tkinter ships with
+      # the python.org runtime, so no extra system package is needed on Windows.
+      - name: Install Python deps
+        env:
+          SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL: "True"
+        run: |
+          python -m pip install --upgrade pip wheel
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.2.2 torchvision==0.17.2
+          pip install -r requirements.txt -r requirements-api.txt
+          pip install pyinstaller==6.6.0
+
+      - name: PyInstaller build
+        run: pyinstaller packaging/uvr_web.spec
+
+      - name: Bundle ffmpeg note
+        run: |
+          echo "Place ffmpeg.exe next to uvr-web.exe for MP3/FLAC output." > dist/uvr-web/README-ffmpeg.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: uvr-web-windows
+          path: dist/uvr-web

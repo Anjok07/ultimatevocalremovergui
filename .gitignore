@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+data.pkl
+
+# API service runtime data (uploads + job outputs)
+/data/
+
+# Downloaded model weights (fetched on demand at runtime)
+models/VR_Models/*.pth
+models/MDX_Net_Models/*.onnx
+models/MDX_Net_Models/*.ckpt
+models/Demucs_Models/*.th
+models/Demucs_Models/*.gz
+models/Demucs_Models/v3_v4_repo/*.th
+models/Demucs_Models/v3_v4_repo/*.gz
+models/Demucs_Models/v3_v4_repo/*.yaml
+
+# Frontend
+web/node_modules/
+web/dist/
+
+# Claude Code project guidance (local only, not part of the contribution)
+CLAUDE.md

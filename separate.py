@@ -1393,7 +1393,8 @@ def vr_denoiser(X, device, hop_length=1024, n_fft=2048, cropsize=256, is_deverbe
         # To reduce the overhead, dataloader is not used.
         for i in range(0, patches, batchsize):
             X_batch = X_dataset[i: i + batchsize]
-            X_batch = torch.from_numpy(X_batch).to(device)
+            # Match float32 model weights before transfer; MPS cannot accept float64.
+            X_batch = torch.from_numpy(X_batch).float().to(device)
 
             pred = model.predict_mask(X_batch)
 

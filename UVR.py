@@ -1236,6 +1236,7 @@ class ThreadSafeConsole(tk.Text):
     
     def __init__(self, master, **options):
         tk.Text.__init__(self, master, **options)
+        self.configure(state=tk.DISABLED)
         self.queue = queue.Queue()
         self.update_me()
 
@@ -1246,21 +1247,25 @@ class ThreadSafeConsole(tk.Text):
         self.queue.put(None)
 
     def update_me(self):
-        self.configure(state=tk.NORMAL)
+        has_updates = False
         try:
             while 1:
                 line = self.queue.get_nowait()
+                if not has_updates:
+                    self.configure(state=tk.NORMAL)
+                    has_updates = True
                 if line is None:
                     self.delete(1.0, tk.END)
                 else:
                     self.insert(tk.END, str(line))
-                self.see(tk.END)
-                self.update_idletasks()
         except queue.Empty:
             pass
-        self.configure(state=tk.DISABLED)
+        finally:
+            if has_updates:
+                self.see(tk.END)
+                self.configure(state=tk.DISABLED)
         self.after(100, self.update_me)
-        
+
     def copy_text(self):
         hightlighted_text = self.selection_get()
         self.clipboard_clear()

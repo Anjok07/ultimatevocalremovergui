@@ -1,3 +1,6 @@
+- **DEVELOPMENT UPDATE - October 6th, 2026:**
+    - Please see the following issue for the latest UVR development update! - [Issue 2399](https://github.com/Anjok07/ultimatevocalremovergui/issues/2399)
+
 # Ultimate Vocal Remover GUI v5.6
 <img src="https://raw.githubusercontent.com/Anjok07/ultimatevocalremovergui/master/gui_data/img/UVR_v5.6.png?raw=true" />
 

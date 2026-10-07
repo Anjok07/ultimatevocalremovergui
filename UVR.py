@@ -305,7 +305,16 @@ def drop(event, accept_mode: str = 'files'):
         path[-1] = path[-1].replace(';', '')
         
         if accept_mode == 'files':
-            root.inputPaths = tuple(path)
+            is_ctrl_pressed = 'ctrl' in event.modifiers if hasattr(event, 'modifiers') and event.modifiers else False
+            if is_ctrl_pressed:
+                # add new files on drag-n-drop when ctrl is pressed
+                current_paths = list(root.inputPaths) if root.inputPaths else []
+                for p in path:
+                    if p not in current_paths:
+                        current_paths.append(p)
+                root.inputPaths = tuple(current_paths)
+            else:
+                root.inputPaths = tuple(path)
             root.process_input_selections()
             root.update_inputPaths()
         elif accept_mode in [FILE_1, FILE_2]:

@@ -43,6 +43,21 @@ def load_model(path_or_package, strict=False):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             path = path_or_package
+            import demucs.htdemucs
+            import fractions
+            import numpy as np
+
+            # We resolve the exact scalar object from NumPy's internals
+            numpy_scalar = np.core.multiarray.scalar if hasattr(np, 'core') else np._core.multiarray.scalar
+            numpy_float64_type = type(np.dtype(np.float64))
+
+            torch.serialization.add_safe_globals([
+                demucs.htdemucs.HTDemucs,
+                fractions.Fraction,
+                np.dtype,
+                numpy_scalar,
+                numpy_float64_type,
+            ])
             package = torch.load(path, 'cpu')
     else:
         raise ValueError(f"Invalid type for {path_or_package}.")

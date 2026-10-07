@@ -167,54 +167,97 @@ This process has been tested on a MacBook Pro 2021 (using M1) and a MacBook Air 
 
 ---
 
-#### **Step 2: Install Dependencies**
+#### **Step 2: Install System Dependencies**
 Use the following commands based on your system type:
 
 **For Debian-based systems (Ubuntu, Mint, etc.):**
 ```bash
 sudo apt update && sudo apt upgrade
-sudo apt-get install -y ffmpeg python3-pip python3-tk
+sudo apt-get install -y ffmpeg python3-pip python3-venv python3-tk rubberband-cli
 ```
 
 **For Arch-based systems (EndeavourOS):**
 ```bash
 sudo pacman -Syu
-sudo pacman -S ffmpeg python-pip tk
+sudo pacman -S ffmpeg python-pip tk rubberband
 ```
+
+> `rubberband` is optional and only needed for the **Time-Stretch** and **Pitch-Shift** tools.
 
 ---
 
-#### **Step 3: Set Up a Virtual Environment (Recommended)**
-Setting up a virtual environment (venv) ensures that the program's dependencies do not interfere with system-wide Python packages.
+#### **Step 3: Install (Recommended — automated script)**
+A helper script sets up a virtual environment, auto-detects your GPU, installs
+the matching PyTorch build, and installs the remaining requirements:
 
-1. **Navigate to the extracted repository directory:**
+```bash
+cd /path/to/ultimatevocalremovergui
+chmod +x install_linux.sh
+
+./install_linux.sh              # auto-detect NVIDIA GPU vs. CPU
+./install_linux.sh --cpu        # force CPU-only PyTorch
+./install_linux.sh --cuda cu128 # pick a specific CUDA wheel index
+```
+
+Then run the application:
+```bash
+source venv/bin/activate
+python UVR.py
+```
+
+The script automatically uses [`uv`](https://github.com/astral-sh/uv) if it is
+available (much faster), otherwise it falls back to `pip`.
+
+---
+
+#### **Manual Installation (alternative)**
+
+1. **Create and activate a virtual environment:**
    ```bash
    cd /path/to/ultimatevocalremovergui
-   ```
-
-2. **Create a virtual environment:**
-   ```bash
    python3 -m venv venv
+   source venv/bin/activate
    ```
 
-3. **Activate the virtual environment:**
-   - For **Debian-based and Arch-based systems:**
-     ```bash
-     source venv/bin/activate
-     ```
+2. **Install PyTorch.** Pick the build that matches your hardware/driver — see
+   the [CUDA / PyTorch version guide](#cuda--pytorch-version-guide) below:
+   ```bash
+   # NVIDIA GPU (CUDA 12.x drivers — most common today)
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
-4. **Install dependencies in the virtual environment:**
+   # CPU only
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+   ```
+
+3. **Install the remaining dependencies:**
    ```bash
    pip install -r requirements.txt
    ```
 
+4. **Run the application:**
+   ```bash
+   python UVR.py
+   ```
+
 ---
 
-#### **Step 4: Run the Application**
-While the virtual environment is activated, start the application:
-```bash
-python UVR.py
-```
+#### **CUDA / PyTorch version guide**
+The default PyPI `torch` wheels may target a newer CUDA toolkit than your
+installed driver supports, which results in `torch.cuda.is_available()` returning
+`False`. Install the wheel that matches your driver:
+
+| NVIDIA driver / `nvidia-smi` CUDA Version | Recommended wheel index | Command suffix |
+|---|---|---|
+| CUDA **12.1 – 12.6** | `cu126` *(recommended default)* | `--index-url https://download.pytorch.org/whl/cu126` |
+| CUDA **12.8+** | `cu128` | `--index-url https://download.pytorch.org/whl/cu128` |
+| No NVIDIA GPU | `cpu` | `--index-url https://download.pytorch.org/whl/cpu` |
+
+Check your driver's supported CUDA version with `nvidia-smi` (top-right "CUDA
+Version"). When in doubt, `cu126` works with virtually all current 12.x drivers.
+
+> **Note on `onnxruntime-gpu`:** `requirements.txt` pins `onnxruntime-gpu<1.22`
+> because 1.22+ requires CUDA 13 runtime libraries. The pinned 1.21.x builds work
+> with CUDA 12.x. If you are on a CUDA 13 setup you can remove that constraint.
 
 ---
 

@@ -1,0 +1,79 @@
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+.installed.cfg
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ---------------------------------------------------------------------------
+# Virtual environments
+# ---------------------------------------------------------------------------
+venv/
+.venv/
+env/
+ENV/
+.python-version
+
+# ---------------------------------------------------------------------------
+# Editors / OS
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------------------------
+# UVR runtime-generated files
+# ---------------------------------------------------------------------------
+# User settings / cached data written on exit
+data.pkl
+
+# Temp working directories created during processing
+/tmp/
+/temp_sample_clips/
+/ensemble_temps/
+
+# Downloaded bulletin / changelog text
+/gui_data/cr_text.txt
+
+# User-saved presets generated at runtime
+/gui_data/saved_ensembles/
+/gui_data/saved_settings/
+
+# Error logs
+*.log
+
+# ---------------------------------------------------------------------------
+# Downloaded model weights (kept out of version control)
+# Config/metadata under */model_data/ and mdx_c_configs/ remain tracked.
+# ---------------------------------------------------------------------------
+/models/VR_Models/*.pth
+/models/MDX_Net_Models/*.onnx
+/models/MDX_Net_Models/*.ckpt
+/models/MDX_Net_Models/*.ckptc
+/models/Demucs_Models/*.ckpt
+/models/Demucs_Models/*.th
+/models/Demucs_Models/*.gz
+/models/Demucs_Models/*.pth
+/models/Demucs_Models/v3_v4_repo/*.th
+/models/Demucs_Models/v3_v4_repo/*.gz
+/models/Demucs_Models/v3_v4_repo/*.yaml
+/models/Demucs_Models/v3_v4_repo/*.bin
+
+# Keep model weights that ship with the repository
+!/models/VR_Models/UVR-DeNoise-Lite.pth

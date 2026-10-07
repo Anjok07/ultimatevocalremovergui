@@ -49,7 +49,7 @@ from separate import (
     save_format, clear_gpu_cache,  # Utility functions
     cuda_available, mps_available, #directml_available,
 )
-from playsound import playsound
+from playsound3 import playsound
 from typing import List
 import onnx
 import re

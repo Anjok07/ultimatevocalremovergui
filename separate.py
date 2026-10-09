@@ -1,4 +1,7 @@
 from __future__ import annotations
+import os
+os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+
 from typing import TYPE_CHECKING
 from demucs.apply import apply_model, demucs_segments
 from demucs.hdemucs import HDemucs
@@ -14,6 +17,15 @@ from lib_v5.vr_network.model_param_init import ModelParameters
 from pathlib import Path
 from gui_data.constants import *
 from gui_data.error_handling import *
+from inference_backend import (
+    BACKEND_AUTO,
+    BACKEND_COREML,
+    clear_backend_cache,
+    cuda_available,
+    enable_mps_fallback_env,
+    mps_available,
+    plan_backend,
+)
 from scipy import signal
 import audioread
 import gzip
@@ -21,10 +33,11 @@ import librosa
 import math
 import numpy as np
 import onnxruntime as ort
-import os
 import torch
+import time
 import warnings
 import pydub
+import shutil
 import soundfile as sf
 import lib_v5.mdxnet as MdxnetSet
 import math
@@ -36,11 +49,7 @@ import gc
 if TYPE_CHECKING:
     from UVR import ModelData
 
-# if not is_macos:
-#     import torch_directml
-
-mps_available = torch.backends.mps.is_available() if is_macos else False
-cuda_available = torch.cuda.is_available()
+enable_mps_fallback_env()
 
 # def get_gpu_info():
 #     directml_device, directml_available = DIRECTML_DEVICE, False
@@ -56,14 +65,70 @@ cuda_available = torch.cuda.is_available()
 # DIRECTML_DEVICE, directml_available = get_gpu_info()
 
 def clear_gpu_cache():
-    gc.collect()
-    if is_macos:
-        torch.mps.empty_cache()
-    else:
-        torch.cuda.empty_cache()
+    clear_backend_cache()
 
 warnings.filterwarnings("ignore")
 cpu = torch.device('cpu')
+
+
+class TorchModelRunner:
+    def __init__(self, model):
+        self.model = model
+
+    def __call__(self, tensor):
+        return self.model(tensor)
+
+
+class OnnxRuntimeRunner:
+    def __init__(self, model_path, providers):
+        available_providers = set(ort.get_available_providers())
+        selected_providers = []
+        for provider in providers:
+            provider_name = provider[0] if isinstance(provider, tuple) else provider
+            if provider_name in available_providers:
+                selected_providers.append(provider)
+        if not selected_providers:
+            selected_providers = ['CPUExecutionProvider']
+
+        try:
+            self.session = ort.InferenceSession(model_path, providers=selected_providers)
+        except Exception:
+            self.session = ort.InferenceSession(model_path, providers=['CPUExecutionProvider'])
+        self.backend_label = f'ONNX Runtime ({", ".join(self.session.get_providers())})'
+
+    def __call__(self, tensor):
+        output = self.session.run(None, {'input': tensor.detach().cpu().numpy()})[0]
+        return torch.from_numpy(output).to(tensor.device)
+
+
+class Onnx2TorchRunner:
+    def __init__(self, model_path, device):
+        self.model = ConvertModel(load(model_path))
+        self.model.to(device).eval()
+
+    def __call__(self, tensor):
+        return self.model(tensor)
+
+
+class MdxOnnxRunner:
+    def __init__(self, model_path, backend_plan, use_onnxruntime):
+        if use_onnxruntime:
+            self.runner = OnnxRuntimeRunner(model_path, backend_plan.onnx_providers)
+            self.backend_label = self.runner.backend_label
+        else:
+            self.runner = Onnx2TorchRunner(model_path, backend_plan.torch_device)
+            self.backend_label = 'ONNX converted to PyTorch'
+
+    def __call__(self, tensor):
+        return self.runner(tensor)
+
+
+class TimedSection:
+    def __init__(self):
+        self.started = time.perf_counter()
+
+    def elapsed(self):
+        return time.perf_counter() - self.started
 
 class SeperateAttributes:
     def __init__(self, model_data: ModelData, 
@@ -120,6 +185,7 @@ class SeperateAttributes:
         self.mp3_bit_set = model_data.mp3_bit_set
         self.save_format = model_data.save_format
         self.is_gpu_conversion = model_data.is_gpu_conversion
+        self.backend_mode = getattr(model_data, 'backend_mode', BACKEND_AUTO)
         self.is_normalization = model_data.is_normalization
         self.is_primary_stem_only = model_data.is_primary_stem_only if not self.is_secondary_model else model_data.is_primary_model_primary_stem_only
         self.is_secondary_stem_only = model_data.is_secondary_stem_only if not self.is_secondary_model else model_data.is_primary_model_secondary_stem_only      
@@ -169,6 +235,19 @@ class SeperateAttributes:
         self.is_opencl = False
         self.device_set = model_data.device_set
         self.is_use_opencl = model_data.is_use_opencl
+        self.backend_plan = plan_backend(
+            self.backend_mode,
+            self.is_gpu_conversion >= 0,
+            self.device_set,
+            process_method=model_data.process_method,
+            demucs_version=getattr(model_data, 'demucs_version', None),
+            coreml_cache_dir=os.path.join(os.getcwd(), 'coreml_cache'),
+        )
+        self.device = self.backend_plan.torch_device
+        self.run_type = self.backend_plan.onnx_providers
+        self.is_other_gpu = self.backend_plan.is_mps
+        self.model_load_timer = None
+        self.model_runner_label = None
         
         if self.is_inst_only_voc_splitter or self.is_sec_bv_rebalance:
             self.is_primary_stem_only = False
@@ -176,21 +255,6 @@ class SeperateAttributes:
         
         if main_model_primary and self.is_multi_stem_ensemble:
             self.primary_stem, self.secondary_stem = main_model_primary, secondary_stem(main_model_primary)
-
-        if self.is_gpu_conversion >= 0:
-            if mps_available:
-                self.device, self.is_other_gpu = 'mps', True
-            else:
-                device_prefix = None
-                if self.device_set != DEFAULT:
-                    device_prefix = CUDA_DEVICE#DIRECTML_DEVICE if self.is_use_opencl and directml_available else CUDA_DEVICE
-
-                # if directml_available and self.is_use_opencl:
-                #     self.device = torch_directml.device() if not device_prefix else f'{device_prefix}:{self.device_set}'
-                #     self.is_other_gpu = True
-                if cuda_available:# and not self.is_use_opencl:
-                    self.device = CUDA_DEVICE if not device_prefix else f'{device_prefix}:{self.device_set}'
-                    self.run_type = ['CUDAExecutionProvider']
 
         if model_data.process_method == MDX_ARCH_TYPE:
             self.is_mdx_ckpt = model_data.is_mdx_ckpt
@@ -229,7 +293,7 @@ class SeperateAttributes:
             self.is_demucs_combine_stems = model_data.is_demucs_combine_stems
             self.demucs_stem_count = model_data.demucs_stem_count
             self.pre_proc_model = model_data.pre_proc_model
-            self.device = cpu if self.is_other_gpu and not self.demucs_version in [DEMUCS_V3, DEMUCS_V4] else self.device
+            self.device = cpu if self.backend_plan.is_mps and not self.demucs_version in [DEMUCS_V3, DEMUCS_V4] else self.device
 
             self.primary_stem = model_data.ensemble_primary_stem if process_data['is_ensemble_master'] else model_data.primary_stem
             self.secondary_stem = model_data.ensemble_secondary_stem if process_data['is_ensemble_master'] else model_data.secondary_stem
@@ -288,6 +352,7 @@ class SeperateAttributes:
             self.is_secondary_stem_only = False
             
     def start_inference_console_write(self):
+        self.model_load_timer = TimedSection()
         if self.is_secondary_model and not self.is_pre_proc_model and not self.is_vocal_split_model:
             self.write_to_console(INFERENCE_STEP_2_SEC(self.process_method, self.model_basename))
         
@@ -300,6 +365,12 @@ class SeperateAttributes:
     def running_inference_console_write(self, is_no_write=False):
         self.write_to_console(DONE, base_text='') if not is_no_write else None
         self.set_progress_bar(0.05) if not is_no_write else None
+        if not is_no_write and self.model_load_timer:
+            runner_info = f' | Runner: {self.model_runner_label}' if self.model_runner_label else ''
+            self.write_to_console(
+                f'Backend: {self.backend_plan.label}{runner_info} | Model load: {self.model_load_timer.elapsed():.2f}s\n'
+            )
+            self.model_load_timer = None
         
         if self.is_secondary_model and not self.is_pre_proc_model and not self.is_vocal_split_model:
             self.write_to_console(INFERENCE_STEP_1_SEC)
@@ -484,14 +555,14 @@ class SeperateMDX(SeperateAttributes):
                 model_params = torch.load(self.model_path, map_location=lambda storage, loc: storage)['hyper_parameters']
                 self.dim_c, self.hop = model_params['dim_c'], model_params['hop_length']
                 separator = MdxnetSet.ConvTDFNet(**model_params)
-                self.model_run = separator.load_from_checkpoint(self.model_path).to(self.device).eval()
+                self.model_run = TorchModelRunner(separator.load_from_checkpoint(self.model_path).to(self.device).eval())
             else:
-                if self.mdx_segment_size == self.dim_t and not self.is_other_gpu:
-                    ort_ = ort.InferenceSession(self.model_path, providers=self.run_type)
-                    self.model_run = lambda spek:ort_.run(None, {'input': spek.cpu().numpy()})[0]
-                else:
-                    self.model_run = ConvertModel(load(self.model_path))
-                    self.model_run.to(self.device).eval()
+                use_onnxruntime = (
+                    self.backend_mode == BACKEND_COREML or
+                    (self.mdx_segment_size == self.dim_t and not self.backend_plan.prefer_onnx2torch)
+                )
+                self.model_run = MdxOnnxRunner(self.model_path, self.backend_plan, use_onnxruntime)
+                self.model_runner_label = self.model_run.backend_label
 
             self.running_inference_console_write()
             mix = prepare_mix(self.audio_file)
@@ -561,8 +632,8 @@ class SeperateMDX(SeperateAttributes):
         mixture = np.concatenate((np.zeros((2, self.trim), dtype='float32'), mix, np.zeros((2, pad), dtype='float32')), 1)
 
         step = self.chunk_size - self.n_fft if overlap == DEFAULT else int((1 - overlap) * chunk_size)
-        result = np.zeros((1, 2, mixture.shape[-1]), dtype=np.float32)
-        divider = np.zeros((1, 2, mixture.shape[-1]), dtype=np.float32)
+        result = torch.zeros((1, 2, mixture.shape[-1]), dtype=torch.float32, device=self.device)
+        divider = torch.zeros((1, 2, mixture.shape[-1]), dtype=torch.float32, device=self.device)
         total = 0
         total_chunks = (mixture.shape[-1] + step - 1) // step
 
@@ -576,8 +647,8 @@ class SeperateMDX(SeperateAttributes):
             if overlap == 0:
                 window = None
             else:
-                window = np.hanning(chunk_size_actual)
-                window = np.tile(window[None, None, :], (1, 2, 1))
+                window = torch.from_numpy(np.hanning(chunk_size_actual).astype(np.float32)).to(self.device)
+                window = window[None, None, :].repeat(1, 2, 1)
 
             mix_part_ = mixture[:, start:end]
             if end != i + chunk_size:
@@ -594,14 +665,14 @@ class SeperateMDX(SeperateAttributes):
                     tar_waves = self.run_model(mix_wave, is_match_mix=is_match_mix)
                     
                     if window is not None:
-                        tar_waves[..., :chunk_size_actual] *= window 
+                        tar_waves[..., :chunk_size_actual] *= window
                         divider[..., start:end] += window
                     else:
                         divider[..., start:end] += 1
 
                     result[..., start:end] += tar_waves[..., :end-start]
-            
-        tar_waves = result / divider
+
+        tar_waves = (result / divider).cpu().numpy()
         tar_waves_.append(tar_waves)
 
         tar_waves_ = np.vstack(tar_waves_)[:, :, self.trim:-self.trim]
@@ -630,11 +701,11 @@ class SeperateMDX(SeperateAttributes):
         spek[:, :, :3, :] *= 0 
 
         if is_match_mix:
-            spec_pred = spek.cpu().numpy()
+            spec_pred = spek
         else:
             spec_pred = -self.model_run(-spek)*0.5+self.model_run(spek)*0.5 if self.is_denoise else self.model_run(spek)
 
-        return self.stft.inverse(torch.tensor(spec_pred).to(self.device)).cpu().detach().numpy()
+        return self.stft.inverse(spec_pred.to(self.device)).detach()
 
 class SeperateMDXC(SeperateAttributes):        
 
@@ -983,29 +1054,41 @@ class SeperateDemucs(SeperateAttributes):
         mix = (mix - ref.mean()) / ref.std()
         mix_infer = mix 
         
-        with torch.no_grad():
-            if self.demucs_version == DEMUCS_V1:
-                sources = apply_model_v1(self.demucs, 
-                                            mix_infer.to(self.device), 
-                                            self.shifts, 
-                                            self.is_split_mode,
-                                            set_progress_bar=self.set_progress_bar)
-            elif self.demucs_version == DEMUCS_V2:
-                sources = apply_model_v2(self.demucs, 
-                                            mix_infer.to(self.device), 
-                                            self.shifts,
-                                            self.is_split_mode,
-                                            self.overlap,
-                                            set_progress_bar=self.set_progress_bar)
+        def run_demucs_on(device):
+            self.demucs.to(device)
+            with torch.no_grad():
+                if self.demucs_version == DEMUCS_V1:
+                    return apply_model_v1(self.demucs,
+                                          mix_infer.to(device),
+                                          self.shifts,
+                                          self.is_split_mode,
+                                          set_progress_bar=self.set_progress_bar)
+                elif self.demucs_version == DEMUCS_V2:
+                    return apply_model_v2(self.demucs,
+                                          mix_infer.to(device),
+                                          self.shifts,
+                                          self.is_split_mode,
+                                          self.overlap,
+                                          set_progress_bar=self.set_progress_bar)
+                else:
+                    return apply_model(self.demucs,
+                                       mix_infer[None],
+                                       self.shifts,
+                                       self.is_split_mode,
+                                       self.overlap,
+                                       static_shifts=1 if self.shifts == 0 else self.shifts,
+                                       set_progress_bar=self.set_progress_bar,
+                                       device=device)[0]
+
+        try:
+            sources = run_demucs_on(self.device)
+        except Exception as e:
+            if self.backend_plan.is_mps and self.demucs_version in [DEMUCS_V3, DEMUCS_V4]:
+                self.write_to_console(f'\nApple GPU backend failed for Demucs; falling back to CPU. ({e})\n', base_text='')
+                self.device = cpu
+                sources = run_demucs_on(cpu)
             else:
-                sources = apply_model(self.demucs, 
-                                        mix_infer[None], 
-                                        self.shifts,
-                                        self.is_split_mode,
-                                        self.overlap,
-                                        static_shifts=1 if self.shifts == 0 else self.shifts,
-                                        set_progress_bar=self.set_progress_bar,
-                                        device=self.device)[0]
+                raise
         
         sources = (sources * ref.std() + ref.mean()).cpu().numpy()
         sources[[0,1]] = sources[[1,0]]
@@ -1313,7 +1396,7 @@ def save_format(audio_path, save_format, mp3_bit_set):
         
         if OPERATING_SYSTEM == 'Darwin':
             FFMPEG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'ffmpeg')
-            pydub.AudioSegment.converter = FFMPEG_PATH
+            pydub.AudioSegment.converter = FFMPEG_PATH if os.path.isfile(FFMPEG_PATH) else shutil.which('ffmpeg')
         
         musfile = pydub.AudioSegment.from_wav(audio_path)
         

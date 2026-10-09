@@ -1,0 +1,24 @@
+# macOS AppleDouble metadata files.
+._*
+
+# Local build and packaging outputs.
+.venv-build-macos/
+.venv-smoke/
+.research-artifacts/
+build/
+dist/
+*.dmg
+*.spec.bak
+
+# Downloaded model weights are runtime/user assets, not source.
+models/**/*.pth
+models/**/*.onnx
+models/**/*.ckpt
+models/**/*.th
+models/Demucs_Models/v3_v4_repo/htdemucs.yaml
+
+# Python/PyInstaller caches.
+__pycache__/
+*.pyc
+*.pyo
+*.log

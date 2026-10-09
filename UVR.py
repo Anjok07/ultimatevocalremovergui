@@ -9,6 +9,7 @@ import librosa
 import math
 import natsort
 import os
+os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 import pickle
 import psutil
 from pyglet import font as pyglet_font
@@ -44,6 +45,7 @@ from lib_v5.vr_network.model_param_init import ModelParameters
 from kthread import KThread
 from lib_v5 import spec_utils
 from pathlib  import Path
+from inference_backend import BACKEND_MODE_OPTIONS as INFERENCE_BACKEND_MODE_OPTIONS
 from separate import (
     SeperateDemucs, SeperateMDX, SeperateMDXC, SeperateVR,  # Model-related
     save_format, clear_gpu_cache,  # Utility functions
@@ -345,6 +347,7 @@ class ModelData():
         self.deverb_vocal_opt = DEVERB_MAPPER[root.deverb_vocal_opt_var.get()]
         self.is_denoise_model = True if root.denoise_option_var.get() == DENOISE_M and os.path.isfile(DENOISER_MODEL_PATH) else False
         self.is_gpu_conversion = 0 if root.is_gpu_conversion_var.get() else -1
+        self.backend_mode = root.backend_mode_var.get()
         self.is_normalization = root.is_normalization_var.get()#
         self.is_use_opencl = False#True if is_opencl_only else root.is_use_opencl_var.get()
         self.is_primary_stem_only = root.is_primary_stem_only_var.get()
@@ -3174,6 +3177,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 self.cuda_device_list = [f"{torch.cuda.get_device_properties(i).name}:{i}" for i in range(torch.cuda.device_count())]
                 self.cuda_device_list.insert(0, DEFAULT)
                 #print(self.cuda_device_list)
+            elif mps_available:
+                self.cuda_device_list = [DEFAULT]
             
             # if directml_available:
             #     self.opencl_list = [f"{torch_directml.device_name(i)}:{i}" for i in range(torch_directml.device_count())]
@@ -3337,6 +3342,19 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
         #if not is_choose_arch:
         self.vocal_splitter_Button_opt(settings_menu, settings_menu_format_Frame, width=SETTINGS_BUT_WIDTH-2, pady=MENU_PADDING_4)
+
+        if self.is_gpu_available:
+            backend_Label = self.menu_title_LABEL_SET(settings_menu_format_Frame, BACKEND_MODE_TEXT)
+            backend_Label.grid(pady=MENU_PADDING_2)
+
+            backend_options = (
+                (BACKEND_AUTO, BACKEND_MPS, BACKEND_COREML, BACKEND_CPU)
+                if is_macos else
+                INFERENCE_BACKEND_MODE_OPTIONS
+            )
+            backend_Option = ComboBoxMenu(settings_menu_format_Frame, textvariable=self.backend_mode_var, values=backend_options, width=GEN_SETTINGS_WIDTH+1)
+            backend_Option.grid(padx=20,pady=MENU_PADDING_1)
+            self.help_hints(backend_Label, text=BACKEND_MODE_HELP)
 
         if not is_macos and self.is_gpu_available:
             gpu_list_options = lambda:self.loop_gpu_list(device_set_Option, 'gpudevice', self.cuda_device_list)#self.opencl_list if is_opencl_only or self.is_use_opencl_var.get() else self.cuda_device_list)
@@ -6823,7 +6841,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.save_format_var = tk.StringVar(value=data['save_format'])
         self.wav_type_set_var = tk.StringVar(value=data['wav_type_set'])#
         self.device_set_var = tk.StringVar(value=data['device_set'])#
-        self.user_code_var = tk.StringVar(value=data['user_code']) 
+        self.backend_mode_var = tk.StringVar(value=data['backend_mode'])
+        self.user_code_var = tk.StringVar(value=data['user_code'])
         self.is_gpu_conversion_var = tk.BooleanVar(value=data['is_gpu_conversion'])
         self.is_primary_stem_only_var = tk.BooleanVar(value=data['is_primary_stem_only'])
         self.is_secondary_stem_only_var = tk.BooleanVar(value=data['is_secondary_stem_only'])
@@ -6967,6 +6986,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.save_format_var.set(loaded_setting['save_format'])
             self.wav_type_set_var.set(loaded_setting['wav_type_set'])#
             self.device_set_var.set(loaded_setting['device_set'])#
+            self.backend_mode_var.set(loaded_setting['backend_mode'])
             self.user_code_var.set(loaded_setting['user_code'])
             self.phase_option_var.set(loaded_setting['phase_option'])#
             self.phase_shifts_var.set(loaded_setting['phase_shifts'])#
@@ -6983,6 +7003,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             self.DualBatch_inputPaths = []
             
         self.is_gpu_conversion_var.set(loaded_setting['is_gpu_conversion'])
+        self.backend_mode_var.set(loaded_setting['backend_mode'])
         self.is_normalization_var.set(loaded_setting['is_normalization'])#
         self.is_use_opencl_var.set(False)#True if is_opencl_only else loaded_setting['is_use_opencl'])#
         self.is_wav_ensemble_var.set(loaded_setting['is_wav_ensemble'])#
@@ -7087,6 +7108,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             'pitch_rate': self.pitch_rate_var.get(),#
             'is_time_correction': self.is_time_correction_var.get(),#
             'is_gpu_conversion': self.is_gpu_conversion_var.get(),
+            'backend_mode': self.backend_mode_var.get(),
             'is_primary_stem_only': self.is_primary_stem_only_var.get(),
             'is_secondary_stem_only': self.is_secondary_stem_only_var.get(),
             'is_testing_audio': self.is_testing_audio_var.get(),#

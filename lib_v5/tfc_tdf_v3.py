@@ -11,29 +11,28 @@ class STFT:
         self.device = device
 
     def __call__(self, x):
-        
-        x_is_mps = not x.device.type in ["cuda", "cpu"]
-        if x_is_mps:
-            x = x.cpu()
+        original_device = x.device
 
         window = self.window.to(x.device)
         batch_dims = x.shape[:-2]
         c, t = x.shape[-2:]
         x = x.reshape([-1, t])
-        x = torch.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True,return_complex=False)
+        try:
+            x = torch.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True, return_complex=False)
+        except Exception:
+            x = x.cpu()
+            window = self.window.to(x.device)
+            x = torch.stft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True, return_complex=False)
         x = x.permute([0, 3, 1, 2])
         x = x.reshape([*batch_dims, c, 2, -1, x.shape[-1]]).reshape([*batch_dims, c * 2, -1, x.shape[-1]])
 
-        if x_is_mps:
+        if x.device != original_device:
             x = x.to(self.device)
 
         return x[..., :self.dim_f, :]
 
     def inverse(self, x):
-        
-        x_is_mps = not x.device.type in ["cuda", "cpu"]
-        if x_is_mps:
-            x = x.cpu()
+        original_device = x.device
 
         window = self.window.to(x.device)
         batch_dims = x.shape[:-3]
@@ -43,11 +42,17 @@ class STFT:
         x = torch.cat([x, f_pad], -2)
         x = x.reshape([*batch_dims, c // 2, 2, n, t]).reshape([-1, 2, n, t])
         x = x.permute([0, 2, 3, 1])
-        x = x[..., 0] + x[..., 1] * 1.j
-        x = torch.istft(x, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True)
+        try:
+            x_complex = x[..., 0] + x[..., 1] * 1.j
+            x = torch.istft(x_complex, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True)
+        except Exception:
+            x = x.cpu()
+            window = self.window.to(x.device)
+            x_complex = x[..., 0] + x[..., 1] * 1.j
+            x = torch.istft(x_complex, n_fft=self.n_fft, hop_length=self.hop_length, window=window, center=True)
         x = x.reshape([*batch_dims, 2, -1])
 
-        if x_is_mps:
+        if x.device != original_device:
             x = x.to(self.device)
 
         return x
@@ -249,5 +254,3 @@ class TFC_TDF_net(nn.Module):
         x = self.stft.inverse(x)
 
         return x
-
-

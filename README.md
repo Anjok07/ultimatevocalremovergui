@@ -80,7 +80,7 @@ In order to use the Time Stretch or Change Pitch tool, you'll need Rubber Band.
 ### MacOS Installation
 - Please Note:
     - The MacOS Sonoma mouse clicking issue has been fixed.
-    - MPS (GPU) acceleration for Mac M1 has been expanded to work with Demucs v4 and all MDX-Net models.
+    - Apple Silicon GPU acceleration is available through MPS. Some model paths may fall back to CPU when PyTorch or the selected backend cannot run an operation on Apple GPU.
     - This bundle is intended for those running macOS Big Sur and above.
     - Application functionality for systems running macOS Catalina or lower is not guaranteed.
     - Application functionality for older or budget Mac systems is not guaranteed.
@@ -238,9 +238,10 @@ If you encounter issues, refer to the [GitHub Issues](https://github.com/Anjok07
 ### Other Application Notes
 - Nvidia GTX 1060 6GB is the minimum requirement for GPU conversions.
 - Nvidia GPUs with at least 8GBs of V-RAM are recommended.
+- Apple Silicon Macs can use Apple GPU (MPS) acceleration when running a modern PyTorch build with MPS support.
 - AMD Radeon GPU supported is limited at this time.
    - There is currently a working branch for AMD GPU users [here](https://github.com/Anjok07/ultimatevocalremovergui/tree/v5.6-amd-gpu)
-- This application is only compatible with 64-bit platforms. 
+- This application is only compatible with 64-bit platforms.
 - This application relies on the Rubber Band library for the Time-Stretch and Pitch-Shift options.
 - This application relies on FFmpeg to process non-wav audio files.
 - The application will automatically remember your settings when closed.
@@ -250,6 +251,101 @@ If you encounter issues, refer to the [GitHub Issues](https://github.com/Anjok07
 ### Performance:
 - Model load times are faster.
 - Importing/exporting audio files is faster.
+
+## Inference Backends
+
+UVR now uses an inference backend selector behind the existing GPU controls. The available backend modes are:
+
+- `Auto`
+- `CPU`
+- `CUDA`
+- `Apple GPU (MPS)`
+- `CoreML`
+
+`Auto` prefers CUDA first, then Apple GPU (MPS), then CoreML for ONNX models on macOS, then CPU. On macOS Apple Silicon, the settings UI shows the relevant choices: `Auto`, `Apple GPU (MPS)`, `CoreML`, and `CPU`.
+
+Backend coverage:
+
+- VR and MDXC models run through PyTorch and can use CPU, CUDA, or Apple GPU (MPS).
+- MDX ONNX models keep ONNX Runtime CUDA and CPU support. On Apple GPU (MPS), MDX ONNX models are converted through `onnx2pytorch` and run as PyTorch models. `CoreML` is available as an explicit experimental ONNX Runtime backend.
+- Demucs v3 and v4 can attempt Apple GPU (MPS). If that path fails, UVR falls back to CPU and records the fallback in the log. Demucs v1 and v2 keep the older CPU/CUDA behavior by default.
+
+The conversion log includes the selected backend, runner, model load time, and fallback status. `PYTORCH_ENABLE_MPS_FALLBACK=1` is set by default for compatibility, but the primary MPS paths are expected to work without hiding unsupported device transfers.
+
+## Developer Smoke Tests
+
+The real-model smoke harness lives in `tools/smoke_inference.py`. It intentionally avoids importing `UVR.py` because `UVR.py` starts the tkinter mainloop on import. The harness drives the separator classes directly, writes results to `.research-artifacts/smoke/smoke_results.jsonl`, and keeps generated audio under `.research-artifacts/smoke/`.
+
+Recommended Apple Silicon setup:
+
+```bash
+uv python install 3.10
+uv venv .venv-smoke --python 3.10
+.venv-smoke/bin/python -m ensurepip --upgrade
+.venv-smoke/bin/python -m pip install playsound==1.2.2
+SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True .venv-smoke/bin/python -m pip install -r requirements.txt
+.venv-smoke/bin/python -m pip uninstall -y PySoundFile
+.venv-smoke/bin/python -m pip install soundfile==0.13.1 onnx2pytorch
+```
+
+Run the blocking smoke flow:
+
+```bash
+.venv-smoke/bin/python tools/smoke_inference.py prepare
+.venv-smoke/bin/python tools/smoke_inference.py doctor --append
+.venv-smoke/bin/python tools/smoke_inference.py probe --append
+.venv-smoke/bin/python tools/smoke_inference.py run --phase blocking --continue-on-error --append
+.venv-smoke/bin/python tools/smoke_inference.py summary --append
+```
+
+The blocking phase covers backend probing plus single-model real inference for VR, MDX ONNX, MDX ONNX CoreML, MDXC, and Demucs v4. Additional phases are available for release checks:
+
+- `extended`: secondary model, vocal splitter, ensemble, FLAC output, and MP3 output.
+- `backend_modes`: explicit Apple GPU (MPS) cases and Demucs v4 CPU comparison.
+- `gpu_disabled`: verifies that disabling GPU forces CPU even when Auto or MPS is selected.
+- `demucs_legacy`: verifies Demucs v1/v2 backend policy without requiring legacy weights.
+- `format_inputs`: FLAC input, MP3 input, and mono input.
+- `long_audio`: 60-second MDX MPS and 180-second VR CPU stability checks.
+- `all`: blocking, extended, backend mode, GPU-disabled, Demucs legacy, format-input, and long-audio checks.
+
+Use `summary` after a run to print the latest pass/fail state and CPU-vs-MPS timing pairs.
+
+The `prepare` command downloads the minimal real model set into the app's existing model folders and generates an 8-second stereo WAV input. Do not commit `.venv-smoke`, `.research-artifacts`, downloaded model weights, `__pycache__`, or AppleDouble `._*` files.
+
+### MDX23C Apple GPU Functional Check
+
+A full-length MDX23C functional check was run on Apple Silicon with the packaged app resources:
+
+- Model: `dist/Ultimate Vocal Remover.app/Contents/Resources/models/MDX_Net_Models/MDX23C-8KFFT-InstVoc_HQ.ckpt`
+- Input: `example_data/kamiina_ep01.wav`
+- Config: `model_2_stem_full_band_8k.yaml`
+- Backend mode: `Auto`
+- Actual backend: `Apple GPU (MPS)`
+- Torch device: `mps`
+- Fallback: `false`
+- Result: `passed`
+- Elapsed time: `2070.068s`
+
+The model hash did not match an entry in the bundled `model_data.json`, so the GUI does not automatically infer its MDX23C config from metadata. For this file, use the 8KFFT config `model_2_stem_full_band_8k.yaml`.
+
+The effective MDX23C parameters for that check were:
+
+- Segment size: `256`
+- Segment default: `true`, so `inference.dim_t=256` from the config was used.
+- Overlap: `8`
+- Batch size: `1`
+- `n_fft`: `8192`
+- `dim_f`: `4096`
+- `hop_length`: `1024`
+- Runtime chunk size: `1024 * (256 - 1) = 261120`
+- Runtime hop size: `261120 // 8 = 32640`
+- Instruments: `Vocals`, `Instrumental`
+- Output format: WAV `PCM_16`
+- Output normalization: `false`
+- Pitch shift: `0`
+- Match frequency cutoff: `true`, but it is not used when pitch shift is zero.
+
+The generated verification files live under `.research-artifacts/functional-mdxc-app/` and are intentionally not committed.
 
 ## Troubleshooting
 

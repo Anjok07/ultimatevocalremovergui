@@ -43,7 +43,13 @@ def load_model(path_or_package, strict=False):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             path = path_or_package
-            package = torch.load(path, 'cpu')
+            from demucs.htdemucs import HTDemucs
+            import fractions
+            import numpy as np
+            from omegaconf.listconfig import ListConfig
+            from torch.serialization import safe_globals
+            with safe_globals([HTDemucs, ListConfig, fractions.Fraction, np.core.multiarray.scalar]):
+                package = torch.load(path, 'cpu', weights_only=False)
     else:
         raise ValueError(f"Invalid type for {path_or_package}.")
 

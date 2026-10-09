@@ -132,7 +132,7 @@ class ImagePath():
         if size is not None:
             size = (int(size[0]), int(size[1]))
             if keep_aspect:
-                img = img.resize((size[0], int(size[0] * ratio)), Image.ANTIALIAS)
+                img = img.resize((size[0], int(size[0] * ratio)), Image.LANCZOS)
             else:
                 img = img.resize(size, Image.ANTIALIAS)
                 

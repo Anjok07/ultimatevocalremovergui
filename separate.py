@@ -1104,7 +1104,7 @@ class SeperateVR(SeperateAttributes):
                 wav_resolution = bp['res_type']
         
             if d == bands_n: # high-end band
-                X_wave[d], _ = librosa.load(audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
+                X_wave[d], _ = librosa.load(audio_file, sr=bp['sr'], mono=False, dtype=np.float32, res_type=wav_resolution)
                 X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], self.mp, band=d, is_v51_model=self.is_vr_51_model)
                     
                 if not np.any(X_wave[d]) and is_mp3:
@@ -1113,7 +1113,7 @@ class SeperateVR(SeperateAttributes):
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else: # lower bands
-                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type=wav_resolution)
+                X_wave[d] = librosa.resample(X_wave[d+1], orig_sr=self.mp.param['band'][d+1]['sr'], target_sr=bp['sr'], res_type=wav_resolution)
                 X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], self.mp, band=d, is_v51_model=self.is_vr_51_model)
 
             if d == bands_n and self.high_end_process != 'none':
@@ -1444,7 +1444,7 @@ def loading_mix(X, mp):
             X_wave[d] = X
 
         else: # lower bands
-            X_wave[d] = librosa.resample(X_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=wav_resolution)
+            X_wave[d] = librosa.resample(X_wave[d+1], orig_sr=mp.param['band'][d+1]['sr'], target_sr=bp['sr'], res_type=wav_resolution)
             
         X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], mp, band=d, is_v51_model=True)
         

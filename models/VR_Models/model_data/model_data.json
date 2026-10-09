@@ -103,7 +103,7 @@
     },
     "6857b2972e1754913aad0c9a1678c753": {
         "vr_model_param": "4band_v3",
-        "primary_stem": "Echo",
+        "primary_stem": "No Echo",
         "nout": 48,
         "nout_lstm": 128
     },

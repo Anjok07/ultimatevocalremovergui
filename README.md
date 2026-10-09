@@ -173,7 +173,8 @@ Use the following commands based on your system type:
 **For Debian-based systems (Ubuntu, Mint, etc.):**
 ```bash
 sudo apt update && sudo apt upgrade
-sudo apt-get install -y ffmpeg python3-pip python3-tk
+sudo apt-get install -y ffmpeg tix tix-dev python3-pip python3.13-tk libprotobuf-dev protobuf-compiler build-essential libffi-dev python3.13-dev libgirepository-2.0-dev libcairo2-dev pkg-config gir1.2-gtk-3.0
+export CMAKE_ARGS="-DONNX_USE_PROTOBUF_SHARED_LIBS=ON"
 ```
 
 **For Arch-based systems (EndeavourOS):**

@@ -28,6 +28,7 @@ import pydub
 import soundfile as sf
 import lib_v5.mdxnet as MdxnetSet
 import math
+from numpy import float32
 #import random
 from onnx import load
 from onnx2pytorch import ConvertModel
@@ -561,8 +562,8 @@ class SeperateMDX(SeperateAttributes):
         mixture = np.concatenate((np.zeros((2, self.trim), dtype='float32'), mix, np.zeros((2, pad), dtype='float32')), 1)
 
         step = self.chunk_size - self.n_fft if overlap == DEFAULT else int((1 - overlap) * chunk_size)
-        result = np.zeros((1, 2, mixture.shape[-1]), dtype=np.float32)
-        divider = np.zeros((1, 2, mixture.shape[-1]), dtype=np.float32)
+        result = np.zeros((1, 2, mixture.shape[-1]), dtype=float)
+        divider = np.zeros((1, 2, mixture.shape[-1]), dtype=float)
         total = 0
         total_chunks = (mixture.shape[-1] + step - 1) // step
 
@@ -1104,7 +1105,7 @@ class SeperateVR(SeperateAttributes):
                 wav_resolution = bp['res_type']
         
             if d == bands_n: # high-end band
-                X_wave[d], _ = librosa.load(audio_file, bp['sr'], False, dtype=np.float32, res_type=wav_resolution)
+                X_wave[d], _ = librosa.load(audio_file, mono=False,sr=bp['sr'], dtype=float, res_type=wav_resolution)
                 X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], self.mp, band=d, is_v51_model=self.is_vr_51_model)
                     
                 if not np.any(X_wave[d]) and is_mp3:
@@ -1113,7 +1114,7 @@ class SeperateVR(SeperateAttributes):
                 if X_wave[d].ndim == 1:
                     X_wave[d] = np.asarray([X_wave[d], X_wave[d]])
             else: # lower bands
-                X_wave[d] = librosa.resample(X_wave[d+1], self.mp.param['band'][d+1]['sr'], bp['sr'], res_type=wav_resolution)
+                X_wave[d] = librosa.resample(X_wave[d+1], orig_sr=self.mp.param['band'][d+1]['sr'], target_sr=bp['sr'], res_type=wav_resolution)
                 X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], self.mp, band=d, is_v51_model=self.is_vr_51_model)
 
             if d == bands_n and self.high_end_process != 'none':
@@ -1444,7 +1445,7 @@ def loading_mix(X, mp):
             X_wave[d] = X
 
         else: # lower bands
-            X_wave[d] = librosa.resample(X_wave[d+1], mp.param['band'][d+1]['sr'], bp['sr'], res_type=wav_resolution)
+            X_wave[d] = librosa.resample(X_wave[d+1], orig_sr=mp.param['band'][d+1]['sr'], target_sr=bp['sr'], res_type=wav_resolution)
             
         X_spec_s[d] = spec_utils.wave_to_spectrogram(X_wave[d], bp['hl'], bp['n_fft'], mp, band=d, is_v51_model=True)
         

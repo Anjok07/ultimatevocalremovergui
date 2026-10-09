@@ -288,6 +288,27 @@
         "mdx_n_fft_scale_set": 7680,
         "primary_stem": "Vocals"
     },
+    "0f2a6bc5b49d87d64728ee40e23bceb1": {
+        "compensate": 1.019,
+        "mdx_dim_f_set": 2560,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "Instrumental"
+    },
+    "cb790d0c913647ced70fc6b38f5bea1a": {
+        "compensate": 1.01,
+        "mdx_dim_f_set": 2560,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "Instrumental"
+    },
+    "b02be2d198d4968a121030cf8950b492": {
+        "compensate": 1.02,
+        "mdx_dim_f_set": 2560,
+        "mdx_dim_t_set": 8,
+        "mdx_n_fft_scale_set": 5120,
+        "primary_stem": "No Crowd"
+    },
     "2154254ee89b2945b97a7efed6e88820": {
         "config_yaml": "model_2_stem_061321.yaml"
     },
@@ -347,5 +368,114 @@
     },
     "99b6ceaae542265a3b6d657bf9fde79f": {
         "config_yaml": "model_2_stem_full_band_8k.yaml"
+    },
+    "116f6f9dabb907b53d847ed9f7a9475f": {
+        "config_yaml": "model_2_stem_full_band_8k.yaml"
+    },
+    "53f707017bfcbb56f5e1bfac420d6732": {
+        "config_yaml": "model_bs_roformer_ep_317_sdr_12.9755.yaml",
+        "is_roformer": true
+    },
+    "63e41acc264bf681a73aa9f7e5f606cc": {
+        "config_yaml": "model_mel_band_roformer_ep_3005_sdr_11.4360.yaml",
+        "is_roformer": true
+    },
+    "e733736763234047587931fc35322fd9": {
+        "config_yaml": "model_bs_roformer_ep_937_sdr_10.5309.yaml",
+        "is_roformer": true
+    },
+    "d7a256bee3e7c620f554bceaab2f68f6": {
+        "config_yaml": "config_melbandroformer_inst.yaml",
+        "is_roformer": true
+    },
+    "365ccfa0e04b31ac2e24bbb935142a81": {
+        "config_yaml": "config_melbandroformer_inst.yaml",
+        "is_roformer": true
+    },
+    "3c15abf122d8eccc4a0eb97bf84a3e58": {
+        "config_yaml": "config_melbandroformer_instvoc_duality.yaml",
+        "is_roformer": true
+    },
+    "9fb197af219c5172ea38703a33aceb79": {
+        "config_yaml": "config_melbandroformer_instvoc_duality.yaml",
+        "is_roformer": true
+    },
+    "d789065adfd747d6f585b27b495bcdae": {
+        "config_yaml": "model_bs_roformer_ep_368_sdr_12.9628.yaml",
+        "is_roformer": true
+    },
+    "e4ca75912fcff3224a19058e55facfbf": {
+        "config_yaml": "config_vocals_mel_band_roformer_kim.yaml",
+        "is_roformer": true
+    },
+    "951f8ef420a941a395a9919f5d55cce9": {
+        "config_yaml": "config_melbandroformer_inst_v2.yaml",
+        "is_roformer": true
+    },
+    "8d306349be961bd1de6b02ee598920b3": {
+        "config_yaml": "config_mel_band_roformer_karaoke.yaml",
+        "is_roformer": true,
+        "model_type": "MelBand-Roformer",
+        "is_karaoke": true
+    },
+    "b1e6014529f71b38dae30aec978c8eb4": {
+        "config_yaml": "aufr33-jarredou_DrumSep_model_mdx23c_ep_141_sdr_10.8059.yaml",
+        "is_roformer": false,
+        "model_type": "MDX23C",
+        "is_karaoke": false
+    },
+    "490993ba65cd8b61a97a7c61650ddb7d": {
+        "config_yaml": "BS_Inst_EXP_VRL.yaml",
+        "is_roformer": true,
+        "model_type": "BS-Roformer v2",
+        "is_karaoke": false
+    },
+    "cfa9cee352938476c31e92656f1b9074": {
+        "config_yaml": "config_dnr_bandit_v2_mus64.yaml",
+        "is_roformer": true,
+        "model_type": "Bandit v2",
+        "is_karaoke": false
+    },
+    "8318a54fe1278ddcf78aad32145c0a6f": {
+        "config_yaml": "deverb_bs_roformer_8_256dim_8depth.yaml",
+        "is_roformer": true,
+        "model_type": "BS-Roformer",
+        "is_karaoke": false
+    },
+    "3bff56e6709357854e71cb2e7802733a": {
+        "config_yaml": "config_dnr_bandit_bsrnn_multi_mus64.yaml",
+        "is_roformer": true,
+        "model_type": "Bandit",
+        "is_karaoke": false
+    },
+    "c7500d7fdb1c0fc24b14b698515462d2": {
+        "config_yaml": "config_mdx23c_similarity.yaml",
+        "is_roformer": false,
+        "model_type": "MDX23C",
+        "is_karaoke": false
+    },
+    "77dd1942c0feb5c04ad0b4effa34fbc6": {
+        "config_yaml": "config_musdb18_scnet_large.yaml",
+        "is_roformer": true,
+        "model_type": "SCNet",
+        "is_karaoke": false
+    },
+    "6e749f5803b8baa7988a10393bb96df1": {
+        "config_yaml": "config_musdb18_scnet.yaml",
+        "is_roformer": true,
+        "model_type": "SCNet",
+        "is_karaoke": false
+    },
+    "bb845b04a3cb0d7a32cdb1f2ce1e007c": {
+        "config_yaml": "config_musdb18_scnet_large_starrytong.yaml",
+        "is_roformer": true,
+        "model_type": "SCNet",
+        "is_karaoke": false
+    },
+    "85b1955d57c0719e94e832eaaeceb0a8": {
+        "config_yaml": "config_musdb18_scnet_xl.yaml",
+        "is_roformer": true,
+        "model_type": "SCNet",
+        "is_karaoke": false
     }
 }

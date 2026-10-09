@@ -29,6 +29,7 @@ import tkinter.ttk as ttk
 from tkinter.font import Font
 from tkinter import filedialog
 from tkinter import messagebox
+import tkinter.dnd as dnd
 from collections import Counter
 from __version__ import VERSION, PATCH, PATCH_MAC, PATCH_LINUX
 from cryptography.fernet import Fernet
@@ -39,7 +40,7 @@ from gui_data.constants import *
 from gui_data.app_size_values import *
 from gui_data.error_handling import error_text, error_dialouge
 from gui_data.old_data_check import file_check, remove_unneeded_yamls, remove_temps
-from gui_data.tkinterdnd2 import TkinterDnD, DND_FILES
+#from tkinterdnd2 import TkinterDnD, DND_FILES
 from lib_v5.vr_network.model_param_init import ModelParameters
 from kthread import KThread
 from lib_v5 import spec_utils
@@ -57,6 +58,15 @@ import sys
 import yaml
 from ml_collections import ConfigDict
 from collections import Counter
+
+try:
+    from tkinterdnd2 import TkinterDnD
+    BaseTk = TkinterDnD.Tk
+    is_dnd_compatible = True
+except ImportError:
+    import tkinter as tk
+    BaseTk = tk.Tk
+    is_dnd_compatible = False
 
 # if not is_macos:
 #     import torch_directml
@@ -92,8 +102,6 @@ def get_execution_time(function, name):
     print(f'{name} Execution Time: ', time_difference)
 
 PREVIOUS_PATCH_WIN = 'UVR_Patch_10_6_23_4_27'
-
-is_dnd_compatible = True
 banner_placement = -2
 
 if OPERATING_SYSTEM=="Darwin":
@@ -1269,7 +1277,7 @@ class ThreadSafeConsole(tk.Text):
     def select_all_text(self):
         self.tag_add('sel', '1.0', 'end')
 
-class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
+class MainWindow(BaseTk):
     # --Constants--
     # Layout
 

@@ -218,60 +218,53 @@ class DnDWrapper:
     tkinter.BaseWidget.drag_source_unregister = drag_source_unregister
 
     def drop_target_register(self, *dndtypes):
-        '''This command will register SELF as a drop target. A drop target is
-        a widget than can accept a drop action. This command can be executed
-        multiple times on a widget. When SELF is registered as a drop target,
-        optional DNDTYPES can be provided. These types list can contain one or
-        more types that SELF will accept during a drop action, and it can
-        contain platform independent or platform specific types. Platform
-        independent are DND_Text for dropping text portions and DND_Files for
-        dropping a list of files (which can contain one or multiple files) on
-        SELF.'''
-        self.tk.call('tkdnd::drop_target', 'register', self._w, dndtypes)
+        '''This command will register SELF as a drop target.'''
+        try:
+            self.tk.call('tkdnd::drop_target', 'register', self._w, dndtypes)
+        except (tkinter.TclError, RuntimeError):
+            pass
     tkinter.BaseWidget.drop_target_register = drop_target_register
 
     def drop_target_unregister(self):
-        '''This command will stop SELF from being a drop target. Thus, SELF
-        will stop receiving events related to drop operations. It is an error
-        to use this command for a window that has not been registered as a
-        drop target with drop_target_register().'''
-        self.tk.call('tkdnd::drop_target', 'unregister', self._w)
+        '''This command will stop SELF from being a drop target.'''
+        try:
+            self.tk.call('tkdnd::drop_target', 'unregister', self._w)
+        except (tkinter.TclError, RuntimeError):
+            pass
     tkinter.BaseWidget.drop_target_unregister = drop_target_unregister
 
     def platform_independent_types(self, *dndtypes):
         '''This command will accept a list of types that can contain platform
-        independnent or platform specific types. A new list will be returned,
-        where each platform specific type in DNDTYPES will be substituted by
-        one or more platform independent types. Thus, the returned list may
-        have more elements than DNDTYPES.'''
-        return self.tk.split(self.tk.call(
-                            'tkdnd::platform_independent_types', dndtypes))
+        independnent or platform specific types.'''
+        try:
+            return self.tk.split(self.tk.call(
+                                'tkdnd::platform_independent_types', dndtypes))
+        except (tkinter.TclError, RuntimeError):
+            return dndtypes
     tkinter.BaseWidget.platform_independent_types = platform_independent_types
 
     def platform_specific_types(self, *dndtypes):
         '''This command will accept a list of types that can contain platform
-        independnent or platform specific types. A new list will be returned,
-        where each platform independent type in DNDTYPES will be substituted
-        by one or more platform specific types. Thus, the returned list may
-        have more elements than DNDTYPES.'''
-        return self.tk.split(self.tk.call(
-                            'tkdnd::platform_specific_types', dndtypes))
+        independnent or platform specific types.'''
+        try:
+            return self.tk.split(self.tk.call(
+                                'tkdnd::platform_specific_types', dndtypes))
+        except (tkinter.TclError, RuntimeError):
+            return dndtypes
     tkinter.BaseWidget.platform_specific_types = platform_specific_types
 
     def get_dropfile_tempdir(self):
-        '''This command will return the temporary directory used by TkDND for
-        storing temporary files. When the package is loaded, this temporary
-        directory will be initialised to a proper directory according to the
-        operating system. This default initial value can be changed to be the
-        value of the following environmental variables:
-        TKDND_TEMP_DIR, TEMP, TMP.'''
-        return self.tk.call('tkdnd::GetDropFileTempDirectory')
+        try:
+            return self.tk.call('tkdnd::GetDropFileTempDirectory')
+        except (tkinter.TclError, RuntimeError):
+            return None
     tkinter.BaseWidget.get_dropfile_tempdir = get_dropfile_tempdir
 
     def set_dropfile_tempdir(self, tempdir):
-        '''This command will change the temporary directory used by TkDND for
-        storing temporary files to TEMPDIR.'''
-        self.tk.call('tkdnd::SetDropFileTempDirectory', tempdir)
+        try:
+            self.tk.call('tkdnd::SetDropFileTempDirectory', tempdir)
+        except (tkinter.TclError, RuntimeError):
+            pass
     tkinter.BaseWidget.set_dropfile_tempdir = set_dropfile_tempdir
 
 #######################################################################
@@ -284,11 +277,17 @@ class Tk(tkinter.Tk, DnDWrapper):
     DnDWrapper class apply to this window and all its descendants.'''
     def __init__(self, *args, **kw):
         tkinter.Tk.__init__(self, *args, **kw)
-        self.TkdndVersion = _require(self)
+        try:
+            self.TkdndVersion = _require(self)
+        except (tkinter.TclError, RuntimeError):
+            self.TkdndVersion = None
 
 class TixTk(tix.Tk, DnDWrapper):
     '''Creates a new instance of a tix.Tk() window; all methods of the
     DnDWrapper class apply to this window and all its descendants.'''
     def __init__(self, *args, **kw):
         tix.Tk.__init__(self, *args, **kw)
-        self.TkdndVersion = _require(self)
+        try:
+            self.TkdndVersion = _require(self)
+        except (tkinter.TclError, RuntimeError):
+            self.TkdndVersion = None

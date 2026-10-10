@@ -29,6 +29,35 @@ import tkinter.ttk as ttk
 from tkinter.font import Font
 from tkinter import filedialog
 from tkinter import messagebox
+
+# Tk 9.0 compatibility shims for Menu.index and Menu.delete
+_orig_menu_index = tk.Menu.index
+def _safe_menu_index(self, index):
+    try:
+        i = self.tk.call(self._w, 'index', index)
+        if not i or i == 'none':
+            return None
+        return self.tk.getint(i)
+    except tk.TclError:
+        return None
+tk.Menu.index = _safe_menu_index
+
+_orig_menu_delete = tk.Menu.delete
+def _safe_menu_delete(self, index1, index2=None):
+    num_index1 = self.index(index1)
+    if num_index1 is None:
+        return
+    num_index2 = self.index(index2) if index2 is not None else None
+    if index2 is not None and num_index2 is None:
+        return
+    try:
+        if num_index2 is None:
+            self.tk.call(self._w, 'delete', index1)
+        else:
+            self.tk.call(self._w, 'delete', index1, index2)
+    except tk.TclError:
+        pass
+tk.Menu.delete = _safe_menu_delete
 from collections import Counter
 from __version__ import VERSION, PATCH, PATCH_MAC, PATCH_LINUX
 from cryptography.fernet import Fernet
@@ -93,7 +122,18 @@ def get_execution_time(function, name):
 
 PREVIOUS_PATCH_WIN = 'UVR_Patch_10_6_23_4_27'
 
-is_dnd_compatible = True
+is_dnd_compatible = False
+try:
+    _test_root = tk.Tk()
+    TkinterDnD._require(_test_root)
+    _test_root.destroy()
+    is_dnd_compatible = True
+except Exception:
+    try:
+        _test_root.destroy()
+    except Exception:
+        pass
+    is_dnd_compatible = False
 banner_placement = -2
 
 if OPERATING_SYSTEM=="Darwin":
@@ -958,7 +998,11 @@ class ToolTip(object):
 
             temp_tooltip.destroy()
         else:
-            x, y, _, _ = self.widget.bbox("insert")
+            try:
+                bbox = self.widget.bbox("insert")
+                x, y = (bbox[0], bbox[1]) if bbox else (0, 0)
+            except Exception:
+                x, y = 0, 0
             x += self.widget.winfo_rootx() + 25
             y += self.widget.winfo_rooty() + 25
 
@@ -1286,6 +1330,8 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     
     def __init__(self):
         #Run the __init__ method on the tk.Tk class
+        global root
+        root = self
         super().__init__()
         
         self.set_app_font()
@@ -1313,7 +1359,11 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
             xpad=int(self.winfo_screenwidth()/2 - width/2),
             ypad=int(self.winfo_screenheight()/2 - height/2 - 30)))
  
-        self.iconbitmap(ICON_IMG_PATH) if is_windows else self.tk.call('wm', 'iconphoto', self._w, tk.PhotoImage(file=MAIN_ICON_IMG_PATH))
+        if is_windows:
+            self.iconbitmap(ICON_IMG_PATH)
+        else:
+            self.main_icon_photo = tk.PhotoImage(file=MAIN_ICON_IMG_PATH)
+            self.tk.call('wm', 'iconphoto', self._w, '-default', self.main_icon_photo)
         self.protocol("WM_DELETE_WINDOW", self.save_values)
         self.resizable(False, False)
         
@@ -1536,7 +1586,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
     def main_window_LABEL_SUB_SET(self, master, text_var):return ttk.Label(master=master, textvariable=text_var, background=BG_COLOR, font=self.font_set, foreground=FG_COLOR, anchor=tk.CENTER)
     def menu_title_LABEL_SET(self, frame, text, width=35):return ttk.Label(master=frame, text=text, font=(SEC_FONT_NAME, f"{FONT_SIZE_5}", "underline"), justify="center", foreground="#13849f", width=width, anchor=tk.CENTER)
     def menu_sub_LABEL_SET(self, frame, text, font_size=FONT_SIZE_2):return ttk.Label(master=frame, text=text, font=(MAIN_FONT_NAME, f"{font_size}"), foreground=FG_COLOR, anchor=tk.CENTER)
-    def menu_FRAME_SET(self, frame, thickness=20):return tk.Frame(frame, highlightbackground=BG_COLOR, highlightcolor=BG_COLOR, highlightthicknes=thickness)
+    def menu_FRAME_SET(self, frame, thickness=20):return tk.Frame(frame, highlightbackground=BG_COLOR, highlightcolor=BG_COLOR, highlightthickness=thickness)
     def check_is_menu_settings_open(self):self.menu_settings() if not self.is_menu_settings_open else None
     def spacer_label(self, frame): return tk.Label(frame, text='', font=(MAIN_FONT_NAME, f"{FONT_SIZE_1}"), foreground='#868687', justify="left").grid()
 
@@ -2271,9 +2321,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 if os.path.isfile(SPLASH_DOC):
                     os.remove(SPLASH_DOC)
             
+            EXCLUDED_FILES = {'requirements.txt', 'demucs_models.txt'}
             for dir in DIRECTORIES:
                 for temp_file in os.listdir(dir):
-                    if temp_file.endswith(EXTENSIONS):
+                    if temp_file.endswith(EXTENSIONS) and temp_file not in EXCLUDED_FILES:
                         if os.path.isfile(os.path.join(dir, temp_file)):
                             os.remove(os.path.join(dir, temp_file))
         except Exception as e:
@@ -2675,7 +2726,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         window.resizable(False, False)
         window.wm_transient(top_window)
         window.title(title)
-        window.iconbitmap(ICON_IMG_PATH) if is_windows else self.tk.call('wm', 'iconphoto', window._w, tk.PhotoImage(file=MAIN_ICON_IMG_PATH))
+        if is_windows:
+            window.iconbitmap(ICON_IMG_PATH)
+        elif hasattr(self, 'main_icon_photo') and self.main_icon_photo:
+            self.tk.call('wm', 'iconphoto', window._w, self.main_icon_photo)
         
         root_location_x = root.winfo_x()
         root_location_y = root.winfo_y()
@@ -3107,12 +3161,13 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         right_frame = ListboxBatchFrame(menu_view_inputs_Frame, self.file_two_sub_var.get().title(), lambda:move_entry(False), self.left_img, self.img_mapper)
         right_frame.grid(row=0, column=1, sticky="nsew", padx=(5, 0))
 
-        left_frame.listbox.drop_target_register(DND_FILES)
-        right_frame.listbox.drop_target_register(DND_FILES)
-        left_frame.listbox.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e, FILE_1_LB))
-        right_frame.listbox.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e, FILE_2_LB))
-        left_frame.listbox.dnd_bind(right_click_button, lambda e: clear_all(e, FILE_1_LB))
-        right_frame.listbox.dnd_bind(right_click_button, lambda e: clear_all(e, FILE_2_LB))
+        if is_dnd_compatible:
+            left_frame.listbox.drop_target_register(DND_FILES)
+            right_frame.listbox.drop_target_register(DND_FILES)
+            left_frame.listbox.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e, FILE_1_LB))
+            right_frame.listbox.dnd_bind('<<Drop>>', lambda e: drag_n_drop(e, FILE_2_LB))
+        left_frame.listbox.bind(right_click_button, lambda e: clear_all(e, FILE_1_LB))
+        right_frame.listbox.bind(right_click_button, lambda e: clear_all(e, FILE_2_LB))
 
         menu_view_inputs_bottom_Frame = self.menu_FRAME_SET(menu_batch_dual_top)
         menu_view_inputs_bottom_Frame.grid(row=1)
@@ -4285,7 +4340,7 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 config_local = os.path.join(MDX_C_CONFIG_PATH, config)
                 if not os.path.isfile(config_local):
                     try:
-                        with urllib.request.urlopen(config_link) as response:
+                        with urllib.request.urlopen(config_link, timeout=5) as response:
                             with open(config_local, 'wb') as out_file:
                                 out_file.write(response.read())
                     except Exception as e:
@@ -5135,8 +5190,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         
         def online_check():
             if not is_start_up:
-                self.app_update_status_Text_var.set(LOADING_VERSION_INFO_TEXT)
-                self.app_update_button_Text_var.set(CHECK_FOR_UPDATES_TEXT)
+                self.after(0, lambda: (
+                    self.app_update_status_Text_var.set(LOADING_VERSION_INFO_TEXT),
+                    self.app_update_button_Text_var.set(CHECK_FOR_UPDATES_TEXT)
+                ))
 
             is_new_update = False
             try:
@@ -5156,69 +5213,75 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     self.bulletin_data = INFO_UNAVAILABLE_TEXT
                     print(e)
 
-                if user_refresh:
-                    self.download_list_state()
-                    for widget in self.download_center_Buttons:
-                        widget.configure(state=tk.NORMAL)
-                    
-                if refresh_list_Button:
-                    self.download_progress_info_var.set('Download List Refreshed!')
-
                 if OPERATING_SYSTEM=="Darwin":
                     self.lastest_version = self.online_data["current_version_mac"]
                 elif OPERATING_SYSTEM=="Linux":
                     self.lastest_version = self.online_data["current_version_linux"]
                 else:
                     self.lastest_version = self.online_data["current_version"]
-                    
-                if self.lastest_version == current_patch and not is_start_up:
-                    self.app_update_status_Text_var.set('UVR Version Current')
-                else:
-                    is_new_update = True
-                    is_beta_version = True if self.lastest_version == PREVIOUS_PATCH_WIN and BETA_VERSION in current_patch else False
-                    
-                    if not is_start_up:
-                        if is_beta_version:
-                            self.app_update_status_Text_var.set(f"Roll Back: {self.lastest_version}")
-                            self.app_update_button_Text_var.set(ROLL_BACK_TEXT)
-                        else:
-                            self.app_update_status_Text_var.set(f"Update Found: {self.lastest_version}")
-                            self.app_update_button_Text_var.set('Click Here to Update')
-                        
-                        if OPERATING_SYSTEM == "Windows":
-                            self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
-                            self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
-                        elif OPERATING_SYSTEM == "Darwin":
-                            self.download_update_link_var.set(UPDATE_MAC_ARM_REPO if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else UPDATE_MAC_X86_64_REPO)
-                        elif OPERATING_SYSTEM == "Linux":
-                            self.download_update_link_var.set(UPDATE_LINUX_REPO)
-                    
-                    if not user_refresh:
-                        if not is_beta_version and not self.lastest_version == current_patch:
-                            self.command_Text.write(NEW_UPDATE_FOUND_TEXT(self.lastest_version))
 
+                def on_success():
+                    if user_refresh:
+                        self.download_list_state()
+                        for widget in self.download_center_Buttons:
+                            try:
+                                widget.configure(state=tk.NORMAL)
+                            except Exception:
+                                pass
+                        
+                    if refresh_list_Button:
+                        self.download_progress_info_var.set('Download List Refreshed!')
+
+                    if self.lastest_version == current_patch and not is_start_up:
+                        self.app_update_status_Text_var.set('UVR Version Current')
+                    else:
+                        is_beta_version = True if self.lastest_version == PREVIOUS_PATCH_WIN and BETA_VERSION in current_patch else False
+                        
+                        if not is_start_up:
+                            if is_beta_version:
+                                self.app_update_status_Text_var.set(f"Roll Back: {self.lastest_version}")
+                                self.app_update_button_Text_var.set(ROLL_BACK_TEXT)
+                            else:
+                                self.app_update_status_Text_var.set(f"Update Found: {self.lastest_version}")
+                                self.app_update_button_Text_var.set('Click Here to Update')
+                            
+                            if OPERATING_SYSTEM == "Windows":
+                                self.download_update_link_var.set('{}{}{}'.format(UPDATE_REPO, self.lastest_version, application_extension))
+                                self.download_update_path_var.set(os.path.join(BASE_PATH, f'{self.lastest_version}{application_extension}'))
+                            elif OPERATING_SYSTEM == "Darwin":
+                                self.download_update_link_var.set(UPDATE_MAC_ARM_REPO if SYSTEM_PROC == ARM or ARM in SYSTEM_ARCH else UPDATE_MAC_X86_64_REPO)
+                            elif OPERATING_SYSTEM == "Linux":
+                                self.download_update_link_var.set(UPDATE_LINUX_REPO)
+                        
+                        if not user_refresh:
+                            if not is_beta_version and not self.lastest_version == current_patch:
+                                self.command_Text.write(NEW_UPDATE_FOUND_TEXT(self.lastest_version))
+
+                self.after(0, on_success)
 
                 is_update_params = self.is_auto_update_model_params if is_start_up else self.is_auto_update_model_params_var.get()
                 
                 if is_update_params and is_start_up or is_download_complete:
                     self.download_model_settings()
-                    
-                # if is_download_complete:
-                #     self.download_model_settings()
 
             except Exception as e:
-                self.offline_state_set(is_start_up)
+                def on_error():
+                    self.offline_state_set(is_start_up)
+                    if user_refresh:
+                        self.download_list_state(disable_only=True)
+                        for widget in self.download_center_Buttons:
+                            try:
+                                widget.configure(state=tk.DISABLED)
+                            except Exception:
+                                pass
+                            
+                    try:
+                        self.error_log_var.set(error_text('Online Data Refresh', e))
+                    except Exception as err:
+                        print(err)
+
+                self.after(0, on_error)
                 is_new_update = False
-                
-                if user_refresh:
-                    self.download_list_state(disable_only=True)
-                    for widget in self.download_center_Buttons:
-                        widget.configure(state=tk.DISABLED)
-                        
-                try:
-                    self.error_log_var.set(error_text('Online Data Refresh', e))
-                except Exception as e:
-                    print(e)
 
             return is_new_update
             
@@ -5231,16 +5294,20 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
     def offline_state_set(self, is_start_up=False):
         """Changes relevant settings and "Download Center" buttons if no internet connection is available"""
-        
-        if not is_start_up and self.is_menu_settings_open:
-            self.app_update_status_Text_var.set(f'Version Status: {NO_CONNECTION}')
-            self.download_progress_info_var.set(NO_CONNECTION) 
-            self.app_update_button_Text_var.set('Refresh')
-            self.refresh_list_Button.configure(state=tk.NORMAL)
-            self.stop_download_Button_DISABLE()
-            self.enable_tabs()
-            
-        self.is_online = False
+        def _apply():
+            if not is_start_up and self.is_menu_settings_open:
+                self.app_update_status_Text_var.set(f'Version Status: {NO_CONNECTION}')
+                self.download_progress_info_var.set(NO_CONNECTION) 
+                self.app_update_button_Text_var.set('Refresh')
+                try:
+                    self.refresh_list_Button.configure(state=tk.NORMAL)
+                    self.stop_download_Button_DISABLE()
+                    self.enable_tabs()
+                except Exception:
+                    pass
+            self.is_online = False
+
+        self.after(0, _apply)
 
     def download_validate_code(self, confirm=False, code_message=None):
         """Verifies the VIP download code"""
@@ -5303,9 +5370,12 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                     config_link = f"{MDX23_CONFIG_CHECKS}{config}"
                     config_local = os.path.join(MDX_C_CONFIG_PATH, config)
                     if not os.path.isfile(config_local):
-                        with urllib.request.urlopen(config_link) as response:
-                            with open(config_local, 'wb') as out_file:
-                                out_file.write(response.read())
+                        try:
+                            with urllib.request.urlopen(config_link, timeout=5) as response:
+                                with open(config_local, 'wb') as out_file:
+                                    out_file.write(response.read())
+                        except Exception:
+                            pass
                 else:
                     model_name = str(model)
 
@@ -5446,9 +5516,15 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
                 return        
 
         for widget in self.download_center_Buttons:
-            widget.configure(state=tk.DISABLED)
-        self.refresh_list_Button.configure(state=tk.DISABLED)
-        self.manual_download_Button.configure(state=tk.DISABLED)
+            try:
+                widget.configure(state=tk.DISABLED)
+            except Exception:
+                pass
+        try:
+            self.refresh_list_Button.configure(state=tk.DISABLED)
+            self.manual_download_Button.configure(state=tk.DISABLED)
+        except Exception:
+            pass
         
         is_demucs_newer = [True for x in DEMUCS_NEWER_ARCH_TYPES if x in self.selected_download_var.get()]
 
@@ -5456,89 +5532,112 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         self.stop_download_Button_ENABLE()
         self.disable_tabs()
         
+        download_update_link = self.download_update_link_var.get()
+        download_update_path = self.download_update_path_var.get()
+        download_link_path = self.download_link_path_var.get()
+        download_save_path = self.download_save_path_var.get()
+        select_download = self.select_download_var.get()
+        demucs_models_copy = list(self.download_demucs_newer_models)
+        
         def download_progress_bar(current, total, model=80):
-            progress = ('%s' % (100 * current // total))
-            self.download_progress_bar_var.set(int(progress))
-            self.download_progress_percent_var.set(progress + ' %')
+            progress = int(100 * current // total) if total > 0 else 0
+            self.after(0, lambda p=progress: (
+                self.download_progress_bar_var.set(p),
+                self.download_progress_percent_var.set(f"{p} %")
+            ))
             
         def push_download():
             self.is_download_thread_active = True
             try:
                 if is_update_app:
-                    self.download_progress_info_var.set(DOWNLOADING_UPDATE)
-                    if os.path.isfile(self.download_update_path_var.get()):
-                        self.download_progress_info_var.set(FILE_EXISTS)
+                    self.after(0, lambda: self.download_progress_info_var.set(DOWNLOADING_UPDATE))
+                    if os.path.isfile(download_update_path):
+                        self.after(0, lambda: self.download_progress_info_var.set(FILE_EXISTS))
                     else:
-                        wget.download(self.download_update_link_var.get(), self.download_update_path_var.get(), bar=download_progress_bar)
+                        wget.download(download_update_link, download_update_path, bar=download_progress_bar)
                         
-                    self.download_post_action(DOWNLOAD_UPDATE_COMPLETE)
+                    self.after(0, lambda: self.download_post_action(DOWNLOAD_UPDATE_COMPLETE))
                 else:
-                    if self.select_download_var.get() == DEMUCS_ARCH_TYPE and is_demucs_newer:
-                        for model_num, model_data in enumerate(self.download_demucs_newer_models, start=1):
-                            self.download_progress_info_var.set('{} {}/{}...'.format(DOWNLOADING_ITEM, model_num, len(self.download_demucs_newer_models)))
+                    if select_download == DEMUCS_ARCH_TYPE and is_demucs_newer:
+                        for model_num, model_data in enumerate(demucs_models_copy, start=1):
+                            self.after(0, lambda mn=model_num, total=len(demucs_models_copy): self.download_progress_info_var.set(f'{DOWNLOADING_ITEM} {mn}/{total}...'))
                             if os.path.isfile(model_data[0]):
                                 continue
                             else:
                                 wget.download(model_data[1], model_data[0], bar=download_progress_bar)
                     else:
-                        self.download_progress_info_var.set(SINGLE_DOWNLOAD)
-                        if os.path.isfile(self.download_save_path_var.get()):
-                            self.download_progress_info_var.set(FILE_EXISTS)
+                        self.after(0, lambda: self.download_progress_info_var.set(SINGLE_DOWNLOAD))
+                        if os.path.isfile(download_save_path):
+                            self.after(0, lambda: self.download_progress_info_var.set(FILE_EXISTS))
                         else:
-                            wget.download(self.download_link_path_var.get(), self.download_save_path_var.get(), bar=download_progress_bar)
+                            wget.download(download_link_path, download_save_path, bar=download_progress_bar)
                             
-                    self.download_post_action(DOWNLOAD_COMPLETE)
+                    self.after(0, lambda: self.download_post_action(DOWNLOAD_COMPLETE))
                 
             except Exception as e:
-                self.error_log_var.set(error_text(DOWNLOADING_ITEM, e))
-                self.download_progress_info_var.set(DOWNLOAD_FAILED)
-                
-                if type(e).__name__ == 'URLError':
-                    self.offline_state_set()
-                else:
-                    self.download_progress_percent_var.set(f"{type(e).__name__}")
-                    self.download_post_action(DOWNLOAD_FAILED)
+                err_text = error_text(DOWNLOADING_ITEM, e)
+                e_type = type(e).__name__
+                def on_download_error():
+                    self.error_log_var.set(err_text)
+                    self.download_progress_info_var.set(DOWNLOAD_FAILED)
+                    if e_type == 'URLError':
+                        self.offline_state_set()
+                    else:
+                        self.download_progress_percent_var.set(e_type)
+                        self.download_post_action(DOWNLOAD_FAILED)
+                self.after(0, on_download_error)
                           
         self.active_download_thread = KThread(target=push_download)
         self.active_download_thread.start()
 
     def download_post_action(self, action):
         """Resets the widget variables in the "Download Center" based on the state of the download."""
-        
-        for widget in self.download_center_Buttons:
-            widget.configure(state=tk.NORMAL)
-        self.refresh_list_Button.configure(state=tk.NORMAL)
-        self.manual_download_Button.configure(state=tk.NORMAL)
-        
-        self.enable_tabs()
-        self.stop_download_Button_DISABLE()
-        
-        if action == DOWNLOAD_FAILED:
+        def _apply():
+            for widget in self.download_center_Buttons:
+                try:
+                    widget.configure(state=tk.NORMAL)
+                except Exception:
+                    pass
             try:
-                self.active_download_thread.terminate()
-            finally:
-                self.download_progress_info_var.set(DOWNLOAD_FAILED)
-                self.download_list_state(reset=False)
-        if action == DOWNLOAD_STOPPED:
-            try:
-                self.active_download_thread.terminate()
-            finally:
-                self.download_progress_info_var.set(DOWNLOAD_STOPPED)
-                self.download_list_state(reset=False)
-        if action == DOWNLOAD_COMPLETE:
-            self.online_data_refresh(is_download_complete=True)
-            self.download_progress_info_var.set(DOWNLOAD_COMPLETE)
-            self.download_list_state()
-        if action == DOWNLOAD_UPDATE_COMPLETE:
-            self.download_progress_info_var.set(DOWNLOAD_UPDATE_COMPLETE)
-            if os.path.isfile(self.download_update_path_var.get()):
-                subprocess.Popen(self.download_update_path_var.get())
-            self.download_list_state()
-        
-        
-        self.is_download_thread_active = False
-        
-        self.delete_temps()
+                self.refresh_list_Button.configure(state=tk.NORMAL)
+                self.manual_download_Button.configure(state=tk.NORMAL)
+                self.enable_tabs()
+                self.stop_download_Button_DISABLE()
+            except Exception:
+                pass
+            
+            if action == DOWNLOAD_FAILED:
+                try:
+                    if self.active_download_thread and self.active_download_thread.is_alive():
+                        self.active_download_thread.terminate()
+                except Exception:
+                    pass
+                finally:
+                    self.download_progress_info_var.set(DOWNLOAD_FAILED)
+                    self.download_list_state(reset=False)
+            if action == DOWNLOAD_STOPPED:
+                try:
+                    if self.active_download_thread and self.active_download_thread.is_alive():
+                        self.active_download_thread.terminate()
+                except Exception:
+                    pass
+                finally:
+                    self.download_progress_info_var.set(DOWNLOAD_STOPPED)
+                    self.download_list_state(reset=False)
+            if action == DOWNLOAD_COMPLETE:
+                self.online_data_refresh(is_download_complete=True)
+                self.download_progress_info_var.set(DOWNLOAD_COMPLETE)
+                self.download_list_state()
+            if action == DOWNLOAD_UPDATE_COMPLETE:
+                self.download_progress_info_var.set(DOWNLOAD_UPDATE_COMPLETE)
+                if os.path.isfile(self.download_update_path_var.get()):
+                    subprocess.Popen(self.download_update_path_var.get())
+                self.download_list_state()
+            
+            self.is_download_thread_active = False
+            self.delete_temps()
+
+        self.after(0, _apply)
    
     #--Refresh/Loop Methods--    
 
@@ -6240,9 +6339,10 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
         progress = base * self.iteration - base
         progress += base * step
 
-        self.progress_bar_main_var.set(progress)
-        
-        self.conversion_Button_Text_var.set(f'Process Progress: {int(progress)}%')
+        self.after(0, lambda p=progress: (
+            self.progress_bar_main_var.set(p),
+            self.conversion_Button_Text_var.set(f'Process Progress: {int(p)}%')
+        ))
 
     def confirm_stop_process(self):
         """Asks for confirmation before halting active process"""
@@ -6263,28 +6363,33 @@ class MainWindow(TkinterDnD.Tk if is_dnd_compatible else tk.Tk):
 
     def process_end(self, error=None):
         """End of process actions"""
-        
-        self.auto_save()
-        self.cached_sources_clear()
-        self.clear_cache_torch = True
-        self.conversion_Button_Text_var.set(START_PROCESSING)
-        self.conversion_Button.configure(state=tk.NORMAL)
-        self.progress_bar_main_var.set(0)
-
-        if error:
-            error_message_box_text = f'{error_dialouge(error)}{ERROR_OCCURED[1]}'
-            confirm = messagebox.askyesno(parent=root,
-                                             title=ERROR_OCCURED[0],
-                                             message=error_message_box_text)
-            
-            if confirm:
-                self.is_confirm_error_var.set(True)
-                self.clear_cache_torch = True
-
+        def _apply():
+            self.auto_save()
+            self.cached_sources_clear()
             self.clear_cache_torch = True
-            
-            if MODEL_MISSING_CHECK in error_message_box_text: 
-                self.update_checkbox_text()
+            self.conversion_Button_Text_var.set(START_PROCESSING)
+            try:
+                self.conversion_Button.configure(state=tk.NORMAL)
+            except Exception:
+                pass
+            self.progress_bar_main_var.set(0)
+
+            if error:
+                error_message_box_text = f'{error_dialouge(error)}{ERROR_OCCURED[1]}'
+                confirm = messagebox.askyesno(parent=root,
+                                                 title=ERROR_OCCURED[0],
+                                                 message=error_message_box_text)
+                
+                if confirm:
+                    self.is_confirm_error_var.set(True)
+                    self.clear_cache_torch = True
+
+                self.clear_cache_torch = True
+                
+                if MODEL_MISSING_CHECK in error_message_box_text: 
+                    self.update_checkbox_text()
+
+        self.after(0, _apply)
  
     def process_tool_start(self):
         """Start the conversion for all the given mp3 and wav files"""

@@ -14,7 +14,7 @@ ml_collections==0.1.1
 natsort==8.2.0
 omegaconf==2.2.3
 opencv-python==4.6.0.66
-Pillow==9.3.0
+Pillow>=10.4.0
 psutil==5.9.4
 pydub==0.25.1
 pyglet==1.5.23
@@ -24,6 +24,7 @@ pytorch_lightning==2.0.0
 PyYAML==6.0
 resampy==0.4.2
 scipy==1.9.3
+setuptools<70
 soundstretch==1.2
 torch
 urllib3==1.26.12
@@ -31,7 +32,7 @@ wget==3.2
 samplerate==0.1.0
 screeninfo==0.8.1
 diffq
-playsound
+playsound==1.2.2
 onnx
 onnxruntime
 onnxruntime-gpu

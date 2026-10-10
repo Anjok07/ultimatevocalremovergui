@@ -176,6 +176,11 @@ sudo apt update && sudo apt upgrade
 sudo apt-get install -y ffmpeg python3-pip python3-tk
 ```
 
+**For Fedora-based systems:**
+```bash
+sudo dnf install -y ffmpeg python3-tkinter
+```
+
 **For Arch-based systems (EndeavourOS):**
 ```bash
 sudo pacman -Syu

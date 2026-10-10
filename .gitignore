@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.pkl
+gui_data/cr_text.txt
+models/MDX_Net_Models/*.onnx
+models/Demucs_Models/v3_repo/
+models/Demucs_Models/v4_repo/
+models/VR_Models/*.pth
+models/VR_Models/*.pt
+.DS_Store

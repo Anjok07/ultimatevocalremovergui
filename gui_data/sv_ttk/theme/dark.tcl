@@ -2,7 +2,7 @@
 
 # A stunning dark theme for ttk based on Microsoft's Sun Valley visual style 
 
-package require Tk 8.6
+package require Tk
 
 namespace eval ttk::theme::sun-valley-dark {
     variable version 1.0

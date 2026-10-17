@@ -1,0 +1,13 @@
+.git
+**/node_modules
+web/dist
+web/node_modules
+data
+*.pyc
+__pycache__
+# Don't bake big model weights into the API image — they mount as a volume.
+models/VR_Models/*.pth
+models/MDX_Net_Models/*.onnx
+models/MDX_Net_Models/*.ckpt
+models/Demucs_Models/**/*.th
+models/Demucs_Models/**/*.gz

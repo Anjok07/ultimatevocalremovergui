@@ -1,0 +1,75 @@
+# Single Dockerfile for the UVR headless API — CPU by default, GPU via build args.
+#
+# The app auto-detects CUDA/MPS at runtime; only the *build inputs* differ per
+# target. Override these args (docker-compose.gpu.yml wires the x86+NVIDIA set):
+#
+#   Target          BASE_IMAGE                                    TORCH_INDEX_URL                         ONNXRUNTIME_PKG   INSTALL_TORCH
+#   CPU (default)   debian:bookworm-slim                          https://download.pytorch.org/whl/cpu    onnxruntime       1
+#   x86 + NVIDIA    nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04 https://download.pytorch.org/whl/cu121  onnxruntime-gpu   1
+#   Jetson (arm64)  nvcr.io/nvidia/l4t-pytorch:<jetpack-tag>      (torch from base — n/a)                 (from base)       0
+#
+# Debian / Ubuntu / L4T are all apt + glibc, so one apt line covers them. We base
+# on a distro image (NOT the official python:*) because UVR.py and the vendored
+# demucs modules `import tkinter` at module load; python3-tk supplies a working
+# tkinter for headless imports (the python:* images lack the _tkinter extension).
+ARG BASE_IMAGE=debian:bookworm-slim
+FROM ${BASE_IMAGE}
+
+# ARGs are cleared by FROM — redeclare the ones used below.
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cpu
+ARG TORCH_SPEC="torch==2.2.2 torchvision==0.17.2"
+ARG ONNXRUNTIME_PKG=onnxruntime
+# INSTALL_TORCH=0 skips the pip torch/onnxruntime install (Jetson L4T base ships
+# CUDA-enabled builds; the venv below exposes them via --system-site-packages).
+ARG INSTALL_TORCH=1
+
+ENV PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    UVR_DATA_DIR=/data \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH \
+    # Allow the legacy `sklearn` shim (a transitive dep) to install.
+    SKLEARN_ALLOW_DEPRECATED_SKLEARN_PACKAGE_INSTALL=True
+
+# System deps:
+#   python3 + venv + pip   the interpreter
+#   python3-tk             working tkinter for headless imports
+#   python3-dev/build*     compile diffq's C extension
+#   ffmpeg / libsndfile1   audio decode/encode (mp3/flac/wav)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-venv python3-dev python3-tk \
+        build-essential \
+        ffmpeg libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# venv with --system-site-packages so a base image that already ships torch/
+# onnxruntime (Jetson L4T) exposes them to the venv. On CPU/x86 the base has no
+# such packages, so it's harmless. Do NOT upgrade pip: the bundled pip/setuptools
+# build the sdist-only deps (ml_collections, Dora, pyrubberband) cleanly, whereas
+# a newer setuptools breaks playsound's setup.py. Just add wheel (for diffq).
+RUN python3 -m venv --system-site-packages $VIRTUAL_ENV && pip install wheel
+
+WORKDIR /app
+COPY requirements.txt requirements-api.txt ./
+
+# requirements.txt hardcodes torch + onnxruntime + onnxruntime-gpu; strip those
+# and install the right builds per target via the args above (keeping a matched
+# torch/torchvision pair — a mismatched transitively-pulled torchvision breaks
+# `import torchvision.ops`). `^onnxruntime` drops both onnxruntime and
+# onnxruntime-gpu while keeping onnx / onnx2pytorch.
+RUN grep -viE '^(torch$|torchvision|onnxruntime)' requirements.txt > /tmp/reqs.txt \
+    && if [ "$INSTALL_TORCH" = "1" ]; then \
+         pip install --index-url ${TORCH_INDEX_URL} ${TORCH_SPEC} \
+         && pip install ${ONNXRUNTIME_PKG} ; \
+       fi \
+    && pip install playsound==1.2.2 \
+    && pip install -r /tmp/reqs.txt \
+    && pip install -r requirements-api.txt
+
+# App source. Model weights and job data live on mounted volumes.
+COPY . .
+
+EXPOSE 8000
+VOLUME ["/data", "/app/models"]
+
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]

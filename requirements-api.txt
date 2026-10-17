@@ -1,0 +1,10 @@
+# Web-service layer dependencies (in addition to requirements.txt).
+# Install together with requirements.txt:  pip install -r requirements.txt -r requirements-api.txt
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+python-multipart==0.0.9
+pydantic==2.7.4
+
+# Override the bare `playsound` in requirements.txt: 1.3.0's sdist fails to build
+# on modern setuptools (all platforms). 1.2.2 ships a working wheel.
+playsound==1.2.2
